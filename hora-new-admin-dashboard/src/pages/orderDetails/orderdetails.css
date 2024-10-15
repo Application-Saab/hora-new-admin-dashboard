@@ -1,0 +1,72 @@
+/* General container styling */
+.order-list-container {
+    width: 90%;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  /* Scrollable box for orders */
+  .orders-box {
+    max-height: 500px;
+    overflow-y: scroll;
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 20px;
+    background-color: #fff;
+  }
+  
+  /* Table styling */
+  .order-table {
+    width: 200%;
+    border-collapse: collapse;
+  }
+  
+  .order-table th, .order-table td {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+  
+  .status.booking {
+    color: green;
+  }
+  
+  .status.expired {
+    color: red;
+  }
+  
+  /* Horizontal Scroll for Pagination */
+  .horizontal-scroll {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .scroll-arrow {
+    font-size: 24px;
+    cursor: pointer;
+    margin: 0 10px;
+  }
+  
+  .pagination-slider {
+    display: flex;
+    overflow-x: auto;
+  }
+  
+  .page-number {
+    padding: 10px;
+    margin: 0 5px;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    min-width: 40px;
+    text-align: center;
+  }
+  
+  .page-number.active {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+  }
+  
