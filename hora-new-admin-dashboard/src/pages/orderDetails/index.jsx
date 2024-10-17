@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaEye, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import Popup from "../popup/Popup";
+import ActionPopup from "../popup/ActionPop";
 import "./orderdetails.css";
 
 const OrderList = () => {
@@ -13,6 +14,11 @@ const OrderList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [popupOpen, setPopupOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState("");
+
+  const [orderDetails, setOrderDetails] = useState(null);
+
+  const [popupType, setPopupType] = useState("");
+
 
   useEffect(() => {
     fetch(`https://horaservices.com:3000/api/admin/adminOrderList`, {
@@ -59,22 +65,79 @@ const OrderList = () => {
     }
   };
 
-  // const openPopup = (address) => {
-  //   setSelectedAddress(address);
-  //   setPopupOpen(true); // Open the popup
-  // };
-
   const openPopup = (address) => {
     // Combine address1 and address2 if both exist
-    const fullAddress = `${address.address1 || ''}, ${address.address2 || ''}, ${address.city || ''}`;
-    
+    const fullAddress = `${address.address1 || ""}, ${
+      address.address2 || ""
+    }, ${address.city || ""}`;
+
     setSelectedAddress(fullAddress);
-    setPopupOpen(true); 
+    setPopupOpen(true);
   };
 
   const closePopup = () => {
-    setPopupOpen(false); 
-    setSelectedAddress(""); 
+    setPopupOpen(false);
+    setSelectedAddress("");
+  };
+
+  // const openActionPopup = (orderId) => {
+  //   fetch(`https://horaservices.com:3000/api/order/order_details_decoration/${orderId}`)
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       console.log(data, "data12");
+  //       if (!data.error && data.status === 200) {
+  //         setOrderDetails(data.data);
+  //       } else {
+  //         console.warn("Error fetching order details:", data.message);
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching order details:", error);
+  //     });
+
+  //   setPopupOpen(true); // Open the popup
+  // };
+
+  const openActionPopup = (orderId, orderType, order_Id) => {
+    let apiUrl;
+    let popupTypeValue;
+
+    // Determine the API URL based on the order type
+    if (orderType === 1) {
+      // Fetch decoration order details
+      apiUrl = `https://horaservices.com:3000/api/order/order_details_decoration/${orderId}`;
+      popupTypeValue = "decoration";
+    } else if (orderType === 2) {
+      // Fetch food delivery order details
+      apiUrl = `https://horaservices.com:3000/api/order/order_details/v1/${order_Id}`;
+      popupTypeValue = "chef"; 
+    } else if (orderType === 6 || orderType === 7) {
+      apiUrl = `https://horaservices.com:3000/api/order/order_details_food_delivery/${orderId}`;
+      popupTypeValue = "foodDelivery";
+    } else {
+      alert("Currently Data is Not Available");
+      return;
+    }
+
+  setPopupType(popupTypeValue);
+
+    // Fetch order details
+    fetch(apiUrl)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data, "data12");
+        if (!data.error && data.status === 200) {
+          console.log(data.data, "se1");
+          console.log(data.data[0], "se2");
+          setOrderDetails(data.data);
+          setPopupOpen(true); 
+        } else {
+          console.warn("Error fetching order details:", data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching order details:", error);
+      });
   };
 
   const downloadOrders = () => {
@@ -86,7 +149,8 @@ const OrderList = () => {
       "OTP",
       "Chef",
       "Helper",
-      "Customer",
+      "Offline Customer",
+      "Online Customer",
       "Supplier",
       "Order Address",
       "Start Time",
@@ -130,6 +194,21 @@ const OrderList = () => {
 
   const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
 
+
+  const getOrderType = (orderTypeValue) => {
+    const orderTypes = {
+      1: "Decoration",
+      2: "Chef",
+      3: "Waiter",
+      4: "Bar Tender",
+      5: "Cleaner",
+      6: "Food Delivery",
+      7: "Live Catering",
+    };
+
+    return orderTypes[orderTypeValue] || "Unknown Order Type"; // Default value if not found
+  };
+
   return (
     <div className="order-list-container">
       <div className="order-header">
@@ -155,10 +234,12 @@ const OrderList = () => {
           <thead>
             <tr>
               <th>Order Id</th>
+              <th>Order Type</th>
               <th>Date & Time</th>
               <th>Otp</th>
               <th>Chef & Helper</th>
-              <th>Customer</th>
+              <th>Offline Customer</th>
+              <th>Online Customer</th>
               <th>Supplier</th>
               <th>Order Address</th>
               <th>Order Start & End Time</th>
@@ -174,7 +255,11 @@ const OrderList = () => {
               filteredOrders.map((order, index) => (
                 <tr key={index}>
                   <td>{order.order_id}</td>
-                  <td>{new Date(order.order_date).toLocaleString()}</td>
+                  <td>{getOrderType(order.type)}</td>
+                  <td>
+  {order.order_date.split('T')[0]} {order.order_time}
+</td>
+
                   <td>{order.otp}</td>
                   <td>
                     {order.chef} & {order.helper}
@@ -182,12 +267,22 @@ const OrderList = () => {
                   <td>
                     <FaEye />
                   </td>
+                  <td>{"N/A"}</td>
                   <td>{order.supplierUserIds.join(", ") || "N/A"}</td>
                   <td>
-                    <FaEye onClick={() => openPopup(order.addressId.length > 0 ? order.addressId[0] : { address1: 'N/A', address2: '', city: '' })} />
+                    <FaEye
+                      onClick={() =>
+                        openPopup(
+                          order.addressId.length > 0
+                            ? order.addressId[0]
+                            : { address1: "N/A", address2: "", city: "" }
+                        )
+                      }
+                    />
                   </td>
                   <td>
-                    {order.job_start_time} to {order.job_end_time}
+                    {/* {order.job_start_time} to {order.job_end_time} */}
+                    {"N/A"}
                   </td>
                   <td>₹{order.total_amount}</td>
                   <td>
@@ -209,7 +304,9 @@ const OrderList = () => {
                       {order.order_status === 0 ? "Active" : "Inactive"}
                     </button>
                   </td>
-                  <td>Actions</td>
+                  <td>
+                    <FaEye onClick={() => openActionPopup(order.order_id, order.type, order._id)} />
+                  </td>
                 </tr>
               ))
             ) : (
@@ -243,10 +340,16 @@ const OrderList = () => {
         />
       </div>
 
-      {/* Popup for Address */}
       <Popup
         isOpen={popupOpen}
         address={selectedAddress}
+        onClose={closePopup}
+      />
+
+      <ActionPopup
+        isOpen={popupOpen}
+        orderDetails={orderDetails}
+        popupType={popupType} 
         onClose={closePopup}
       />
     </div>
