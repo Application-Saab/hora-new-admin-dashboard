@@ -99,7 +99,7 @@ const Sidebar = () => {
 const Page = () => {
   return (
     <Router>
-      <div style={{ display: 'flex' }}>
+      <div >
         <Sidebar />
         <div className="main-content">
           <Routes>

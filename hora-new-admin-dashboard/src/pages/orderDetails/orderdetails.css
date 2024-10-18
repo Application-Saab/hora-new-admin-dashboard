@@ -7,7 +7,7 @@
   
   /* Scrollable box for orders */
   .orders-box {
-    max-height: 500px;
+    max-height: 560px;
     overflow-y: scroll;
     border: 1px solid #ddd;
     padding: 10px;
@@ -17,7 +17,7 @@
   
   /* Table styling */
   .order-table {
-    width: 200%;
+    width: 250%;
     border-collapse: collapse;
   }
   
@@ -68,5 +68,41 @@
     background-color: #007bff;
     color: white;
     font-weight: bold;
+  }
+  
+
+  .search-download-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    width: 100%; /* Ensures that the container stretches across the page */
+  }
+  
+  .search-box {
+    flex-grow: 1;
+    margin-right: 20px;
+  }
+  
+  .small-search {
+    padding: 12px;
+    width: 120px; /* You can adjust this to make the search box smaller */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-left: -10px;
+  }
+  
+  .download-button {
+    padding: 11px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 7px;
+  }
+  
+  .download-button:hover {
+    background-color: #45a049;
   }
   

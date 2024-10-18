@@ -47,7 +47,7 @@ input[type="file"] {
 .button1:hover {
     background-color: #4cae4c;
 }
-
+/* 
 .form_css {
     flex-direction: row;
     flex-wrap: wrap;
@@ -63,4 +63,84 @@ input[type="number1"] {
 
 input[type="comment"] {
     width: 500px;
-}
+} */
+
+
+.form_css {
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    width: 630px;
+  }
+  
+  .form_css label {
+    display: block;
+    margin-bottom: 10px;
+  }
+  
+  .form_css input[type="text"] {
+    width: 97%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+  }
+  
+  .form_css button[type="button"] {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  /*  */
+ 
+  
+  .addon-container {
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    width: 630px;
+  }
+  
+  .addon-form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .addon-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .addon-input {
+    padding: 8px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 200px; /* Adjust width as needed */
+  }
+  
+  .name-input {
+    flex: 1;
+  }
+  
+  .price-input {
+    flex: 0.5;
+  }
+  
+  .add-new-btn {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .add-new-btn:hover {
+    background-color: #45a049;
+  }
+  

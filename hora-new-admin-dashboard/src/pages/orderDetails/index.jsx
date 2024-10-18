@@ -104,11 +104,9 @@ const OrderList = () => {
 
     // Determine the API URL based on the order type
     if (orderType === 1) {
-      // Fetch decoration order details
       apiUrl = `https://horaservices.com:3000/api/order/order_details_decoration/${orderId}`;
       popupTypeValue = "decoration";
     } else if (orderType === 2) {
-      // Fetch food delivery order details
       apiUrl = `https://horaservices.com:3000/api/order/order_details/v1/${order_Id}`;
       popupTypeValue = "chef"; 
     } else if (orderType === 6 || orderType === 7) {
@@ -215,7 +213,7 @@ const OrderList = () => {
         <h2>Order Details</h2>
       </div>
 
-      <div className="search-download-container">
+      {/* <div className="search-download-container">
         <div className="search-box">
           <input
             type="text"
@@ -227,7 +225,24 @@ const OrderList = () => {
         <button className="download-button" onClick={downloadOrders}>
           Download All Orders
         </button>
-      </div>
+      </div> */}
+
+<div className="search-download-container">
+  <div className="search-box">
+    <input
+      type="textS"
+      className="small-search"
+      placeholder="Search by Order ID"
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+    />
+  </div>
+  <button className="download-button" onClick={downloadOrders}>
+    Download All Orders
+  </button>
+</div>
+
+
 
       <div className="orders-box">
         <table className="order-table">
