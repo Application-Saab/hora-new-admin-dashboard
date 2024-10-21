@@ -3,6 +3,12 @@ import { FaEye, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import Popup from "../popup/Popup";
 import ActionPopup from "../popup/ActionPop";
 import "./orderdetails.css";
+import {
+  BASE_URL,
+  ADMIN_USER_DETAILS,
+  ADMIN_ORDER_LIST,
+} from "../../utils/apiconstant";
+import axios from "axios";
 
 const OrderList = () => {
   const [orders, setOrders] = useState([]);
@@ -21,19 +27,28 @@ const OrderList = () => {
 
 
   useEffect(() => {
-    fetch(`https://horaservices.com:3000/api/admin/adminOrderList`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        page: currentPage,
-        per_page: itemsPerPage,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
+    const url = `${BASE_URL}${ADMIN_ORDER_LIST}`;
+  
+    const fetchOrders = async () => {
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            page: currentPage,
+            per_page: itemsPerPage,
+          }),
+        });
+  
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+  
+        const data = await response.json();
         console.log(data, "data");
+  
         if (data && data.data && data.data.order) {
           setOrders(data.data.order);
           setTotalItems(data.data.paginate.total_item);
@@ -41,11 +56,19 @@ const OrderList = () => {
         } else {
           console.warn("No orders found in response data");
         }
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error("Error fetching orders:", error);
-      });
-  }, [currentPage]);
+      }
+    };
+  
+    fetchOrders();
+  
+    // Optionally, return a cleanup function if needed
+    return () => {
+      // Cleanup logic if necessary
+    };
+  }, [currentPage, itemsPerPage]); // Ensure all relevant dependencies are included
+  
 
   useEffect(() => {
     if (searchTerm) {
@@ -58,6 +81,22 @@ const OrderList = () => {
       setFilteredOrders(orders);
     }
   }, [searchTerm, orders]);
+
+
+
+  const getOnlineCustomerNumber = (onlineCustomerId) => {
+      const url = `${BASE_URL}${ADMIN_USER_DETAILS}${onlineCustomerId}`;
+      axios.get(url)
+          .then(response => {
+              alert("online customer Number:   "+ response.data.data.phone);
+             
+          })
+          .catch(error => {
+              console.error('Error fetching customer data:', error);
+              throw error; // Rethrow the error for handling elsewhere if needed
+          });
+  };
+  
 
   const handlePageChange = (page) => {
     if (page > 0 && page <= totalPages) {
@@ -80,24 +119,7 @@ const OrderList = () => {
     setSelectedAddress("");
   };
 
-  // const openActionPopup = (orderId) => {
-  //   fetch(`https://horaservices.com:3000/api/order/order_details_decoration/${orderId}`)
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       console.log(data, "data12");
-  //       if (!data.error && data.status === 200) {
-  //         setOrderDetails(data.data);
-  //       } else {
-  //         console.warn("Error fetching order details:", data.message);
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching order details:", error);
-  //     });
-
-  //   setPopupOpen(true); // Open the popup
-  // };
-
+  
   const openActionPopup = (orderId, orderType, order_Id) => {
     let apiUrl;
     let popupTypeValue;
@@ -147,8 +169,8 @@ const OrderList = () => {
       "OTP",
       "Chef",
       "Helper",
-      "Offline Customer",
-      "Online Customer",
+      "Offline Order",
+      "Online Order",
       "Supplier",
       "Order Address",
       "Start Time",
@@ -166,7 +188,7 @@ const OrderList = () => {
         order.otp,
         order.chef,
         order.helper,
-        order.customer || "N/A",
+        order._id || "N/A",
         order.supplierUserIds.join(", ") || "N/A",
         order.addressId.length > 0 ? order.addressId[0].address1 : "N/A",
         order.job_start_time,
@@ -252,13 +274,12 @@ const OrderList = () => {
               <th>Order Type</th>
               <th>Date & Time</th>
               <th>Otp</th>
-              <th>Chef & Helper</th>
-              <th>Offline Customer</th>
-              <th>Online Customer</th>
+              <th>Offline Order No.</th>
+              <th>Online Order No.</th>
               <th>Supplier</th>
-              <th>Order Address</th>
+              {/* <th>Order Address</th> */}
               <th>Order Start & End Time</th>
-              <th>Total Item & Amount</th>
+              <th>Total Amount</th>
               <th>Order Status</th>
               <th>Created</th>
               <th>Status</th>
@@ -277,14 +298,17 @@ const OrderList = () => {
 
                   <td>{order.otp}</td>
                   <td>
-                    {order.chef} & {order.helper}
+                    {order.phone_no || "N/A"}
                   </td>
+                  
                   <td>
-                    <FaEye />
-                  </td>
-                  <td>{"N/A"}</td>
+                  <FaEye
+                      onClick={() =>
+                  getOnlineCustomerNumber(order.fromId)}
+                    />
+                    </td>
                   <td>{order.supplierUserIds.join(", ") || "N/A"}</td>
-                  <td>
+                  {/* <td>
                     <FaEye
                       onClick={() =>
                         openPopup(
@@ -294,7 +318,7 @@ const OrderList = () => {
                         )
                       }
                     />
-                  </td>
+                  </td> */}
                   <td>
                     {/* {order.job_start_time} to {order.job_end_time} */}
                     {"N/A"}

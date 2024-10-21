@@ -303,7 +303,7 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
             <div className="order-grid">
               <div className="order-details-box">
                 <div className="order-detail-row">
-                  <p><strong>Order Number:</strong> {orderDetails._doc.order_id}</p>
+                  <p><strong>Order Id:</strong> {orderDetails._doc.order_id}</p>
                   <p><strong>Order Date:</strong> {new Date(orderDetails._doc.order_date).toLocaleDateString()}</p>
                   <p><strong>No of burners:</strong> {orderDetails._doc.burners || 0}</p>
                   <p><strong>No of people:</strong> {orderDetails._doc.no_of_people || 0}</p>
@@ -338,6 +338,12 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
                 <ul style={{ listStyleType: "none", padding: 0 }}>
                   <li style={{ display: "flex", justifyContent: "space-between" }}>
                     <strong>Subtotal:</strong> <span>₹{orderDetails._doc.total_amount}</span>
+                  </li>
+                  <li style={{ display: "flex", justifyContent: "space-between" }}>
+                    <strong>Advance Amount:</strong> <span>₹{orderDetails._doc.advance_amount}</span>
+                  </li>
+                  <li style={{ display: "flex", justifyContent: "space-between" }}>
+                    <strong>Balance Amount:</strong> <span>₹{orderDetails._doc.balance_amount}</span>
                   </li>
                   <li style={{ display: "flex", justifyContent: "space-between" }}>
                     <strong>Discount:</strong> <span>₹{orderDetails._doc.discount || 0}</span>
