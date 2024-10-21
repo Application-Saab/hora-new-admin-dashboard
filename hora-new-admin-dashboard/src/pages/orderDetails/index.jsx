@@ -200,17 +200,17 @@ const OrderList = () => {
       csvRows.push(row.join(","));
     });
 
-    // Create a Blob and download it
-    const blob = new Blob([csvRows.join("\n")], {
-      type: "text/csv;charset=utf-8;",
-    });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.setAttribute("download", "orders.csv"); // Name of the file to download
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+  //   // Create a Blob and download it
+  //   const blob = new Blob([csvRows.join("\n")], {
+  //     type: "text/csv;charset=utf-8;",
+  //   });
+  //   const link = document.createElement("a");
+  //   link.href = URL.createObjectURL(blob);
+  //   link.setAttribute("download", "orders.csv"); // Name of the file to download
+  //   document.body.appendChild(link);
+  //   link.click();
+  //   document.body.removeChild(link);
+  // };
 
   const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
 
