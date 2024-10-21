@@ -104,15 +104,15 @@ const OrderList = () => {
     }
   };
 
-  const openPopup = (address) => {
-    // Combine address1 and address2 if both exist
-    const fullAddress = `${address.address1 || ""}, ${
-      address.address2 || ""
-    }, ${address.city || ""}`;
+  // const openPopup = (address) => {
+  //   // Combine address1 and address2 if both exist
+  //   const fullAddress = `${address.address1 || ""}, ${
+  //     address.address2 || ""
+  //   }, ${address.city || ""}`;
 
-    setSelectedAddress(fullAddress);
-    setPopupOpen(true);
-  };
+  //   setSelectedAddress(fullAddress);
+  //   setPopupOpen(true);
+  // };
 
   const closePopup = () => {
     setPopupOpen(false);

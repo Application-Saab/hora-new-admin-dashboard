@@ -88,7 +88,7 @@ const AddOrder = () => {
     } else {
       setPincodeMessage("");
     }
-  }, [dishName, isContinueClicked, isFetched, pincode]);
+  }, [dishName, isContinueClicked, isFetched]);
 
   const handleContinueClick = () => {
     setIsContinueClicked(true);
