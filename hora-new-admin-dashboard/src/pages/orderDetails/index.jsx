@@ -160,45 +160,45 @@ const OrderList = () => {
       });
   };
 
-  const downloadOrders = () => {
-    // Convert orders to CSV format
-    const csvRows = [];
-    const headers = [
-      "Order ID",
-      "Date & Time",
-      "OTP",
-      "Chef",
-      "Helper",
-      "Offline Order",
-      "Online Order",
-      "Supplier",
-      "Order Address",
-      "Start Time",
-      "End Time",
-      "Total Amount",
-      "Status",
-      "Created",
-    ];
-    csvRows.push(headers.join(",")); // Add headers
+  // const downloadOrders = () => {
+  //   // Convert orders to CSV format
+  //   const csvRows = [];
+  //   const headers = [
+  //     "Order ID",
+  //     "Date & Time",
+  //     "OTP",
+  //     "Chef",
+  //     "Helper",
+  //     "Offline Order",
+  //     "Online Order",
+  //     "Supplier",
+  //     "Order Address",
+  //     "Start Time",
+  //     "End Time",
+  //     "Total Amount",
+  //     "Status",
+  //     "Created",
+  //   ];
+  //   csvRows.push(headers.join(",")); // Add headers
 
-    filteredOrders.forEach((order) => {
-      const row = [
-        order.order_id,
-        new Date(order.order_date).toLocaleString(),
-        order.otp,
-        order.chef,
-        order.helper,
-        order._id || "N/A",
-        order.supplierUserIds.join(", ") || "N/A",
-        order.addressId.length > 0 ? order.addressId[0].address1 : "N/A",
-        order.job_start_time,
-        order.job_end_time,
-        order.total_amount,
-        order.status === 0 ? "Booking" : "Expired",
-        new Date(order.createdAt).toLocaleString(),
-      ];
-      csvRows.push(row.join(","));
-    });
+  //   filteredOrders.forEach((order) => {
+  //     const row = [
+  //       order.order_id,
+  //       new Date(order.order_date).toLocaleString(),
+  //       order.otp,
+  //       order.chef,
+  //       order.helper,
+  //       order._id || "N/A",
+  //       order.supplierUserIds.join(", ") || "N/A",
+  //       order.addressId.length > 0 ? order.addressId[0].address1 : "N/A",
+  //       order.job_start_time,
+  //       order.job_end_time,
+  //       order.total_amount,
+  //       order.status === 0 ? "Booking" : "Expired",
+  //       new Date(order.createdAt).toLocaleString(),
+  //     ];
+  //     csvRows.push(row.join(","));
+  //   });
 
   //   // Create a Blob and download it
   //   const blob = new Blob([csvRows.join("\n")], {
@@ -259,9 +259,9 @@ const OrderList = () => {
       onChange={(e) => setSearchTerm(e.target.value)}
     />
   </div>
-  <button className="download-button" onClick={downloadOrders}>
+  {/* <button className="download-button" onClick={downloadOrders}>
     Download All Orders
-  </button>
+  </button> */}
 </div>
 
 
