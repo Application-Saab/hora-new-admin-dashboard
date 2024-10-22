@@ -1,13 +1,14 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import { FaEye, FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import Popup from "../popup/Popup";
-import ActionPopup from "../popup/ActionPop";
+import Popup from "../../../pages/popup/Popup";
+import ActionPopup from "../../../pages/popup/ActionPop";
 import "./orderdetails.css";
 import {
   BASE_URL,
   ADMIN_USER_DETAILS,
   ADMIN_ORDER_LIST,
-} from "../../utils/apiconstant";
+} from "../../../utils/apiconstant";
 import axios from "axios";
 
 const OrderList = () => {
@@ -104,15 +105,6 @@ const OrderList = () => {
     }
   };
 
-  // const openPopup = (address) => {
-  //   // Combine address1 and address2 if both exist
-  //   const fullAddress = `${address.address1 || ""}, ${
-  //     address.address2 || ""
-  //   }, ${address.city || ""}`;
-
-  //   setSelectedAddress(fullAddress);
-  //   setPopupOpen(true);
-  // };
 
   const closePopup = () => {
     setPopupOpen(false);
@@ -181,36 +173,25 @@ const OrderList = () => {
   //   ];
   //   csvRows.push(headers.join(",")); // Add headers
 
-  //   filteredOrders.forEach((order) => {
-  //     const row = [
-  //       order.order_id,
-  //       new Date(order.order_date).toLocaleString(),
-  //       order.otp,
-  //       order.chef,
-  //       order.helper,
-  //       order._id || "N/A",
-  //       order.supplierUserIds.join(", ") || "N/A",
-  //       order.addressId.length > 0 ? order.addressId[0].address1 : "N/A",
-  //       order.job_start_time,
-  //       order.job_end_time,
-  //       order.total_amount,
-  //       order.status === 0 ? "Booking" : "Expired",
-  //       new Date(order.createdAt).toLocaleString(),
-  //     ];
-  //     csvRows.push(row.join(","));
-  //   });
-
-  //   // Create a Blob and download it
-  //   const blob = new Blob([csvRows.join("\n")], {
-  //     type: "text/csv;charset=utf-8;",
-  //   });
-  //   const link = document.createElement("a");
-  //   link.href = URL.createObjectURL(blob);
-  //   link.setAttribute("download", "orders.csv"); // Name of the file to download
-  //   document.body.appendChild(link);
-  //   link.click();
-  //   document.body.removeChild(link);
-  // };
+    filteredOrders.forEach((order) => {
+      const row = [
+        order.order_id,
+        new Date(order.order_date).toLocaleString(),
+        order.otp,
+        order.chef,
+        order.helper,
+        order._id || "N/A",
+        order.supplierUserIds.join(", ") || "N/A",
+        order.addressId.length > 0 ? order.addressId[0].address1 : "N/A",
+        order.job_start_time,
+        order.job_end_time,
+        order.total_amount,
+        order.status === 0 ? "Booking" : "Expired",
+        new Date(order.createdAt).toLocaleString(),
+      ];
+      csvRows.push(row.join(","));
+    });
+  };
 
   const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
 
@@ -235,19 +216,7 @@ const OrderList = () => {
         <h2>Order Details</h2>
       </div>
 
-      {/* <div className="search-download-container">
-        <div className="search-box">
-          <input
-            type="text"
-            placeholder="Search by Order ID"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <button className="download-button" onClick={downloadOrders}>
-          Download All Orders
-        </button>
-      </div> */}
+    
 
 <div className="search-download-container">
   <div className="search-box">
@@ -393,6 +362,6 @@ const OrderList = () => {
       />
     </div>
   );
-};
+
 
 export default OrderList;

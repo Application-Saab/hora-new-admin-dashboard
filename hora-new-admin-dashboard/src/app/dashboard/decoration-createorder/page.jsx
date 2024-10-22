@@ -1,3 +1,5 @@
+
+"use client";
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import "react-datepicker/dist/react-datepicker.css";
@@ -9,7 +11,7 @@ import {
   GET_DECORATION_BY_NAME,
   CONFIRM_ORDER_ENDPOINT,
   SAVE_LOCATION_ENDPOINT,
-} from "../../utils/apiconstant";
+} from "../../../utils/apiconstant";
 
 const AddOrder = () => {
   const [dishName, setDishName] = useState("");
@@ -51,34 +53,76 @@ const AddOrder = () => {
 
  
 
-  useEffect(() => {
-    if (dishName && isContinueClicked && !isFetched) {
-      const fetchProductDetails = async () => {
-        try {
-          const url = `${BASE_URL}${GET_DECORATION_BY_NAME}${encodeURIComponent(dishName)}`;
-          const response = await axios.get(url);
-          if (
-            response.data &&
-            !response.data.error &&
-            response.data.data.length > 0
-          ) {
-            const productData = response.data.data[0];
-            setProduct(productData);
-            setProductID(productData._id);
-            setCategory(productData.price);
-            setShowProductDetails(true);
-            setIsFetched(true);
-          } else {
-            setShowProductDetails(false);
+    // useEffect(() => {
+    //   if (dishName && isContinueClicked && !isFetched) {
+    //     const fetchProductDetails = async () => {
+    //       try {
+    //         const url = `${BASE_URL}${GET_DECORATION_BY_NAME}${encodeURIComponent(dishName)}`;
+    //         const response = await axios.get(url);
+    //         if (
+    //           response.data &&
+    //           !response.data.error &&
+    //           response.data.data.length > 0
+    //         ) {
+    //           const productData = response.data.data[0];
+    //           setProduct(productData);
+    //           setProductID(productData._id);
+    //           setCategory(productData.price);
+    //           setShowProductDetails(true);
+    //           setIsFetched(true);
+    //         } else {
+    //           setShowProductDetails(false);
+    //         }
+    //       } catch (error) {
+    //         console.error("Error fetching product:", error.message);
+    //       }
+    //     };
+
+    //     fetchProductDetails();
+    //   }
+
+    useEffect(() => {
+      if (dishName && isContinueClicked && !isFetched) {
+        const fetchProductDetails = async () => {
+          try {
+            const url = `${BASE_URL}${GET_DECORATION_BY_NAME}${encodeURIComponent(dishName)}`;
+            const response = await axios.get(url);
+            if (
+              response.data &&
+              !response.data.error &&
+              response.data.data.length > 0
+            ) {
+              const productData = response.data.data[0];
+              setProduct(productData);
+              setProductID(productData._id);
+              setCategory(productData.price);
+              setShowProductDetails(true);
+              setIsFetched(true);
+            } else {
+              setShowProductDetails(false);
+            }
+          } catch (error) {
+            console.error("Error fetching product:", error.message);
           }
-        } catch (error) {
-          console.error("Error fetching product:", error.message);
-        }
-      };
+        };
+    
+        fetchProductDetails();
+      }
+    }, [dishName, isContinueClicked, isFetched]);
+    
 
-      fetchProductDetails();
-    }
+  //   if (pincode) {
+  //     if (pincodes.includes(pincode)) {
+  //       setPincodeMessage("Pincode available");
+  //     } else {
+  //       setPincodeMessage("Pincode not available");
+  //     }
+  //   } else {
+  //     setPincodeMessage("");
+  //   }
+  // }, [dishName, isContinueClicked, isFetched]);
 
+  useEffect(() => {
     if (pincode) {
       if (pincodes.includes(pincode)) {
         setPincodeMessage("Pincode available");
@@ -86,9 +130,10 @@ const AddOrder = () => {
         setPincodeMessage("Pincode not available");
       }
     } else {
-      setPincodeMessage("");
+      setPincodeMessage(""); // Reset message if pincode is empty
     }
-  }, [dishName, isContinueClicked, isFetched]);
+  }, [pincode]);
+  
 
   const handleContinueClick = () => {
     setIsContinueClicked(true);
