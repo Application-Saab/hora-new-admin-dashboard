@@ -1,23 +1,23 @@
 /* General container styling */
 .order-list-container {
-    width: 90%;
+    width: 94%;
     margin: 0 auto;
     padding: 20px;
   }
   
   /* Scrollable box for orders */
   .orders-box {
-    max-height: 560px;
+    max-height: 600px;
     overflow-y: scroll;
     border: 1px solid #ddd;
     padding: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     background-color: #fff;
   }
   
   /* Table styling */
   .order-table {
-    width: 250%;
+    width: 280%;
     border-collapse: collapse;
   }
   
@@ -25,6 +25,7 @@
     padding: 8px 12px;
     border: 1px solid #ddd;
     text-align: left;
+    width: 50px;
   }
   
   .status.booking {
@@ -104,5 +105,22 @@
   
   .download-button:hover {
     background-color: #45a049;
+  }
+  
+  .status-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .status-button.active {
+    background-color: green;
+  }
+  
+  .status-button.inactive {
+    background-color: red;
   }
   
