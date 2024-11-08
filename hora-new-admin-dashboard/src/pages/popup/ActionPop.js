@@ -111,8 +111,8 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
         return { status: "Unknown", className: "status-unknown" };
     }
   };
-  const orderStatus = getOrderStatus(orderDetails._doc.type); // Get the order status object
-  const statusClass = orderStatus.className;
+  // const orderStatus = getOrderStatus(orderDetails._doc.type); // Get the order status object
+  // const statusClass = orderStatus.className;
 
   return (
     <div className="popup-overlay">

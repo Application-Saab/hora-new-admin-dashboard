@@ -132,7 +132,7 @@ const AddOrder = () => {
     } else {
       setPincodeMessage(""); // Reset message if pincode is empty
     }
-  }, [pincode]);
+  }, []);
   
 
   const handleContinueClick = () => {
