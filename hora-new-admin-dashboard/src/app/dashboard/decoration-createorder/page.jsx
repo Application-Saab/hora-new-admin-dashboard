@@ -29,9 +29,11 @@ const AddOrder = () => {
   const [showProductDetails, setShowProductDetails] = useState(false);
   const [isFetched, setIsFetched] = useState(false);
   const [pincodeMessage, setPincodeMessage] = useState("");
+  const [pincodeMessageColor, setPincodeMessageColor] = useState("");
   const [totalamount, setTotalAmount] = useState("");
   const [advanceamount, setAdvanceAmount] = useState("");
   const [balanceamount, setBalanceAmount] = useState("");
+  const [orderTakenBy, setOrderTakenBy] = useState("");
 
   const [products, setProducts] = useState([{ name: "", price: "" }]);
   const [comment, setComment] = useState("");
@@ -126,14 +128,16 @@ const AddOrder = () => {
     if (pincode) {
       if (pincodes.includes(pincode)) {
         setPincodeMessage("Pincode available");
+        setPincodeMessageColor("green"); // Set color for available
       } else {
         setPincodeMessage("Pincode not available");
+        setPincodeMessageColor("red"); // Set color for not available
       }
     } else {
       setPincodeMessage(""); // Reset message if pincode is empty
+      setPincodeMessageColor(""); // Reset color if pincode is empty
     }
   }, [pincode]);
-  
 
   const handleContinueClick = () => {
     setIsContinueClicked(true);
@@ -244,7 +248,7 @@ const AddOrder = () => {
         order_type: true,
         items: [product._id],
         decoration_comments: comment,
-        status: 0,
+        status: 1,
       };
   
       console.log(requestData, "requestData");
@@ -923,6 +927,16 @@ const sendWelcomeMessage = async (mobileNumber) => {
               </div>
             </div>
 
+            <label htmlFor="orderTakenBy">Order Taken By*</label>
+            <input
+              type="text"
+              id="orderTakenBy"
+              value={orderTakenBy}
+              onChange={(e) => setOrderTakenBy(e.target.value)}
+              placeholder="Order Taken By"
+              required
+            />
+
             <div
               className="date-time-container"
               style={{
@@ -1152,9 +1166,8 @@ const sendWelcomeMessage = async (mobileNumber) => {
               id="pincode"
               value={pincode}
               onChange={(e) => setPincode(e.target.value)}
-              required
             />
-            <p>{pincodeMessage}</p>
+            <p style={{fontWeight: "bold", fontSize: "15px", color: pincodeMessageColor }}>{pincodeMessage}</p>
 
             <button className="button1" type="submit">
               Create Order

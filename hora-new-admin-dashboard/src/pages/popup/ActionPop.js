@@ -31,7 +31,7 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
           decorations.push({
             name: dec.name,
             price: dec.price,
-            featuredImage: `${imageBaseUrl}${dec.featured_image}`, // Load image from URL
+            featuredImage: `${imageBaseUrl}${dec.featured_image}`, 
             inclusion: dec.inclusion,
           });
         });
@@ -44,8 +44,8 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
       return "No inclusion details available";
 
     return inclusionArray[0]
-      .replace(/<[^>]+>/g, "") // Remove HTML tags
-      .replace(/&#10;/g, "\n"); // Replace `&#10;` with newline
+      .replace(/<[^>]+>/g, "") 
+      .replace(/&#10;/g, "\n");
   };
 
   const sendOrderDetailsToWhatsApp = () => {
@@ -57,10 +57,10 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
     // const noOfPeople = orderDetails._doc.no_of_people || 0;
     // const type = orderDetails._doc.type || "N/A";
     const orderType = getOrderType(orderDetails._doc.type);
-    const orderStatus = getOrderStatus(orderDetails._doc.type); 
+    // const orderStatus = getOrderStatus(orderDetails._doc.type);
     const address = orderDetails._doc.addressId?.address1 || "N/A";
     const orderTime = orderDetails._doc.order_time || "N/A";
-    const phone = orderDetails._doc.fromId?.phone || "N/A";
+    // const phone = orderDetails._doc.fromId?.phone || "N/A";
     const decorationComments = orderDetails._doc.decoration_comments || "N/A";
     // const subtotal = orderDetails._doc.total_amount || 0;
     // const advanceAmount = orderDetails._doc.advance_amount || 0;
@@ -71,12 +71,12 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
     // const totalAmount = orderDetails._doc.payable_amount || 0;
 
     // Prepare the WhatsApp message content
-    let message = `Order Details:\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\nOrder Type: ${orderType}\nOrder Status: ${orderStatus.status}\nAddress: ${address}\nOrder Time: ${orderTime}\nPhone: ${phone}\nComments: ${decorationComments}\n\nOrder Summary:`;
+    let message = `Order Details:\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\nOrder Type: ${orderType}\nAddress: ${address}\nOrder Time: ${orderTime}\nComments: ${decorationComments}\n\nOrder Summary:`;
 
     // Add each decoration item to the message
     decorations.forEach((dec, index) => {
       const inclusion = getCleanInclusionText(dec.inclusion) || "N/A";
-      message += `\nItem ${index + 1}: ${dec.name}\nPrice: ₹${
+      message += `\nItem ${index + 1}: ${dec.name}\nBalance Amount: ₹${
         dec.price
       }\nInclusion: ${inclusion}\n`;
 
@@ -111,7 +111,7 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
         return { status: "Unknown", className: "status-unknown" };
     }
   };
-  const orderStatus = getOrderStatus(orderDetails._doc.type); // Get the order status object
+  const orderStatus = getOrderStatus(orderDetails._doc.type);
   const statusClass = orderStatus.className;
 
   return (
@@ -190,7 +190,10 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
                           {dec.name}: ₹{dec.price}
                         </p>
                         {/* <div>{parse(dec.inclusion[0])}</div> */}
-                        <button className="startbutton" onClick={sendOrderDetailsToWhatsApp}>
+                        <button
+                          className="startbutton"
+                          onClick={sendOrderDetailsToWhatsApp}
+                        >
                           Share On WhatsApp
                         </button>
                       </div>
