@@ -38,6 +38,10 @@ const AddOrder = () => {
   const [products, setProducts] = useState([{ name: "", price: "" }]);
   const [comment, setComment] = useState("");
 
+  const [error, setError] = useState(null);
+
+  const [customerId, setCustomerId] = useState(null); 
+
   const handleInputChange = (index, field, value) => {
     const newProducts = [...products];
     newProducts[index][field] = value;
@@ -111,18 +115,6 @@ const AddOrder = () => {
         fetchProductDetails();
       }
     }, [dishName, isContinueClicked, isFetched]);
-    
-
-  //   if (pincode) {
-  //     if (pincodes.includes(pincode)) {
-  //       setPincodeMessage("Pincode available");
-  //     } else {
-  //       setPincodeMessage("Pincode not available");
-  //     }
-  //   } else {
-  //     setPincodeMessage("");
-  //   }
-  // }, [dishName, isContinueClicked, isFetched]);
 
   useEffect(() => {
     if (pincode) {
@@ -138,6 +130,49 @@ const AddOrder = () => {
       setPincodeMessageColor(""); // Reset color if pincode is empty
     }
   }, [pincode]);
+
+
+
+  
+const handleCheckCustomer = async (e) => {
+  e.preventDefault();
+  setError(null); 
+
+  try {
+    const response = await axios.post('https://horaservices.com:3000/api/admin/admin_user_list', {
+      email: "",
+      page: "",
+      per_page: 2000,
+      phone: "", 
+      role: "customer",
+    });
+
+    console.log(response, "responsecustomer");
+
+    const users = response?.data?.data?.users;
+    console.log(users, "userss");
+
+    if (Array.isArray(users)) {
+      const customer_id = users.find((user) => user.phone === customerNumber);
+
+      console.log(customer_id._id, "customer number");
+
+      setCustomerId(customer_id);
+
+      if (customer_id) {
+        console.log("Customer ID:", customer_id._id); 
+        alert("Customer Exist");
+      } else {
+        console.log("Customer number not found.");
+      }
+    } else {
+      console.log("No users found in the response.");
+    }
+  } catch (err) {
+    setError("The Customer is not exists");
+    console.error(err);
+  }
+};
 
   const handleContinueClick = () => {
     setIsContinueClicked(true);
@@ -233,7 +268,7 @@ const AddOrder = () => {
         order_time: timeSlot.value,
         no_of_people: 0,
         type: 1,
-        fromId: "63edb239d680d47d95870fa0",
+        fromId: customerId,
         is_discount: "0",
         addressId: addressID,
         order_date: formattedDate,
@@ -992,7 +1027,7 @@ const sendWelcomeMessage = async (mobileNumber) => {
               </div>
             </div>
 
-            <label htmlFor="customerNumber">Customer Number*</label>
+            {/* <label htmlFor="customerNumber">Customer Number*</label>
             <input
               type="text"
               id="customerNumber"
@@ -1000,7 +1035,22 @@ const sendWelcomeMessage = async (mobileNumber) => {
               onChange={(e) => setCustomerNumber(e.target.value)}
               placeholder="Customer Number"
               required
-            />
+            /> */}
+
+
+<label htmlFor="customerNumber">Customer Number*</label>
+      <input
+        type="text"
+        id="customerNumber"
+        value={customerNumber}
+        onChange={(e) => setCustomerNumber(e.target.value)}
+        placeholder="Customer Number"
+        required
+      />
+      <button onClick={handleCheckCustomer}>Check Customer</button>
+
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+
 
             <label htmlFor="address">Address*</label>
             <textarea
