@@ -1154,13 +1154,14 @@ const sendWelcomeMessage = async (mobileNumber) => {
             />
 
             <label htmlFor="balanceamount" >Balance Amount</label>
-            <input
+            {/* <input
               type="text"
               id="balanceamount"
               value={balanceamount}
               onChange={(e) => setBalanceAmount(e.target.value)}
               placeholder="Balance Amount"
-            />
+            /> */}
+            {totalamount - advanceamount}
 
 <div className='checkoutInputType border-1 rounded-4'>
                   <h4>Share your comments (if any)</h4>

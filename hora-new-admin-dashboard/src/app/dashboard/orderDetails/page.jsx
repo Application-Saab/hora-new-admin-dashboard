@@ -17,7 +17,7 @@ const OrderList = () => {
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [setTotalItems] = useState(0);
-  const itemsPerPage = 500;
+  const itemsPerPage = 10;
   const [searchTerm, setSearchTerm] = useState("");
   const [popupOpen, setPopupOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState("");
@@ -74,7 +74,7 @@ const OrderList = () => {
         },
         body: JSON.stringify({
           page: 1,
-          per_page: 500,
+          per_page: 10,
         }),
       });
 
@@ -204,6 +204,7 @@ const OrderList = () => {
   };
 
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+  console.log(totalPages,"totalpages");
   const displayedOrders = filteredOrders.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -393,6 +394,18 @@ const OrderList = () => {
     XLSX.writeFile(wb, "file.xlsx");
   };
 
+
+   const handlePageChange = (page) => {
+  if (page > 0 && page <= totalPages) {
+    console.log(`Changing to page ${page}`);
+    setCurrentPage(page);
+  } else {
+    console.warn(`Page ${page} is out of bounds. Must be between 1 and ${totalPages}`);
+  }
+};
+
+
+
   const updateOrderStatus = async (orderId, status) => {
     try {
       const response = await fetch(
@@ -420,6 +433,13 @@ const OrderList = () => {
     } catch (error) {
       console.error("Error updating order status:", error);
     }
+  };
+
+
+  const getOrderId = (e) => {
+    const orderId1 = 10800 + e;
+    const updateOrderId = "#" + orderId1;
+    return updateOrderId;
   };
 
   return (
@@ -586,6 +606,7 @@ const OrderList = () => {
                   </th>
                   <th>Fulfillment Date</th>
                   <th>Otp</th>
+                  <th>Order Taken By</th>
                   <th>Offline Customer No</th>
                   <th>Online Customer No</th>
                   <th>Supplier</th>
@@ -624,13 +645,14 @@ const OrderList = () => {
                 {displayedOrders.length > 0 ? (
                   displayedOrders.map((order, index) => (
                     <tr key={index}>
-                      <td>{order.order_id}</td>
+                      <td>{getOrderId(order.order_id)}</td>
                       <td>{getOrderType(order.type)}</td>
                       <td>{order.order_locality || "N/A"}</td>
                       <td>
                         {order.order_date.split("T")[0]} {order.order_time}
                       </td>
                       <td>{order.otp}</td>
+                      <td>"N/A"</td>
                       <td>{order.phone_no || "N/A"}</td>
                       {/* <td>
                     <FaEye
@@ -729,15 +751,16 @@ const OrderList = () => {
                         <div style={styles.container}>
                           {/* Call Icon */}
                           <div
-                            style={styles.callIcon}
+                            // style={styles.callIcon}
                             onClick={() => handleCallClick(order.phone_no)}
                           >
-                            <FaPhone />
+                            N/A
+                            {/* <FaPhone /> */}
                           </div>
 
                           {/* Buttons for Call Status */}
                           <div style={styles.btnGroup}>
-                            <button
+                            {/* <button
                               style={{ ...styles.btn, ...styles.btnCalled }}
                               onClick={() => showAlert("Called")}
                             >
@@ -757,7 +780,7 @@ const OrderList = () => {
                               onClick={() => showAlert("Not Received")}
                             >
                               Not Received
-                            </button>
+                            </button> */}
                           </div>
                         </div>
                       </td>

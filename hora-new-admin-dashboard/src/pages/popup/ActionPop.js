@@ -31,7 +31,7 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
           decorations.push({
             name: dec.name,
             price: dec.price,
-            featuredImage: `${imageBaseUrl}${dec.featured_image}`, 
+            featuredImage: `${imageBaseUrl}${dec.featured_image}`,
             inclusion: dec.inclusion,
           });
         });
@@ -43,9 +43,7 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
     if (!inclusionArray || inclusionArray.length === 0)
       return "No inclusion details available";
 
-    return inclusionArray[0]
-      .replace(/<[^>]+>/g, "") 
-      .replace(/&#10;/g, "\n");
+    return inclusionArray[0].replace(/<[^>]+>/g, "").replace(/&#10;/g, "\n");
   };
 
   const sendOrderDetailsToWhatsApp = () => {
@@ -114,6 +112,14 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
   const orderStatus = getOrderStatus(orderDetails._doc.type);
   const statusClass = orderStatus.className;
 
+
+  const getOrderId = (e) => {
+    const orderId1 = 10800 + e;
+    const updateOrderId = "#" + orderId1;
+    return updateOrderId;
+  };
+
+
   return (
     <div className="popup-overlay">
       <div className="popup-content">
@@ -127,7 +133,10 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
               <div className="order-details-box">
                 <div className="order-detail-row">
                   <p>
-                    <strong>Order Id:</strong> {orderDetails._doc.order_id}
+                    <strong>Customer Order Id:</strong> {orderDetails._doc.order_id}
+                  </p>
+                  <p>
+                    <strong>Supplier Order Id:</strong> {getOrderId(orderDetails._doc.order_id)}
                   </p>
                   {/* <p><strong>Order Id:</strong> {orderDetails._doc.otp}</p> */}
                   <p>
@@ -162,6 +171,14 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
                   <p>
                     <strong>Phone Number:</strong>{" "}
                     {orderDetails._doc.fromId.phone || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Order Add On:</strong>{" "}
+                    {orderDetails._doc.add_on.map((item, index) => (
+                      <li key={index}>
+                        <strong>{item.name}</strong>: ${item.price}
+                      </li>
+                    ))}
                   </p>
                   <p>
                     <strong>Order decoration_comments:</strong>{" "}
