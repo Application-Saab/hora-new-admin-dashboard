@@ -147,20 +147,14 @@ const handleCheckCustomer = async (e) => {
       role: "customer",
     });
 
-    console.log(response, "responsecustomer");
 
     const users = response?.data?.data?.users;
-    console.log(users, "userss");
 
     if (Array.isArray(users)) {
       const customer_id = users.find((user) => user.phone === customerNumber);
-
-      console.log(customer_id._id, "customer number");
-
       setCustomerId(customer_id);
 
       if (customer_id) {
-        console.log("Customer ID:", customer_id._id); 
         alert("Customer Exist");
       } else {
         console.log("Customer number not found.");
@@ -193,11 +187,9 @@ const handleCheckCustomer = async (e) => {
 
   const saveAddress = async () => {
     try {
-      console.log("Inside saveAddress");
       const url = BASE_URL + SAVE_LOCATION_ENDPOINT;
 
       let userId = "63edb239d680d47d95870fa0";
-      console.log(userId, "userid63");
 
       if (!userId) {
         console.error("Error retrieving userID");
@@ -212,8 +204,6 @@ const handleCheckCustomer = async (e) => {
         city: city,
         userId: userId,
       };
-      console.log(address2, "address263");
-
       const token =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2M2VkYjIzOWQ2ODBkNDdkOTU4NzBmYTAiLCJuYW1lIjoiQmhhcmF0IiwiZW1haWwiOiJiaGFyYXRneWFuY2hhbmRhbmkwMDFAZ21haWwuY29tIiwicGhvbmUiOiI4ODg0MjIxNDg3Iiwicm9sZSI6ImN1c3RvbWVyIiwiaWF0IjoxNzI2MTI1NDkyLCJleHAiOjE3NTc2NjE0OTJ9.HuVjkLUBi0sCpH9p3uPzQKtnO2OR910g9MviBlLY0QY";
 
@@ -225,7 +215,6 @@ const handleCheckCustomer = async (e) => {
       });
 
       if (response.status === API_SUCCESS_CODE) {
-        console.log("Address saved successfully");
         return response.data.data._id;
       } else {
         console.error("Failed to save address", response.status);
@@ -246,7 +235,6 @@ const handleCheckCustomer = async (e) => {
       price: product.price,
     }));
   
-    console.log(addOnProduct, "addOnProduct");
   
 
   
@@ -259,7 +247,6 @@ const handleCheckCustomer = async (e) => {
         return;
       }
   
-      console.log(addressID, "addressIDFDS12");
   
       const requestData = {
         add_on: addOnProduct,
@@ -278,19 +265,18 @@ const handleCheckCustomer = async (e) => {
         orderApplianceIds: [],
         payable_amount: totalamount,
         advance_amount: advanceamount,
-        balance_amount: balanceamount,
         is_gst: "0",
         order_type: true,
         items: [product._id],
         decoration_comments: comment,
         status: 1,
+        balance_amount: balanceamount,
       };
   
-      console.log(requestData, "requestData");
 
       try {
         const response = await axios.post(`${BASE_URL}${CONFIRM_ORDER_ENDPOINT}`, requestData);
-        sendWelcomeMessage(customerNumber);
+        // sendWelcomeMessage(customerNumber);
         alert("Order created successfully:", response.data);
       } catch (error) {
         console.error("Error creating order:", error);
@@ -875,8 +861,6 @@ const sendWelcomeMessage = async (mobileNumber) => {
 
   formattedMobileNumber = formattedMobileNumber.replace(/\s+/g, '');
 
-  console.log('Sending WhatsApp message to mobile number:', formattedMobileNumber);
-
   const options = {
       method: 'POST',
       url: 'https://public.doubletick.io/whatsapp/message/template',
@@ -908,11 +892,15 @@ const sendWelcomeMessage = async (mobileNumber) => {
 
   try {
       const response = await axios.request(options);
-      console.log('WhatsApp message response:', response.data);
   } catch (error) {
       console.error('Error sending WhatsApp message:', error);
   }
 };
+
+useEffect(() => {
+  const balance = totalamount - advanceamount;
+  setBalanceAmount(balance);
+}, [totalamount, advanceamount]);
 
   return (
     <div className="container">
@@ -1134,34 +1122,33 @@ const sendWelcomeMessage = async (mobileNumber) => {
 
   
 
-            <label htmlFor="totalamount">Total Amount*</label>
-            <input
-              type="text"
-              id="totalamount"
-              value={totalamount}
-              onChange={(e) => setTotalAmount(e.target.value)}
-              placeholder="Total Amount"
-              required
-            />
+<label htmlFor="totalamount">Total Amount*</label>
+      <input
+        type="text"
+        id="totalamount"
+        value={totalamount}
+        onChange={(e) => setTotalAmount(e.target.value)}
+        placeholder="Total Amount"
+        required
+      />
 
-            <label htmlFor="advanceamount">Advance Amount</label>
-            <input
-              type="text"
-              id="advanceamount"
-              value={advanceamount}
-              onChange={(e) => setAdvanceAmount(e.target.value)}
-              placeholder="Advance Amount"
-            />
+      <label htmlFor="advanceamount">Advance Amount</label>
+      <input
+        type="text"
+        id="advanceamount"
+        value={advanceamount}
+        onChange={(e) => setAdvanceAmount(e.target.value)}
+        placeholder="Advance Amount"
+      />
 
-            <label htmlFor="balanceamount" >Balance Amount</label>
-            {/* <input
-              type="text"
-              id="balanceamount"
-              value={balanceamount}
-              onChange={(e) => setBalanceAmount(e.target.value)}
-              placeholder="Balance Amount"
-            /> */}
-            {totalamount - advanceamount}
+      <label htmlFor="balanceamount">Balance Amount</label>
+      <input
+        type="text"
+        id="balanceamount"
+        value={balanceamount}
+        placeholder="Balance Amount"
+        disabled
+      />
 
 <div className='checkoutInputType border-1 rounded-4'>
                   <h4>Share your comments (if any)</h4>

@@ -17,12 +17,10 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
     return orderTypes[orderTypeValue] || "Unknown Order Type";
   };
 
-  // console.log(orderDetails, "orderdetails");
 
   const imageBaseUrl = "https://horaservices.com/api/uploads/";
-  const decorations = [];
+  const decorations = []; 
 
-  console.log(orderDetails._doc, "orderdetails");
 
   if (orderDetails && orderDetails.items && orderDetails.items.length > 0) {
     orderDetails.items.forEach((item) => {
@@ -39,7 +37,6 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
     });
   }
   const getCleanInclusionText = (inclusionArray) => {
-    console.log(inclusionArray, "inclusionarray");
     if (!inclusionArray || inclusionArray.length === 0)
       return "No inclusion details available";
 

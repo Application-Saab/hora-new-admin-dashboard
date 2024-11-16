@@ -17,7 +17,7 @@ const OrderList = () => {
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [setTotalItems] = useState(0);
-  const itemsPerPage = 10;
+  const itemsPerPage = 500;
   const [searchTerm, setSearchTerm] = useState("");
   const [popupOpen, setPopupOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState("");
@@ -57,7 +57,6 @@ const OrderList = () => {
     setProgress(0);
 
     const url = `${BASE_URL}${ADMIN_ORDER_LIST}`;
-    console.log("Fetching orders from URL:", url);
 
     const progressInterval = setInterval(() => {
       setProgress((prevProgress) => {
@@ -74,7 +73,7 @@ const OrderList = () => {
         },
         body: JSON.stringify({
           page: 1,
-          per_page: 10,
+          per_page: 500,
         }),
       });
 
@@ -117,8 +116,14 @@ const OrderList = () => {
 
   useEffect(() => {
     const filtered = orders.filter((order) => {
-      const matchesSearch = order.order_id.toString().includes(searchTerm);
-
+      // const matchesSearch = order.order_id.toString().includes(searchTerm);
+      const transformedOrderId = getOrderId(order.order_id);
+      const sanitizedSearchTerm = searchTerm.startsWith("#")
+        ? searchTerm
+        : `#${searchTerm}`;
+      const matchesSearch =
+        sanitizedSearchTerm === "" || transformedOrderId.includes(sanitizedSearchTerm);
+        
       const matchesPhoneNumber =
         (order.phone_number && order.phone_number.includes(phoneSearchTerm)) ||
         (order.phone_no && order.phone_no.includes(phoneSearchTerm));
@@ -135,14 +140,12 @@ const OrderList = () => {
 
       const matchesOrderType =
         !selectedOrderType || getOrderType(order.type) === selectedOrderType;
+      
       const matchesStatus =
         !selectedStatus ||
         (selectedStatus === "Active" && order.status === 1) ||
         (selectedStatus === "Inactive" && order.status === 0);
-      // const matchesOrderStatus =
-      //   !selectedOrderStatus ||
-      //   (selectedOrderStatus === "Booking" && order.order_status === 0) ||
-      //   (selectedOrderStatus === "Expired" && order.order_status === 1);
+    
       const matchesOrderStatus =
         !selectedOrderStatus ||
         (selectedOrderStatus === "Booking" && order.order_status === 0) ||
@@ -204,7 +207,6 @@ const OrderList = () => {
   };
 
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
-  console.log(totalPages,"totalpages");
   const displayedOrders = filteredOrders.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -232,7 +234,6 @@ const OrderList = () => {
         throw new Error("Failed to fetch user details");
       }
       const data = await response.json();
-      console.log(data, "datasuppopup");
       setSupplierDetails(data);
       setIsPopupOpen(true);
     } catch (error) {
@@ -298,11 +299,6 @@ const OrderList = () => {
 
     formattedMobileNumber = formattedMobileNumber.replace(/\s+/g, "");
 
-    console.log(
-      "Sending WhatsApp message to mobile number:",
-      formattedMobileNumber
-    );
-
     const options = {
       method: "POST",
       url: "https://public.doubletick.io/whatsapp/message/template",
@@ -335,7 +331,6 @@ const OrderList = () => {
 
     try {
       const response = await axios.request(options);
-      console.log("WhatsApp message response:", response.data);
     } catch (error) {
       console.error("Error sending WhatsApp message:", error);
     }
@@ -397,7 +392,6 @@ const OrderList = () => {
 
    const handlePageChange = (page) => {
   if (page > 0 && page <= totalPages) {
-    console.log(`Changing to page ${page}`);
     setCurrentPage(page);
   } else {
     console.warn(`Page ${page} is out of bounds. Must be between 1 and ${totalPages}`);
@@ -422,11 +416,9 @@ const OrderList = () => {
 
       const data = await response.json();
 
-      console.log("API Response:", data);
 
       if (response.ok) {
         fetchOrders();
-        console.log("Order status updated successfully!");
       } else {
         console.error("Failed to update order status.");
       }
