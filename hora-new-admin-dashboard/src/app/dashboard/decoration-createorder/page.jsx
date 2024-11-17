@@ -29,12 +29,18 @@ const AddOrder = () => {
   const [showProductDetails, setShowProductDetails] = useState(false);
   const [isFetched, setIsFetched] = useState(false);
   const [pincodeMessage, setPincodeMessage] = useState("");
+  const [pincodeMessageColor, setPincodeMessageColor] = useState("");
   const [totalamount, setTotalAmount] = useState("");
   const [advanceamount, setAdvanceAmount] = useState("");
   const [balanceamount, setBalanceAmount] = useState("");
+  const [orderTakenBy, setOrderTakenBy] = useState("");
 
   const [products, setProducts] = useState([{ name: "", price: "" }]);
   const [comment, setComment] = useState("");
+
+  const [error, setError] = useState(null);
+
+  const [customerId, setCustomerId] = useState(null); 
 
   const handleInputChange = (index, field, value) => {
     const newProducts = [...products];
@@ -109,31 +115,55 @@ const AddOrder = () => {
         fetchProductDetails();
       }
     }, [dishName, isContinueClicked, isFetched]);
-    
-
-  //   if (pincode) {
-  //     if (pincodes.includes(pincode)) {
-  //       setPincodeMessage("Pincode available");
-  //     } else {
-  //       setPincodeMessage("Pincode not available");
-  //     }
-  //   } else {
-  //     setPincodeMessage("");
-  //   }
-  // }, [dishName, isContinueClicked, isFetched]);
 
   useEffect(() => {
     if (pincode) {
       if (pincodes.includes(pincode)) {
         setPincodeMessage("Pincode available");
+        setPincodeMessageColor("green"); // Set color for available
       } else {
         setPincodeMessage("Pincode not available");
+        setPincodeMessageColor("red"); // Set color for not available
       }
     } else {
       setPincodeMessage(""); // Reset message if pincode is empty
+      setPincodeMessageColor(""); // Reset color if pincode is empty
     }
   }, []);
   
+const handleCheckCustomer = async (e) => {
+  e.preventDefault();
+  setError(null); 
+
+  try {
+    const response = await axios.post('https://horaservices.com:3000/api/admin/admin_user_list', {
+      email: "",
+      page: "",
+      per_page: 2000,
+      phone: "", 
+      role: "customer",
+    });
+
+
+    const users = response?.data?.data?.users;
+
+    if (Array.isArray(users)) {
+      const customer_id = users.find((user) => user.phone === customerNumber);
+      setCustomerId(customer_id);
+
+      if (customer_id) {
+        alert("Customer Exist");
+      } else {
+        console.log("Customer number not found.");
+      }
+    } else {
+      console.log("No users found in the response.");
+    }
+  } catch (err) {
+    setError("The Customer is not exists");
+    console.error(err);
+  }
+};
 
   const handleContinueClick = () => {
     setIsContinueClicked(true);
@@ -154,11 +184,9 @@ const AddOrder = () => {
 
   const saveAddress = async () => {
     try {
-      console.log("Inside saveAddress");
       const url = BASE_URL + SAVE_LOCATION_ENDPOINT;
 
       let userId = "63edb239d680d47d95870fa0";
-      console.log(userId, "userid63");
 
       if (!userId) {
         console.error("Error retrieving userID");
@@ -173,8 +201,6 @@ const AddOrder = () => {
         city: city,
         userId: userId,
       };
-      console.log(address2, "address263");
-
       const token =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2M2VkYjIzOWQ2ODBkNDdkOTU4NzBmYTAiLCJuYW1lIjoiQmhhcmF0IiwiZW1haWwiOiJiaGFyYXRneWFuY2hhbmRhbmkwMDFAZ21haWwuY29tIiwicGhvbmUiOiI4ODg0MjIxNDg3Iiwicm9sZSI6ImN1c3RvbWVyIiwiaWF0IjoxNzI2MTI1NDkyLCJleHAiOjE3NTc2NjE0OTJ9.HuVjkLUBi0sCpH9p3uPzQKtnO2OR910g9MviBlLY0QY";
 
@@ -186,7 +212,6 @@ const AddOrder = () => {
       });
 
       if (response.status === API_SUCCESS_CODE) {
-        console.log("Address saved successfully");
         return response.data.data._id;
       } else {
         console.error("Failed to save address", response.status);
@@ -207,7 +232,6 @@ const AddOrder = () => {
       price: product.price,
     }));
   
-    console.log(addOnProduct, "addOnProduct");
   
 
   
@@ -220,7 +244,6 @@ const AddOrder = () => {
         return;
       }
   
-      console.log(addressID, "addressIDFDS12");
   
       const requestData = {
         add_on: addOnProduct,
@@ -229,7 +252,7 @@ const AddOrder = () => {
         order_time: timeSlot.value,
         no_of_people: 0,
         type: 1,
-        fromId: "63edb239d680d47d95870fa0",
+        fromId: customerId,
         is_discount: "0",
         addressId: addressID,
         order_date: formattedDate,
@@ -239,19 +262,18 @@ const AddOrder = () => {
         orderApplianceIds: [],
         payable_amount: totalamount,
         advance_amount: advanceamount,
-        balance_amount: balanceamount,
         is_gst: "0",
         order_type: true,
         items: [product._id],
         decoration_comments: comment,
-        status: 0,
+        status: 1,
+        balance_amount: balanceamount,
       };
   
-      console.log(requestData, "requestData");
 
       try {
         const response = await axios.post(`${BASE_URL}${CONFIRM_ORDER_ENDPOINT}`, requestData);
-        sendWelcomeMessage(customerNumber);
+        // sendWelcomeMessage(customerNumber);
         alert("Order created successfully:", response.data);
       } catch (error) {
         console.error("Error creating order:", error);
@@ -836,8 +858,6 @@ const sendWelcomeMessage = async (mobileNumber) => {
 
   formattedMobileNumber = formattedMobileNumber.replace(/\s+/g, '');
 
-  console.log('Sending WhatsApp message to mobile number:', formattedMobileNumber);
-
   const options = {
       method: 'POST',
       url: 'https://public.doubletick.io/whatsapp/message/template',
@@ -869,11 +889,15 @@ const sendWelcomeMessage = async (mobileNumber) => {
 
   try {
       const response = await axios.request(options);
-      console.log('WhatsApp message response:', response.data);
   } catch (error) {
       console.error('Error sending WhatsApp message:', error);
   }
 };
+
+useEffect(() => {
+  const balance = totalamount - advanceamount;
+  setBalanceAmount(balance);
+}, [totalamount, advanceamount]);
 
   return (
     <div className="container">
@@ -922,6 +946,16 @@ const sendWelcomeMessage = async (mobileNumber) => {
                 />
               </div>
             </div>
+
+            <label htmlFor="orderTakenBy">Order Taken By*</label>
+            <input
+              type="text"
+              id="orderTakenBy"
+              value={orderTakenBy}
+              onChange={(e) => setOrderTakenBy(e.target.value)}
+              placeholder="Order Taken By"
+              required
+            />
 
             <div
               className="date-time-container"
@@ -978,7 +1012,7 @@ const sendWelcomeMessage = async (mobileNumber) => {
               </div>
             </div>
 
-            <label htmlFor="customerNumber">Customer Number*</label>
+            {/* <label htmlFor="customerNumber">Customer Number*</label>
             <input
               type="text"
               id="customerNumber"
@@ -986,7 +1020,22 @@ const sendWelcomeMessage = async (mobileNumber) => {
               onChange={(e) => setCustomerNumber(e.target.value)}
               placeholder="Customer Number"
               required
-            />
+            /> */}
+
+
+<label htmlFor="customerNumber">Customer Number*</label>
+      <input
+        type="text"
+        id="customerNumber"
+        value={customerNumber}
+        onChange={(e) => setCustomerNumber(e.target.value)}
+        placeholder="Customer Number"
+        required
+      />
+      <button onClick={handleCheckCustomer}>Check Customer</button>
+
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+
 
             <label htmlFor="address">Address*</label>
             <textarea
@@ -1070,33 +1119,33 @@ const sendWelcomeMessage = async (mobileNumber) => {
 
   
 
-            <label htmlFor="totalamount">Total Amount*</label>
-            <input
-              type="text"
-              id="totalamount"
-              value={totalamount}
-              onChange={(e) => setTotalAmount(e.target.value)}
-              placeholder="Total Amount"
-              required
-            />
+<label htmlFor="totalamount">Total Amount*</label>
+      <input
+        type="text"
+        id="totalamount"
+        value={totalamount}
+        onChange={(e) => setTotalAmount(e.target.value)}
+        placeholder="Total Amount"
+        required
+      />
 
-            <label htmlFor="advanceamount">Advance Amount</label>
-            <input
-              type="text"
-              id="advanceamount"
-              value={advanceamount}
-              onChange={(e) => setAdvanceAmount(e.target.value)}
-              placeholder="Advance Amount"
-            />
+      <label htmlFor="advanceamount">Advance Amount</label>
+      <input
+        type="text"
+        id="advanceamount"
+        value={advanceamount}
+        onChange={(e) => setAdvanceAmount(e.target.value)}
+        placeholder="Advance Amount"
+      />
 
-            <label htmlFor="balanceamount" >Balance Amount</label>
-            <input
-              type="text"
-              id="balanceamount"
-              value={balanceamount}
-              onChange={(e) => setBalanceAmount(e.target.value)}
-              placeholder="Balance Amount"
-            />
+      <label htmlFor="balanceamount">Balance Amount</label>
+      <input
+        type="text"
+        id="balanceamount"
+        value={balanceamount}
+        placeholder="Balance Amount"
+        disabled
+      />
 
 <div className='checkoutInputType border-1 rounded-4'>
                   <h4>Share your comments (if any)</h4>
@@ -1152,9 +1201,8 @@ const sendWelcomeMessage = async (mobileNumber) => {
               id="pincode"
               value={pincode}
               onChange={(e) => setPincode(e.target.value)}
-              required
             />
-            <p>{pincodeMessage}</p>
+            <p style={{fontWeight: "bold", fontSize: "15px", color: pincodeMessageColor }}>{pincodeMessage}</p>
 
             <button className="button1" type="submit">
               Create Order
