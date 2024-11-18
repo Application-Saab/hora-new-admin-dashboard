@@ -17,7 +17,7 @@ const OrderList = () => {
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [setTotalItems] = useState(0);
-  const itemsPerPage = 10;
+  const itemsPerPage = 1000;
   const [searchTerm, setSearchTerm] = useState("");
   const [popupOpen, setPopupOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState("");
@@ -36,21 +36,29 @@ const OrderList = () => {
   const [createdAtStart, setCreatedAtStart] = useState("");
   const [createdAtEnd, setCreatedAtEnd] = useState("");
 
-  const getOnlineCustomerNumber = (onlineCustomerId) => {
-    const url = `${BASE_URL}${ADMIN_USER_DETAILS}${onlineCustomerId}`;
-    return axios
-      .get(url)
-      .then((response) => {
-        return response.data.data.phone;
-      })
-      .catch((error) => {
-        console.error("Error fetching customer data:", error);
-        return null;
-      });
-  };
-
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
+
+  const getOnlineCustomerNumber = async (onlineCustomerId) => {
+    const cachedPhone = localStorage.getItem(
+      `customer_phone_${onlineCustomerId}`
+    );
+    if (cachedPhone) {
+      return cachedPhone;
+    }
+
+    const url = `${BASE_URL}${ADMIN_USER_DETAILS}${onlineCustomerId}`;
+    try {
+      const response = await axios.get(url);
+      const phone = response.data.data.phone;
+
+      localStorage.setItem(`customer_phone_${onlineCustomerId}`, phone);
+      return phone;
+    } catch (error) {
+      console.error("Error fetching customer data:", error);
+      return null;
+    }
+  };
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -73,7 +81,7 @@ const OrderList = () => {
         },
         body: JSON.stringify({
           page: 1,
-          per_page: 10,
+          per_page: 1000,
         }),
       });
 
@@ -82,7 +90,7 @@ const OrderList = () => {
       }
 
       const data = await response.json();
-
+      
       if (data && data.data && data.data.order) {
         const ordersWithPhoneNumbers = await Promise.all(
           data.data.order.map(async (order) => {
@@ -103,8 +111,8 @@ const OrderList = () => {
       console.error("Error fetching orders:", error);
     } finally {
       clearInterval(progressInterval);
-      setProgress(100); 
-      setTimeout(() => setLoading(false), 500); 
+      setProgress(100);
+      setTimeout(() => setLoading(false), 500);
     }
   };
 
@@ -122,8 +130,9 @@ const OrderList = () => {
         ? searchTerm
         : `#${searchTerm}`;
       const matchesSearch =
-        sanitizedSearchTerm === "" || transformedOrderId.includes(sanitizedSearchTerm);
-        
+        sanitizedSearchTerm === "" ||
+        transformedOrderId.includes(sanitizedSearchTerm);
+
       const matchesPhoneNumber =
         (order.phone_number && order.phone_number.includes(phoneSearchTerm)) ||
         (order.phone_no && order.phone_no.includes(phoneSearchTerm));
@@ -140,12 +149,12 @@ const OrderList = () => {
 
       const matchesOrderType =
         !selectedOrderType || getOrderType(order.type) === selectedOrderType;
-      
+
       const matchesStatus =
         !selectedStatus ||
         (selectedStatus === "Active" && order.status === 1) ||
         (selectedStatus === "Inactive" && order.status === 0);
-    
+
       const matchesOrderStatus =
         !selectedOrderStatus ||
         (selectedOrderStatus === "Booking" && order.order_status === 0) ||
@@ -389,16 +398,19 @@ const OrderList = () => {
     XLSX.writeFile(wb, "file.xlsx");
   };
 
+  //    const handlePageChange = (page) => {
+  //   if (page > 0 && page <= totalPages) {
+  //     setCurrentPage(page);
+  //   } else {
+  //     console.warn(`Page ${page} is out of bounds. Must be between 1 and ${totalPages}`);
+  //   }
+  // };
 
-   const handlePageChange = (page) => {
-  if (page > 0 && page <= totalPages) {
-    setCurrentPage(page);
-  } else {
-    console.warn(`Page ${page} is out of bounds. Must be between 1 and ${totalPages}`);
-  }
-};
-
-
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   const updateOrderStatus = async (orderId, status) => {
     try {
@@ -408,14 +420,12 @@ const OrderList = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            // "Authorization": token
           },
           body: JSON.stringify({ _id: orderId, status: status }),
         }
       );
 
       const data = await response.json();
-
 
       if (response.ok) {
         fetchOrders();
@@ -426,7 +436,6 @@ const OrderList = () => {
       console.error("Error updating order status:", error);
     }
   };
-
 
   const getOrderId = (e) => {
     const orderId1 = 10800 + e;
@@ -568,37 +577,38 @@ const OrderList = () => {
                 <tr>
                   <th>Order Id</th>
                   <th className="order-type-header">
-                    <span>  Order Type</span>
-                    <span> <select
-                      value={selectedOrderType}
-                      onChange={(e) => setSelectedOrderType(e.target.value)}
-                      className="order-type-dropdown"
-                    >
-                      <option value="">All</option>
-                      <option value="Decoration">Decoration</option>
-                      <option value="Chef">Chef</option>
-                      <option value="Food Delivery">Food Delivery</option>
-                      <option value="Live Catering">Live Catering</option>
-                    </select></span>
-                   
+                    <span> Order Type</span>
+                    <span>
+                      {" "}
+                      <select
+                        value={selectedOrderType}
+                        onChange={(e) => setSelectedOrderType(e.target.value)}
+                        className="order-type-dropdown"
+                      >
+                        <option value="">All</option>
+                        <option value="Decoration">Decoration</option>
+                        <option value="Chef">Chef</option>
+                        <option value="Food Delivery">Food Delivery</option>
+                        <option value="Live Catering">Live Catering</option>
+                      </select>
+                    </span>
                   </th>
 
                   <th className="order-type-header">
-                   <span> City</span>
-                   <span>
-                   <select
-                      value={selectedCity}
-                      onChange={(e) => setSelectedCity(e.target.value)}
-                      className="order-type-dropdown"
-                    >
-                      <option value="">All</option>
-                      <option value="Hyderabad">Hyderabad</option>
-                      <option value="Bangalore">Bangalore</option>
-                      <option value="Mumbai">Mumbai</option>
-                      <option value="Delhi">Delhi</option>
-                    </select>
-                   </span>
-                 
+                    <span> City</span>
+                    <span>
+                      <select
+                        value={selectedCity}
+                        onChange={(e) => setSelectedCity(e.target.value)}
+                        className="order-type-dropdown"
+                      >
+                        <option value="">All</option>
+                        <option value="Hyderabad">Hyderabad</option>
+                        <option value="Bangalore">Bangalore</option>
+                        <option value="Mumbai">Mumbai</option>
+                        <option value="Delhi">Delhi</option>
+                      </select>
+                    </span>
                   </th>
                   <th>Fulfillment Date</th>
                   <th>Otp</th>
@@ -611,17 +621,20 @@ const OrderList = () => {
                   <th className="order-type-header">
                     <span>Order Status</span>
                     <span>
-                    <select
-                      value={selectedOrderStatus}
-                      onChange={(e) => setSelectedOrderStatus(e.target.value)}
-                      className="order-type-dropdown"
-                    >
-                      <option value="">All</option>
-                      <option value="Booking">Booking</option>
-                      <option value="Expired">Expired</option>
-                    </select>
+                      <select
+                        value={selectedOrderStatus}
+                        onChange={(e) => setSelectedOrderStatus(e.target.value)}
+                        className="order-type-dropdown"
+                      >
+                        <option value="">All</option>
+                        <option value="Booking">Booking</option>
+                        <option value="Expired">Expired</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Accepted">Accepted</option>
+                        <option value="In-progress">In-progress</option>
+                        <option value="Cancelled">Cancelled</option>
+                      </select>
                     </span>
-                   
                   </th>
                   <th>Created</th>
                   <th>Calling Status</th>
@@ -829,7 +842,7 @@ const OrderList = () => {
             </table>
           </div>
 
-          <div className="horizontal-scroll">
+          {/* <div className="horizontal-scroll">
             <FaChevronLeft
               className="scroll-arrow"
               onClick={() => handlePageChange(currentPage - 1)}
@@ -854,6 +867,32 @@ const OrderList = () => {
               onClick={() => handlePageChange(currentPage + 1)}
             />
           </div>
+          
+          */}
+
+          <div className="pagination">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => handlePageChange(currentPage - 1)}
+            >
+              Previous
+            </button>
+            {[...Array(totalPages).keys()].map((page) => (
+              <button
+                key={page}
+                className={currentPage === page + 1 ? "active" : ""}
+                onClick={() => handlePageChange(page + 1)}
+              >
+                {page + 1}
+              </button>
+            ))}
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => handlePageChange(currentPage + 1)}
+            >
+              Next
+            </button>
+          </div>
 
           <Popup
             isOpen={popupOpen}
@@ -870,7 +909,7 @@ const OrderList = () => {
       )}
     </div>
   );
-}
+};
 
 export default OrderList;
 

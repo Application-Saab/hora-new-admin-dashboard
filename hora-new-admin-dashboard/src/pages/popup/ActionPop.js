@@ -173,7 +173,7 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
                     <strong>Order Add On:</strong>{" "}
                     {orderDetails._doc.add_on.map((item, index) => (
                       <li key={index}>
-                        <strong>{item.name}</strong>: ${item.price}
+                        <strong>{item.name}</strong>: ₹{item.price}
                       </li>
                     ))}
                   </p>
@@ -184,7 +184,6 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
                 </div>
                 <h3>Ordered Items:</h3>
                 <div>
-                  {console.log(decorations)}
                   {decorations.length > 0 ? (
                     decorations.map((dec, index) => (
                       <div key={index} style={{ marginBottom: "10px" }}>

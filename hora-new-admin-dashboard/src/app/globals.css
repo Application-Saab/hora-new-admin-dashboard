@@ -81,3 +81,41 @@ h1, h2, h3 {
   text-transform: capitalize;
   margin-top: 10px;
 }
+
+.pagination {
+  display: flex; /* Aligns child elements horizontally */
+  justify-content: center; /* Centers the buttons horizontally */
+  align-items: center; /* Centers the buttons vertically */
+  position: fixed; /* Keeps it in the middle of the viewport */
+  top: 95%; /* Moves it 50% down from the top */
+  left: 55%; /* Moves it 50% from the left */
+  transform: translate(-50%, -50%); /* Centers the element perfectly */
+  gap: 10px; /* Adds spacing between buttons */
+}
+
+.pagination button {
+  padding: 10px 15px; /* Adds space inside the buttons */
+  font-size: 16px; /* Makes text readable */
+  cursor: pointer; /* Changes cursor to pointer on hover */
+  border: 1px solid #ccc; /* Adds a border around buttons */
+  border-radius: 5px; /* Slightly rounds the corners */
+  background-color: #f9f9f9; /* Sets a light background */
+  color: #333; /* Sets text color */
+  transition: background-color 0.3s, transform 0.2s; /* Smooth animations */
+}
+
+.pagination button:hover {
+  background-color: #ddd; /* Changes background on hover */
+}
+
+.pagination button:disabled {
+  cursor: not-allowed; /* Disables pointer for disabled buttons */
+  background-color: #e0e0e0; /* Sets a disabled background color */
+  color: #aaa; /* Sets disabled text color */
+}
+
+.pagination button.active {
+  background-color: #007bff; /* Highlights active page button */
+  color: #fff; /* Sets active text color */
+  border-color: #007bff; /* Matches border to highlight color */
+}
