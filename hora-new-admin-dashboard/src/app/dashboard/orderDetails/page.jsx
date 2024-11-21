@@ -17,7 +17,7 @@ const OrderList = () => {
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [setTotalItems] = useState(0);
-  const itemsPerPage = 1000;
+  const itemsPerPage = 20;
   const [searchTerm, setSearchTerm] = useState("");
   const [popupOpen, setPopupOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState("");
@@ -40,19 +40,19 @@ const OrderList = () => {
   const [progress, setProgress] = useState(0);
 
   const getOnlineCustomerNumber = async (onlineCustomerId) => {
-    const cachedPhone = localStorage.getItem(
-      `customer_phone_${onlineCustomerId}`
-    );
-    if (cachedPhone) {
-      return cachedPhone;
-    }
+    // const cachedPhone = localStorage.getItem(
+    //   `customer_phone_${onlineCustomerId}`
+    // );
+    // if (cachedPhone) {
+    //   return cachedPhone;
+    // }
 
     const url = `${BASE_URL}${ADMIN_USER_DETAILS}${onlineCustomerId}`;
     try {
       const response = await axios.get(url);
       const phone = response.data.data.phone;
 
-      localStorage.setItem(`customer_phone_${onlineCustomerId}`, phone);
+      // localStorage.setItem(`customer_phone_${onlineCustomerId}`, phone);
       return phone;
     } catch (error) {
       console.error("Error fetching customer data:", error);
@@ -81,15 +81,18 @@ const OrderList = () => {
         },
         body: JSON.stringify({
           page: 1,
-          per_page: 1000,
+          per_page: 10,
         }),
       });
+      
+      console.log(response, "respkjdflk");
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
       const data = await response.json();
+      console.log(data, "datalkk");
       
       if (data && data.data && data.data.order) {
         const ordersWithPhoneNumbers = await Promise.all(
