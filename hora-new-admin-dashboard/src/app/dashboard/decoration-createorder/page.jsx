@@ -1,4 +1,3 @@
-
 "use client";
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
@@ -39,6 +38,8 @@ const AddOrder = () => {
   const [comment, setComment] = useState("");
 
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
   const [customerId, setCustomerId] = useState(null); 
 
@@ -133,7 +134,8 @@ const AddOrder = () => {
   
 const handleCheckCustomer = async (e) => {
   e.preventDefault();
-  setError(null); 
+  setMessage(""); // Clear previous messages
+  setLoading(true); 
 
   try {
     const response = await axios.post('https://horaservices.com:3000/api/admin/admin_user_list', {
@@ -152,16 +154,18 @@ const handleCheckCustomer = async (e) => {
       setCustomerId(customer_id);
 
       if (customer_id) {
-        alert("Customer Exist");
+        setMessage("Customer exists.");
       } else {
-        console.log("Customer number not found.");
+        setMessage("Customer does not exist.");
       }
     } else {
-      console.log("No users found in the response.");
+      setMessage("No users found in the response.");
     }
   } catch (err) {
-    setError("The Customer is not exists");
+    setMessage("An error occurred while checking the customer.");
     console.error(err);
+  }finally {
+    setLoading(false); // Stop the loader
   }
 };
 
@@ -232,9 +236,6 @@ const handleCheckCustomer = async (e) => {
       price: product.price,
     }));
   
-  
-
-  
     const formattedDate = date ? formatDate(date) : null;
   
       const addressID = await saveAddress();
@@ -269,12 +270,13 @@ const handleCheckCustomer = async (e) => {
         status: 1,
         balance_amount: balanceamount,
       };
-  
+
 
       try {
         const response = await axios.post(`${BASE_URL}${CONFIRM_ORDER_ENDPOINT}`, requestData);
         // sendWelcomeMessage(customerNumber);
         alert("Order created successfully:", response.data);
+        // window.location.reload();
       } catch (error) {
         console.error("Error creating order:", error);
         alert("There was an error creating the order. Please try again.");
@@ -1032,9 +1034,11 @@ useEffect(() => {
         placeholder="Customer Number"
         required
       />
-      <button onClick={handleCheckCustomer}>Check Customer</button>
-
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <button onClick={handleCheckCustomer} disabled={loading}>
+        {loading ? "Checking..." : "Check Customer"}
+      </button>
+      {loading && <p>Loading...</p>} {/* Loader */}
+      {message && <p>{message}</p>} 
 
 
             <label htmlFor="address">Address*</label>

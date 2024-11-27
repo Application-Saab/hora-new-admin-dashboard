@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { FaEye, FaChevronLeft, FaChevronRight, FaPhone } from "react-icons/fa";
+import React, { useState, useEffect, useRef } from "react";
+import { FaEye, FaPhone } from "react-icons/fa";
 import Popup from "../../../pages/popup/Popup";
 import ActionPopup from "../../../pages/popup/ActionPop";
 import "./orderdetails.css";
@@ -10,19 +10,45 @@ import {
   ADMIN_ORDER_LIST,
 } from "../../../utils/apiconstant";
 import axios from "axios";
-// import * as XLSX from "xlsx";
+import * as XLSX from "xlsx";
+
+import Fuse from "fuse.js";
 
 const OrderList = () => {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [setTotalItems] = useState(0);
-  const itemsPerPage = 20;
+  const itemsPerPage = 1000;
   const [searchTerm, setSearchTerm] = useState("");
   const [popupOpen, setPopupOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState("");
   const [orderDetails, setOrderDetails] = useState(null);
   const [popupType, setPopupType] = useState("");
+  
+  const [fuse, setFuse] = useState(null);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const ordersPerPage = 10;
+
+  const [paginationInfo, setPaginationInfo] = useState({
+    total_item: 0,
+    showing: 0,
+    first_page: 1,
+    previous_page: 1,
+    current_page: 1,
+    next_page: 1,
+    last_page: 1
+  });
+
+  const [paginate, setPaginate] = useState({
+    total_item: 0,
+    showing: 0,
+    first_page: 1,
+    previous_page: 1,
+    current_page: 1,
+    next_page: 2,
+    last_page: 1,
+  });
 
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -39,76 +65,335 @@ const OrderList = () => {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  const getOnlineCustomerNumber = async (onlineCustomerId) => {
-    // const cachedPhone = localStorage.getItem(
-    //   `customer_phone_${onlineCustomerId}`
-    // );
-    // if (cachedPhone) {
-    //   return cachedPhone;
-    // }
+  // const getOnlineCustomerNumber = async (onlineCustomerId) => {
+  //   const cachedPhone = localStorage.getItem(
+  //     `customer_phone_${onlineCustomerId}`
+  //   );
+  //   if (cachedPhone) {
+  //     return cachedPhone;
+  //   }
 
-    const url = `${BASE_URL}${ADMIN_USER_DETAILS}${onlineCustomerId}`;
-    try {
-      const response = await axios.get(url);
-      const phone = response.data.data.phone;
+  //   const url = `${BASE_URL}${ADMIN_USER_DETAILS}${onlineCustomerId}`;
+  //   try {
+  //     const response = await axios.get(url);
+  //     const phone = response.data.data.phone;
 
-      // localStorage.setItem(`customer_phone_${onlineCustomerId}`, phone);
-      return phone;
-    } catch (error) {
-      console.error("Error fetching customer data:", error);
-      return null;
-    }
-  };
+  //     localStorage.setItem(`customer_phone_${onlineCustomerId}`, phone);
+  //     return phone;
+  //   } catch (error) {
+  //     console.error("Error fetching customer data:", error);
+  //     return null;
+  //   }
+  // };
 
-  const fetchOrders = async () => {
+  // const fetchOrders = async () => {
+  //   setLoading(true);
+  //   setProgress(0);
+
+  //   const url = `${BASE_URL}${ADMIN_ORDER_LIST}`;
+
+  //   const progressInterval = setInterval(() => {
+  //     setProgress((prevProgress) => {
+  //       if (prevProgress >= 90) return prevProgress;
+  //       return prevProgress + 1;
+  //     });
+  //   }, 30);
+
+  //   try {
+  //     const response = await fetch(url, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         page: 1,
+  //         per_page: 10,
+  //       }),
+  //     });
+      
+  //     console.log(response, "respkjdflk");
+
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! Status: ${response.status}`);
+  //     }
+
+  //     const data = await response.json();
+  //     console.log(data, "datalkk");
+      
+  //     if (data && data.data && data.data.order) {
+  //       const ordersWithPhoneNumbers = await Promise.all(
+  //         data.data.order.map(async (order) => {
+  //           const phoneNumber = await getOnlineCustomerNumber(order.fromId);
+  //           return {
+  //             ...order,
+  //             phone_number: phoneNumber,
+  //           };
+  //         })
+  //       );
+
+  //       setOrders(ordersWithPhoneNumbers);
+  //       setFilteredOrders(ordersWithPhoneNumbers);
+  //     } else {
+  //       console.warn("No orders found in response data");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching orders:", error);
+  //   } finally {
+  //     clearInterval(progressInterval);
+  //     setProgress(100);
+  //     setTimeout(() => setLoading(false), 500);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchOrders();
+  // }, []);
+
+
+  
+  // API Calls
+  
+  // const fetchOrders = async (page = 1) => {
+  //   setLoading(true);
+  //   setProgress(0);
+
+  //   const progressInterval = setInterval(() => {
+  //     setProgress((prev) => Math.min(90, prev + 1));
+  //   }, 30);
+
+  //   try {
+  //     const response = await fetch(`${BASE_URL}${ADMIN_ORDER_LIST}`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json"
+  //       },
+  //       body: JSON.stringify({
+  //         page,
+  //         per_page: 10,
+  //         // created_at_start: "2024-07-17T16:10:38.695Z",
+  //         // created_at_end: "2024-07-17T16:10:38.695Z",
+  //         order_id: orderId,
+         
+  //       })
+  //     });
+
+  //     const data = await response.json();
+
+  //     if (data?.data?.order) {
+  //       const enrichedOrders = await Promise.all(
+  //         data.data.order.map(async (order) => ({
+  //           ...order,
+  //           phone_number: await getOnlineCustomerNumber(order.fromId)
+  //         }))
+  //       );
+
+  //       setOrders(enrichedOrders);
+  //       setFilteredOrders(enrichedOrders);
+  //       setPaginationInfo(data.data.paginate);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching orders:", error);
+  //   } finally {
+  //     clearInterval(progressInterval);
+  //     setProgress(100);
+  //     setTimeout(() => setLoading(false), 500);
+  //   }
+  // };
+
+  // const fetchOrders = async (page = 1) => {
+  //   setLoading(true);
+  //   setProgress(0);
+  
+  //   const progressInterval = setInterval(() => {
+  //     setProgress((prev) => Math.min(90, prev + 1));
+  //   }, 30);
+  
+
+  //   const orderId = parseInt(searchTerm, 10);
+
+  //   try {
+  //     // Construct body based on whether searchTerm is used
+  //     const requestBody = {
+  //       order_id : orderId,
+  //       page,
+  //       per_page: 10,
+  //     };
+
+  //   console.log(typeof(searchTerm), "sohan");
+  //   console.log(searchTerm.trim(), "sohan");
+  
+  //     console.log(requestBody, "requestbody");
+  //     // If a search term is entered, include it as order_id
+  //     // if (search) {
+  //     //   requestBody.order_id = search; // Dynamically set order_id as searchTerm
+  //     // }
+  
+  //     const response = await fetch(`${BASE_URL}${ADMIN_ORDER_LIST}`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(requestBody),
+  //     });
+  
+  //     const data = await response.json();
+  //     console.log(data, "data");
+  
+  //     if (data?.data?.order) {
+  //       const enrichedOrders = await Promise.all(
+  //         data.data.order.map(async (order) => ({
+  //           ...order,
+  //           phone_number: await getOnlineCustomerNumber(order.fromId),
+  //         }))
+  //       );
+  
+  //       setOrders(enrichedOrders);
+  //       setFilteredOrders(enrichedOrders); // Display directly fetched orders
+  //       setPaginationInfo(data.data.paginate); // Update pagination info
+  //     } else {
+  //       setOrders([]); // Clear orders if no data is returned
+  //       setFilteredOrders([]);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching orders:", error);
+  //   } finally {
+  //     clearInterval(progressInterval);
+  //     setProgress(100);
+  //     setTimeout(() => setLoading(false), 500);
+  //   }
+  // };
+
+  
+  
+  // const handleSearchChange = (e) => {
+  //   const term = e.target.value.trim(); // Trim spaces to avoid unnecessary API calls
+  //   setSearchTerm(term);
+  
+  //   if (!term) {
+  //     // Reset filtered data and fetch default orders if search is cleared
+  //     fetchOrders(1);
+  //   } else {
+  //     fetchOrders(1, term);
+  //   }
+  // };
+
+
+  // Fetch Orders from API
+  // const fetchOrders = async (page = 1, searchParams = {}) => {
+  //   setLoading(true);
+  //   setProgress(0);
+
+  //   const progressInterval = setInterval(() => {
+  //     setProgress((prev) => Math.min(90, prev + 1));
+  //   }, 30);
+
+  //   try {
+  //     const response = await axios.post(`${BASE_URL}${ADMIN_ORDER_LIST}`, {
+  //       page,
+  //       per_page: 10,
+  //       ...searchParams, // Include order_id or any search parameter dynamically
+  //     });
+
+  //     const data = response.data;
+
+  //     if (data?.data?.order) {
+  //       // Update orders and filteredOrders
+  //       setOrders(data.data.order);
+  //       setFilteredOrders(data.data.order);
+
+  //       // Initialize Fuse.js for fuzzy search
+  //       const options = {
+  //         keys: [
+  //           "order_id",        // Order ID
+  //           "phone_number",    // Phone number
+  //           "order_locality",  // City
+  //           "type",            // Order type
+  //         ],
+  //         threshold: 0.3,       // Sensitivity for fuzzy search
+  //       };
+
+  //       setFuse(new Fuse(data.data.order, options));
+  //     } else {
+  //       setOrders([]);
+  //       setFilteredOrders([]);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching orders:", error);
+  //   } finally {
+  //     clearInterval(progressInterval);
+  //     setProgress(100);
+  //     setTimeout(() => setLoading(false), 500);
+  //   }
+  // };
+
+  // // Fetch initial data
+  // useEffect(() => {
+  //   fetchOrders(1);
+  // }, []);
+
+  let abortController;
+
+  const fetchOrders = async (page = 1, searchParams = {}) => {
     setLoading(true);
     setProgress(0);
 
-    const url = `${BASE_URL}${ADMIN_ORDER_LIST}`;
+ if (abortController) {
+  abortController.abort();
+}
+abortController = new AbortController(); 
 
     const progressInterval = setInterval(() => {
-      setProgress((prevProgress) => {
-        if (prevProgress >= 90) return prevProgress;
-        return prevProgress + 1;
-      });
+      setProgress((prev) => Math.min(90, prev + 1));
     }, 30);
 
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          page: 1,
-          per_page: 10,
-        }),
-      });
-      
-      console.log(response, "respkjdflk");
+      const response = await axios.post(`${BASE_URL}${ADMIN_ORDER_LIST}`, 
+        {
+        page,
+        per_page: ordersPerPage,
+        ...searchParams,
+      },
+      { signal: abortController.signal }
+    );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
+      const data = response.data;
 
-      const data = await response.json();
-      console.log(data, "datalkk");
-      
-      if (data && data.data && data.data.order) {
-        const ordersWithPhoneNumbers = await Promise.all(
-          data.data.order.map(async (order) => {
-            const phoneNumber = await getOnlineCustomerNumber(order.fromId);
-            return {
-              ...order,
-              phone_number: phoneNumber,
-            };
-          })
+      if (data?.data?.order) {
+        const enrichedOrders = await Promise.all(
+          data.data.order.map(async (order) => ({
+            ...order,
+            phone_number: await getOnlineCustomerNumber(order.fromId),
+          }))
         );
 
-        setOrders(ordersWithPhoneNumbers);
-        setFilteredOrders(ordersWithPhoneNumbers);
+        // Update Orders and FilteredOrders
+        setOrders(enrichedOrders);
+        setFilteredOrders(enrichedOrders);
+
+        setPaginate({
+          total_item: data.data.paginate.total_item,
+          showing: data.data.paginate.showing,
+          first_page: data.data.paginate.first_page,
+          previous_page: data.data.paginate.previous_page,
+          current_page: data.data.paginate.current_page,
+          next_page: data.data.paginate.next_page,
+          last_page: data.data.paginate.last_page,
+        });
+
+        // Initialize Fuse.js for Fuzzy Search
+        const options = {
+          keys: ["order_id", "phone_number"],
+          threshold: 1,
+        };
+        setFuse(new Fuse(enrichedOrders, options));
       } else {
-        console.warn("No orders found in response data");
+        setOrders([]);
+        setFilteredOrders([]);
+        setPaginationInfo((prev) => ({
+          ...prev,
+          total_item: 0,
+          showing: 0,
+        }));
       }
     } catch (error) {
       console.error("Error fetching orders:", error);
@@ -119,83 +404,269 @@ const OrderList = () => {
     }
   };
 
+  // Fetch Customer Phone Number
+  const getOnlineCustomerNumber = async (customerId) => {
+    const cached = localStorage.getItem(`customer_phone_${customerId}`);
+    if (cached) return cached;
+
+    try {
+      const response = await axios.get(`${BASE_URL}${ADMIN_USER_DETAILS}${customerId}`);
+      const phone = response.data.data.phone;
+      localStorage.setItem(`customer_phone_${customerId}`, phone);
+      return phone;
+    } catch (error) {
+      console.error("Error fetching customer phone:", error);
+      return "N/A";
+    }
+  };
+
+  
+  // useEffect(() => {
+  //   fetchOrders(paginate.current_page);
+  // }, [paginate.current_page]);
+
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    // Fetch orders when the component mounts or paginate.current_page changes
+    fetchOrders(paginate.current_page);
+    return () => {
+      if (abortController) {
+        abortController.abort();
+      }
+    };
+  }, [paginate.current_page]);
+
+  const handlePageChange = (page) => {
+    fetchOrders(page);
+  };
+
+  // Handle Search Change
+  const handleSearchChange = (e) => {
+    const term = e.target.value.trim();
+    setSearchTerm(term);
+
+    // If term is numeric (order_id), send it to the server as an integer
+    if (term && !isNaN(term)) {
+      const orderId = parseInt(term, 10); // Convert to integer
+      fetchOrders(1, { order_id: orderId });
+    }
+    // If search term is cleared, fetch all orders again
+    else if (!term) {
+      fetchOrders(1); // Fetch without search parameters (clear the filter)
+    }
+    // If search term is not numeric, apply fuzzy search on loaded data
+    else if (term && fuse) {
+      const results = fuse.search(term).map((result) => result.item);
+      setFilteredOrders(results);
+    }
+  };
+
+  // Event Handlers
+  // const handlePageChange = (page) => {
+  //   setCurrentPage(page);
+  //   fetchOrders(page);
+  // };
+
+  // useEffect(() => {
+  //   fetchOrders(paginationInfo.current_page);
+  // }, [paginationInfo.current_page]);
+
+  // const handlePageChange = (page) => {
+  //   setPaginationInfo((prev) => ({
+  //     ...prev,
+  //     current_page: page,
+  //   }));
+  // };
 
   const [phoneSearchTerm, setPhoneSearchTerm] = useState("");
+  // Handle Phone Search
+  const handlePhoneSearchChange = (e) => {
+    const term = e.target.value.trim();
+    setPhoneSearchTerm(term);
 
-  useEffect(() => {
-    const filtered = orders.filter((order) => {
-      // const matchesSearch = order.order_id.toString().includes(searchTerm);
-      const transformedOrderId = getOrderId(order.order_id);
-      const sanitizedSearchTerm = searchTerm.startsWith("#")
-        ? searchTerm
-        : `#${searchTerm}`;
-      const matchesSearch =
-        sanitizedSearchTerm === "" ||
-        transformedOrderId.includes(sanitizedSearchTerm);
-
-      const matchesPhoneNumber =
-        (order.phone_number && order.phone_number.includes(phoneSearchTerm)) ||
-        (order.phone_no && order.phone_no.includes(phoneSearchTerm));
-
-      const orderCreatedAt = new Date(order.createdAt);
-      const orderDate = new Date(order.order_date.split("T")[0]);
-      const matchesDateRange =
-        (!startDate || orderDate >= new Date(startDate)) &&
-        (!endDate || orderDate <= new Date(endDate));
-
-      const matchesCreatedAtRange =
-        (!createdAtStart || orderCreatedAt >= new Date(createdAtStart)) &&
-        (!createdAtEnd || orderCreatedAt <= new Date(createdAtEnd));
-
-      const matchesOrderType =
-        !selectedOrderType || getOrderType(order.type) === selectedOrderType;
-
-      const matchesStatus =
-        !selectedStatus ||
-        (selectedStatus === "Active" && order.status === 1) ||
-        (selectedStatus === "Inactive" && order.status === 0);
-
-      const matchesOrderStatus =
-        !selectedOrderStatus ||
-        (selectedOrderStatus === "Booking" && order.order_status === 0) ||
-        (selectedOrderStatus === "Accepted" && order.order_status === 1) ||
-        (selectedOrderStatus === "In-progress" && order.order_status === 2) ||
-        (selectedOrderStatus === "Completed" && order.order_status === 3) ||
-        (selectedOrderStatus === "Cancelled" && order.order_status === 4) ||
-        (selectedOrderStatus === "Expired" && order.order_status === 6);
-
-      const matchesCity =
-        !selectedCity || order.order_locality === selectedCity;
-
-      return (
-        matchesSearch &&
-        matchesPhoneNumber &&
-        matchesDateRange &&
-        matchesCreatedAtRange &&
-        matchesOrderType &&
-        matchesStatus &&
-        matchesOrderStatus &&
-        matchesCity
+    if (!term) {
+      setFilteredOrders(orders);
+    } else {
+      const filtered = orders.filter((order) =>
+        order.phone_number.includes(term)
       );
-    });
-    setFilteredOrders(filtered);
-    setCurrentPage(1);
-  }, [
-    searchTerm,
-    phoneSearchTerm,
-    startDate,
-    endDate,
-    createdAtStart,
-    createdAtEnd,
-    selectedOrderType,
-    selectedStatus,
-    selectedOrderStatus,
-    selectedCity,
-    orders,
-  ]);
+      setFilteredOrders(filtered);
+    }
+  };
+  
+// useEffect(() => {
+//   fetchOrders(1); // Fetch only once when a dependency changes
+// }, [
+//   selectedOrderType,
+//   selectedStatus,
+//   selectedOrderStatus,
+//   selectedCity,
+//   startDate,
+//   endDate,
+//   createdAtStart,
+//   createdAtEnd
+// ]);
+
+// Filter orders when orders or filtering inputs change
+// useEffect(() => {
+//   const filtered = orders.filter((order) => {
+//     const transformedOrderId = getOrderId(order.order_id);
+//     const sanitizedSearchTerm = searchTerm.startsWith("#")
+//       ? searchTerm
+//       : `#${searchTerm}`;
+//     const matchesSearch =
+//       sanitizedSearchTerm === "" ||
+//       transformedOrderId.includes(sanitizedSearchTerm);
+
+//     const matchesPhoneNumber =
+//       (order.phone_number && order.phone_number.includes(phoneSearchTerm)) ||
+//       (order.phone_no && order.phone_no.includes(phoneSearchTerm));
+
+//     const orderCreatedAt = new Date(order.createdAt);
+//     const orderDate = new Date(order.order_date.split("T")[0]);
+//     const matchesDateRange =
+//       (!startDate || orderDate >= new Date(startDate)) &&
+//       (!endDate || orderDate <= new Date(endDate));
+
+//     const matchesCreatedAtRange =
+//       (!createdAtStart || orderCreatedAt >= new Date(createdAtStart)) &&
+//       (!createdAtEnd || orderCreatedAt <= new Date(createdAtEnd));
+
+//     const matchesOrderType =
+//       !selectedOrderType || getOrderType(order.type) === selectedOrderType;
+
+//     const matchesStatus =
+//       !selectedStatus ||
+//       (selectedStatus === "Active" && order.status === 1) ||
+//       (selectedStatus === "Inactive" && order.status === 0);
+
+//     const matchesOrderStatus =
+//       !selectedOrderStatus ||
+//       (selectedOrderStatus === "Booking" && order.order_status === 0) ||
+//       (selectedOrderStatus === "Accepted" && order.order_status === 1) ||
+//       (selectedOrderStatus === "In-progress" && order.order_status === 2) ||
+//       (selectedOrderStatus === "Completed" && order.order_status === 3) ||
+//       (selectedOrderStatus === "Cancelled" && order.order_status === 4) ||
+//       (selectedOrderStatus === "Expired" && order.order_status === 6);
+
+//     const matchesCity =
+//       !selectedCity || order.order_locality === selectedCity;
+
+//     return (
+//       matchesSearch &&
+//       matchesPhoneNumber &&
+//       matchesDateRange &&
+//       matchesCreatedAtRange &&
+//       matchesOrderType &&
+//       matchesStatus &&
+//       matchesOrderStatus &&
+//       matchesCity
+//     );
+//   });
+
+//   setFilteredOrders(filtered);
+//   setCurrentPage(1); // Reset pagination after filtering
+// }, [
+//   orders,
+//   searchTerm,
+//   phoneSearchTerm,
+//   startDate,
+//   endDate,
+//   createdAtStart,
+//   createdAtEnd,
+//   selectedOrderType,
+//   selectedStatus,
+//   selectedOrderStatus,
+//   selectedCity
+// ]);
+
+
+  // useEffect(() => {
+  //   const filtered = orders.filter((order) => {
+  //     // const matchesSearch = order.order_id.toString().includes(searchTerm);
+  //     const transformedOrderId = getOrderId(order.order_id);
+  //     const sanitizedSearchTerm = searchTerm.startsWith("#")
+  //       ? searchTerm
+  //       : `#${searchTerm}`;
+  //     const matchesSearch =
+  //       sanitizedSearchTerm === "" ||
+  //       transformedOrderId.includes(sanitizedSearchTerm);
+
+  //     const matchesPhoneNumber =
+  //       (order.phone_number && order.phone_number.includes(phoneSearchTerm)) ||
+  //       (order.phone_no && order.phone_no.includes(phoneSearchTerm));
+
+  //     const orderCreatedAt = new Date(order.createdAt);
+  //     const orderDate = new Date(order.order_date.split("T")[0]);
+  //     const matchesDateRange =
+  //       (!startDate || orderDate >= new Date(startDate)) &&
+  //       (!endDate || orderDate <= new Date(endDate));
+
+  //     const matchesCreatedAtRange =
+  //       (!createdAtStart || orderCreatedAt >= new Date(createdAtStart)) &&
+  //       (!createdAtEnd || orderCreatedAt <= new Date(createdAtEnd));
+
+  //     const matchesOrderType =
+  //       !selectedOrderType || getOrderType(order.type) === selectedOrderType;
+
+  //     const matchesStatus =
+  //       !selectedStatus ||
+  //       (selectedStatus === "Active" && order.status === 1) ||
+  //       (selectedStatus === "Inactive" && order.status === 0);
+
+  //     const matchesOrderStatus =
+  //       !selectedOrderStatus ||
+  //       (selectedOrderStatus === "Booking" && order.order_status === 0) ||
+  //       (selectedOrderStatus === "Accepted" && order.order_status === 1) ||
+  //       (selectedOrderStatus === "In-progress" && order.order_status === 2) ||
+  //       (selectedOrderStatus === "Completed" && order.order_status === 3) ||
+  //       (selectedOrderStatus === "Cancelled" && order.order_status === 4) ||
+  //       (selectedOrderStatus === "Expired" && order.order_status === 6);
+
+  //     const matchesCity =
+  //       !selectedCity || order.order_locality === selectedCity;
+
+  //     return (
+  //       matchesSearch &&
+  //       matchesPhoneNumber &&
+  //       matchesDateRange &&
+  //       matchesCreatedAtRange &&
+  //       matchesOrderType &&
+  //       matchesStatus &&
+  //       matchesOrderStatus &&
+  //       matchesCity
+  //     );
+  //   });
+  //   setFilteredOrders(filtered);
+  //   setCurrentPage(1);
+  // }, [
+  //   searchTerm,
+  //   phoneSearchTerm,
+  //   startDate,
+  //   endDate,
+  //   createdAtStart,
+  //   createdAtEnd,
+  //   selectedOrderType,
+  //   selectedStatus,
+  //   selectedOrderStatus,
+  //   selectedCity,
+  //   orders,
+  // ]);
+  
+  // // Side Effects
+  // useEffect(() => {
+  //   fetchOrders(1);
+  // }, [
+  //   selectedOrderType,
+  //   selectedStatus,
+  //   selectedOrderStatus,
+  //   selectedCity,
+  //   startDate,
+  //   endDate,
+  //   createdAtStart,
+  //   createdAtEnd
+  // ]);
+
+  // Fetch orders when filtering options change
 
   const getOrderStatus = (orderStatusValue) => {
     switch (orderStatusValue) {
@@ -218,11 +689,11 @@ const OrderList = () => {
     }
   };
 
-  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
-  const displayedOrders = filteredOrders.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  // const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+  // const displayedOrders = filteredOrders.slice(
+  //   (currentPage - 1) * itemsPerPage,
+  //   currentPage * itemsPerPage
+  // );
 
   const getOrderType = (orderTypeValue) => {
     const orderTypes = {
@@ -409,11 +880,24 @@ const OrderList = () => {
   //   }
   // };
 
-  const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
+  // const handlePageChange = (page) => {
+  //   if (page >= 1 && page <= totalPages) {
+  //     setCurrentPage(page);
+  //   }
+  // };
+
+
+   // Loading Screen Component
+   const LoadingScreen = () => (
+    <div className="loading-overlay">
+      <div className="loading-container">
+        <div className="progress-bar">
+          <div className="progress" style={{ width: `${progress}%` }}></div>
+        </div>
+        <div className="loading-text">Loading... {progress}%</div>
+      </div>
+    </div>
+  );
 
   const updateOrderStatus = async (orderId, status) => {
     try {
@@ -446,48 +930,36 @@ const OrderList = () => {
     return updateOrderId;
   };
 
+  const totalPages = Math.ceil(totalOrders / ordersPerPage);
+
+  const renderPageNumbers = () => {
+    const { first_page, current_page, last_page } = paginate;
+    const pageNumbers = [];
+    const delta = 2; // Number of pages to show before/after the current page
+
+    for (let i = 1; i <= last_page; i++) {
+      if (
+        i === first_page || // First page
+        i === last_page || // Last page
+        (i >= current_page - delta && i <= current_page + delta) // Current window
+      ) {
+        pageNumbers.push(i);
+      } else if (
+        i === current_page - delta - 1 || // Add ellipsis before
+        i === current_page + delta + 1 // Add ellipsis after
+      ) {
+        pageNumbers.push("...");
+      }
+    }
+
+    return [...new Set(pageNumbers)]; // Ensure no duplicate ellipses
+  };
+
   return (
     <div>
-      {loading ? (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            flexDirection: "column",
-            color: "#fff",
-            fontSize: "1.5em",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              width: "20%",
-              height: "10px",
-              backgroundColor: "#444",
-              borderRadius: "10px",
-              overflow: "hidden",
-              marginBottom: "20px",
-            }}
-          >
-            <div
-              style={{
-                width: `${progress}%`,
-                height: "100%",
-                backgroundColor: "#4caf50",
-                transition: "width 0.3s ease",
-              }}
-            ></div>
-          </div>
-          <div>Loading... {progress}%</div>
-        </div>
-      ) : (
+      {loading && <LoadingScreen />}
+      
+      
         <div className="order-list-container">
           <div className="order-header">
             <h2>Order Details</h2>
@@ -500,7 +972,7 @@ const OrderList = () => {
                 className="small-search"
                 placeholder="Search by Order ID"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={handleSearchChange}
               />
 
               {/* Phone Number Search */}
@@ -509,7 +981,7 @@ const OrderList = () => {
                 className="small-search"
                 placeholder="Search by Phone Number"
                 value={phoneSearchTerm}
-                onChange={(e) => setPhoneSearchTerm(e.target.value)}
+                onChange={handlePhoneSearchChange}
               />
 
               {/* Start Date and End Date Box */}
@@ -654,13 +1126,17 @@ const OrderList = () => {
                     </select>
                   </th>
                   <th>Action</th>
+                  <th>Rating</th>
                 </tr>
               </thead>
               <tbody>
-                {displayedOrders.length > 0 ? (
-                  displayedOrders.map((order, index) => (
-                    <tr key={index}>
-                      <td>{getOrderId(order.order_id)}</td>
+                {/* {displayedOrders.length > 0 ? (
+                  displayedOrders.map((order, index) => ( */}
+                              {filteredOrders.map((order) => (
+                    // <tr key={index}>
+                    <tr key={order._id}>
+                      <td>{order.order_id}</td>
+                      {/* <td>{getOrderId(order.order_id)}</td> */}
                       <td>{getOrderType(order.type)}</td>
                       <td>{order.order_locality || "N/A"}</td>
                       <td>
@@ -742,15 +1218,7 @@ const OrderList = () => {
 
                       <td>{"N/A"}</td>
                       <td>₹{order.total_amount}</td>
-                      {/* <td>
-                    <span
-                      className={`status ${
-                        order.order_status === 0 ? "booking" : "expired"
-                      }`}
-                    >
-                      {order.order_status === 0 ? "Booking" : "Expired"}
-                    </span>
-                  </td> */}
+                     
                       <td>
                         <span
                           className={`status ${
@@ -834,13 +1302,9 @@ const OrderList = () => {
                           }
                         />
                       </td>
+                      <td>N/A</td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="13">No orders found</td>
-                  </tr>
-                )}
+                ))}
               </tbody>
             </table>
           </div>
@@ -873,7 +1337,7 @@ const OrderList = () => {
           
           */}
 
-          <div className="pagination">
+          {/* <div className="pagination">
             <button
               disabled={currentPage === 1}
               onClick={() => handlePageChange(currentPage - 1)}
@@ -895,7 +1359,64 @@ const OrderList = () => {
             >
               Next
             </button>
-          </div>
+          </div> */}
+ 
+    {/* Pagination */}
+    <div className="pagination">
+        <button
+          disabled={paginate.current_page === paginate.first_page}
+          onClick={() => handlePageChange(paginate.previous_page)}
+        >
+          Previous
+        </button>
+
+        {renderPageNumbers().map((page, index) => (
+          <button
+            key={index}
+            disabled={page === "..."}
+            onClick={() => page !== "..." && handlePageChange(page)}
+            className={paginate.current_page === page ? "active" : ""}
+          >
+            {page}
+          </button>
+        ))}
+
+        <button
+          disabled={paginate.current_page === paginate.last_page}
+          onClick={() => handlePageChange(paginate.next_page)}
+        >
+          Next
+        </button>
+      </div>
+{/* <div className="pagination-container">
+        <div className="pagination-info">
+          Showing {paginationInfo.showing} of {paginationInfo.total_item} orders
+        </div>
+        <div className="pagination-controls">
+          <button
+            disabled={currentPage === paginationInfo.first_page}
+            onClick={() => handlePageChange(paginationInfo.previous_page)}
+          >
+            Previous
+          </button>
+          {Array.from({ length: paginationInfo.last_page }, (_, i) => i + 1)
+            .map((page) => (
+              <button
+                key={page}
+                className={currentPage === page ? "active" : ""}
+                onClick={() => handlePageChange(page)}
+              >
+                {page}
+              </button>
+            ))}
+          <button
+            disabled={currentPage === paginationInfo.last_page}
+            onClick={() => handlePageChange(paginationInfo.next_page)}
+          >
+            Next
+          </button>
+        </div>
+      </div> */}
 
           <Popup
             isOpen={popupOpen}
@@ -909,7 +1430,7 @@ const OrderList = () => {
             onClose={closePopup}
           />
         </div>
-      )}
+      
     </div>
   );
 };
