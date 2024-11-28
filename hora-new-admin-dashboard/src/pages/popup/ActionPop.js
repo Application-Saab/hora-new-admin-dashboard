@@ -37,11 +37,13 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
     });
   }
   const getCleanInclusionText = (inclusionArray) => {
-    if (!inclusionArray || inclusionArray.length === 0)
+    if (!inclusionArray || inclusionArray.length === 0) 
       return "No inclusion details available";
-
-    return inclusionArray[0].replace(/<[^>]+>/g, "").replace(/&#10;/g, "\n");
+  
+    // Format the inclusion array as bullet points
+    return inclusionArray.map(item => `• ${item.replace(/<[^>]+>/g, "").replace(/&#10;/g, "\n").trim()}`).join("\n");
   };
+  
 
   const sendOrderDetailsToWhatsApp = () => {
     const orderId = orderDetails._doc.order_id || "N/A";
@@ -57,6 +59,7 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
     const orderTime = orderDetails._doc.order_time || "N/A";
     // const phone = orderDetails._doc.fromId?.phone || "N/A";
     const decorationComments = orderDetails._doc.decoration_comments || "N/A";
+    const addOnItems = orderDetails._doc.add_on || "N/A";
     // const subtotal = orderDetails._doc.total_amount || 0;
     // const advanceAmount = orderDetails._doc.advance_amount || 0;
     // const balanceAmount = orderDetails._doc.balance_amount || 0;
@@ -65,21 +68,54 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
     // const perPersonCost = orderDetails._doc.per_person_cost || 0;
     // const totalAmount = orderDetails._doc.payable_amount || 0;
 
-    // Prepare the WhatsApp message content
-    let message = `Order Details:\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\nOrder Type: ${orderType}\nAddress: ${address}\nOrder Time: ${orderTime}\nComments: ${decorationComments}\n\nOrder Summary:`;
+     // Calculate balance amount based on the order details
+  let balanceAmount = 0;
+  if (orderDetails._doc.phone_no) {
+    balanceAmount = orderDetails._doc.total_amount - orderDetails._doc.advance_amount;
+  } else {
+    if (
+      [2, 3, 4, 5].includes(orderDetails._doc?.type)
+    ) {
+      balanceAmount = Math.round((orderDetails._doc?.payable_amount * 4) / 5);
+    } else if (
+      [6, 7].includes(orderDetails._doc?.type)
+    ) {
+      balanceAmount = Math.round(orderDetails._doc?.payable_amount * 0.35);
+    } else {
+      balanceAmount = Math.round(orderDetails._doc?.payable_amount * 0.65);
+    }
+  }
 
-    // Add each decoration item to the message
-    decorations.forEach((dec, index) => {
-      const inclusion = getCleanInclusionText(dec.inclusion) || "N/A";
-      message += `\nItem ${index + 1}: ${dec.name}\nBalance Amount: ₹${
-        dec.price
-      }\nInclusion: ${inclusion}\n`;
+    let message = `Order Details:\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\nOrder Type: ${orderType}\nAddress: ${address}\nOrder Time: ${orderTime}\nBalance Amount: ₹${balanceAmount}\nComments: ${decorationComments}\n\nOrder Summary:`;
 
-      // Check if the decoration has a featured image and add it to the message
-      if (dec.featuredImage) {
-        message += `Featured Image: ${dec.featuredImage}\n`;
-      }
-    });
+    // decorations.forEach((dec, index) => {
+    //   const inclusion = getCleanInclusionText(dec.inclusion) || "N/A";
+    //   message += `\nItem ${index + 1}: ${dec.name}\nInclusion: ${inclusion}\n`;
+
+    //   if (dec.featuredImage) {
+    //     message += `Featured Image: ${dec.featuredImage}\n`;
+    //   }
+    // });
+
+   decorations.forEach((dec, index) => {
+  const inclusion = getCleanInclusionText(dec.inclusion) || "N/A";  // Get the formatted inclusion list
+  message += `\nItem ${index + 1}: ${dec.name}\nInclusion:\n${inclusion}\n`;
+
+  if (dec.featuredImage) {
+    message += `Featured Image: ${dec.featuredImage}\n`;
+  }
+});
+
+    
+
+    if (addOnItems.length > 0) {
+      message += `\n\nOrder Add-On Items:`;
+      addOnItems.forEach((item, index) => {
+          message += `\n${index + 1}. ${item.name}: ₹${item.price}`;
+      });
+  } else {
+      message += `\n\nOrder Add-On Items: None`;
+  }
 
     // Open WhatsApp with the pre-filled message
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
@@ -187,10 +223,23 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
                   {decorations.length > 0 ? (
                     decorations.map((dec, index) => (
                       <div key={index} style={{ marginBottom: "10px" }}>
-                        <p>
+                        {/* <p>
                           <strong>Inclusion:</strong>{" "}
                           {getCleanInclusionText(dec.inclusion)}{" "}
-                        </p>
+                        </p> */}
+                        <p>
+  <strong>Inclusion:</strong>
+  <div>
+    {getCleanInclusionText(dec.inclusion)
+      .split("\n")
+      .map((item, index) => (
+        <span key={index} style={{ display: "block" }}>
+          • {item.trim()}
+        </span>
+      ))}
+  </div>
+</p>
+
                         {dec.featuredImage && (
                           <Image
                             src={dec.featuredImage}
@@ -217,6 +266,7 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
                 </div>
               </div>
 
+
               <div className="order-summary-box">
                 <h3 style={{ color: "white" }}>Order Summary</h3>
                 <ul style={{ listStyleType: "none", padding: 0 }}>
@@ -230,13 +280,48 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
                     style={{ display: "flex", justifyContent: "space-between" }}
                   >
                     <strong>Advance Amount:</strong>{" "}
-                    <span>₹{orderDetails._doc.advance_amount}</span>
+                    <span>₹{orderDetails._doc.advance_amount  || 0}</span>
                   </li>
                   <li
                     style={{ display: "flex", justifyContent: "space-between" }}
                   >
-                    <strong>Balance Amount:</strong>{" "}
-                    <span>₹{orderDetails._doc.balance_amount}</span>
+                    {/* <strong>Balance Amount:</strong>{" "}
+                    <span>₹{orderDetails._doc.balance_amount}</span> */}
+                    {orderDetails._doc.phone_no ? (
+                                    orderDetails._doc.total_amount - orderDetails._doc.advance_amount
+                                  ) : (
+                                    <strong
+                                    >
+                                      Balance Amount
+                                      {orderDetails._doc?.type === 2 ||
+                                      orderDetails._doc?.type === 3 ||
+                                      orderDetails._doc?.type === 4 ||
+                                      orderDetails._doc?.type === 5 ? (
+                                        <span style={{marginLeft: "72px"}}>
+                                          {"₹" +
+                                            Math.round(
+                                              (orderDetails._doc?.payable_amount * 4) / 5
+                                            )}
+                                        </span>
+                                      ) : orderDetails._doc?.type === 6 ||
+                                      orderDetails._doc?.type === 7 ? (
+                                        <span style={{marginLeft: "72px"}}>
+                                          {"₹" +
+                                            Math.round(
+                                              orderDetails._doc?.payable_amount * 0.35
+                                            )}
+                                        </span>
+                                      ) : (
+                                        <span style={{marginLeft: "72px"}}>
+                                          {"₹" +
+                                            Math.round(
+                                              orderDetails._doc?.payable_amount * 0.65
+                                            )}
+                                        </span>
+                                      )}
+                                    </strong>
+                                  )}
+
                   </li>
                   <li
                     style={{ display: "flex", justifyContent: "space-between" }}

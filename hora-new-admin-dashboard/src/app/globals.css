@@ -5,10 +5,10 @@ body {
 }
 
 .sidebar {
-  width: 220px;
+  width: 200px;
   height: 100vh;
-  background: linear-gradient(90deg,rgba(221,94,137,.8),#97538c);
-  padding: 20px;
+  background: linear-gradient(90deg, rgba(221, 94, 137, 0.8), #97538c);
+  /* padding: 20px; */
   position: fixed;
   left: 0;
   top: 0;
@@ -32,13 +32,15 @@ body {
 }
 
 .main-content {
-  margin-left: 240px;
-  padding: 20px;
+  margin-left: 175px;
+  /* padding: 20px; */
   flex: 1;
   transition: margin-left 0.3s ease;
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   color: #333;
 }
 
@@ -68,7 +70,7 @@ h1, h2, h3 {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-.startbutton{
+.startbutton {
   width: 80%;
   background-color: #fa4e4d;
   color: #fff;
@@ -83,39 +85,39 @@ h1, h2, h3 {
 }
 
 .pagination {
-  display: flex; /* Aligns child elements horizontally */
-  justify-content: center; /* Centers the buttons horizontally */
-  align-items: center; /* Centers the buttons vertically */
-  position: fixed; /* Keeps it in the middle of the viewport */
-  top: 95%; /* Moves it 50% down from the top */
-  left: 55%; /* Moves it 50% from the left */
-  transform: translate(-50%, -50%); /* Centers the element perfectly */
-  gap: 10px; /* Adds spacing between buttons */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 95%;
+  left: 55%;
+  transform: translate(-50%, -50%);
+  gap: 10px;
 }
 
 .pagination button {
-  padding: 10px 15px; /* Adds space inside the buttons */
-  font-size: 16px; /* Makes text readable */
-  cursor: pointer; /* Changes cursor to pointer on hover */
-  border: 1px solid #ccc; /* Adds a border around buttons */
-  border-radius: 5px; /* Slightly rounds the corners */
-  background-color: #f9f9f9; /* Sets a light background */
-  color: #333; /* Sets text color */
-  transition: background-color 0.3s, transform 0.2s; /* Smooth animations */
+  padding: 10px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  color: #333;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
 .pagination button:hover {
-  background-color: #ddd; /* Changes background on hover */
+  background-color: #ddd;
 }
 
 .pagination button:disabled {
-  cursor: not-allowed; /* Disables pointer for disabled buttons */
-  background-color: #e0e0e0; /* Sets a disabled background color */
-  color: #aaa; /* Sets disabled text color */
+  cursor: not-allowed;
+  background-color: #e0e0e0;
+  color: #aaa;
 }
 
 .pagination button.active {
-  background-color: #007bff; /* Highlights active page button */
-  color: #fff; /* Sets active text color */
-  border-color: #007bff; /* Matches border to highlight color */
+  background-color: #007bff;
+  color: #fff;
+  border-color: #007bff;
 }

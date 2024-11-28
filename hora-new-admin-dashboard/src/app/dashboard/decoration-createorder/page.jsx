@@ -40,6 +40,10 @@ const AddOrder = () => {
 
   const [error, setError] = useState(null);
 
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [messageColor, setMessageColor] = useState("");
+
   const [customerId, setCustomerId] = useState(null); 
 
   const handleInputChange = (index, field, value) => {
@@ -133,7 +137,9 @@ const AddOrder = () => {
   
 const handleCheckCustomer = async (e) => {
   e.preventDefault();
-  setError(null); 
+  // setError(null); 
+  setMessage("");
+  setLoading(true);
 
   try {
     const response = await axios.post('https://horaservices.com:3000/api/admin/admin_user_list', {
@@ -152,16 +158,20 @@ const handleCheckCustomer = async (e) => {
       setCustomerId(customer_id);
 
       if (customer_id) {
-        alert("Customer Exist");
+        setMessage("Customer exists.");
+        setMessageColor("green");
       } else {
-        console.log("Customer number not found.");
+        setMessage("Customer does not exist.");
+        setMessageColor("red");
       }
     } else {
-      console.log("No users found in the response.");
+      setMessage("No users found in the response.");
     }
   } catch (err) {
-    setError("The Customer is not exists");
+    setMessage("An error occurred while checking the customer.");
     console.error(err);
+  }finally {
+    setLoading(false); // Stop the loader
   }
 };
 
@@ -1022,7 +1032,22 @@ useEffect(() => {
               required
             /> */}
 
+<label htmlFor="customerNumber">Customer Number*</label>
+      <input
+        type="text"
+        id="customerNumber"
+        value={customerNumber}
+        onChange={(e) => setCustomerNumber(e.target.value)}
+        placeholder="Customer Number"
+        required
+      />
+      <button onClick={handleCheckCustomer} disabled={loading}>
+        {loading ? "Checking..." : "Check Customer"}
+      </button>
+      {loading && <p>Loading...</p>} {/* Loader */}
+      {<p style={{ color: messageColor }}>{message}</p>}
 
+{/* 
 <label htmlFor="customerNumber">Customer Number*</label>
       <input
         type="text"
@@ -1034,7 +1059,7 @@ useEffect(() => {
       />
       <button onClick={handleCheckCustomer}>Check Customer</button>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p style={{ color: 'red' }}>{error}</p>} */}
 
 
             <label htmlFor="address">Address*</label>
