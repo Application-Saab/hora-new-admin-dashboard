@@ -1,11 +1,12 @@
 
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
 import "../decoration-createorder/createorder.css";
 
 function App() {
-	const [isContinueClicked, setIsContinueClicked] = useState(false);
+	// const [isContinueClicked, setIsContinueClicked] = useState(false);
+	const [isContinueClicked] = useState(false);
 	const handleSubmit = () => {
 		console.log("sohan");
 	}

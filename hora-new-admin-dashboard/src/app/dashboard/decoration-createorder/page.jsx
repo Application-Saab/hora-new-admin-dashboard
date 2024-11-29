@@ -38,7 +38,7 @@ const AddOrder = () => {
   const [products, setProducts] = useState([{ name: "", price: "" }]);
   const [comment, setComment] = useState("");
 
-  const [error, setError] = useState(null);
+  // const [error, setError] = useState(null);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -283,7 +283,6 @@ const handleCheckCustomer = async (e) => {
 
       try {
         const response = await axios.post(`${BASE_URL}${CONFIRM_ORDER_ENDPOINT}`, requestData);
-        // sendWelcomeMessage(customerNumber);
         alert("Order created successfully:", response.data);
       } catch (error) {
         console.error("Error creating order:", error);
@@ -860,52 +859,6 @@ const handleCheckCustomer = async (e) => {
     "400072",
     "400089",
     ]
-
-
-const sendWelcomeMessage = async (mobileNumber) => {
-  let formattedMobileNumber = mobileNumber;
-
-  if (!formattedMobileNumber.startsWith('+91')) {
-      formattedMobileNumber = '+91' + formattedMobileNumber;
-  }
-
-  formattedMobileNumber = formattedMobileNumber.replace(/\s+/g, '');
-
-  const options = {
-      method: 'POST',
-      url: 'https://public.doubletick.io/whatsapp/message/template',
-      headers: {
-          accept: 'application/json',
-          'content-type': 'application/json',
-          Authorization: 'key_wZpn79uTfV' 
-      },
-      data: {
-          messages: [
-              {
-                  content: {
-                      language: 'en',
-                      templateData: {
-                          header: {
-                              type: 'IMAGE',
-                              mediaUrl: 'https://quickscale-template-media.s3.ap-south-1.amazonaws.com/org_FGdNfMoTi9/2a2f1b0c-63e0-4c3e-a0fb-7ba269f23014.jpeg'
-                          },
-                          body: { placeholders: ['Hora Services'] } 
-                      },
-                      templateName: 'order_confirmation_message__v3'
-                  },
-                  from: '+917338584828',
-                  to: formattedMobileNumber 
-              }
-          ]
-      }
-  };
-
-  try {
-      const response = await axios.request(options);
-  } catch (error) {
-      console.error('Error sending WhatsApp message:', error);
-  }
-};
 
 useEffect(() => {
   const balance = totalamount - advanceamount;

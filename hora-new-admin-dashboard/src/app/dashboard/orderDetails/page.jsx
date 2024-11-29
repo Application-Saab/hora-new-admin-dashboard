@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { FaEye, FaChevronLeft, FaChevronRight, FaPhone } from "react-icons/fa";
+import { FaEye } from "react-icons/fa";
 import Popup from "../../../pages/popup/Popup";
 import ActionPopup from "../../../pages/popup/ActionPop";
 import "./orderdetails.css";
@@ -16,7 +16,7 @@ const OrderList = () => {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [setTotalItems] = useState(0);
+  // const [setTotalItems] = useState(0);
   const itemsPerPage = 1000;
   const [searchTerm, setSearchTerm] = useState("");
   const [popupOpen, setPopupOpen] = useState(false);
@@ -215,7 +215,7 @@ const OrderList = () => {
     }
   };
 
-  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+  // const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
   const displayedOrders = filteredOrders.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -287,67 +287,67 @@ const OrderList = () => {
     setSupplierDetails(null);
   };
 
-  const handleCallingStatus = (event, phone_no) => {
-    const selectedValue = event.target.value;
+  // const handleCallingStatus = (event, phone_no) => {
+  //   const selectedValue = event.target.value;
 
-    if (selectedValue === "one") {
-      alert(`You selected One! Phone number: ${phone_no}`);
-    } else if (selectedValue === "two") {
-      alert(`You selected Two! Phone number: ${phone_no}`);
-    } else if (selectedValue === "three") {
-      alert(`You selected Three! Phone number: ${phone_no}`);
-    }
-  };
+  //   if (selectedValue === "one") {
+  //     alert(`You selected One! Phone number: ${phone_no}`);
+  //   } else if (selectedValue === "two") {
+  //     alert(`You selected Two! Phone number: ${phone_no}`);
+  //   } else if (selectedValue === "three") {
+  //     alert(`You selected Three! Phone number: ${phone_no}`);
+  //   }
+  // };
 
-  const sendWelcomeMessage = async (mobileNumber) => {
-    let formattedMobileNumber = mobileNumber;
+  // const sendWelcomeMessage = async (mobileNumber) => {
+  //   let formattedMobileNumber = mobileNumber;
 
-    if (!formattedMobileNumber.startsWith("+91")) {
-      formattedMobileNumber = "+91" + formattedMobileNumber;
-    }
+  //   if (!formattedMobileNumber.startsWith("+91")) {
+  //     formattedMobileNumber = "+91" + formattedMobileNumber;
+  //   }
 
-    formattedMobileNumber = formattedMobileNumber.replace(/\s+/g, "");
+  //   formattedMobileNumber = formattedMobileNumber.replace(/\s+/g, "");
 
-    const options = {
-      method: "POST",
-      url: "https://public.doubletick.io/whatsapp/message/template",
-      headers: {
-        accept: "application/json",
-        "content-type": "application/json",
-        Authorization: "key_wZpn79uTfV",
-      },
-      data: {
-        messages: [
-          {
-            content: {
-              language: "en",
-              templateData: {
-                header: {
-                  type: "IMAGE",
-                  mediaUrl:
-                    "https://quickscale-template-media.s3.ap-south-1.amazonaws.com/org_FGdNfMoTi9/2a2f1b0c-63e0-4c3e-a0fb-7ba269f23014.jpeg",
-                },
-                body: { placeholders: ["Hora Services"] },
-              },
-              templateName: "order_confirmation_message__v3",
-            },
-            from: "+917338584828",
-            to: formattedMobileNumber,
-          },
-        ],
-      },
-    };
+  //   const options = {
+  //     method: "POST",
+  //     url: "https://public.doubletick.io/whatsapp/message/template",
+  //     headers: {
+  //       accept: "application/json",
+  //       "content-type": "application/json",
+  //       Authorization: "key_wZpn79uTfV",
+  //     },
+  //     data: {
+  //       messages: [
+  //         {
+  //           content: {
+  //             language: "en",
+  //             templateData: {
+  //               header: {
+  //                 type: "IMAGE",
+  //                 mediaUrl:
+  //                   "https://quickscale-template-media.s3.ap-south-1.amazonaws.com/org_FGdNfMoTi9/2a2f1b0c-63e0-4c3e-a0fb-7ba269f23014.jpeg",
+  //               },
+  //               body: { placeholders: ["Hora Services"] },
+  //             },
+  //             templateName: "order_confirmation_message__v3",
+  //           },
+  //           from: "+917338584828",
+  //           to: formattedMobileNumber,
+  //         },
+  //       ],
+  //     },
+  //   };
 
-    try {
-      const response = await axios.request(options);
-    } catch (error) {
-      console.error("Error sending WhatsApp message:", error);
-    }
-  };
+  //   try {
+  //     const response = await axios.request(options);
+  //   } catch (error) {
+  //     console.error("Error sending WhatsApp message:", error);
+  //   }
+  // };
 
-  const showAlert = (status) => {
-    alert(`Selected status: ${status}`);
-  };
+  // const showAlert = (status) => {
+  //   alert(`Selected status: ${status}`);
+  // };
 
   const handleCallClick = (phoneNo) => {
     window.location.href = `tel:${phoneNo}`;
@@ -406,11 +406,11 @@ const OrderList = () => {
   //   }
   // };
 
-  const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
+  // const handlePageChange = (page) => {
+  //   if (page >= 1 && page <= totalPages) {
+  //     setCurrentPage(page);
+  //   }
+  // };
 
   const updateOrderStatus = async (orderId, status) => {
     try {
@@ -425,7 +425,7 @@ const OrderList = () => {
         }
       );
 
-      const data = await response.json();
+      // const data = await response.json();
 
       if (response.ok) {
         fetchOrders();
