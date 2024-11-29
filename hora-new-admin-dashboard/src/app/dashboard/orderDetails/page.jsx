@@ -664,7 +664,7 @@ const OrderList = () => {
                         {order.order_date.split("T")[0]} {order.order_time}
                       </td>
                       <td>{order.otp}</td>
-                      <td>"N/A"</td>
+                      <td>{order.order_taken_by || "N/A"}</td>
                       <td>{order.phone_no || "N/A"}</td>
                       {/* <td>
                     <FaEye
@@ -737,17 +737,13 @@ const OrderList = () => {
                         `}</style>
                       </td>
 
-                      <td>{"N/A"}</td>
+                      <td>
+  {`${order.job_start_time.replace(/(\d{4})(\d{1,2}:\d{2}:\d{2} (AM|PM))/, '$1 $2')} - 
+    ${order.job_end_time}`}
+</td>
+
                       <td>₹{order.total_amount}</td>
-                      {/* <td>
-                    <span
-                      className={`status ${
-                        order.order_status === 0 ? "booking" : "expired"
-                      }`}
-                    >
-                      {order.order_status === 0 ? "Booking" : "Expired"}
-                    </span>
-                  </td> */}
+                      
                       <td>
                         <span
                           className={`status ${
@@ -769,42 +765,10 @@ const OrderList = () => {
                             N/A
                             {/* <FaPhone /> */}
                           </div>
-
-                          {/* Buttons for Call Status */}
                           <div style={styles.btnGroup}>
-                            {/* <button
-                              style={{ ...styles.btn, ...styles.btnCalled }}
-                              onClick={() => showAlert("Called")}
-                            >
-                              Called
-                            </button>
-                            <button
-                              style={{ ...styles.btn, ...styles.btnNotCalled }}
-                              onClick={() => showAlert("Not Called")}
-                            >
-                              Not Called
-                            </button>
-                            <button
-                              style={{
-                                ...styles.btn,
-                                ...styles.btnNotReceived,
-                              }}
-                              onClick={() => showAlert("Not Received")}
-                            >
-                              Not Received
-                            </button> */}
                           </div>
                         </div>
                       </td>
-                      {/* <td>
-                    <button
-                      className={`status-button ${
-                        order.status === 0 ? "active" : "inactive"
-                      }`}
-                    >
-                      {order.status === 1 ? "Active" : "Inactive"}
-                    </button>
-                  </td> */}
                       <td>
                         <button
                           className={`status-button ${

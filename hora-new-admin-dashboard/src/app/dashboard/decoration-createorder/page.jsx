@@ -234,16 +234,15 @@ const handleCheckCustomer = async (e) => {
   };
 
   
+  const [lloading, setlLoading] = useState(false);
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setlLoading(true);
   
     const addOnProduct = products.map((product) => ({
       name: product.name,
       price: product.price,
     }));
-  
-  
-
   
     const formattedDate = date ? formatDate(date) : null;
   
@@ -253,7 +252,6 @@ const handleCheckCustomer = async (e) => {
         console.error("Address ID is missing");
         return;
       }
-  
   
       const requestData = {
         add_on: addOnProduct,
@@ -278,8 +276,10 @@ const handleCheckCustomer = async (e) => {
         decoration_comments: comment,
         status: 1,
         balance_amount: balanceamount,
+        order_taken_by: orderTakenBy,
       };
-  
+
+      console.log(requestData, "requestData decoration");
 
       try {
         const response = await axios.post(`${BASE_URL}${CONFIRM_ORDER_ENDPOINT}`, requestData);
@@ -288,6 +288,9 @@ const handleCheckCustomer = async (e) => {
       } catch (error) {
         console.error("Error creating order:", error);
         alert("There was an error creating the order. Please try again.");
+      }
+      finally {
+        setlLoading(false); 
       }
     } 
 
@@ -1022,16 +1025,6 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* <label htmlFor="customerNumber">Customer Number*</label>
-            <input
-              type="text"
-              id="customerNumber"
-              value={customerNumber}
-              onChange={(e) => setCustomerNumber(e.target.value)}
-              placeholder="Customer Number"
-              required
-            /> */}
-
 <label htmlFor="customerNumber">Customer Number*</label>
       <input
         type="text"
@@ -1046,20 +1039,6 @@ useEffect(() => {
       </button>
       {loading && <p>Loading...</p>} {/* Loader */}
       {<p style={{ color: messageColor }}>{message}</p>}
-
-{/* 
-<label htmlFor="customerNumber">Customer Number*</label>
-      <input
-        type="text"
-        id="customerNumber"
-        value={customerNumber}
-        onChange={(e) => setCustomerNumber(e.target.value)}
-        placeholder="Customer Number"
-        required
-      />
-      <button onClick={handleCheckCustomer}>Check Customer</button>
-
-      {error && <p style={{ color: 'red' }}>{error}</p>} */}
 
 
             <label htmlFor="address">Address*</label>
@@ -1084,37 +1063,6 @@ useEffect(() => {
             
             />
 
-            {/* <label htmlFor="addOn">Add On</label>
-            <div>
-              <form className="form_css">
-                {products.map((product, index) => (
-                  <div key={index}>
-                    <input
-                      type="text1"
-                      placeholder="Name"
-                      value={product.name}
-                      onChange={(e) =>
-                        handleInputChange(index, "name", e.target.value)
-                      }
-                    />
-                    <input
-                      type="number1"
-                      placeholder="Price"
-                      value={product.price}
-                      onChange={(e) =>
-                        handleInputChange(index, "price", e.target.value)
-                      }
-                    />
-                  </div>
-                ))}
-                <button type="button" onClick={addProduct}>
-                  Add New
-                </button>
-              </form>
-            </div> */}
-
-
-{/* Add On Form */}
 <label htmlFor="addOn">Add On</label>
 <div className="addon-container">
   <form className="addon-form">
@@ -1184,8 +1132,6 @@ useEffect(() => {
                 </div>
 
 
-
-
             <div style={{ margin: "10px 0", width: "100%" }}>
               <label
                 htmlFor="city"
@@ -1230,11 +1176,13 @@ useEffect(() => {
             <p style={{fontWeight: "bold", fontSize: "15px", color: pincodeMessageColor }}>{pincodeMessage}</p>
 
             <button className="button1" type="submit">
-              Create Order
+              {/* Create Order */}
+              {lloading ? "Creating Order..." : "Create Order"}
             </button>
           </>
         )}
       </form>
+      {lloading && <div className="loader">Loading...</div>}
     </div>
   );
 };
