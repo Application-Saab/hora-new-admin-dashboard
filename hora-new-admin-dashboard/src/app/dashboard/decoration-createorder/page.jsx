@@ -1,4 +1,3 @@
-
 "use client";
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
@@ -46,6 +45,12 @@ const AddOrder = () => {
 
   const [customerId, setCustomerId] = useState(null); 
 
+  const [showPopup, setShowPopup] = useState(false); // For toggling the popup
+  const [newCustomerName, setNewCustomerName] = useState(""); // For name input
+  const [newCustomerPhone, setNewCustomerPhone] = useState(""); 
+
+
+
   const handleInputChange = (index, field, value) => {
     const newProducts = [...products];
     newProducts[index][field] = value;
@@ -60,36 +65,6 @@ const AddOrder = () => {
     const commentText = e.target.value;
     setComment(commentText);
   };
-
- 
-
-    // useEffect(() => {
-    //   if (dishName && isContinueClicked && !isFetched) {
-    //     const fetchProductDetails = async () => {
-    //       try {
-    //         const url = `${BASE_URL}${GET_DECORATION_BY_NAME}${encodeURIComponent(dishName)}`;
-    //         const response = await axios.get(url);
-    //         if (
-    //           response.data &&
-    //           !response.data.error &&
-    //           response.data.data.length > 0
-    //         ) {
-    //           const productData = response.data.data[0];
-    //           setProduct(productData);
-    //           setProductID(productData._id);
-    //           setCategory(productData.price);
-    //           setShowProductDetails(true);
-    //           setIsFetched(true);
-    //         } else {
-    //           setShowProductDetails(false);
-    //         }
-    //       } catch (error) {
-    //         console.error("Error fetching product:", error.message);
-    //       }
-    //     };
-
-    //     fetchProductDetails();
-    //   }
 
     useEffect(() => {
       if (dishName && isContinueClicked && !isFetched) {
@@ -124,45 +99,48 @@ const AddOrder = () => {
     if (pincode) {
       if (pincodes.includes(pincode)) {
         setPincodeMessage("Pincode available");
-        setPincodeMessageColor("green"); // Set color for available
+        setPincodeMessageColor("green"); 
       } else {
         setPincodeMessage("Pincode not available");
-        setPincodeMessageColor("red"); // Set color for not available
+        setPincodeMessageColor("red"); 
       }
     } else {
-      setPincodeMessage(""); // Reset message if pincode is empty
-      setPincodeMessageColor(""); // Reset color if pincode is empty
+      setPincodeMessage(""); 
+      setPincodeMessageColor(""); 
     }
   }, []);
   
+
 const handleCheckCustomer = async (e) => {
   e.preventDefault();
-  // setError(null); 
   setMessage("");
   setLoading(true);
 
   try {
-    const response = await axios.post('https://horaservices.com:3000/api/admin/admin_user_list', {
-      email: "",
-      page: "",
-      per_page: 2000,
-      phone: "", 
-      role: "customer",
-    });
-
+    const response = await axios.post(
+      "https://horaservices.com:3000/api/admin/admin_user_list",
+      {
+        email: "",
+        page: "",
+        per_page: 2000,
+        phone: "",
+        role: "customer",
+      }
+    );
 
     const users = response?.data?.data?.users;
 
     if (Array.isArray(users)) {
-      const customer_id = users.find((user) => user.phone === customerNumber);
-      setCustomerId(customer_id);
-
-      if (customer_id) {
+      const customer = users.find((user) => user.phone === customerNumber);
+      console.log(customer, "customer");
+      setCustomerId(customer);
+      if (customer) {
         setMessage("Customer exists.");
         setMessageColor("green");
       } else {
         setMessage("Customer does not exist.");
         setMessageColor("red");
+        setShowPopup(true); 
       }
     } else {
       setMessage("No users found in the response.");
@@ -170,10 +148,39 @@ const handleCheckCustomer = async (e) => {
   } catch (err) {
     setMessage("An error occurred while checking the customer.");
     console.error(err);
-  }finally {
-    setLoading(false); // Stop the loader
+  } finally {
+    setLoading(false); 
   }
 };
+
+
+const handleAddCustomer = async () => {
+  const requestData = {
+    name: newCustomerName,
+    phone: newCustomerPhone,
+    email: "",
+    role: "customer",
+  };
+  console.log(requestData, "requestion data");
+  try {
+    const response = await axios.post(
+      "https://horaservices.com:3000/api/admin/user_signup",
+      requestData
+    );
+
+    console.log("Customer added:", response.data.dataToSave._id);
+    setCustomerId(response.data.dataToSave);
+    setMessage("Customer successfully added.");
+    // window.location.reload(false);
+    setMessageColor("green");
+    setShowPopup(false); 
+  } catch (err) {
+    console.error("Error adding customer:", err);
+    setMessage("Failed to add customer.");
+    setMessageColor("red");
+  }
+};
+
 
   const handleContinueClick = () => {
     setIsContinueClicked(true);
@@ -198,12 +205,8 @@ const handleCheckCustomer = async (e) => {
 
       let userId = "63edb239d680d47d95870fa0";
 
-      if (!userId) {
-        console.error("Error retrieving userID");
-        return null;
-      }
-
       const address2 = address + pincode;
+      console.log(address2, "address2");
       const requestDataa = {
         address1: address2,
         address2: googleLocation,
@@ -211,6 +214,8 @@ const handleCheckCustomer = async (e) => {
         city: city,
         userId: userId,
       };
+
+      console.log(requestDataa, "requestdataa");
       const token =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2M2VkYjIzOWQ2ODBkNDdkOTU4NzBmYTAiLCJuYW1lIjoiQmhhcmF0IiwiZW1haWwiOiJiaGFyYXRneWFuY2hhbmRhbmkwMDFAZ21haWwuY29tIiwicGhvbmUiOiI4ODg0MjIxNDg3Iiwicm9sZSI6ImN1c3RvbWVyIiwiaWF0IjoxNzI2MTI1NDkyLCJleHAiOjE3NTc2NjE0OTJ9.HuVjkLUBi0sCpH9p3uPzQKtnO2OR910g9MviBlLY0QY";
 
@@ -1136,6 +1141,31 @@ useEffect(() => {
         )}
       </form>
       {lloading && <div className="loader">Loading...</div>}
+      {showPopup && (
+        <div className="popup">
+          <h2>Add New Customer</h2>
+          <label>
+            Name:
+            <input
+              type="text"
+              value={newCustomerName}
+              onChange={(e) => setNewCustomerName(e.target.value)}
+            />
+          </label>
+          <br />
+          <label>
+            Phone:
+            <input
+              type="text"
+              value={newCustomerPhone}
+              onChange={(e) => setNewCustomerPhone(e.target.value)}
+            />
+          </label>
+          <br />
+          <button onClick={handleAddCustomer}>Add Customer</button>
+          <button onClick={() => setShowPopup(false)}>Cancel</button>
+        </div>
+      )}
     </div>
   );
 };

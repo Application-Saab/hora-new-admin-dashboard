@@ -666,13 +666,7 @@ const OrderList = () => {
                       <td>{order.otp}</td>
                       <td>{order.order_taken_by || "N/A"}</td>
                       <td>{order.phone_no || "N/A"}</td>
-                      {/* <td>
-                    <FaEye
-                      onClick={() => getOnlineCustomerNumber(order.fromId)}
-                    />
-                  </td> */}
                       <td>{order.phone_number || "N/A"}</td>
-                      {/* <td>{order.supplierUserIds.join(", ") || "N/A"}</td> */}
                       <td>
                         {order.toId ? (
                           <FaEye
@@ -695,7 +689,7 @@ const OrderList = () => {
                                 ×
                               </button>
                               <h3>Supplier Details</h3>
-                              <p>Name: {supplierDetails.name}</p>
+                              <p>Name: {supplierDetails.data.name}</p>
                               <p>Phone: {supplierDetails.data.phone}</p>
                               <p>City: {supplierDetails.data.city}</p>
                               <p>Role: {supplierDetails.data.role}</p>

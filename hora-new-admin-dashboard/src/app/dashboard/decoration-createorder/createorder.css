@@ -152,4 +152,112 @@ input[type="comment"] {
     font-weight: bold;
     color: #f01212;
   }
+ 
   
+  /* popup new customer css */
+/* General Styles */
+
+
+/* Popup Container */
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  padding: 20px;
+  background: #ffffff; /* Clean white background */
+  border-radius: 16px; /* Rounded corners */
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1); /* Soft shadow */
+  z-index: 1000;
+  animation: fade-in 0.3s ease-in-out;
+}
+
+/* Fade-In Animation */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* Title */
+.popup h2 {
+  margin: 0 0 15px;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+}
+
+/* Labels */
+.popup label {
+  display: block;
+  margin: 12px 0 6px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* Input Fields */
+.popup input {
+  width: calc(100% - 20px);
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background: #f9f9f9;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.popup input:focus {
+  border-color: #4caf50; /* Soft green for focus */
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
+}
+
+/* Buttons */
+.popup button {
+  width: 48%;
+  padding: 12px;
+  margin: 10px 1%;
+  border: none;
+  border-radius: 12px;
+  background: #4caf50; /* Light green button */
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.popup button:hover {
+  background-color: #45a049; /* Darker green hover effect */
+  transform: translateY(-2px); /* Slight lift on hover */
+}
+
+/* Cancel Button */
+.popup button.cancel {
+  background: #e0e0e0; /* Light grey for cancel */
+  color: #333;
+}
+
+.popup button.cancel:hover {
+  background: #d6d6d6; /* Darker grey on hover */
+}
+
+/* Responsive Design for Mobile */
+@media (max-width: 480px) {
+  .popup {
+    width: 90%;
+    padding: 15px;
+  }
+
+  .popup h2 {
+    font-size: 1.4rem;
+  }
+}
