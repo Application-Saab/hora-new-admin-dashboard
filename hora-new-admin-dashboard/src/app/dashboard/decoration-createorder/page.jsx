@@ -137,21 +137,28 @@ const handleCheckCustomer = async (e) => {
       if (customer) {
         setMessage("Customer exists.");
         setMessageColor("green");
+        setShowButton(true);
       } else {
         setMessage("Customer does not exist.");
         setMessageColor("red");
         setShowPopup(true); 
+        setShowButton(false);
       }
     } else {
       setMessage("No users found in the response.");
+      setShowButton(false);
     }
   } catch (err) {
     setMessage("An error occurred while checking the customer.");
     console.error(err);
+    setShowButton(false);
   } finally {
     setLoading(false); 
   }
 };
+
+
+const [showButton, setShowButton] = useState(false);
 
 
 const handleAddCustomer = async () => {
@@ -168,18 +175,22 @@ const handleAddCustomer = async () => {
       requestData
     );
 
-    console.log("Customer added:", response.data.dataToSave._id);
-    setCustomerId(response.data.dataToSave);
-    setMessage("Customer successfully added.");
-    // window.location.reload(false);
-    setMessageColor("green");
-    setShowPopup(false); 
+      console.log("Customer added:", response.data.dataToSave._id);
+      setCustomerId(response.data.dataToSave);
+      setMessage("Customer successfully added.");
+      setMessageColor("green");
+      setShowPopup(false); 
+      setShowButton(true); // Show button if response is successful
   } catch (err) {
     console.error("Error adding customer:", err);
     setMessage("Failed to add customer.");
     setMessageColor("red");
   }
 };
+
+useEffect(() => {
+  console.log("showButton state updated:", showButton);
+}, [showButton]);
 
 
   const handleContinueClick = () => {
@@ -203,8 +214,6 @@ const handleAddCustomer = async () => {
     try {
       const url = BASE_URL + SAVE_LOCATION_ENDPOINT;
 
-      let userId = "63edb239d680d47d95870fa0";
-
       const address2 = address + pincode;
       console.log(address2, "address2");
       const requestDataa = {
@@ -212,7 +221,7 @@ const handleAddCustomer = async () => {
         address2: googleLocation,
         locality: city,
         city: city,
-        userId: userId,
+        userId: customerId,
       };
 
       console.log(requestDataa, "requestdataa");
@@ -300,7 +309,7 @@ const handleAddCustomer = async () => {
 
 
   const timeSlotOptions = [
-    { value: "7:00 AM - 10:00 AM", label: "9:00 AM - 11:00 AM" },
+    { value: "7:00 AM - 10:00 AM", label: "7:00 AM - 10:00 AM" },
     { value: "10:00 AM - 1:00 PM", label: "10:00 AM - 1:00 PM" },
     { value: "1:00 PM - 4:00 PM", label: "1:00 PM - 4:00 PM" },
     { value: "4:00 PM - 7:00 PM", label: "4:00 PM - 7:00 PM" },
@@ -1133,10 +1142,11 @@ useEffect(() => {
             />
             <p style={{fontWeight: "bold", fontSize: "15px", color: pincodeMessageColor }}>{pincodeMessage}</p>
 
+            {showButton && (
             <button className="button1" type="submit">
-              {/* Create Order */}
               {lloading ? "Creating Order..." : "Create Order"}
             </button>
+)}
           </>
         )}
       </form>

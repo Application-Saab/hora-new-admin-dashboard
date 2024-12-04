@@ -90,7 +90,7 @@ const OrderList = () => {
       }
 
       const data = await response.json();
-      
+
       if (data && data.data && data.data.order) {
         const ordersWithPhoneNumbers = await Promise.all(
           data.data.order.map(async (order) => {
@@ -138,7 +138,10 @@ const OrderList = () => {
         (order.phone_no && order.phone_no.includes(phoneSearchTerm));
 
       const orderCreatedAt = new Date(order.createdAt);
-      const orderDate = new Date(order.order_date.split("T")[0]);
+      // const orderDate = new Date(order.order_date.split("T")[0]);
+      const orderDate = order?.order_date
+        ? new Date(order.order_date.split("T")[0])
+        : null;
       const matchesDateRange =
         (!startDate || orderDate >= new Date(startDate)) &&
         (!endDate || orderDate <= new Date(endDate));
@@ -661,7 +664,11 @@ const OrderList = () => {
                       <td>{getOrderType(order.type)}</td>
                       <td>{order.order_locality || "N/A"}</td>
                       <td>
-                        {order.order_date.split("T")[0]} {order.order_time}
+                        {order?.order_date
+                          ? `${order.order_date.split("T")[0]} ${
+                              order.order_time || ""
+                            }`
+                          : "N/A"}
                       </td>
                       <td>{order.otp}</td>
                       <td>{order.order_taken_by || "N/A"}</td>
@@ -732,12 +739,15 @@ const OrderList = () => {
                       </td>
 
                       <td>
-  {`${order.job_start_time.replace(/(\d{4})(\d{1,2}:\d{2}:\d{2} (AM|PM))/, '$1 $2')} - 
+                        {`${order.job_start_time.replace(
+                          /(\d{4})(\d{1,2}:\d{2}:\d{2} (AM|PM))/,
+                          "$1 $2"
+                        )} - 
     ${order.job_end_time}`}
-</td>
+                      </td>
 
                       <td>₹{order.total_amount}</td>
-                      
+
                       <td>
                         <span
                           className={`status ${
@@ -759,8 +769,7 @@ const OrderList = () => {
                             N/A
                             {/* <FaPhone /> */}
                           </div>
-                          <div style={styles.btnGroup}>
-                          </div>
+                          <div style={styles.btnGroup}></div>
                         </div>
                       </td>
                       <td>
