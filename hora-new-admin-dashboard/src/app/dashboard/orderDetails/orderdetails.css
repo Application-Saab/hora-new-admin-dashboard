@@ -1,18 +1,33 @@
 /* General container styling */
 .order-list-container {
-    width: 94%;
-    margin: 0 auto;
+    /* width: 80%;
+    margin: 0 auto; */
     padding: 5px;
-    margin-bottom: 100px;
+    /* margin-bottom: 100px; */
   }
   
+  .orderDetailsList{
+    display: flex;
+    flex-direction: column;
+  }
+  .orderDetails_pagination{
+    width: 100%;
+    text-align: center;
+    padding: 5px;
+  }
   /* Scrollable box for orders */
   .orders-box {
-    max-height: 650px;
+    /* max-height: 650px;
     max-width: 1500px;
     overflow-y: scroll;
     border: 1px solid #ddd;
-    /* padding: 10px; */
+     padding: 10px; 
+    margin-bottom: 10px;
+    background-color: #fff; 
+    max-height: 650px; */
+    max-width : 100%;
+    overflow-x: scroll;
+    border: 1px solid #ddd;
     margin-bottom: 10px;
     background-color: #fff;
   }
@@ -80,7 +95,6 @@
     width: 120px; /* You can adjust this to make the search box smaller */
     border: 1px solid #ccc;
     border-radius: 4px;
-    margin-left: -10px;
   }
   
   .download-button {

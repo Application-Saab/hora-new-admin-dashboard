@@ -3,15 +3,17 @@ body {
   font-family: Arial, sans-serif;
   background-color: #f0f0f0;
 }
-
+.main-content{
+  width:84%;
+}
 .sidebar {
-  width: 200px;
+  width: 15%;
   height: 100vh;
   background: linear-gradient(90deg, rgba(221, 94, 137, 0.8), #97538c);
   /* padding: 20px; */
-  position: fixed;
+  position: sticky;
   left: 0;
-  top: 0;
+  top: 0; 
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
@@ -32,9 +34,9 @@ body {
 }
 
 .main-content {
-  margin-left: 175px;
+  /* margin-left: 175px; */
   /* padding: 20px; */
-  flex: 1;
+  /* flex: 1; */
   transition: margin-left 0.3s ease;
 }
 

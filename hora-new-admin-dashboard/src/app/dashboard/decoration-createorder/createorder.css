@@ -14,13 +14,15 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-h1 {
+.pageHeading{
+  font-size: calc(16px + 14 * ((100vw - 360px) / (768 - 360)));
     text-align: center;
 }
 
 label {
     display: block;
     margin-top: 15px;
+    margin-bottom:5px;
 }
 
 input[type="text"],

@@ -16,8 +16,9 @@ const OrderList = () => {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(1);
   // const [setTotalItems] = useState(0);
-  const itemsPerPage = 1000;
+  const itemsPerPage = 10;
   const [searchTerm, setSearchTerm] = useState("");
   const [popupOpen, setPopupOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState("");
@@ -38,51 +39,31 @@ const OrderList = () => {
 
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [phoneSearchTerm, setPhoneSearchTerm] = useState("");
 
-  const getOnlineCustomerNumber = async (onlineCustomerId) => {
-    const cachedPhone = localStorage.getItem(
-      `customer_phone_${onlineCustomerId}`
-    );
-    if (cachedPhone) {
-      return cachedPhone;
-    }
+  const [supplierDetails, setSupplierDetails] = useState(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
 
-    const url = `${BASE_URL}${ADMIN_USER_DETAILS}${onlineCustomerId}`;
-    try {
-      const response = await axios.get(url);
-      const phone = response.data.data.phone;
-
-      localStorage.setItem(`customer_phone_${onlineCustomerId}`, phone);
-      return phone;
-    } catch (error) {
-      console.error("Error fetching customer data:", error);
-      return null;
-    }
-  };
-
-  const fetchOrders = async () => {
+  const fetchOrders = async (page , orderId = '' ,status = '' ) => {
     setLoading(true);
     setProgress(0);
-
     const url = `${BASE_URL}${ADMIN_ORDER_LIST}`;
+    let newId  = Math.abs(orderId - 10800);
 
-    const progressInterval = setInterval(() => {
-      setProgress((prevProgress) => {
-        if (prevProgress >= 90) return prevProgress;
-        return prevProgress + 1;
-      });
-    }, 30);
 
+    let requestData = {
+      page: page,
+      per_page: itemsPerPage,
+      order_id: searchTerm.length > 0 ? newId : "", // Conditionally set order_id
+      order_status : Number(status ) || "",
+    };
     try {
       const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          page: 1,
-          per_page: 1000,
-        }),
+        body: JSON.stringify(requestData),
       });
 
       if (!response.ok) {
@@ -90,109 +71,62 @@ const OrderList = () => {
       }
 
       const data = await response.json();
-      
+      console.log(data.data)
       if (data && data.data && data.data.order) {
-        const ordersWithPhoneNumbers = await Promise.all(
-          data.data.order.map(async (order) => {
-            const phoneNumber = await getOnlineCustomerNumber(order.fromId);
-            return {
-              ...order,
-              phone_number: phoneNumber,
-            };
-          })
-        );
-
-        setOrders(ordersWithPhoneNumbers);
-        setFilteredOrders(ordersWithPhoneNumbers);
+        setOrders(data.data.order);
+        setTotalPage(data.data.paginate.last_page);
       } else {
         console.warn("No orders found in response data");
       }
     } catch (error) {
       console.error("Error fetching orders:", error);
-    } finally {
-      clearInterval(progressInterval);
-      setProgress(100);
-      setTimeout(() => setLoading(false), 500);
+    } 
+    // finally {
+    //   setProgress(100);
+    //   setTimeout(() => setLoading(false), 500);
+    // }
+  };
+
+  const getOnlineCustomerNumber = async (onlineCustomerId) => {
+  
+    const url = `${BASE_URL}${ADMIN_USER_DETAILS}${onlineCustomerId}`;
+    try {
+      const response = await axios.get(url);
+      const phone = response.data.data.phone;
+  
+      return phone;
+    } catch (error) {
+      console.error("Error fetching customer data:", error);
+      return null;
     }
+  
   };
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+   
+    fetchOrders(currentPage);
+  }, [currentPage]);
 
-  const [phoneSearchTerm, setPhoneSearchTerm] = useState("");
+  useEffect(()=> {
+    for(let i = 0; i < orders.length;i++) {
+      if(!orders[i].phone_no) {
+      orders[i].online_phone_number = getOnlineCustomerNumber(orders[i].fromId);
+      }
+    }
+  }, [orders]);
 
-  useEffect(() => {
-    const filtered = orders.filter((order) => {
-      // const matchesSearch = order.order_id.toString().includes(searchTerm);
-      const transformedOrderId = getOrderId(order.order_id);
-      const sanitizedSearchTerm = searchTerm.startsWith("#")
-        ? searchTerm
-        : `#${searchTerm}`;
-      const matchesSearch =
-        sanitizedSearchTerm === "" ||
-        transformedOrderId.includes(sanitizedSearchTerm);
+const FilterSearch = (id) => {
+  setSearchTerm(id)
+  fetchOrders(currentPage ,searchTerm)
+};
+const FilterByStatus = (status) => {
+  console.log(status)
+  fetchOrders(currentPage ,'' ,status)
+};
+const FilterByCity = (selectedCity) => {
+  fetchOrders(currentPage ,'' ,'', selectedCity)
+}
 
-      const matchesPhoneNumber =
-        (order.phone_number && order.phone_number.includes(phoneSearchTerm)) ||
-        (order.phone_no && order.phone_no.includes(phoneSearchTerm));
-
-      const orderCreatedAt = new Date(order.createdAt);
-      const orderDate = new Date(order.order_date.split("T")[0]);
-      const matchesDateRange =
-        (!startDate || orderDate >= new Date(startDate)) &&
-        (!endDate || orderDate <= new Date(endDate));
-
-      const matchesCreatedAtRange =
-        (!createdAtStart || orderCreatedAt >= new Date(createdAtStart)) &&
-        (!createdAtEnd || orderCreatedAt <= new Date(createdAtEnd));
-
-      const matchesOrderType =
-        !selectedOrderType || getOrderType(order.type) === selectedOrderType;
-
-      const matchesStatus =
-        !selectedStatus ||
-        (selectedStatus === "Active" && order.status === 1) ||
-        (selectedStatus === "Inactive" && order.status === 0);
-
-      const matchesOrderStatus =
-        !selectedOrderStatus ||
-        (selectedOrderStatus === "Booking" && order.order_status === 0) ||
-        (selectedOrderStatus === "Accepted" && order.order_status === 1) ||
-        (selectedOrderStatus === "In-progress" && order.order_status === 2) ||
-        (selectedOrderStatus === "Completed" && order.order_status === 3) ||
-        (selectedOrderStatus === "Cancelled" && order.order_status === 4) ||
-        (selectedOrderStatus === "Expired" && order.order_status === 6);
-
-      const matchesCity =
-        !selectedCity || order.order_locality === selectedCity;
-
-      return (
-        matchesSearch &&
-        matchesPhoneNumber &&
-        matchesDateRange &&
-        matchesCreatedAtRange &&
-        matchesOrderType &&
-        matchesStatus &&
-        matchesOrderStatus &&
-        matchesCity
-      );
-    });
-    setFilteredOrders(filtered);
-    setCurrentPage(1);
-  }, [
-    searchTerm,
-    phoneSearchTerm,
-    startDate,
-    endDate,
-    createdAtStart,
-    createdAtEnd,
-    selectedOrderType,
-    selectedStatus,
-    selectedOrderStatus,
-    selectedCity,
-    orders,
-  ]);
 
   const getOrderStatus = (orderStatusValue) => {
     switch (orderStatusValue) {
@@ -215,11 +149,7 @@ const OrderList = () => {
     }
   };
 
-  // const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
-  const displayedOrders = filteredOrders.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+
 
   const getOrderType = (orderTypeValue) => {
     const orderTypes = {
@@ -230,187 +160,6 @@ const OrderList = () => {
     };
     return orderTypes[orderTypeValue] || "Unknown Order Type";
   };
-
-  const [supplierDetails, setSupplierDetails] = useState(null);
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-
-  const openSupplierPopup = async (orderId) => {
-    try {
-      const response = await fetch(
-        `https://horaservices.com:3000/api/admin/getUserDetails/${orderId}`
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch user details");
-      }
-      const data = await response.json();
-      setSupplierDetails(data);
-      setIsPopupOpen(true);
-    } catch (error) {
-      console.error("Error fetching user details:", error);
-    }
-  };
-
-  const openActionPopup = (orderId, orderType, order_Id) => {
-    let apiUrl;
-    let popupTypeValue;
-    if (orderType === 1) {
-      apiUrl = `https://horaservices.com:3000/api/order/order_details_decoration/${orderId}`;
-      popupTypeValue = "decoration";
-    } else if (orderType === 2) {
-      apiUrl = `https://horaservices.com:3000/api/order/order_details/v1/${order_Id}`;
-      popupTypeValue = "chef";
-    } else if (orderType === 6 || orderType === 7) {
-      apiUrl = `https://horaservices.com:3000/api/order/order_details_food_delivery/${orderId}`;
-      popupTypeValue = "foodDelivery";
-    } else {
-      alert("Currently Data is Not Available");
-      return;
-    }
-    setPopupType(popupTypeValue);
-    fetch(apiUrl)
-      .then((response) => response.json())
-      .then((data) => {
-        if (!data.error && data.status === 200) {
-          setOrderDetails(data.data);
-          setPopupOpen(true);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching order details:", error);
-      });
-  };
-
-  const closePopup = () => {
-    setPopupOpen(false);
-    setSelectedAddress("");
-    setIsPopupOpen(false);
-    setSupplierDetails(null);
-  };
-
-  // const handleCallingStatus = (event, phone_no) => {
-  //   const selectedValue = event.target.value;
-
-  //   if (selectedValue === "one") {
-  //     alert(`You selected One! Phone number: ${phone_no}`);
-  //   } else if (selectedValue === "two") {
-  //     alert(`You selected Two! Phone number: ${phone_no}`);
-  //   } else if (selectedValue === "three") {
-  //     alert(`You selected Three! Phone number: ${phone_no}`);
-  //   }
-  // };
-
-  // const sendWelcomeMessage = async (mobileNumber) => {
-  //   let formattedMobileNumber = mobileNumber;
-
-  //   if (!formattedMobileNumber.startsWith("+91")) {
-  //     formattedMobileNumber = "+91" + formattedMobileNumber;
-  //   }
-
-  //   formattedMobileNumber = formattedMobileNumber.replace(/\s+/g, "");
-
-  //   const options = {
-  //     method: "POST",
-  //     url: "https://public.doubletick.io/whatsapp/message/template",
-  //     headers: {
-  //       accept: "application/json",
-  //       "content-type": "application/json",
-  //       Authorization: "key_wZpn79uTfV",
-  //     },
-  //     data: {
-  //       messages: [
-  //         {
-  //           content: {
-  //             language: "en",
-  //             templateData: {
-  //               header: {
-  //                 type: "IMAGE",
-  //                 mediaUrl:
-  //                   "https://quickscale-template-media.s3.ap-south-1.amazonaws.com/org_FGdNfMoTi9/2a2f1b0c-63e0-4c3e-a0fb-7ba269f23014.jpeg",
-  //               },
-  //               body: { placeholders: ["Hora Services"] },
-  //             },
-  //             templateName: "order_confirmation_message__v3",
-  //           },
-  //           from: "+917338584828",
-  //           to: formattedMobileNumber,
-  //         },
-  //       ],
-  //     },
-  //   };
-
-  //   try {
-  //     const response = await axios.request(options);
-  //   } catch (error) {
-  //     console.error("Error sending WhatsApp message:", error);
-  //   }
-  // };
-
-  // const showAlert = (status) => {
-  //   alert(`Selected status: ${status}`);
-  // };
-
-  const handleCallClick = (phoneNo) => {
-    window.location.href = `tel:${phoneNo}`;
-  };
-
-  const exportToExcel = () => {
-    const wb = XLSX.utils.book_new();
-    const headers = [
-      "Order Id",
-      "Order Type",
-      "City",
-      "Fulfillment Date",
-      "Otp",
-      "Offline Customer No",
-      "Online Customer No",
-      "Supplier",
-      "Order Start & End Time",
-      "Total Amount",
-      "Order Status",
-      "Created",
-      "Calling Status",
-      "Status",
-      "Action",
-    ];
-
-    const formattedData = filteredOrders.map((order) => ({
-      "Order Id": order.order_id,
-      "Order Type": getOrderType(order.type),
-      City: order.order_locality || "N/A",
-      "Fulfillment Date": `${order.order_date.split("T")[0]} ${
-        order.order_time
-      }`,
-      Otp: order.otp,
-      "Offline Customer No": order.phone_no || "N/A",
-      "Online Customer No": order.phone_number || "N/A",
-      Supplier: order.supplier ? order.supplier : "NA",
-      "Order Start & End Time": `${order.start_time} - ${order.end_time}`,
-      "Total Amount": order.total_amount,
-      "Order Status": getOrderStatus(order.order_status).status,
-      Created: new Date(order.createdAt).toLocaleString(),
-      "Calling Status": order.calling_status || "N/A",
-      Status: order.status === 1 ? "Active" : "Inactive",
-      Action: "N/A",
-    }));
-
-    const ws = XLSX.utils.json_to_sheet(formattedData, { header: headers });
-    XLSX.utils.book_append_sheet(wb, ws, "Filtered Orders");
-    XLSX.writeFile(wb, "file.xlsx");
-  };
-
-  //    const handlePageChange = (page) => {
-  //   if (page > 0 && page <= totalPages) {
-  //     setCurrentPage(page);
-  //   } else {
-  //     console.warn(`Page ${page} is out of bounds. Must be between 1 and ${totalPages}`);
-  //   }
-  // };
-
-  // const handlePageChange = (page) => {
-  //   if (page >= 1 && page <= totalPages) {
-  //     setCurrentPage(page);
-  //   }
-  // };
 
   const updateOrderStatus = async (orderId, status) => {
     try {
@@ -442,10 +191,32 @@ const OrderList = () => {
     const updateOrderId = "#" + orderId1;
     return updateOrderId;
   };
+  const openActionPopup = (currentId) => {
+    // Find the specific order using find() instead of filter()
+    const selectedOrder = orders.find(order => order.order_id === currentId);
+  
+    if (selectedOrder) {
+      // Perform actions with the found order if needed
+      console.log("Selected Order:", selectedOrder);
+      setOrderDetails(selectedOrder)
+      // setPopupType(popupTypeValue); // Assuming popupTypeValue is defined
+      setPopupOpen(true);
+    } else {
+      console.warn("No matching order found!");
+    }
+  };
 
+
+
+  const closePopup = () => {
+    setPopupOpen(false);
+    setSelectedAddress("");
+    setIsPopupOpen(false);
+    setSupplierDetails(null);
+  };
   return (
-    <div>
-      {loading ? (
+    <div className="orderDetailsList">
+      {/* {loading ? (
         <div
           style={{
             position: "fixed",
@@ -484,7 +255,8 @@ const OrderList = () => {
           </div>
           <div>Loading... {progress}%</div>
         </div>
-      ) : (
+      ) :
+       <> */}
         <div className="order-list-container">
           <div className="order-header">
             <h2>Order Details</h2>
@@ -494,24 +266,29 @@ const OrderList = () => {
             <div className="search-box">
               <input
                 type="text"
-                className="small-search"
+                className="small-search byId"
                 placeholder="Search by Order ID"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+                onChange={(e) => 
+                  setSearchTerm(e.target.value)
+                     
+                }
+                />
+              <button onClick={() => FilterSearch(searchTerm)}>Search</button>
+              
 
               {/* Phone Number Search */}
-              <input
+              {/* <input
                 type="text"
-                className="small-search"
+                className="small-search byPhone"
                 placeholder="Search by Phone Number"
                 value={phoneSearchTerm}
                 onChange={(e) => setPhoneSearchTerm(e.target.value)}
-              />
+              /> */}
 
               {/* Start Date and End Date Box */}
-              <div className="date-filter-box">
-                {/* <h3 className="date-filter-title">Start & End Date</h3> */}
+              {/* <div className="date-filter-box">
+                <h3 className="date-filter-title">Start & End Date</h3> 
                 <div className="date-filter-container">
                   <div className="date-input-container">
                     <label className="date-label">Start (Fulfillment)</label>
@@ -535,42 +312,42 @@ const OrderList = () => {
                     />
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               {/* Created At Date Box */}
-              <div className="date-filter-box">
-                {/* <h3 className="date-filter-title">Created At Date</h3> */}
-                <div className="date-filter-container">
-                  <div className="date-input-container">
-                    <label className="date-label">Start (Created)</label>
-                    <input
-                      type="date"
-                      value={createdAtStart}
-                      onChange={(e) => setCreatedAtStart(e.target.value)}
-                      placeholder="Created At Start"
-                      className="date-input"
-                    />
-                  </div>
+                {/* <div className="date-filter-box">
+                  <h3 className="date-filter-title">Created At Date</h3>
+                  <div className="date-filter-container">
+                    <div className="date-input-container">
+                      <label className="date-label">Start (Created)</label>
+                      <input
+                        type="date"
+                        value={createdAtStart}
+                        onChange={(e) => setCreatedAtStart(e.target.value)}
+                        placeholder="Created At Start"
+                        className="date-input"
+                      />
+                    </div>
 
-                  <div className="date-input-container">
-                    <label className="date-label">End (Created)</label>
-                    <input
-                      type="date"
-                      value={createdAtEnd}
-                      onChange={(e) => setCreatedAtEnd(e.target.value)}
-                      placeholder="Created At End"
-                      className="date-input"
-                    />
+                    <div className="date-input-container">
+                      <label className="date-label">End (Created)</label>
+                      <input
+                        type="date"
+                        value={createdAtEnd}
+                        onChange={(e) => setCreatedAtEnd(e.target.value)}
+                        placeholder="Created At End"
+                        className="date-input"
+                      />
+                    </div>
                   </div>
-                </div>
-              </div>
+                </div> */}
             </div>
           </div>
 
           <div className="orders-box">
-            <button className="red-button" onClick={exportToExcel}>
+            {/* <button className="red-button" onClick={exportToExcel}>
               Download Excel
-            </button>
+            </button> */}
 
             <table className="order-table">
               <thead>
@@ -623,16 +400,20 @@ const OrderList = () => {
                     <span>
                       <select
                         value={selectedOrderStatus}
-                        onChange={(e) => setSelectedOrderStatus(e.target.value)}
+                        onChange={(e) => {
+                          const newStatus = e.target.value; // Get the updated value directly
+                          setSelectedOrderStatus(newStatus);  // Update state
+                          FilterByStatus(newStatus);          // Pass the updated value immediately
+                        }}
                         className="order-type-dropdown"
                       >
                         <option value="">All</option>
-                        <option value="Booking">Booking</option>
-                        <option value="Expired">Expired</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Accepted">Accepted</option>
-                        <option value="In-progress">In-progress</option>
-                        <option value="Cancelled">Cancelled</option>
+                        <option value="0">Booking</option>                       
+                        <option value="1">Accepted</option>
+                        <option value="2">In-progress</option>
+                        <option value="3">Completed</option>
+                        <option value="6">Expired</option>
+                        <option value="4">Cancelled</option>
                       </select>
                     </span>
                   </th>
@@ -645,7 +426,7 @@ const OrderList = () => {
                       onChange={(e) => setSelectedStatus(e.target.value)}
                       className="order-type-dropdown"
                     >
-                      <option value="">All</option>
+                      <option value="All">All</option>
                       <option value="Active">Active</option>
                       <option value="Inactive">Inactive</option>
                     </select>
@@ -654,19 +435,24 @@ const OrderList = () => {
                 </tr>
               </thead>
               <tbody>
-                {displayedOrders.length > 0 ? (
-                  displayedOrders.map((order, index) => (
+
+                {orders.length > 0 ? (
+                  orders.map((order, index) => (
+
                     <tr key={index}>
                       <td>{getOrderId(order.order_id)}</td>
                       <td>{getOrderType(order.type)}</td>
                       <td>{order.order_locality || "N/A"}</td>
                       <td>
-                        {order.order_date.split("T")[0]} {order.order_time}
+                        {order?.order_date
+                          ? `${order.order_date.split("T")[0]} ${order.order_time || ""
+                          }`
+                          : "N/A"}
                       </td>
                       <td>{order.otp}</td>
                       <td>{order.order_taken_by || "N/A"}</td>
                       <td>{order.phone_no || "N/A"}</td>
-                      <td>{order.phone_number || "N/A"}</td>
+                       <td>{order.online_phone_number || "N/A"}</td>
                       <td>
                         {order.toId ? (
                           <FaEye
@@ -675,7 +461,7 @@ const OrderList = () => {
                         ) : (
                           <p>NA</p>
                         )}
-
+                        
                         {isPopupOpen && supplierDetails && (
                           <div className="popup-overlay" onClick={closePopup}>
                             <div
@@ -695,7 +481,7 @@ const OrderList = () => {
                               <p>Role: {supplierDetails.data.role}</p>
                             </div>
                           </div>
-                        )}
+                        )} 
 
                         <style jsx>{`
                           .popup-overlay {
@@ -732,17 +518,16 @@ const OrderList = () => {
                       </td>
 
                       <td>
-  {`${order.job_start_time.replace(/(\d{4})(\d{1,2}:\d{2}:\d{2} (AM|PM))/, '$1 $2')} - 
+                        {`${order.job_start_time.replace(/(\d{4})(\d{1,2}:\d{2}:\d{2} (AM|PM))/, '$1 $2')} - 
     ${order.job_end_time}`}
-</td>
+                      </td>
 
                       <td>₹{order.total_amount}</td>
-                      
+
                       <td>
                         <span
-                          className={`status ${
-                            getOrderStatus(order.order_status).className
-                          }`}
+                          className={`status ${getOrderStatus(order.order_status).className
+                            }`}
                         >
                           {getOrderStatus(order.order_status).status}
                         </span>
@@ -765,9 +550,8 @@ const OrderList = () => {
                       </td>
                       <td>
                         <button
-                          className={`status-button ${
-                            order.status === 0 ? "active" : "inactive"
-                          }`}
+                          className={`status-button ${order.status === 0 ? "active" : "inactive"
+                            }`}
                           onClick={() =>
                             updateOrderStatus(
                               order._id,
@@ -780,13 +564,13 @@ const OrderList = () => {
                       </td>
                       <td>
                         <FaEye
-                          onClick={() =>
+                          onClick={() =>{
+                            console.log('ji')
                             openActionPopup(
                               order.order_id,
-                              order.type,
-                              order._id
+                              
                             )
-                          }
+                           } }
                         />
                       </td>
                     </tr>
@@ -800,64 +584,13 @@ const OrderList = () => {
             </table>
           </div>
 
-          {/* <div className="horizontal-scroll">
-            <FaChevronLeft
-              className="scroll-arrow"
-              onClick={() => handlePageChange(currentPage - 1)}
-            />
-            <div className="pagination-slider">
-              {Array.from({ length: totalPages }, (_, index) => index + 1)
-                .slice(currentPage - 1, currentPage + 14)
-                .map((page) => (
-                  <button
-                    key={page}
-                    className={`page-number ${
-                      page === currentPage ? "active" : ""
-                    }`}
-                    onClick={() => handlePageChange(page)}
-                  >
-                    {page}
-                  </button>
-                ))}
-            </div>
-            <FaChevronRight
-              className="scroll-arrow"
-              onClick={() => handlePageChange(currentPage + 1)}
-            />
-          </div>
-          
-          */}
 
-          {/* <div className="pagination">
-        { /* <div className="pagination">
-            <button
-              disabled={currentPage === 1}
-              onClick={() => handlePageChange(currentPage - 1)}
-            >
-              Previous
-            </button>
-            {[...Array(totalPages).keys()].map((page) => (
-              <button
-                key={page}
-                className={currentPage === page + 1 ? "active" : ""}
-                onClick={() => handlePageChange(page + 1)}
-              >
-                {page + 1}
-              </button>
-            ))}
-            <button
-              disabled={currentPage === totalPages}
-              onClick={() => handlePageChange(currentPage + 1)}
-            >
-              Next
-            </button>
-          </div> */}
 
-          <Popup
+          {/* <Popup
             isOpen={popupOpen}
             address={selectedAddress}
             onClose={closePopup}
-          />
+          /> */}
           <ActionPopup
             isOpen={popupOpen}
             orderDetails={orderDetails}
@@ -865,8 +598,25 @@ const OrderList = () => {
             onClose={closePopup}
           />
         </div>
-      )}
-    </div>
+        {/* pagination */}
+        <div className="orderDetails_pagination">
+          <button
+            onClick={() => setCurrentPage((prevPage) => Math.max(prevPage - 1, 1))}
+            disabled={currentPage === 1} // Disable Previous button on first page
+          >
+            {"<"} 
+          </button>
+          <span> Page {currentPage} of {totalPage} </span>
+          <button
+            onClick={() => setCurrentPage((prevPage) => prevPage + 1)}
+            disabled={currentPage === totalPage} // Disable Next button on last page
+          >
+            {">"}
+          </button>
+        </div>
+
+      {/* </>} */}
+      </div>
   );
 };
 

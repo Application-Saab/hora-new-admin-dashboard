@@ -2,40 +2,37 @@ import React from "react";
 import Link from "next/link";
 import "./globals.css";
 import { FaTachometerAlt, FaPlusCircle } from "react-icons/fa";
-
+const menuItems = [
+  { label: "Dashboard", icon: <FaTachometerAlt />, url: "/dashboard" },
+  {
+    label: "Decoration Create Order",
+    icon: <FaPlusCircle />,
+    url: "/dashboard/decoration-createorder",
+  },
+  {
+    label: "Order Details",
+    icon: <FaTachometerAlt />,
+    url: "/dashboard/orderDetails",
+  },
+  {
+    label: "Food Create Order",
+    icon: <FaPlusCircle />,
+    url: "/dashboard/food-create-order",
+  },
+];
 const Sidebar = () => {
   return (
     <div className="sidebar">
       <ul>
-        <li>
-          <Link href="/dashboard" className="link-button">
-            <FaTachometerAlt style={{ marginRight: "8px" }} /> Dashboard
+      {menuItems.map((item, index) => (
+        <li key={index}>
+          <Link href={item.url} className="link-button">
+            {item.icon}
+            <span style={{ marginLeft: "8px" }}>{item.label}</span>
           </Link>
         </li>
-        <li>
-          <Link
-            href="/dashboard/decoration-createorder"
-            className="link-button"
-          >
-            <FaPlusCircle style={{ marginRight: "8px" }} /> Decoration Create
-            Order
-          </Link>
-        </li>
-        <li>
-          <Link href="/dashboard/orderDetails" className="link-button">
-            <FaTachometerAlt style={{ marginRight: "8px" }} /> Order Details
-          </Link>
-        </li>
-        <li>
-          <Link
-            href="/dashboard/food-create-order"
-            className="link-button"
-          >
-            <FaPlusCircle style={{ marginRight: "8px" }} /> Food Create
-            Order
-          </Link>
-        </li>
-      </ul>
+      ))}
+    </ul>
     </div>
   );
 };
@@ -48,9 +45,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <div style={{ display: "flex" }}>
+        <div className='dashBoard_page' style={{ display: "flex" }}>
           <Sidebar />
-          <div className="main-content" style={{ flexGrow: 1 }}>
+          <div className="main-content" >
             {children}
           </div>
         </div>
