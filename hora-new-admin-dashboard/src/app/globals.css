@@ -123,3 +123,16 @@ h3 {
   color: #fff;
   border-color: #007bff;
 }
+
+.filter-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+.filter-container .left {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+

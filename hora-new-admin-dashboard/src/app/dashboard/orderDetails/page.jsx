@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { FaEye } from "react-icons/fa";
-import Popup from "../../../pages/popup/Popup";
-import ActionPopup from "../../../pages/popup/ActionPop";
+import Popup from "../../component/Popup";
+import ActionPopup from "../../component/ActionPop";
 import "./orderdetails.css";
 import {
   BASE_URL,
@@ -22,41 +22,68 @@ const OrderList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [popupOpen, setPopupOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState("");
+  const [selectedOffcusNum, setSelectedOffcusNum] = useState("");
   const [orderDetails, setOrderDetails] = useState(null);
-  const [popupType, setPopupType] = useState("");
-
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-
   const [selectedOrderType, setSelectedOrderType] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedOrderStatus, setSelectedOrderStatus] = useState("");
-
+  const [actionPopupOrderId, setActionPopupOrderId] = useState("");
+  const [actionPopupOrderType, setActionPopupOrderType] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
-
   const [createdAtStart, setCreatedAtStart] = useState("");
   const [createdAtEnd, setCreatedAtEnd] = useState("");
-
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [phoneSearchTerm, setPhoneSearchTerm] = useState("");
-
   const [supplierDetails, setSupplierDetails] = useState(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState("");
 
-  const fetchOrders = async (page , orderId = '' ,status = '' ) => {
+  const fetchOrders = async (page, orderId = '', status = '', orderType = '', orderCity = '', selectedDate = '' , selectedOfflineNum = '') => {
+    console.log("Selected Date in fetchOrders:", selectedOfflineNum);  // Log the selected date for debugging
     setLoading(true);
     setProgress(0);
+  
+    // Handle orderType mapping
+    let typeId;
+    switch (orderType) {
+      case "Decoration":
+        typeId = 1;
+        break;
+      case "Chef":
+        typeId = 2;
+        break;
+      case "Food Delivery":
+        typeId = 6;
+        break;
+      case "Live Catering":
+        typeId = 7;
+        break;
+      default:
+        typeId = null; // or another default value if needed
+    }
+  
     const url = `${BASE_URL}${ADMIN_ORDER_LIST}`;
-    let newId  = Math.abs(orderId - 10800);
-
-
+  
+    // `newId` calculation - update this based on actual use case, or use `orderId` directly if needed
+    let newId = Math.abs(orderId - 10800);  // Confirm if this is needed or if `orderId` should be used as is
+  
+    // Prepare requestData
     let requestData = {
       page: page,
       per_page: itemsPerPage,
-      order_id: searchTerm.length > 0 ? newId : "", // Conditionally set order_id
-      order_status : Number(status ) || "",
+      order_id: orderId.length > 0 ? newId : "", // Conditionally set order_id if `orderId` exists
+      order_status: status ? Number(status) : "", // Convert status to number, or use empty string if invalid
+      type: typeId || "", // Use typeId if available
+      order_locality: orderCity || "",
+      order_date: selectedDate || "" ,
+      phone_no: selectedOfflineNum || ""
     };
+  
+    console.log(requestData);  // Log the request data for debugging
+  
     try {
       const response = await fetch(url, {
         method: "POST",
@@ -65,28 +92,33 @@ const OrderList = () => {
         },
         body: JSON.stringify(requestData),
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log(data.data)
-      if (data && data.data && data.data.order) {
-        setOrders(data.data.order);
-        setTotalPage(data.data.paginate.last_page);
-      } else {
-        console.warn("No orders found in response data");
-      }
+  
+      if (response.status === 200) {
+        // Success - handle valid response
+        const data = await response.json();
+        console.log("Fetched Orders:", data);
+  
+        if (data && data.data && data.data.order) {
+          setOrders(data.data.order);
+          setTotalPage(data.data.paginate.last_page);
+        } else {
+          // No orders found, show an alert with a message
+          alert("No orders found.");
+          console.warn("No orders found");
+        }
+      } 
     } catch (error) {
       console.error("Error fetching orders:", error);
-    } 
-    // finally {
-    //   setProgress(100);
-    //   setTimeout(() => setLoading(false), 500);
-    // }
+      // Show an alert with the error message
+      alert(`Error fetching orders: ${error.message}`);
+    } finally {
+      setProgress(100);
+      setTimeout(() => setLoading(false), 500);
+    }
   };
-
+  
+  
+  
   const getOnlineCustomerNumber = async (onlineCustomerId) => {
   
     const url = `${BASE_URL}${ADMIN_USER_DETAILS}${onlineCustomerId}`;
@@ -103,9 +135,8 @@ const OrderList = () => {
   };
 
   useEffect(() => {
-   
-    fetchOrders(currentPage);
-  }, [currentPage]);
+    fetchOrders(currentPage, searchTerm, selectedOrderStatus, selectedOrderType, selectedCity , selectedDate, selectedOffcusNum);
+  }, [currentPage, searchTerm ,selectedOrderStatus, selectedOrderType, selectedCity , selectedDate  , selectedOffcusNum]);
 
   useEffect(()=> {
     for(let i = 0; i < orders.length;i++) {
@@ -115,17 +146,44 @@ const OrderList = () => {
     }
   }, [orders]);
 
-const FilterSearch = (id) => {
-  setSearchTerm(id)
-  fetchOrders(currentPage ,searchTerm)
-};
-const FilterByStatus = (status) => {
-  console.log(status)
-  fetchOrders(currentPage ,'' ,status)
+  // useEffect(() => {
+  //   const filtered = orders.filter(order => {
+  //     const phoneNumber = String(order.phone_no || ''); // Convert phone_no to string
+  //     const onlinePhoneNumber = String(order.online_phone_number || ''); // Convert online_phone_number to string
+  
+  //     const matchesSearchTerm = order.order_id.toString().includes(searchTerm);
+  
+  //     // Check if phone search term exists in phone numbers
+  //     const matchesPhoneSearchTerm = phoneNumber.includes(phoneSearchTerm) || onlinePhoneNumber.includes(phoneSearchTerm);
+  
+  //     return matchesSearchTerm && matchesPhoneSearchTerm;
+  //   });
+  
+  //   setFilteredOrders(filtered);  // Set filtered orders
+  // }, [searchTerm, phoneSearchTerm, orders]);
+  
+
+  const FilterSearch = (id) => {
+    setSearchTerm(id);
+    fetchOrders(currentPage, id, selectedOrderStatus, selectedOrderType, selectedCity , selectedOffcusNum);
+  };
+  const FilterByStatus = (status) => {
+    setSelectedStatus(status);
+    fetchOrders(currentPage, searchTerm, status, selectedOrderType, selectedCity , selectedOffcusNum);
+  };
+const FilterByType = (selectedType) => {
+  setSelectedOrderType(selectedType);
+  fetchOrders(currentPage, searchTerm, selectedOrderStatus, selectedType, selectedCity, selectedOffcusNum);
 };
 const FilterByCity = (selectedCity) => {
-  fetchOrders(currentPage ,'' ,'', selectedCity)
-}
+  setSelectedCity(selectedCity);
+  fetchOrders(currentPage, searchTerm, selectedOrderStatus, selectedOrderType, selectedCity, selectedOffcusNum);
+};
+
+// const FilterByOfflineCustomer = (selectedOfflineNum) => {
+//   setSelectedOffcusNum(selectedOfflineNum);
+//   fetchOrders(currentPage, searchTerm, selectedOrderStatus, selectedOrderType, selectedCity, selectedOffcusNum);
+// }
 
 
   const getOrderStatus = (orderStatusValue) => {
@@ -191,77 +249,26 @@ const FilterByCity = (selectedCity) => {
     const updateOrderId = "#" + orderId1;
     return updateOrderId;
   };
-  const openActionPopup = (currentId) => {
-    // Find the specific order using find() instead of filter()
-    const selectedOrder = orders.find(order => order.order_id === currentId);
   
-    if (selectedOrder) {
-      // Perform actions with the found order if needed
-      console.log("Selected Order:", selectedOrder);
-      setOrderDetails(selectedOrder)
-      // setPopupType(popupTypeValue); // Assuming popupTypeValue is defined
-      setPopupOpen(true);
-    } else {
-      console.warn("No matching order found!");
-    }
+  const openActionPopup = (orderId, orderType) => {
+    setActionPopupOrderId(orderId);
+    setActionPopupOrderType(orderType)
+    setPopupOpen(true); // Open the popup
   };
-
-
 
   const closePopup = () => {
-    setPopupOpen(false);
-    setSelectedAddress("");
-    setIsPopupOpen(false);
-    setSupplierDetails(null);
+    setPopupOpen(false); // Close the popup
+    setOrderDetails(null); // Clear selected order details
   };
+
   return (
     <div className="orderDetailsList">
-      {/* {loading ? (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            flexDirection: "column",
-            color: "#fff",
-            fontSize: "1.5em",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              width: "20%",
-              height: "10px",
-              backgroundColor: "#444",
-              borderRadius: "10px",
-              overflow: "hidden",
-              marginBottom: "20px",
-            }}
-          >
-            <div
-              style={{
-                width: `${progress}%`,
-                height: "100%",
-                backgroundColor: "#4caf50",
-                transition: "width 0.3s ease",
-              }}
-            ></div>
-          </div>
-          <div>Loading... {progress}%</div>
-        </div>
-      ) :
-       <> */}
         <div className="order-list-container">
           <div className="order-header">
             <h2>Order Details</h2>
           </div>
-
+          <div className="filter-container">
+            <div className="left">
           <div className="search-download-container">
             <div className="search-box">
               <input
@@ -270,79 +277,61 @@ const FilterByCity = (selectedCity) => {
                 placeholder="Search by Order ID"
                 value={searchTerm}
                 onChange={(e) => 
-                  setSearchTerm(e.target.value)
+                  setSearchTerm(e.target.value)   
+                }
+              
+                />
+              {/* <button onClick={() => FilterSearch(searchTerm)}>Search</button> */}
+              
+                </div>
+                </div>
+              {/* Phone Number Search */}
+          <div>
+          <input
+                type="text"
+                className="small-search byPhone"
+                placeholder="Search by offline customer"
+                value={selectedOffcusNum}
+
+                onChange={(e) => 
+                  setSelectedOffcusNum(e.target.value)
                      
                 }
                 />
-              <button onClick={() => FilterSearch(searchTerm)}>Search</button>
-              
-
-              {/* Phone Number Search */}
-              {/* <input
+              {/* <button onClick={() => FilterByOfflineCustomer(selectedOffcusNum)}>Search</button> */}
+              <input
                 type="text"
                 className="small-search byPhone"
-                placeholder="Search by Phone Number"
-                value={phoneSearchTerm}
-                onChange={(e) => setPhoneSearchTerm(e.target.value)}
-              /> */}
+                placeholder="Search by online customer"
+                value={selectedOffcusNum}
 
-              {/* Start Date and End Date Box */}
-              {/* <div className="date-filter-box">
-                <h3 className="date-filter-title">Start & End Date</h3> 
-                <div className="date-filter-container">
-                  <div className="date-input-container">
-                    <label className="date-label">Start (Fulfillment)</label>
-                    <input
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      placeholder="Start Date"
-                      className="date-input"
-                    />
-                  </div>
-
-                  <div className="date-input-container">
-                    <label className="date-label">End (Fulfillment)</label>
-                    <input
-                      type="date"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      placeholder="End Date"
-                      className="date-input"
-                    />
-                  </div>
-                </div>
-              </div> */}
-
-              {/* Created At Date Box */}
-                {/* <div className="date-filter-box">
-                  <h3 className="date-filter-title">Created At Date</h3>
-                  <div className="date-filter-container">
-                    <div className="date-input-container">
-                      <label className="date-label">Start (Created)</label>
-                      <input
-                        type="date"
-                        value={createdAtStart}
-                        onChange={(e) => setCreatedAtStart(e.target.value)}
-                        placeholder="Created At Start"
-                        className="date-input"
-                      />
-                    </div>
-
-                    <div className="date-input-container">
-                      <label className="date-label">End (Created)</label>
-                      <input
-                        type="date"
-                        value={createdAtEnd}
-                        onChange={(e) => setCreatedAtEnd(e.target.value)}
-                        placeholder="Created At End"
-                        className="date-input"
-                      />
-                    </div>
-                  </div>
-                </div> */}
-            </div>
+                onChange={(e) => 
+                  setSelectedOnlinecusNum(e.target.value)
+                     
+                }
+                />
           </div>
+          <div className="date-filter-box">
+  <div className="date-filter-container">
+    <div className="date-input-container">
+      <label className="date-label">Order Date</label>
+      <input
+        type="date"
+        value={selectedDate}
+        onChange={(e) => setSelectedDate(e.target.value)}  // Update the selectedDate state
+        placeholder="Select Date"
+        className="date-input"
+      />
+    </div>
+  </div>
+</div>
+          </div> 
+          <div className="right">
+     
+
+              </div>
+         
+                </div>
 
           <div className="orders-box">
             {/* <button className="red-button" onClick={exportToExcel}>
@@ -358,16 +347,21 @@ const FilterByCity = (selectedCity) => {
                     <span>
                       {" "}
                       <select
-                        value={selectedOrderType}
-                        onChange={(e) => setSelectedOrderType(e.target.value)}
-                        className="order-type-dropdown"
-                      >
-                        <option value="">All</option>
-                        <option value="Decoration">Decoration</option>
-                        <option value="Chef">Chef</option>
-                        <option value="Food Delivery">Food Delivery</option>
-                        <option value="Live Catering">Live Catering</option>
-                      </select>
+  value={selectedOrderType}
+  onChange={(e) => {
+    const newOrderType = e.target.value;
+    setSelectedOrderType(newOrderType);
+    FilterByType(newOrderType); // Trigger the filter
+  }}
+  className="order-type-dropdown"
+>
+  <option value="">All</option>
+  <option value="Decoration">Decoration</option>
+  <option value="Chef">Chef</option>
+  <option value="Food Delivery">Food Delivery</option>
+  <option value="Live Catering">Live Catering</option>
+</select>
+
                     </span>
                   </th>
 
@@ -376,7 +370,11 @@ const FilterByCity = (selectedCity) => {
                     <span>
                       <select
                         value={selectedCity}
-                        onChange={(e) => setSelectedCity(e.target.value)}
+                        onChange={(e) => {
+                          const newOrderCity = e.target.value; // Get the updated value directly
+                          setSelectedCity(newOrderCity);  // Update state
+                          FilterByCity(newOrderCity);          // Pass the updated value immediately
+                        }}
                         className="order-type-dropdown"
                       >
                         <option value="">All</option>
@@ -388,6 +386,7 @@ const FilterByCity = (selectedCity) => {
                     </span>
                   </th>
                   <th>Fulfillment Date</th>
+                  <th>Fulfillment Time</th>
                   <th>Otp</th>
                   <th>Order Taken By</th>
                   <th>Offline Customer No</th>
@@ -408,7 +407,7 @@ const FilterByCity = (selectedCity) => {
                         className="order-type-dropdown"
                       >
                         <option value="">All</option>
-                        <option value="0">Booking</option>                       
+                        <option value="0">Booked</option>                       
                         <option value="1">Accepted</option>
                         <option value="2">In-progress</option>
                         <option value="3">Completed</option>
@@ -444,10 +443,16 @@ const FilterByCity = (selectedCity) => {
                       <td>{getOrderType(order.type)}</td>
                       <td>{order.order_locality || "N/A"}</td>
                       <td>
-                        {order?.order_date
-                          ? `${order.order_date.split("T")[0]} ${order.order_time || ""
-                          }`
-                          : "N/A"}
+                      {order?.order_date
+                      ? `${order.order_date.split("T")[0]}`
+                      : "N/A"}
+                      </td>
+                      <td>
+                      {order?.order_time
+                      ? `${order.order_time}` // If `order_time` is available, show it
+                      : order?.order_date
+                      ? `${order.order_date.split("T")[1].slice(0, 8)}`
+                      : "N/A"}
                       </td>
                       <td>{order.otp}</td>
                       <td>{order.order_taken_by || "N/A"}</td>
@@ -461,61 +466,7 @@ const FilterByCity = (selectedCity) => {
                         ) : (
                           <p>NA</p>
                         )}
-                        
-                        {isPopupOpen && supplierDetails && (
-                          <div className="popup-overlay" onClick={closePopup}>
-                            <div
-                              className="popup"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <button
-                                className="close-button"
-                                onClick={closePopup}
-                              >
-                                ×
-                              </button>
-                              <h3>Supplier Details</h3>
-                              <p>Name: {supplierDetails.data.name}</p>
-                              <p>Phone: {supplierDetails.data.phone}</p>
-                              <p>City: {supplierDetails.data.city}</p>
-                              <p>Role: {supplierDetails.data.role}</p>
-                            </div>
-                          </div>
-                        )} 
-
-                        <style jsx>{`
-                          .popup-overlay {
-                            position: fixed;
-                            top: 0;
-                            left: 0;
-                            right: 0;
-                            bottom: 0;
-                            background: rgba(0, 0, 0, 0.2);
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            z-index: 1000;
-                          }
-                          .popup {
-                            background: white;
-                            padding: 20px;
-                            border-radius: 8px;
-                            max-width: 400px;
-                            width: 100%;
-                            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-                            position: relative;
-                          }
-                          .close-button {
-                            position: absolute;
-                            top: 10px;
-                            right: 10px;
-                            background: transparent;
-                            border: none;
-                            font-size: 18px;
-                            cursor: pointer;
-                          }
-                        `}</style>
-                      </td>
+                         </td>
 
                       <td>
                         {`${order.job_start_time.replace(/(\d{4})(\d{1,2}:\d{2}:\d{2} (AM|PM))/, '$1 $2')} - 
@@ -565,11 +516,7 @@ const FilterByCity = (selectedCity) => {
                       <td>
                         <FaEye
                           onClick={() =>{
-                            console.log('ji')
-                            openActionPopup(
-                              order.order_id,
-                              
-                            )
+                            openActionPopup( order.order_id, order.type )
                            } }
                         />
                       </td>
@@ -580,23 +527,74 @@ const FilterByCity = (selectedCity) => {
                     <td colSpan="13">No orders found</td>
                   </tr>
                 )}
+
+
+
+{/* 
+  {filteredOrders.length > 0 ? (
+    filteredOrders.map((order, index) => (
+      <tr key={index}>
+        <td>{getOrderId(order.order_id)}</td>
+        <td>{getOrderType(order.type)}</td>
+        <td>{order.order_locality || "N/A"}</td>
+        <td>{order?.order_date ? `${order.order_date.split("T")[0]}` : "N/A"}</td>
+        <td>{order?.order_time ? `${order.order_time}` : order?.order_date ? `${order.order_date.split("T")[1].slice(0, 8)}` : "N/A"}</td>
+        <td>{order.otp}</td>
+        <td>{order.order_taken_by || "N/A"}</td>
+        <td>{order.phone_no || "N/A"}</td>
+        <td>{order.online_phone_number || "N/A"}</td>
+        <td>
+          {order.toId ? (
+            <FaEye onClick={() => openSupplierPopup(order.toId)} />
+          ) : (
+            <p>NA</p>
+          )}
+        </td>
+        <td>{`${order.job_start_time.replace(/(\d{4})(\d{1,2}:\d{2}:\d{2} (AM|PM))/, '$1 $2')} - ${order.job_end_time}`}</td>
+        <td>₹{order.total_amount}</td>
+        <td>
+          <span className={`status ${getOrderStatus(order.order_status).className}`}>
+            {getOrderStatus(order.order_status).status}
+          </span>
+        </td>
+        <td>{new Date(order.createdAt).toLocaleString()}</td>
+        <td>
+          <div style={styles.container}>
+            <div onClick={() => handleCallClick(order.phone_no)}>N/A</div>
+            <div style={styles.btnGroup}></div>
+          </div>
+        </td>
+        <td>
+          <button
+            className={`status-button ${order.status === 0 ? "active" : "inactive"}`}
+            onClick={() => updateOrderStatus(order._id, order.status === 1 ? 0 : 1)}
+          >
+            {order.status === 1 ? "Active" : "Inactive"}
+          </button>
+        </td>
+        <td>
+          <FaEye onClick={() => openActionPopup(order.order_id, order.type)} />
+        </td>
+      </tr>
+    ))
+  ) : (
+    <tr>
+      <td colSpan="13">No orders found</td>
+    </tr>
+  )} */}
+
+
               </tbody>
             </table>
           </div>
 
-
-
-          {/* <Popup
-            isOpen={popupOpen}
-            address={selectedAddress}
-            onClose={closePopup}
-          /> */}
           <ActionPopup
-            isOpen={popupOpen}
-            orderDetails={orderDetails}
-            popupType={popupType}
-            onClose={closePopup}
-          />
+          isOpen={popupOpen}
+          actionPopupOrderId={actionPopupOrderId}
+          actionPopupOrderType={actionPopupOrderType}
+          onClose={closePopup}
+        />
+
         </div>
         {/* pagination */}
         <div className="orderDetails_pagination">

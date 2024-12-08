@@ -12,7 +12,8 @@ import {
   SAVE_LOCATION_ENDPOINT,
   API_SUCCESS_CODE,
 } from "../../../utils/apiconstant";
-import { pincodes } from '../../../utils/pincodes.js'
+import { pincodes } from '../../../utils/pincodes.js';
+
 const AddOrder = () => {
   const [dishName, setDishName] = useState("");
   const [productid, setProductID] = useState("");

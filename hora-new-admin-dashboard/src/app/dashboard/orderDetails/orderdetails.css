@@ -5,7 +5,11 @@
     padding: 5px;
     /* margin-bottom: 100px; */
   }
-  
+  .order-header h2 {
+    margin: 7px 0 0 0;
+    padding: 0;
+    font-size: 15px;
+}
   .orderDetailsList{
     display: flex;
     flex-direction: column;
@@ -17,32 +21,40 @@
   }
   /* Scrollable box for orders */
   .orders-box {
-    /* max-height: 650px;
-    max-width: 1500px;
-    overflow-y: scroll;
-    border: 1px solid #ddd;
-     padding: 10px; 
-    margin-bottom: 10px;
-    background-color: #fff; 
-    max-height: 650px; */
-    max-width : 100%;
+    max-width: 127s0px;
     overflow-x: scroll;
-    border: 1px solid #ddd;
+    border: 2px solid #ddd;
     margin-bottom: 10px;
     background-color: #fff;
+    /* overflow: scroll; */
+    box-shadow: 0 2px 18px 1px rgba(49, 53, 72, .1);
+    border-radius: 13px;
   }
   
+  .order-table thf {
+    padding: 8px 7px !important;
+}
   /* Table styling */
   .order-table {
     width: 180%;
     border-collapse: collapse;
   }
+
+  th.order-type-header span {
+    width: 100%;
+    display: inline-flex
+;
+    text-align: center;
+    margin-bottom: 4px;
+}
   
   .order-table th, .order-table td {
-    padding: 8px 12px;
+    padding: 1px 8px;
     border: 1px solid #ddd;
     text-align: left;
-    width: 50px;
+    width: 100px;
+    font-size: 13px;
+  
   }
   
   .status.booking {
@@ -91,8 +103,7 @@
 
   
   .small-search {
-    padding: 12px;
-    width: 120px; /* You can adjust this to make the search box smaller */
+    padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
   }
@@ -131,25 +142,22 @@
 
   /* input date and time */
 
-  .search-download-container {
-    margin-bottom: 20px;
-  }
   
   .search-box {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 8px;
     width: 100%;
-  }
+    border: 1px;
+}
   
   .date-filter-box {
     display: block;
     border: 2px solid #ddd; /* Box border */
     padding: 5px;
     border-radius: 8px;
-    width: 39%; /* Adjust width for two boxes */
+
     background-color: #fff;
-    margin-top: -70px;
   }
   
   .date-filter-title {

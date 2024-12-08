@@ -26,7 +26,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/pages/popup/ActionPop.js",
+    "src/app/component/ActionPop.js",
     "src/app/layout.tsx",
     "src/app/page.tsx",
     "src/app/page.jsx"
