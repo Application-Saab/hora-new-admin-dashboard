@@ -2,12 +2,13 @@ import Image from "next/image";
 import "./Actionpopup.css";
 import { useState, useEffect } from "react";
 
-const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupOrderType, onClose  }) => {
+const ActionPopup = ({ isOpen, actionPopupOrderId,actionPopupChefOrderId,  actionPopupOrderType, onClose  }) => {
   if (!isOpen) return null;
   const [popupType, setPopupType] = useState("");
   const [orderDetails, setOrderDetails] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  
   useEffect(() => {
     setLoading(true);
     setError(null);
@@ -17,7 +18,8 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupOrderType, onClose
       apiUrl = `https://horaservices.com:3000/api/order/order_details_decoration/${actionPopupOrderId}`;
       setPopupType("decoration");
     } else if (actionPopupOrderType === 2) {
-      apiUrl = `https://horaservices.com:3000/api/order/order_details/v1/${actionPopupOrderId}`;
+      const chefOrderId = actionPopupChefOrderId.toString();
+      apiUrl = `https://horaservices.com:3000/api/order/order_details/v1/${chefOrderId}`;
       setPopupType("chef");
     } else if (actionPopupOrderType === 6 || actionPopupOrderType === 7) {
       apiUrl = `https://horaservices.com:3000/api/order/order_details_food_delivery/${actionPopupOrderId}`;
@@ -44,13 +46,15 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupOrderType, onClose
         setError("Error fetching order details");
         console.error("Error fetching order details:", error);
       });
-  }, [actionPopupOrderId, actionPopupOrderType]);
+  }, [actionPopupOrderId,actionPopupChefOrderId,   actionPopupOrderType]);
+
 
   const getOrderId = (e) => {
     const orderId1 = 10800 + e;
     const updateOrderId = "#" + orderId1;
     return updateOrderId;
   };
+ 
 
   const getOrderType = (orderTypeValue) => {
     const orderTypes = {
@@ -89,7 +93,155 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupOrderType, onClose
 
     );
   };
+   // share on whatsapp========================
+   const sendOrderDetailsToWhatsApp = () => {
+    const orderId = getOrderId(orderDetails._doc.order_id) || "N/A";
+    const orderDate = new Date(
+      orderDetails._doc.order_date
+    ).toLocaleDateString();
+    // const burners = orderDetails._doc.burners || 0;
+    // const noOfPeople = orderDetails._doc.no_of_people || 0;
+    // const type = orderDetails._doc.type || "N/A";
+    const orderType = getOrderType(orderDetails._doc.type);
+    // const orderStatus = getOrderStatus(orderDetails._doc.type);
+    const address = orderDetails._doc.addressId?.address1 || "N/A";
+    const googleMapLocation = orderDetails._doc.addressId?.address2 || "N/A";
+    const orderTime = orderDetails._doc.order_time || "N/A";
+    // const phone = orderDetails._doc.fromId?.phone || "N/A";
+    const decorationComments = orderDetails._doc.decoration_comments || "N/A";
+    const addOnItems = orderDetails._doc.add_on || "N/A";
 
+
+    // Calculate balance amount based on the order details
+    let balanceAmount = 0;
+    if (orderDetails._doc.phone_no) {
+      balanceAmount =
+        orderDetails._doc.total_amount - orderDetails._doc.advance_amount;
+    } else {
+      if ([2, 3, 4, 5].includes(orderDetails._doc?.type)) {
+        balanceAmount = Math.round((orderDetails._doc?.payable_amount * 4) / 5);
+      } else if ([6, 7].includes(orderDetails._doc?.type)) {
+        balanceAmount = Math.round(orderDetails._doc?.payable_amount * 0.35);
+      } else {
+        balanceAmount = Math.round(orderDetails._doc?.payable_amount * 0.65);
+      }
+    }
+
+    
+
+    let message = `Order Details:\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\nOrder Type: ${orderType}\nAddress: ${address}\nGoogleMapLocation: ${googleMapLocation}\nOrder Time: ${orderTime}\nBalance Amount: ₹${balanceAmount}\nComments: ${decorationComments}\n`;
+
+    if (addOnItems.length > 0) {
+      message += `\nOrder Add-On Items:`;
+      addOnItems.forEach((item, index) => {
+        message += `\n${index + 1}. ${item.name}: ₹${item.price}`;
+      });
+    } else {
+      message += `\nOrder Add-On Items: None`;
+    }
+
+    decorations.forEach((dec, index) => {
+      const inclusion = getCleanInclusionText(dec.inclusion) || "N/A"; // Get the formatted inclusion list
+      message += `\n\nOrder Summary:\nItem ${index + 1}: ${dec.name}\nInclusion:\n${inclusion}\n`;
+
+      if (dec.featuredImage) {
+        message += `Featured Image: ${dec.featuredImage}\n`;
+      }
+    });
+
+    
+
+    // Open WhatsApp with the pre-filled message
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, "_blank");
+  };
+  // fetch orderdetails
+  const FetchOrderDetails = ({ orderDetails }) => {
+    console.log(getOrderType(orderDetails?.type) ,JSON.stringify(orderDetails))
+    return (
+      <div>
+        <div className="order-details-container">
+          <h2 className="popup-title">Order Details</h2>
+          <div className="order-grid">
+            <div className="order-details-box">
+              <div className="order-detail-row">
+                <p>
+                  <strong>Order Number:</strong> {getOrderId(orderDetails?.order_id)}
+                </p>
+                <p>
+                  <strong>Order Date:</strong>{" "}
+                  {new Date(orderDetails?.order_date).toLocaleDateString()}
+                </p>
+                <p>
+                  <strong>No of burners:</strong> {orderDetails?.burners || 0}
+                </p>
+                <p>
+                  <strong>No of people:</strong> {orderDetails?.no_of_people || 0}
+                </p>
+                <p>
+                  <strong>City:</strong> {orderDetails?.order_locality || "N/A"}
+                </p>
+                <p>
+                  <strong>Order Type:</strong> {getOrderType(orderDetails?.type)}
+                </p>
+                <p>
+                  <strong>Order Address:</strong> {orderDetails?.addressId?.address1 || "N/A"}
+                </p>
+              </div>
+              <h3>Ordered Items:</h3>
+              <div className="order-items-container">
+                <ul className="order-items-list">
+                  {orderDetails?.selecteditems?.map((item) => (
+                    <li key={item._id} className="order-item">
+                      <Image
+                        src={`https://horaservices.com/api/uploads/${item.image}`}
+                        alt={item.name}
+                        width={80}
+                        height={80}
+                        className="order-item-image"
+                      />
+                      <div className="order-item-details">
+                        <strong className="order-item-title">{item.name}</strong>
+                        <span className="order-item-price">₹{item.price}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <div className="order-summary-box">
+              <h3 style={{ color: "white" }}>Order Summary</h3>
+              <ul style={{ listStyleType: "none", padding: 0 }}>
+                <li style={{ display: "flex", justifyContent: "space-between" }}>
+                  <strong>Subtotal:</strong> <span>₹{orderDetails?.total_amount}</span>
+                </li>
+                <li style={{ display: "flex", justifyContent: "space-between" }}>
+                  <strong>Discount:</strong> <span>₹{orderDetails?.discount || 0}</span>
+                </li>
+                <li style={{ display: "flex", justifyContent: "space-between" }}>
+                  <strong>GST:</strong> <span>₹{orderDetails?.gst || 0}</span>
+                </li>
+                <li style={{ display: "flex", justifyContent: "space-between" }}>
+                  <strong>Per person cost:</strong> <span>₹{orderDetails?.per_person_cost || 0}</span>
+                </li>
+                <li
+                  className="total-amount"
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontWeight: "bold",
+                  }}
+                >
+                  <strong>Total:</strong> <span>₹{orderDetails?.payable_amount}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+  
 
   return (
     <div className="popup-overlay">
@@ -168,7 +320,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupOrderType, onClose
                     <p><strong>Product Name:</strong>{dec.name}</p> 
                     <p><strong>Product Price: </strong>{dec.price}</p>
                     <p>
-                    <Image src={`https://horaservices.com/api/uploads/${dec.featured_image}`} width={200} height={200} />
+                    <Image src={`https://horaservices.com/api/uploads/${dec.featured_image}`} width={200} height={200} alt={`${dec.featured_image}-name`}/>
                     </p>
                     <p>{getItemInclusion(dec.inclusion)}</p>
                     </div>
@@ -227,135 +379,32 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupOrderType, onClose
                   </li>
                 
                 </ul>
+                <button
+                          className="startbutton"
+                          onClick={sendOrderDetailsToWhatsApp}
+                        >
+                          Share On WhatsApp
+                        </button>
               </div>
             </div>
           </div>
         ) : (
-          <p></p>
+          null
         )} 
-        {popupType === "chef" && (
-          <div>
-            <div className="order-details-container">
-              <h2 className="popup-title">Order Details</h2>
-              { JSON.stringify(orderDetails) }
-              {/* <div className="order-grid">
-                <div className="order-details-box">
-                  <div className="order-detail-row">
-                    <p>
-                      <strong>Order Number:</strong> {orderDetails.order_id}
-                    </p>
-                    <p>
-                      <strong>Order Date:</strong>{" "}
-                      {new Date(orderDetails.order_date).toLocaleDateString()}
-                    </p>
-                    <p>
-                      <strong>No of burners:</strong>{" "}
-                      {orderDetails.burners || 0}
-                    </p>
-                    <p>
-                      <strong>No of people:</strong>{" "}
-                      {orderDetails.no_of_people || 0}
-                    </p>
-                    <p>
-                      <strong>Type:</strong> {orderDetails.type || "N/A"}
-                    </p>
-                    <p>
-                      <strong>Order Type:</strong>{" "}
-                      {getOrderType(orderDetails.type)}
-                    </p>
-                    <p>
-                      <strong>Order Address:</strong>{" "}
-                      {orderDetails.addressId?.address1 || "N/A"}
-                    </p>
-                  </div>
-                  <h3>Ordered Items:</h3>
 
-                  <div className="order-items-container">
-                    <ul className="order-items-list">
-                      {orderDetails.selecteditems.map((item) => (
-                        <li key={item._id} className="order-item">
-                          <Image
-                            src={`https://horaservices.com/api/uploads/${item.image}`}
-                            alt={item.name}
-                            width={80} // Smaller size for items
-                            height={80} // Smaller size for items
-                            className="order-item-image"
-                          />
-                          <div className="order-item-details">
-                            <strong className="order-item-title">
-                              {item.name}
-                            </strong>
-                            <span className="order-item-price">
-                              ₹{item.price}
-                            </span>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="order-summary-box">
-                  <h3 style={{ color: "white" }}>Order Summary</h3>
-                  <ul style={{ listStyleType: "none", padding: 0 }}>
-                    <li
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <strong>Subtotal:</strong>{" "}
-                      <span>₹{orderDetails.total_amount}</span>
-                    </li>
-                    <li
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <strong>Discount:</strong>{" "}
-                      <span>₹{orderDetails.discount || 0}</span>
-                    </li>
-                    <li
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <strong>GST:</strong>{" "}
-                      <span>₹{orderDetails.gst || 0}</span>
-                    </li>
-                    <li
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <strong>Per person cost:</strong>{" "}
-                      <span>₹{orderDetails.per_person_cost || 0}</span>
-                    </li>
-                    <li
-                      className="total-amount"
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      <strong>Total:</strong>{" "}
-                      <span>₹{orderDetails.payable_amount}</span>
-                    </li>
-                  </ul>
-                </div>
-              </div> */}
-            </div>
-          </div>
+      {popupType === "chef" && orderDetails && (
+          <FetchOrderDetails orderDetails={orderDetails} />
         )}
+        {popupType === "foodDelivery" && orderDetails && (
+          <FetchOrderDetails orderDetails={orderDetails[0]} />
+        )}
+ 
 
-      
+
       </div>
     </div>
   );
 };
 
 export default ActionPopup;
+

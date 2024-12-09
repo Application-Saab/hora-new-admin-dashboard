@@ -151,7 +151,7 @@
     border: 1px;
 }
   
-  .date-filter-box {
+  .date-filter-container {
     display: block;
     border: 2px solid #ddd; /* Box border */
     padding: 5px;
