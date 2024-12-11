@@ -126,7 +126,7 @@ h3 {
 
 .filter-container {
   display: flex;
-  justify-content: space-between;
+
   gap: 10px;
   align-items: center;
 }

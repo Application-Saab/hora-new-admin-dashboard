@@ -22,12 +22,12 @@ const OrderList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [popupOpen, setPopupOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState("");
-  const [selectedOffcusNum, setSelectedOffcusNum] = useState("");
+  const [selectedPhoneNumber, setSelectedPhoneNumber] = useState("");
   const [orderDetails, setOrderDetails] = useState(null);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [selectedOrderType, setSelectedOrderType] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedActiveStatus, setSelectedActiveStatus] = useState("");
   const [selectedOrderStatus, setSelectedOrderStatus] = useState("");
   const [actionPopupOrderId, setActionPopupOrderId] = useState("");
   const [actionPopupChefOrderId, setActionPopupChefOrderId] = useState("");
@@ -42,7 +42,7 @@ const OrderList = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState("");
 
-  const fetchOrders = async (page, orderId = '', status = '', orderType = '', orderCity = '', selectedDate = '', selectedOfflineNum = '') => {
+  const fetchOrders = async (page, orderId = '', orderstatus = '', activeStatus= '' ,orderType = '', orderCity = '', selectedDate = '', selectedOfflineNum = '') => {
     console.log("Selected Date in fetchOrders:", selectedOfflineNum);  // Log the selected date for debugging
     setLoading(true);
     setProgress(0);
@@ -69,21 +69,24 @@ const OrderList = () => {
     const url = `${BASE_URL}${ADMIN_ORDER_LIST}`;
 
     // `newId` calculation - update this based on actual use case, or use `orderId` directly if needed
-    let newId = Math.abs(orderId - 10800);  // Confirm if this is needed or if `orderId` should be used as is
-
+    let filteredId = Math.abs(orderId - 10800);  // Confirm if this is needed or if `orderId` should be used as is
+    let filteredDate=( `${selectedDate}T00:00:00.000Z`).toString()
+    console.log(filteredDate)
     // Prepare requestData
     let requestData = {
       page: page,
       per_page: itemsPerPage,
-      order_id: orderId.length > 0 ? newId : "", // Conditionally set order_id if `orderId` exists
-      order_status: status ? Number(status) : "", // Convert status to number, or use empty string if invalid
-      type: typeId || "", // Use typeId if available
+      order_id: orderId.length > 0 ? filteredId : "", // `match orderId`
+      order_status: Number(orderstatus) || "", // 'match OrderStatus'
+      status: Number(activeStatus) ||  "", //match active/unactive status
+      type: typeId || "", // match order type
       order_locality: orderCity || "",
-      order_date: selectedDate || "",
-      phone_no: selectedOfflineNum || ""
+      // order_date: filteredDate || "",
+      phone_no: selectedOfflineNum || "",
+      online_phone_no :selectedOfflineNum || "",
     };
 
-    console.log(requestData);  // Log the request data for debugging
+    console.log(requestData); 
 
     try {
       const response = await fetch(url, {
@@ -106,6 +109,7 @@ const OrderList = () => {
           // No orders found, show an alert with a message
           alert("No orders found.");
           console.warn("No orders found");
+          setSearchTerm('');
         }
       }
     } catch (error) {
@@ -119,56 +123,25 @@ const OrderList = () => {
   };
 
 
-
-  const getOnlineCustomerNumber = async (onlineCustomerId) => {
-
-    const url = `${BASE_URL}${ADMIN_USER_DETAILS}${onlineCustomerId}`;
-    try {
-      const response = await axios.get(url);
-      const phone = response.data.data.phone;
-
-      return phone;
-    } catch (error) {
-      console.error("Error fetching customer data:", error);
-      return null;
-    }
-
-  };
-
   useEffect(() => {
-    fetchOrders(currentPage, searchTerm, selectedOrderStatus, selectedOrderType, selectedCity, selectedDate, selectedOffcusNum);
-  }, [currentPage, searchTerm, selectedOrderStatus, selectedOrderType, selectedCity, selectedDate, selectedOffcusNum]);
-
-  useEffect(() => {
-    for (let i = 0; i < orders.length; i++) {
-      if (!orders[i].phone_no) {
-        orders[i].online_phone_number = getOnlineCustomerNumber(orders[i].fromId);
-      }
-    }
-  }, [orders]);
+    fetchOrders(currentPage, searchTerm, selectedOrderStatus, selectedActiveStatus , selectedOrderType, selectedCity, selectedDate, selectedPhoneNumber);
+  }, [currentPage, selectedOrderStatus, selectedActiveStatus ,selectedOrderType, selectedCity, selectedDate]);
 
 
-  const FilterSearch = (id) => {
-    setSearchTerm(id);
-    fetchOrders(currentPage, id, selectedOrderStatus, selectedOrderType, selectedCity, selectedOffcusNum);
-  };
-  const FilterByStatus = (status) => {
-    setSelectedStatus(status);
-    fetchOrders(currentPage, searchTerm, status, selectedOrderType, selectedCity, selectedOffcusNum);
-  };
-  const FilterByType = (selectedType) => {
-    setSelectedOrderType(selectedType);
-    fetchOrders(currentPage, searchTerm, selectedOrderStatus, selectedType, selectedCity, selectedOffcusNum);
-  };
-  const FilterByCity = (selectedCity) => {
-    setSelectedCity(selectedCity);
-    fetchOrders(currentPage, searchTerm, selectedOrderStatus, selectedOrderType, selectedCity, selectedOffcusNum);
+
+  const FilterSearch = (orderId) => {
+    setSearchTerm(orderId);
+    fetchOrders(currentPage, orderId, selectedOrderStatus, selectedOrderType, selectedCity, selectedPhoneNumber);
+    setSearchTerm('');
   };
 
-  // const FilterByOfflineCustomer = (selectedOfflineNum) => {
-  //   setSelectedOffcusNum(selectedOfflineNum);
-  //   fetchOrders(currentPage, searchTerm, selectedOrderStatus, selectedOrderType, selectedCity, selectedOffcusNum);
-  // }
+
+  const FilterPhoneNumber = (selectedPhoneNumber) => {
+    console.log(selectedPhoneNumber)
+    setSelectedPhoneNumber(selectedPhoneNumber);
+    fetchOrders(currentPage, searchTerm, selectedOrderStatus, selectedActiveStatus , selectedOrderType, selectedCity, selectedDate, selectedPhoneNumber);
+    // SelectedPhoneNumber('');
+  }
 
 
   const getOrderStatus = (orderStatusValue) => {
@@ -277,29 +250,29 @@ const OrderList = () => {
                 type="text"
                 className="small-search byPhone"
                 placeholder="Search by offline customer"
-                value={selectedOffcusNum}
+                value={selectedPhoneNumber}
 
                 onChange={(e) =>
-                  setSelectedOffcusNum(e.target.value)
+                  setSelectedPhoneNumber(e.target.value)
 
                 }
               />
-              {/* <button onClick={() => FilterByOfflineCustomer(selectedOffcusNum)}>Search</button> */}
-              <input
+              <button onClick={() => FilterPhoneNumber(selectedPhoneNumber)}>Search</button>
+              {/* <input
                 type="text"
                 className="small-search byPhone"
                 placeholder="Search by online customer"
-                value={selectedOffcusNum}
+                value={selectedPhoneNumber}
 
                 onChange={(e) =>
                   setSelectedOnlinecusNum(e.target.value)
 
                 }
-              />
+              /> */}
             </div>
-            <div className="date-filter-container">
+            {/* date search */}
               <div className="date-filter-container">
-                <div className="date-input-container">
+            
                   <label className="date-label">Order Date</label>
                   <input
                     type="date"
@@ -308,9 +281,9 @@ const OrderList = () => {
                     placeholder="Select Date"
                     className="date-input"
                   />
-                </div>
+                
               </div>
-            </div>
+           
           </div>
           <div className="right-part">
 
@@ -337,7 +310,7 @@ const OrderList = () => {
                       onChange={(e) => {
                         const newOrderType = e.target.value;
                         setSelectedOrderType(newOrderType);
-                        FilterByType(newOrderType); // Trigger the filter
+                        // FilterByType(newOrderType); // Trigger the filter
                       }}
                       className="order-type-dropdown"
                     >
@@ -359,7 +332,7 @@ const OrderList = () => {
                       onChange={(e) => {
                         const newOrderCity = e.target.value; // Get the updated value directly
                         setSelectedCity(newOrderCity);  // Update state
-                        FilterByCity(newOrderCity);          // Pass the updated value immediately
+                        // FilterByCity(newOrderCity);          // Pass the updated value immediately
                       }}
                       className="order-type-dropdown"
                     >
@@ -386,9 +359,9 @@ const OrderList = () => {
                     <select
                       value={selectedOrderStatus}
                       onChange={(e) => {
-                        const newStatus = e.target.value; // Get the updated value directly
-                        setSelectedOrderStatus(newStatus);  // Update state
-                        FilterByStatus(newStatus);          // Pass the updated value immediately
+                        const filterdStatus = e.target.value; // Get the updated value directly
+                        setSelectedOrderStatus(filterdStatus);  // Update state
+                        // FilterByStatus(newStatus);          // Pass the updated value immediately
                       }}
                       className="order-type-dropdown"
                     >
@@ -407,13 +380,13 @@ const OrderList = () => {
                 <th className="order-type-header">
                   Status
                   <select
-                    value={selectedStatus}
-                    onChange={(e) => setSelectedStatus(e.target.value)}
+                    value={selectedActiveStatus}
+                    onChange={(e) => setSelectedActiveStatus(e.target.value)}
                     className="order-type-dropdown"
                   >
                     <option value="All">All</option>
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
+                    <option value="1">Active</option>
+                    <option value="0">Inactive</option>
                   </select>
                 </th>
                 <th>Action</th>

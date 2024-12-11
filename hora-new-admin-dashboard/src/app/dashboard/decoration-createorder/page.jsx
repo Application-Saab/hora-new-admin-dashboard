@@ -38,7 +38,7 @@ const AddOrder = () => {
 
   const [products, setProducts] = useState([{ name: "", price: "" }]);
   const [comment, setComment] = useState("");
-
+  const [dishNameError, setDishNameError] = useState('')
   // const [error, setError] = useState(null);
 
   const [loading, setLoading] = useState(false);
@@ -81,8 +81,10 @@ const AddOrder = () => {
             setProductID(productData._id);
             setProductPrice(productData.price);
             setShowProductDetails(true);
+            setDishNameError('')
           } else {
             setShowProductDetails(false);
+            setDishNameError('No product found')
           }
         } catch (error) {
           console.error("Error fetching product:", error.message);
@@ -96,7 +98,7 @@ const AddOrder = () => {
   useEffect(() => {
     if (pincode) {
       if (pincodes.includes(pincode)) {
-       
+
         setPincodeMessage("Pincode available");
         setPincodeMessageColor("green");
       } else {
@@ -281,7 +283,7 @@ const AddOrder = () => {
       balance_amount: balanceamount,
       order_taken_by: orderTakenBy,
     };
-    
+
     console.log(requestData, "requestData decoration");
 
     try {
@@ -305,7 +307,7 @@ const AddOrder = () => {
     { value: "7:00 PM - 10:00 PM", label: "7:00 PM - 10:00 PM" },
   ];
 
- 
+
   useEffect(() => {
     const balance = totalamount - advanceamount;
     setBalanceAmount(balance);
@@ -314,7 +316,7 @@ const AddOrder = () => {
   return (
     <div className="container">
       <h1 className="createOrder pageHeading">Create Decoration Order</h1>
-      <form onSubmit={handleSubmit}>
+      <form className='orderCreation form' onSubmit={handleSubmit}>
         {/* product check */}
         <label htmlFor="dishName">Product Name *</label>
         <input
@@ -334,13 +336,16 @@ const AddOrder = () => {
         {!isContinueClicked && (
           <button
             type="button"
-            className="button1"
+            className="orderCheck-btn"
             onClick={handleContinueClick}
             style={{ marginTop: "10px" }}
+            disabled={dishName === '' ? true : false}
           >
             Continue
           </button>
+
         )}
+        {<p class='error-msg' style={{ color: " red" }}>{dishName && isContinueClicked ? dishNameError : ''}</p>}
         {/* product details =================================================*/}
 
         {showProductDetails && product && (
@@ -371,7 +376,7 @@ const AddOrder = () => {
               placeholder="Customer Number"
               required
             />
-            <button onClick={handleCheckCustomer} disabled={loading}>
+            <button class="orderCheck-btn" onClick={handleCheckCustomer} disabled={loading}>
               {loading ? "Checking..." : "Check Customer"}
             </button>
             {loading && <p>Loading...</p>} {/* Loader */}
@@ -395,19 +400,13 @@ const AddOrder = () => {
                   className="date-time-container"
                   style={{
                     display: "flex",
-                    justifyContent: "space-between",
                     alignItems: "center",
-                    margin: "10px 0",
+                    gap: "2%",
                   }}
                 >
-                  <div style={{ flex: 1, marginRight: "10px" }}>
+                  <div style={{ marginRight: "10px" }}>
                     <label
                       htmlFor="date"
-                      style={{
-                        fontWeight: "bold",
-                        marginBottom: "5px",
-                        display: "block",
-                      }}
                     >
                       Date *
                     </label>
@@ -417,19 +416,14 @@ const AddOrder = () => {
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
                       required
-                      style={{
-                        width: "90%",
-                        padding: "10px",
-                        fontSize: "16px",
-                      }}
                     />
                   </div>
 
-                  <div style={{ flex: 1, marginLeft: "10px" }}>
+                  <div style={{ marginLeft: "10px" }}>
                     <label
                       htmlFor="timeSlot"
                       style={{
-                        fontWeight: "bold",
+
                         marginBottom: "5px",
                         display: "block",
                       }}
@@ -448,31 +442,32 @@ const AddOrder = () => {
 
 
 
+                <div className="address-box">
+                  <label htmlFor="address">Address*</label>
+                  <textarea
+                    type="text"
+                    id="address"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    placeholder="Address"
+                    required
+                  />
+                </div>
+                <div className="googleLocation-box">
+                  <label htmlFor="googleLocation">Google Location</label>
+                  <textarea
+                    type="text"
+                    id="googleLocation"
+                    value={googleLocation}
+                    onChange={(e) => setGoogleLocation(e.target.value)}
+                    placeholder="googleLocation"
 
-                <label htmlFor="address">Address*</label>
-                <textarea
-                  type="text"
-                  id="address"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  placeholder="Address"
-                  style={{ width: "665px" }}
-                  required
-                />
 
-                <label htmlFor="googleLocation">Google Location</label>
-                <textarea
-                  type="text"
-                  id="googleLocation"
-                  value={googleLocation}
-                  onChange={(e) => setGoogleLocation(e.target.value)}
-                  placeholder="googleLocation"
-                  style={{ width: "665px" }}
-
-                />
-
-                <label htmlFor="addOn">Add On</label>
+                  />
+                </div>
                 <div className="addon-container">
+                  <label htmlFor="addOn">Add On</label>
+
                   <form className="addon-form">
                     {products.map((product, index) => (
                       <div className="addon-row" key={index}>
@@ -499,80 +494,85 @@ const AddOrder = () => {
                 </div>
 
 
-
-                <label htmlFor="totalamount">Total Amount*</label>
-                <input
-                  type="text"
-                  id="totalamount"
-                  value={totalamount}
-                  onChange={(e) => setTotalAmount(e.target.value)}
-                  placeholder="Total Amount"
-                  required
-                />
-
-                <label htmlFor="advanceamount">Advance Amount</label>
-                <input
-                  type="text"
-                  id="advanceamount"
-                  value={advanceamount}
-                  onChange={(e) => setAdvanceAmount(e.target.value)}
-                  placeholder="Advance Amount"
-                />
-
-                <label htmlFor="balanceamount">Balance Amount</label>
-                <input
-                  type="text"
-                  id="balanceamount"
-                  value={balanceamount}
-                  placeholder="Balance Amount"
-                  disabled
-                />
-
-
-
-
-                <div style={{ margin: "10px 0", width: "100%" }}>
-                  <label
-                    htmlFor="city"
-                    style={{
-                      fontWeight: "bold",
-                      marginBottom: "5px",
-                      display: "block",
-                    }}
-                  >
-                    City *
-                  </label>
-                  <select
-                    id="city"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
+                <div className="amount-box">
+                  <label htmlFor="totalamount">Total Amount*</label>
+                  <input
+                    type="text"
+                    id="totalamount"
+                    value={totalamount}
+                    onChange={(e) => setTotalAmount(e.target.value)}
+                    placeholder="Total Amount"
                     required
-                    style={{
-                      width: "103%",
-                      padding: "10px",
-                      borderRadius: "5px",
-                      fontSize: "16px",
-                      transition: "border-color 0.3s",
-                    }}
-                  >
-                    <option value="" style={{ color: "#aaa" }}>
-                      Select City
-                    </option>
-                    <option value="Bangalore">Bangalore</option>
-                    <option value="Delhi">Delhi</option>
-                    <option value="Mumbai">Mumbai</option>
-                    <option value="Hyderbad">Hyderbad</option>
-                  </select>
+                  />
+
+                  <label htmlFor="advanceamount">Advance Amount</label>
+                  <input
+                    type="text"
+                    id="advanceamount"
+                    value={advanceamount}
+                    onChange={(e) => setAdvanceAmount(e.target.value)}
+                    placeholder="Advance Amount"
+                  />
+
+                  <label htmlFor="balanceamount">Balance Amount</label>
+                  <input
+                    type="text"
+                    id="balanceamount"
+                    value={balanceamount}
+                    placeholder="Balance Amount"
+                    disabled
+                  />
                 </div>
 
-                <label htmlFor="pincode">Pincode *</label>
-                <input
-                  type="text"
-                  id="pincode"
-                  value={pincode}
-                  onChange={(e) => setPincode(e.target.value)}
-                />
-                <p style={{ fontWeight: "bold", fontSize: "15px", color: pincodeMessageColor }}>{pincodeMessage}</p>
+
+
+                <div className="cityPincode-box" style={{ margin: "10px 0", width: "100%" }}>
+                  <div className="city-box">
+                    <label
+                      htmlFor="city"
+                      style={{
+
+                        marginBottom: "5px",
+                        display: "block",
+                      }}
+                    >
+                      City *
+                    </label>
+                    <select
+                      id="city"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      required
+                      style={{
+                        width: "100%",
+                        padding: "10px",
+                        borderRadius: "5px",
+                        fontSize: "16px",
+                        transition: "border-color 0.3s",
+                      }}
+                    >
+                      <option value="" style={{ color: "#aaa" }}>
+                        Select City
+                      </option>
+                      <option value="Bangalore">Bangalore</option>
+                      <option value="Delhi">Delhi</option>
+                      <option value="Mumbai">Mumbai</option>
+                      <option value="Hyderbad">Hyderbad</option>
+                    </select>
+
+                  </div>
+                  <div className="pincode-box">
+                    <label htmlFor="pincode">Pincode *</label>
+                    <input
+                      type="text"
+                      id="pincode"
+                      value={pincode}
+                      onChange={(e) => setPincode(e.target.value)}
+                    />
+                    <p style={{ fontWeight: "bold", fontSize: "15px", color: pincodeMessageColor }}>{pincodeMessage}</p>
+                  </div>
+
+                </div>
                 <div className='checkoutInputType border-1 rounded-4'>
                   <h4>Share your comments (if any)</h4>
                   <textarea className='rounded border border-1 p-1 bg-white text-black'
@@ -585,7 +585,7 @@ const AddOrder = () => {
 
                   />
                 </div>
-                <button className="button1" type="submit">
+                <button className="orderCheck-btn" type="submit">
                   {/* Create Order */}
                   {lloading ? "Creating Order..." : "Create Order"}
                 </button>

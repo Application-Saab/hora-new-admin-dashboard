@@ -1,54 +1,69 @@
-/* body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 20px;
-} */
-
-.container {
-    max-width: 650px;
-    margin: auto;
-    background: white;
-    padding: 50px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+body {
+  box-sizing: border-box;
 }
 
-.pageHeading{
-  font-size: calc(16px + 14 * ((100vw - 360px) / (768 - 360)));
-    text-align: center;
+.container {
+  max-width: 65%;
+  margin: auto;
+  background: white;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.orderCreation {
+  display: flex;
+  flex-direction: column;
+}
+
+.pageHeading {
+  font-size: calc(12px + 14 * ((100vw - 360px) / (768 - 360)));
+  text-align: center;
 }
 
 label {
-    display: block;
-    margin-top: 15px;
-    margin-bottom:5px;
+  display: block;
+  margin-top: 15px;
+  margin-bottom: 5px;
 }
 
+textarea {
+  width: 100%;
+  display: block;
+  max-width: 100%;
+}
+
+input[type="date"],
 input[type="text"],
 input[type="number"],
-input[type="file"] {
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+input[type="file"],
+textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
-.button1 {
-    margin-top: 20px;
-    padding: 10px;
-    background-color: #5cb85c;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    width: 100%;
+.orderCheck-btn {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #5cb85c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
 }
 
 .button1:hover {
-    background-color: #4cae4c;
+  background-color: #4cae4c;
 }
+
+label {
+  font-weight: bold;
+}
+
 /* 
 .form_css {
     flex-direction: row;
@@ -69,94 +84,101 @@ input[type="comment"] {
 
 
 .form_css {
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    width: 630px;
-  }
-  
-  .form_css label {
-    display: block;
-    margin-bottom: 10px;
-  }
-  
-  .form_css input[type="text"] {
-    width: 97%;
-    padding: 10px;
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-  }
-  
-  .form_css button[type="button"] {
-    padding: 10px 20px;
-    background-color: #4CAF50;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  width: 630px;
+}
 
-  /*  */
- 
-  
-  .addon-container {
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    width: 630px;
-  }
-  
-  .addon-form {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .addon-row {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-  
-  .addon-input {
-    padding: 8px;
-    margin-right: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    width: 200px; /* Adjust width as needed */
-  }
-  
-  .name-input {
+.form_css label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.form_css input[type="text"] {
+  width: 97%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+}
+
+.form_css button[type="button"] {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/*  */
+
+
+.amount-box {
+
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+  ;
+
+}
+
+.addon-form {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.addon-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.addon-input {
+  padding: 8px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 200px;
+  /* Adjust width as needed */
+}
+
+/* .name-input {
     flex: 1;
   }
   
   .price-input {
     flex: 0.5;
-  }
-  
-  .add-new-btn {
-    padding: 8px 16px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .add-new-btn:hover {
-    background-color: #45a049;
-  }
-  .loader {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 60px;
-    font-weight: bold;
-    color: #f01212;
-  }
- 
-  
-  /* popup new customer css */
+  } */
+
+.add-new-btn {
+  padding: 8px 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-new-btn:hover {
+  background-color: #45a049;
+}
+
+.loader {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 60px;
+  font-weight: bold;
+  color: #f01212;
+}
+
+
+/* popup new customer css */
 /* General Styles */
 
 
@@ -168,9 +190,12 @@ input[type="comment"] {
   transform: translate(-50%, -50%);
   width: 400px;
   padding: 20px;
-  background: #ffffff; /* Clean white background */
-  border-radius: 16px; /* Rounded corners */
-  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1); /* Soft shadow */
+  background: #ffffff;
+  /* Clean white background */
+  border-radius: 16px;
+  /* Rounded corners */
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
+  /* Soft shadow */
   z-index: 1000;
   animation: fade-in 0.3s ease-in-out;
 }
@@ -181,6 +206,7 @@ input[type="comment"] {
     opacity: 0;
     transform: translate(-50%, -60%);
   }
+
   to {
     opacity: 1;
     transform: translate(-50%, -50%);
@@ -218,7 +244,8 @@ input[type="comment"] {
 }
 
 .popup input:focus {
-  border-color: #4caf50; /* Soft green for focus */
+  border-color: #4caf50;
+  /* Soft green for focus */
   box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
 }
 
@@ -229,7 +256,8 @@ input[type="comment"] {
   margin: 10px 1%;
   border: none;
   border-radius: 12px;
-  background: #4caf50; /* Light green button */
+  background: #4caf50;
+  /* Light green button */
   color: #ffffff;
   font-size: 1rem;
   font-weight: 600;
@@ -238,18 +266,22 @@ input[type="comment"] {
 }
 
 .popup button:hover {
-  background-color: #45a049; /* Darker green hover effect */
-  transform: translateY(-2px); /* Slight lift on hover */
+  background-color: #45a049;
+  /* Darker green hover effect */
+  transform: translateY(-2px);
+  /* Slight lift on hover */
 }
 
 /* Cancel Button */
 .popup button.cancel {
-  background: #e0e0e0; /* Light grey for cancel */
+  background: #e0e0e0;
+  /* Light grey for cancel */
   color: #333;
 }
 
 .popup button.cancel:hover {
-  background: #d6d6d6; /* Darker grey on hover */
+  background: #d6d6d6;
+  /* Darker grey on hover */
 }
 
 /* Responsive Design for Mobile */
@@ -261,5 +293,15 @@ input[type="comment"] {
 
   .popup h2 {
     font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 549px) {
+
+  .date-time-container,
+  .addon-row,
+  .amount-box {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
