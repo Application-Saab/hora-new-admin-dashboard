@@ -69,7 +69,20 @@ const ActionPopup = ({ isOpen, actionPopupOrderId,actionPopupChefOrderId,  actio
     return orderTypes[orderTypeValue] || "Unknown Order Type";
   };
 
+  const getCleanInclusionText = (inclusionArray) => {
+    if (!inclusionArray || inclusionArray.length === 0)
+      return "No inclusion details available";
+  
+    return inclusionArray
+      .join("") 
+      .replace(/<\/?(div|span)>/g, "") 
+      .replace(/&#10;/g, "\n") 
+      .replace(/\s*-\s*/g, "\n- ")
+      .trim(); 
+  };
+
   const getItemInclusion = (inclusion) => {
+    console.log(inclusion);
     if (!Array.isArray(inclusion) || inclusion.length === 0) {
       return null;
     }
@@ -95,6 +108,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId,actionPopupChefOrderId,  actio
   };
    // share on whatsapp========================
    const sendOrderDetailsToWhatsApp = () => {
+    console.log(JSON.stringify(orderDetails.items));
     const orderId = getOrderId(orderDetails._doc.order_id) || "N/A";
     const orderDate = new Date(
       orderDetails._doc.order_date
@@ -140,14 +154,35 @@ const ActionPopup = ({ isOpen, actionPopupOrderId,actionPopupChefOrderId,  actio
       message += `\nOrder Add-On Items: None`;
     }
 
-    decorations.forEach((dec, index) => {
-      const inclusion = getCleanInclusionText(dec.inclusion) || "N/A"; // Get the formatted inclusion list
-      message += `\n\nOrder Summary:\nItem ${index + 1}: ${dec.name}\nInclusion:\n${inclusion}\n`;
+  
+    <p>
+      {
+        orderDetails.items.map((item) =>
+          item.decoration.map((dec, index) => {
+            // Append each item's details to the message
+            message += `\n\nProduct Name: ${dec.name}\n`; // Product name
+            message += `Product Price: ${dec.price}\n`; // Product price
+            message += `Image URL: https://horaservices.com/api/uploads/${dec.featured_image}\n`; // Image URL
+            const inclusionText = getCleanInclusionText(dec.inclusion);
+            message += `Inclusion: \n${inclusionText}\n`;
+            return null; // No need to return anything from the map function, as we're just building a string
+          })
+        )};
+    </p>
 
-      if (dec.featuredImage) {
-        message += `Featured Image: ${dec.featuredImage}\n`;
-      }
-    });
+  //   {
+  //    orderDetails.items.decorations.forEach((dec, index) => {
+  //     const inclusion = getCleanInclusionText(dec.inclusion) || "N/A"; // Get the formatted inclusion list
+  //     message += `\n\nOrder Summary:\nItem ${index + 1}: ${dec.name}\nInclusion:\n${inclusion}\n`;
+    
+  //     if (dec.featuredImage) {
+  //       message += `Featured Image: ${dec.featuredImage}\n`;
+  //     }
+  //   });
+  //   };
+  // </p>
+
+
 
     
 
