@@ -71,14 +71,16 @@ const OrderList = () => {
     // `newId` calculation - update this based on actual use case, or use `orderId` directly if needed
     let filteredId = Math.abs(orderId - 10800);  // Confirm if this is needed or if `orderId` should be used as is
     let filteredDate=( `${selectedDate}T00:00:00.000Z`).toString()
-    console.log(filteredDate)
+    console.log(Number(activeStatus))
     // Prepare requestData
     let requestData = {
       page: page,
       per_page: itemsPerPage,
       order_id: orderId.length > 0 ? filteredId : "", // `match orderId`
       order_status: Number(orderstatus) || "", // 'match OrderStatus'
-      status: Number(activeStatus) ||  "", //match active/unactive status
+      status: (Number(activeStatus) === 0 || Number(activeStatus) === 1) 
+    ? Number(activeStatus) 
+    : "",
       type: typeId || "", // match order type
       order_locality: orderCity || "",
       // order_date: filteredDate || "",
@@ -240,7 +242,7 @@ const OrderList = () => {
                   }}
 
                 />
-                <button onClick={() => FilterSearch(searchTerm)}>Search</button>
+                <button className="filter-btn" onClick={() => FilterSearch(searchTerm)}>Search</button>
 
               </div>
             </div>
@@ -257,7 +259,7 @@ const OrderList = () => {
 
                 }
               />
-              <button onClick={() => FilterPhoneNumber(selectedPhoneNumber)}>Search</button>
+              <button className="filter-btn" onClick={() => FilterPhoneNumber(selectedPhoneNumber)}>Search</button>
               {/* <input
                 type="text"
                 className="small-search byPhone"
@@ -287,7 +289,7 @@ const OrderList = () => {
           </div>
           <div className="right-part">
 
-            <button onClick={() => window.location.reload()}>Reset all filters</button>
+            <button className="filter-btn" onClick={() => window.location.reload()}>Reset all filters</button>
           </div>
 
         </div>
