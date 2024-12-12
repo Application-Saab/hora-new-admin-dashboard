@@ -165,15 +165,15 @@ th.order-type-header span {
 }
 
 .date-filter-container {
-
   border: 2px solid #ddd;
-  /* Box border */
   padding: 4px;
   border-radius: 8px;
   background-color: #fff;
   display: flex;
-  gap: 1px;
-  flex-direction: column;
+  gap: 10px;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
 
 }
 

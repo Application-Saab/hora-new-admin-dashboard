@@ -3,16 +3,21 @@ import "./Actionpopup.css";
 import { useState, useEffect } from "react";
 
 const ActionPopup = ({ isOpen, actionPopupOrderId,actionPopupChefOrderId,  actionPopupOrderType, onClose  }) => {
-  if (!isOpen) return null;
+  // if (!isOpen) {
+  //   return null;  // Early exit if the popup is not open
+  // }
+  
+
   const [popupType, setPopupType] = useState("");
   const [orderDetails, setOrderDetails] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
+  let apiUrl = "";
+
   useEffect(() => {
     setLoading(true);
     setError(null);
-    let apiUrl = "";
+
     // Set the popup type and corresponding API URL based on order type
     if (actionPopupOrderType === 1) {
       apiUrl = `https://horaservices.com:3000/api/order/order_details_decoration/${actionPopupOrderId}`;
@@ -158,7 +163,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId,actionPopupChefOrderId,  actio
     <p>
       {
         orderDetails.items.map((item) =>
-          item.decoration.map((dec, index) => {
+          item.decoration.map((dec) => {
             // Append each item's details to the message
             message += `\n\nProduct Name: ${dec.name}\n`; // Product name
             message += `Product Price: ${dec.price}\n`; // Product price
@@ -279,165 +284,171 @@ const ActionPopup = ({ isOpen, actionPopupOrderId,actionPopupChefOrderId,  actio
   
 
   return (
-    <div className="popup-overlay">
-      <div className="popup-content">
-        <button onClick={onClose} className="close-btn">
-          ✖
-        </button>
-        {loading && <div>Loading...</div>}
-        {error && <div className="error-message">{error}</div>}
-        {popupType === "decoration" && orderDetails ? (
-          <div className="order-details-container">
-            <h2 className="popup-title">Order Details</h2>
-            <div className="order-grid">
-              <div className="order-details-box">
-                <div className="order-detail-row">
-                  <p>
-                    <strong> Order Id:</strong>{" "}
-                    {getOrderId(orderDetails._doc.order_id)}
-                  </p>
-                  {/* <p><strong>Order Id:</strong> {orderDetails._doc.otp}</p> */}
-                  <p>
-                    <strong>Order Date:</strong>{" "}
-                    {new Date(
-                      orderDetails._doc.order_date
-                    ).toLocaleDateString()}
-                  </p>
-                  <p>
-                    <strong>Order Type:</strong>{" "}
-                    {getOrderType(orderDetails._doc.type)}
-                  </p>
-                  <p>
-                    <strong>Order City:</strong>{" "}
-                    {orderDetails._doc.order_locality || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Order Address:</strong>{" "}
-                    {orderDetails._doc.addressId?.address1 || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Order Google Map Location:</strong>{" "}
-                    {orderDetails._doc.addressId?.address2 || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Order Time:</strong>{" "}
-                    {orderDetails._doc.order_time || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Phone Number:</strong>{" "}
-                    {orderDetails._doc.fromId.phone || "N/A"}
-                  </p>
-                  <p>
-                    <strong>Order Add On:</strong>{" "}
-
-                    { orderDetails._doc.add_on.length > 0 ? (
-                      <ul>
-                        {orderDetails._doc.add_on.map((item, index) => (
-                          <li key={index}>
-                            <strong>{item.name}</strong>: ₹{item.price}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      "N/A"
-                    )}
-                  </p>
-
-                  <p>
-                    <strong>Order decoration_comments:</strong>{" "}
-                    {orderDetails._doc.decoration_comments || "N/A"}
-                  </p>
-                    <p>
-                    {
-                    orderDetails.items.map((item) =>
-                    item.decoration.map((dec, index) => (
-                    <div key={`${index}-${dec.name}`}>  {/* Unique key for each decoration */}
-                    <p><strong>Product Name:</strong>{dec.name}</p> 
-                    <p><strong>Product Price: </strong>{dec.price}</p>
-                    <p>
-                    <Image src={`https://horaservices.com/api/uploads/${dec.featured_image}`} width={200} height={200} alt={`${dec.featured_image}-name`}/>
-                    </p>
-                    <p>{getItemInclusion(dec.inclusion)}</p>
-                    </div>
-                    ))
-                    )
-                    }
-                    </p>
-                </div>
-            
-
-              </div>
-
-              <div className="order-summary-box">
-                <h3 style={{ color: "white" }}>Order Summary</h3>
-                <ul style={{ listStyleType: "none", padding: 0 }}>
-                  <li
-                    style={{ display: "flex", justifyContent: "space-between" }}
-                  >
-                    <strong>Total Amount:</strong>{" "}
-                    <span>₹{orderDetails._doc.total_amount}</span>
-                  </li>
-                  <li
-                    style={{ display: "flex", justifyContent: "space-between" }}
-                  >
-                    <strong>Advance Amount:</strong>{" "}
-                    <span>₹{orderDetails._doc.advance_amount || 0}</span>
-                  </li>
-               
-                  <li style={{ display: "flex", justifyContent: "space-between" }}>
+    isOpen ? 
+        (
+          <div className="popup-overlay">
+          <div className="popup-content">
+            <button onClick={onClose} className="close-btn">
+              ✖
+            </button>
+            {loading && <div>Loading...</div>}
+            {error && <div className="error-message">{error}</div>}
+            {popupType === "decoration" && orderDetails ? (
+              <div className="order-details-container">
+                <h2 className="popup-title">Order Details</h2>
+                <div className="order-grid">
+                  <div className="order-details-box">
+                    <div className="order-detail-row">
+                      <p>
+                        <strong> Order Id:</strong>{" "}
+                        {getOrderId(orderDetails._doc.order_id)}
+                      </p>
+                      {/* <p><strong>Order Id:</strong> {orderDetails._doc.otp}</p> */}
+                      <p>
+                        <strong>Order Date:</strong>{" "}
+                        {new Date(
+                          orderDetails._doc.order_date
+                        ).toLocaleDateString()}
+                      </p>
+                      <p>
+                        <strong>Order Type:</strong>{" "}
+                        {getOrderType(orderDetails._doc.type)}
+                      </p>
+                      <p>
+                        <strong>Order City:</strong>{" "}
+                        {orderDetails._doc.order_locality || "N/A"}
+                      </p>
+                      <p>
+                        <strong>Order Address:</strong>{" "}
+                        {orderDetails._doc.addressId?.address1 || "N/A"}
+                      </p>
+                      <p>
+                        <strong>Order Google Map Location:</strong>{" "}
+                        {orderDetails._doc.addressId?.address2 || "N/A"}
+                      </p>
+                      <p>
+                        <strong>Order Time:</strong>{" "}
+                        {orderDetails._doc.order_time || "N/A"}
+                      </p>
+                      <p>
+                        <strong>Phone Number:</strong>{" "}
+                        {orderDetails._doc.fromId.phone || "N/A"}
+                      </p>
+                      <p>
+                        <strong>Order Add On:</strong>{" "}
     
-      <span>Balance Amount</span>
-      <span>
-  {orderDetails._doc?.total_amount && orderDetails._doc?.advance_amount
-    ? `₹ ${(orderDetails._doc.total_amount - orderDetails._doc.advance_amount)}`
-    : "N/A"}
-</span>
-</li>
-
-                  <li
-                    style={{ display: "flex", justifyContent: "space-between" }}
-                  >
-                    <strong>Discount:</strong>{" "}
-                    <span>₹{orderDetails._doc.discount || 0}</span>
-                  </li>
-                  <li
-                    style={{ display: "flex", justifyContent: "space-between" }}
-                  >
-                    <strong>GST:</strong>{" "}
-                    <span>₹{orderDetails._doc.gst || 0}</span>
-                  </li>
-                  <li
-                    style={{ display: "flex", justifyContent: "space-between" }}
-                  >
-                    <strong>Per person cost:</strong>{" "}
-                    <span>₹{orderDetails._doc.per_person_cost || 0}</span>
-                  </li>
+                        { orderDetails._doc.add_on.length > 0 ? (
+                          <ul>
+                            {orderDetails._doc.add_on.map((item, index) => (
+                              <li key={index}>
+                                <strong>{item.name}</strong>: ₹{item.price}
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          "N/A"
+                        )}
+                      </p>
+    
+                      <p>
+                        <strong>Order decoration_comments:</strong>{" "}
+                        {orderDetails._doc.decoration_comments || "N/A"}
+                      </p>
+                        <p>
+                        {
+                        orderDetails.items.map((item) =>
+                        item.decoration.map((dec, index) => (
+                        <div key={`${index}-${dec.name}`}>  {/* Unique key for each decoration */}
+                        <p><strong>Product Name:</strong>{dec.name}</p> 
+                        <p><strong>Product Price: </strong>{dec.price}</p>
+                        <p>
+                        <Image src={`https://horaservices.com/api/uploads/${dec.featured_image}`} width={200} height={200} alt={`${dec.featured_image}-name`}/>
+                        </p>
+                        <p>{getItemInclusion(dec.inclusion)}</p>
+                        </div>
+                        ))
+                        )
+                        }
+                        </p>
+                    </div>
                 
-                </ul>
-                <button
-                          className="startbutton"
-                          onClick={sendOrderDetailsToWhatsApp}
-                        >
-                          Share On WhatsApp
-                        </button>
+    
+                  </div>
+    
+                  <div className="order-summary-box">
+                    <h3 style={{ color: "white" }}>Order Summary</h3>
+                    <ul style={{ listStyleType: "none", padding: 0 }}>
+                      <li
+                        style={{ display: "flex", justifyContent: "space-between" }}
+                      >
+                        <strong>Total Amount:</strong>{" "}
+                        <span>₹{orderDetails._doc.total_amount}</span>
+                      </li>
+                      <li
+                        style={{ display: "flex", justifyContent: "space-between" }}
+                      >
+                        <strong>Advance Amount:</strong>{" "}
+                        <span>₹{orderDetails._doc.advance_amount || 0}</span>
+                      </li>
+                   
+                      <li style={{ display: "flex", justifyContent: "space-between" }}>
+        
+          <span>Balance Amount</span>
+          <span>
+      {orderDetails._doc?.total_amount && orderDetails._doc?.advance_amount
+        ? `₹ ${(orderDetails._doc.total_amount - orderDetails._doc.advance_amount)}`
+        : "N/A"}
+    </span>
+    </li>
+    
+                      <li
+                        style={{ display: "flex", justifyContent: "space-between" }}
+                      >
+                        <strong>Discount:</strong>{" "}
+                        <span>₹{orderDetails._doc.discount || 0}</span>
+                      </li>
+                      <li
+                        style={{ display: "flex", justifyContent: "space-between" }}
+                      >
+                        <strong>GST:</strong>{" "}
+                        <span>₹{orderDetails._doc.gst || 0}</span>
+                      </li>
+                      <li
+                        style={{ display: "flex", justifyContent: "space-between" }}
+                      >
+                        <strong>Per person cost:</strong>{" "}
+                        <span>₹{orderDetails._doc.per_person_cost || 0}</span>
+                      </li>
+                    
+                    </ul>
+                    <button
+                              className="startbutton"
+                              onClick={sendOrderDetailsToWhatsApp}
+                            >
+                              Share On WhatsApp
+                            </button>
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              null
+            )} 
+    
+          {popupType === "chef" && orderDetails && (
+              <FetchOrderDetails orderDetails={orderDetails} />
+            )}
+            {popupType === "foodDelivery" && orderDetails && (
+              <FetchOrderDetails orderDetails={orderDetails[0]} />
+            )}
+     
+    
+    
           </div>
-        ) : (
-          null
-        )} 
+        </div>
+        ) 
+      : 
+      null
 
-      {popupType === "chef" && orderDetails && (
-          <FetchOrderDetails orderDetails={orderDetails} />
-        )}
-        {popupType === "foodDelivery" && orderDetails && (
-          <FetchOrderDetails orderDetails={orderDetails[0]} />
-        )}
- 
-
-
-      </div>
-    </div>
   );
 };
 

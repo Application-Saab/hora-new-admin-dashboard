@@ -1,31 +1,24 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { FaEye } from "react-icons/fa";
-import Popup from "../../component/Popup";
 import ActionPopup from "../../component/ActionPop";
 import "./orderdetails.css";
 import {
   BASE_URL,
-  ADMIN_USER_DETAILS,
   ADMIN_ORDER_LIST,
 } from "../../../utils/apiconstant";
-import axios from "axios";
 // import * as XLSX from "xlsx";
 
 const OrderList = () => {
   const [orders, setOrders] = useState([]);
-  const [filteredOrders, setFilteredOrders] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
   // const [setTotalItems] = useState(0);
   const itemsPerPage = 10;
   const [searchTerm, setSearchTerm] = useState("");
   const [popupOpen, setPopupOpen] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState("");
   const [selectedPhoneNumber, setSelectedPhoneNumber] = useState("");
   const [orderDetails, setOrderDetails] = useState(null);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
   const [selectedOrderType, setSelectedOrderType] = useState("");
   const [selectedActiveStatus, setSelectedActiveStatus] = useState("");
   const [selectedOrderStatus, setSelectedOrderStatus] = useState("");
@@ -33,20 +26,12 @@ const OrderList = () => {
   const [actionPopupChefOrderId, setActionPopupChefOrderId] = useState("");
   const [actionPopupOrderType, setActionPopupOrderType] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
-  const [createdAtStart, setCreatedAtStart] = useState("");
-  const [createdAtEnd, setCreatedAtEnd] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [phoneSearchTerm, setPhoneSearchTerm] = useState("");
-  const [supplierDetails, setSupplierDetails] = useState(null);
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  // const [supplierDetails, setSupplierDetails] = useState(null);
+
   const [selectedDate, setSelectedDate] = useState("");
 
   const fetchOrders = async (page, orderId = '', orderstatus = '', activeStatus= '' ,orderType = '', orderCity = '', selectedDate = '', selectedOfflineNum = '') => {
     console.log("Selected Date in fetchOrders:", selectedOfflineNum);  // Log the selected date for debugging
-    setLoading(true);
-    setProgress(0);
-
     // Handle orderType mapping
     let typeId;
     switch (orderType) {
@@ -70,7 +55,7 @@ const OrderList = () => {
 
     // `newId` calculation - update this based on actual use case, or use `orderId` directly if needed
     let filteredId = Math.abs(orderId - 10800);  // Confirm if this is needed or if `orderId` should be used as is
-    let filteredDate=( `${selectedDate}T00:00:00.000Z`).toString()
+    // let filteredDate=( `${selectedDate}T00:00:00.000Z`).toString()
     console.log(Number(activeStatus))
     // Prepare requestData
     let requestData = {
@@ -119,8 +104,7 @@ const OrderList = () => {
       // Show an alert with the error message
       alert(`Error fetching orders: ${error.message}`);
     } finally {
-      setProgress(100);
-      setTimeout(() => setLoading(false), 500);
+      console.log('filan');
     }
   };
 
@@ -219,7 +203,6 @@ const OrderList = () => {
 
   const closePopup = () => {
     setPopupOpen(false); // Close the popup
-    setOrderDetails(null); // Clear selected order details
   };
 
   return (
@@ -488,61 +471,6 @@ const OrderList = () => {
                   <td colSpan="13">No orders found</td>
                 </tr>
               )}
-
-
-
-              {/* 
-  {filteredOrders.length > 0 ? (
-    filteredOrders.map((order, index) => (
-      <tr key={index}>
-        <td>{getOrderId(order.order_id)}</td>
-        <td>{getOrderType(order.type)}</td>
-        <td>{order.order_locality || "N/A"}</td>
-        <td>{order?.order_date ? `${order.order_date.split("T")[0]}` : "N/A"}</td>
-        <td>{order?.order_time ? `${order.order_time}` : order?.order_date ? `${order.order_date.split("T")[1].slice(0, 8)}` : "N/A"}</td>
-        <td>{order.otp}</td>
-        <td>{order.order_taken_by || "N/A"}</td>
-        <td>{order.phone_no || "N/A"}</td>
-        <td>{order.online_phone_number || "N/A"}</td>
-        <td>
-          {order.toId ? (
-            <FaEye onClick={() => openSupplierPopup(order.toId)} />
-          ) : (
-            <p>NA</p>
-          )}
-        </td>
-        <td>{`${order.job_start_time.replace(/(\d{4})(\d{1,2}:\d{2}:\d{2} (AM|PM))/, '$1 $2')} - ${order.job_end_time}`}</td>
-        <td>₹{order.total_amount}</td>
-        <td>
-          <span className={`status ${getOrderStatus(order.order_status).className}`}>
-            {getOrderStatus(order.order_status).status}
-          </span>
-        </td>
-        <td>{new Date(order.createdAt).toLocaleString()}</td>
-        <td>
-          <div style={styles.container}>
-            <div onClick={() => handleCallClick(order.phone_no)}>N/A</div>
-            <div style={styles.btnGroup}></div>
-          </div>
-        </td>
-        <td>
-          <button
-            className={`status-button ${order.status === 0 ? "active" : "inactive"}`}
-            onClick={() => updateOrderStatus(order._id, order.status === 1 ? 0 : 1)}
-          >
-            {order.status === 1 ? "Active" : "Inactive"}
-          </button>
-        </td>
-        <td>
-          <FaEye onClick={() => openActionPopup(order.order_id, order.type)} />
-        </td>
-      </tr>
-    ))
-  ) : (
-    <tr>
-      <td colSpan="13">No orders found</td>
-    </tr>
-  )} */}
 
 
             </tbody>
