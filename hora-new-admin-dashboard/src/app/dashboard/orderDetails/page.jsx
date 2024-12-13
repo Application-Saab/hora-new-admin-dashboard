@@ -63,12 +63,10 @@ const OrderList = () => {
       per_page: itemsPerPage,
       order_id: orderId.length > 0 ? filteredId : "", // `match orderId`
       order_status: Number(orderstatus) || "", // 'match OrderStatus'
-      status: (Number(activeStatus) === 0 || Number(activeStatus) === 1) 
-    ? Number(activeStatus) 
-    : "",
+      status: (Number(activeStatus) === 0 || Number(activeStatus) === 1)  ? Number(activeStatus)  : "",
       type: typeId || "", // match order type
       order_locality: orderCity || "",
-      // order_date: filteredDate || "",
+      order_date: selectedDate || "",
       phone_no: selectedOfflineNum || "",
       online_phone_no :selectedOfflineNum || "",
     };
