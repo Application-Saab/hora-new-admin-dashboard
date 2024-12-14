@@ -326,10 +326,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId,actionPopupChefOrderId,  actio
                         <strong>Order Time:</strong>{" "}
                         {orderDetails._doc.order_time || "N/A"}
                       </p>
-                      <p>
-                        <strong>Phone Number:</strong>{" "}
-                        {orderDetails._doc.fromId.phone || "N/A"}
-                      </p>
+                  
                       <p>
                         <strong>Order Add On:</strong>{" "}
     
@@ -337,7 +334,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId,actionPopupChefOrderId,  actio
                           <ul>
                             {orderDetails._doc.add_on.map((item, index) => (
                               <li key={index}>
-                                <strong>{item.name}</strong>: ₹{item.price}
+                                <strong>{item.name} {item.title}</strong>: ₹{item.price}
                               </li>
                             ))}
                           </ul>
