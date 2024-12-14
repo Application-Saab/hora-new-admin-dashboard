@@ -67,7 +67,7 @@ const OrderList = () => {
       order_locality: orderCity || "",
       order_date: selectedDate || "",
       phone_no: selectedOfflineNum || "",
-      online_phone_no :selectedOfflineNum || "",
+      // online_phone_no :selectedOfflineNum || "",
     };
 
     console.log(requestData); 
@@ -331,8 +331,8 @@ const OrderList = () => {
                 <th>Fulfillment Time</th>
                 <th>Otp</th>
                 <th>Order Taken By</th>
-                <th>Offline Customer No</th>
-                <th>Online Customer No</th>
+                <th>Customer No</th>
+                {/* <th>Online Customer No</th> */}
                 <th>Supplier</th>
                 <th>Order Start & End Time</th>
                 <th>Total Amount</th>
@@ -400,7 +400,7 @@ const OrderList = () => {
                     <td>{order.otp}</td>
                     <td>{order.order_taken_by || "N/A"}</td>
                     <td>{order.phone_no || "N/A"}</td>
-                    <td>{order.online_phone_no || "N/A"}</td>
+                    {/* <td>{order.online_phone_no || "N/A"}</td> */}
                     <td>
                       {order.toId ? (
                         <FaEye
