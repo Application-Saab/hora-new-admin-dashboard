@@ -14,7 +14,7 @@ const OrderList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
   // const [setTotalItems] = useState(0);
-  const itemsPerPage = 10;
+  const itemsPerPage = 15;
   const [searchTerm, setSearchTerm] = useState("");
   const [popupOpen, setPopupOpen] = useState(false);
   const [selectedPhoneNumber, setSelectedPhoneNumber] = useState("");
@@ -55,7 +55,7 @@ const OrderList = () => {
     // `newId` calculation - update this based on actual use case, or use `orderId` directly if needed
     let filteredId = Math.abs(orderId - 10800);  // Confirm if this is needed or if `orderId` should be used as is
     // let filteredDate=( `${selectedDate}T00:00:00.000Z`).toString()
-    console.log(Number(activeStatus))
+    console.log("1111", orderstatus)
     // Prepare requestData
     let requestData = {
       page: page,
@@ -91,9 +91,9 @@ const OrderList = () => {
           setTotalPage(data.data.paginate.last_page);
         } else {
           // No orders found, show an alert with a message
-          alert("No orders found.");
+          setOrders('');
+          setTotalPage('');
           console.warn("No orders found");
-          setSearchTerm('');
         }
       }
     } catch (error) {
@@ -108,7 +108,8 @@ const OrderList = () => {
 
   useEffect(() => {
     fetchOrders(currentPage, searchTerm, selectedOrderStatus, selectedActiveStatus , selectedOrderType, selectedCity, selectedDate, selectedPhoneNumber);
-  }, [currentPage, searchTerm, selectedOrderStatus, selectedActiveStatus ,selectedOrderType, selectedCity, selectedDate, selectedPhoneNumber]);
+  
+  }, [currentPage, searchTerm , selectedOrderStatus, selectedActiveStatus ,selectedOrderType, selectedCity, selectedDate, selectedPhoneNumber]);
 
 
 
@@ -222,7 +223,7 @@ const OrderList = () => {
                   }}
 
                 />
-                <button className="filter-btn" onClick={() => FilterSearch(searchTerm)}>Search</button>
+              {/* <button className="filter-btn" onClick={() => FilterSearch(searchTerm)}>Search</button>  */}
 
               </div>
             </div>
@@ -231,7 +232,7 @@ const OrderList = () => {
               <input
                 type="text"
                 className="small-search byPhone"
-                placeholder="Search by offline customer"
+                placeholder="Search by customer Number"
                 value={selectedPhoneNumber}
 
                 onChange={(e) =>
@@ -239,7 +240,7 @@ const OrderList = () => {
 
                 }
               />
-              <button className="filter-btn" onClick={() => FilterPhoneNumber(selectedPhoneNumber)}>Search</button>
+              {/* <button className="filter-btn" onClick={() => FilterPhoneNumber(selectedPhoneNumber)}>Search</button> */}
               {/* <input
                 type="text"
                 className="small-search byPhone"
@@ -384,9 +385,10 @@ const OrderList = () => {
                     <td>{getOrderType(order.type)}</td>
                     <td>{order.order_locality || "N/A"}</td>
                     <td>
-                      {order?.order_date
-                        ? `${order.order_date.split("T")[0]}`
-                        : "N/A"}
+                    {order?.order_date
+  ? new Date(order.order_date.split("T")[0]).toLocaleDateString()
+  : "N/A"}
+
                     </td>
                     <td>
                       {order?.order_time
