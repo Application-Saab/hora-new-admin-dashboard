@@ -3,11 +3,7 @@ import "./Actionpopup.css";
 import { useState, useEffect } from "react";
 
 const ActionPopup = ({ isOpen, actionPopupOrderId,actionPopupChefOrderId,  actionPopupOrderType, onClose  }) => {
-  // if (!isOpen) {
-  //   return null;  // Early exit if the popup is not open
-  // }
-  
-
+ 
   const [popupType, setPopupType] = useState("");
   const [orderDetails, setOrderDetails] = useState(null);
   const [loading, setLoading] = useState(false);

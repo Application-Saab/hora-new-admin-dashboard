@@ -18,7 +18,6 @@ const OrderList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [popupOpen, setPopupOpen] = useState(false);
   const [selectedPhoneNumber, setSelectedPhoneNumber] = useState("");
-  const [orderDetails, setOrderDetails] = useState(null);
   const [selectedOrderType, setSelectedOrderType] = useState("");
   const [selectedActiveStatus, setSelectedActiveStatus] = useState("");
   const [selectedOrderStatus, setSelectedOrderStatus] = useState("");
@@ -109,7 +108,7 @@ const OrderList = () => {
 
   useEffect(() => {
     fetchOrders(currentPage, searchTerm, selectedOrderStatus, selectedActiveStatus , selectedOrderType, selectedCity, selectedDate, selectedPhoneNumber);
-  }, [currentPage, selectedOrderStatus, selectedActiveStatus ,selectedOrderType, selectedCity, selectedDate]);
+  }, [currentPage, searchTerm, selectedOrderStatus, selectedActiveStatus ,selectedOrderType, selectedCity, selectedDate, selectedPhoneNumber]);
 
 
 
@@ -256,7 +255,7 @@ const OrderList = () => {
             {/* date search */}
               <div className="date-filter-container">
             
-                  <label className="date-label">Order Date</label>
+                  <label className="date-label">Order Fullfilement Date</label>
                   <input
                     type="date"
                     value={selectedDate}
@@ -399,7 +398,7 @@ const OrderList = () => {
                     <td>{order.otp}</td>
                     <td>{order.order_taken_by || "N/A"}</td>
                     <td>{order.phone_no || "N/A"}</td>
-                    <td>{order.online_phone_number || "N/A"}</td>
+                    <td>{order.online_phone_no || "N/A"}</td>
                     <td>
                       {order.toId ? (
                         <FaEye
