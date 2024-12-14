@@ -113,19 +113,19 @@ const OrderList = () => {
 
 
 
-  const FilterSearch = (orderId) => {
-    setSearchTerm(orderId);
-    fetchOrders(currentPage, orderId, selectedOrderStatus, selectedOrderType, selectedCity, selectedPhoneNumber);
-    setSearchTerm('');
-  };
+  // const FilterSearch = (orderId) => {
+  //   setSearchTerm(orderId);
+  //   fetchOrders(currentPage, orderId, selectedOrderStatus, selectedOrderType, selectedCity, selectedPhoneNumber);
+  //   setSearchTerm('');
+  // };
 
 
-  const FilterPhoneNumber = (selectedPhoneNumber) => {
-    console.log(selectedPhoneNumber)
-    setSelectedPhoneNumber(selectedPhoneNumber);
-    fetchOrders(currentPage, searchTerm, selectedOrderStatus, selectedActiveStatus , selectedOrderType, selectedCity, selectedDate, selectedPhoneNumber);
-    // SelectedPhoneNumber('');
-  }
+  // const FilterPhoneNumber = (selectedPhoneNumber) => {
+  //   console.log(selectedPhoneNumber)
+  //   setSelectedPhoneNumber(selectedPhoneNumber);
+  //   fetchOrders(currentPage, searchTerm, selectedOrderStatus, selectedActiveStatus , selectedOrderType, selectedCity, selectedDate, selectedPhoneNumber);
+  //   // SelectedPhoneNumber('');
+  // }
 
 
   const getOrderStatus = (orderStatusValue) => {
