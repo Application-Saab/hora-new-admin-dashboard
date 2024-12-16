@@ -199,8 +199,34 @@ const OrderList = () => {
     setPopupOpen(true); // Open the popup
   };
 
+
+
+
+
+  const [supplierDetails, setSupplierDetails] = useState(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+  const openSupplierPopup = async (orderId) => {
+    try {
+      const response = await fetch(
+        `https://horaservices.com:3000/api/admin/getUserDetails/${orderId}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch user details");
+      }
+      const data = await response.json();
+      setSupplierDetails(data);
+      setIsPopupOpen(true);
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+    }
+  };
+
+
   const closePopup = () => {
     setPopupOpen(false); // Close the popup
+    setIsPopupOpen(false);
+    setSupplierDetails(null);
   };
 
   return (
@@ -373,6 +399,7 @@ const OrderList = () => {
                   </select>
                 </th>
                 <th>Action</th>
+                <th>Rating</th>
               </tr>
             </thead>
             <tbody>
@@ -409,6 +436,25 @@ const OrderList = () => {
                       ) : (
                         <p>NA</p>
                       )}
+                      
+                      {isPopupOpen && supplierDetails && (
+                          <div className="popup-overlay" onClick={closePopup}>
+                            <div
+                              className="popup"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <button
+                                className="close-button"
+                                onClick={closePopup}
+                              >
+                                ×
+                              </button>
+                              <h3>Supplier Details</h3>
+                              <p>Name: {supplierDetails.data.name}</p>
+                              <p>Phone: {supplierDetails.data.phone}</p>
+                            </div>
+                          </div>
+                        )}
                     </td>
 
                     <td>
@@ -462,6 +508,9 @@ const OrderList = () => {
                           openActionPopup(order.order_id, order._id, order.type)
                         }}
                       />
+                    </td>
+                    <td>
+                     {order.userReviewRatingArray[0]}
                     </td>
                   </tr>
                 ))
