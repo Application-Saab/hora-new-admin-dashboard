@@ -35,6 +35,15 @@ const Sidebar = () => {
             Order
           </Link>
         </li>
+
+        <li>
+          <Link
+            href="/dashboard/photography"
+            className="link-button"
+          >
+            <FaPlusCircle style={{ marginRight: "8px" }} /> Photography Create
+          </Link>
+        </li>
       </ul>
     </div>
   );

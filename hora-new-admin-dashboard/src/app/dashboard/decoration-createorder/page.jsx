@@ -296,7 +296,7 @@ useEffect(() => {
       console.log(requestData, "requestData decoration");
 
       try {
-        const response = await axios.post(`${BASE_URL}${CONFIRM_ORDER_ENDPOINT}`, requestData);
+        const response = await axios.post(`${BASE_URL}${CONFIRM_ORDER_ENDPOINTT}`, requestData);
         alert("Order created successfully:", response.data);
       } catch (error) {
         console.error("Error creating order:", error);
