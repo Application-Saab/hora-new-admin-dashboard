@@ -54,8 +54,6 @@ const OrderList = () => {
 
     // `newId` calculation - update this based on actual use case, or use `orderId` directly if needed
     let filteredId = Math.abs(orderId - 10800);  // Confirm if this is needed or if `orderId` should be used as is
-    // let filteredDate=( `${selectedDate}T00:00:00.000Z`).toString()
-    console.log("1111", orderstatus)
     // Prepare requestData
     let requestData = {
       page: page,
@@ -84,7 +82,6 @@ const OrderList = () => {
       if (response.status === 200) {
         // Success - handle valid response
         const data = await response.json();
-        console.log("Fetched Orders:", data);
 
         if (data && data.data && data.data.order) {
           setOrders(data.data.order);
@@ -110,22 +107,6 @@ const OrderList = () => {
     fetchOrders(currentPage, searchTerm, selectedOrderStatus, selectedActiveStatus , selectedOrderType, selectedCity, selectedDate, selectedPhoneNumber);
   
   }, [currentPage, searchTerm , selectedOrderStatus, selectedActiveStatus ,selectedOrderType, selectedCity, selectedDate, selectedPhoneNumber]);
-
-
-
-  // const FilterSearch = (orderId) => {
-  //   setSearchTerm(orderId);
-  //   fetchOrders(currentPage, orderId, selectedOrderStatus, selectedOrderType, selectedCity, selectedPhoneNumber);
-  //   setSearchTerm('');
-  // };
-
-
-  // const FilterPhoneNumber = (selectedPhoneNumber) => {
-  //   console.log(selectedPhoneNumber)
-  //   setSelectedPhoneNumber(selectedPhoneNumber);
-  //   fetchOrders(currentPage, searchTerm, selectedOrderStatus, selectedActiveStatus , selectedOrderType, selectedCity, selectedDate, selectedPhoneNumber);
-  //   // SelectedPhoneNumber('');
-  // }
 
 
   const getOrderStatus = (orderStatusValue) => {
@@ -249,7 +230,7 @@ const OrderList = () => {
                   }}
 
                 />
-              {/* <button className="filter-btn" onClick={() => FilterSearch(searchTerm)}>Search</button>  */}
+              
 
               </div>
             </div>
@@ -266,18 +247,7 @@ const OrderList = () => {
 
                 }
               />
-              {/* <button className="filter-btn" onClick={() => FilterPhoneNumber(selectedPhoneNumber)}>Search</button> */}
-              {/* <input
-                type="text"
-                className="small-search byPhone"
-                placeholder="Search by online customer"
-                value={selectedPhoneNumber}
-
-                onChange={(e) =>
-                  setSelectedOnlinecusNum(e.target.value)
-
-                }
-              /> */}
+     
             </div>
             {/* date search */}
               <div className="date-filter-container">
@@ -302,9 +272,7 @@ const OrderList = () => {
         </div>
 
         <div className="orders-box">
-          {/* <button className="red-button" onClick={exportToExcel}>
-              Download Excel
-            </button> */}
+    
 
           <table className="order-table">
             <thead>
@@ -413,8 +381,8 @@ const OrderList = () => {
                     <td>{order.order_locality || "N/A"}</td>
                     <td>
                     {order?.order_date
-  ? new Date(order.order_date.split("T")[0]).toLocaleDateString()
-  : "N/A"}
+                          ? new Date(order.order_date.split("T")[0]).toLocaleDateString()
+                          : "N/A"}
 
                     </td>
                     <td>
@@ -459,7 +427,7 @@ const OrderList = () => {
 
                     <td>
                       {`${order.job_start_time.replace(/(\d{4})(\d{1,2}:\d{2}:\d{2} (AM|PM))/, '$1 $2')} - 
-    ${order.job_end_time}`}
+                               ${order.job_end_time}`}
                     </td>
 
                     <td>₹{order.total_amount}</td>
@@ -478,7 +446,7 @@ const OrderList = () => {
                       <div style={styles.container}>
                         {/* Call Icon */}
                         <div
-                          // style={styles.callIcon}
+                        
                           onClick={() => handleCallClick(order.phone_no)}
                         >
                           N/A

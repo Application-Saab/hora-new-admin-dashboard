@@ -12,7 +12,7 @@
   
   .popup-content {
     background-color: #fff;
-    padding: 30px;
+    padding: 10px;
     border-radius: 12px;
     max-width: 900px;
     max-height: 500px;
@@ -52,7 +52,7 @@
   
   .order-details-box {
     background-color: #f8f9fa;
-    padding: 20px;
+    padding:0 20px;
     border-radius: 8px;
     box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.05);
   }
