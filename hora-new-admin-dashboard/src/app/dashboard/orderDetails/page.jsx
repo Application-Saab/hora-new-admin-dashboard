@@ -90,6 +90,7 @@ const OrderList = () => {
       }
 
       const data = await response.json();
+      console.log(data, "dataq");
 
       if (data && data.data && data.data.order) {
         const ordersWithPhoneNumbers = await Promise.all(
@@ -654,6 +655,7 @@ const OrderList = () => {
                     </select>
                   </th>
                   <th>Action</th>
+                  <th>Rating</th>
                 </tr>
               </thead>
               <tbody>
@@ -665,7 +667,9 @@ const OrderList = () => {
                       <td>{order.order_locality || "N/A"}</td>
                       <td>
                         {order?.order_date
-                          ? `${order.order_date.split("T")[0]} ${
+                          ? `${new Date(order.order_date).getDate()}/${
+                              new Date(order.order_date).getMonth() + 1
+                            }/${new Date(order.order_date).getFullYear()} ${
                               order.order_time || ""
                             }`
                           : "N/A"}
@@ -737,7 +741,6 @@ const OrderList = () => {
                           }
                         `}</style>
                       </td>
-
                       <td>
                         {`${order.job_start_time.replace(
                           /(\d{4})(\d{1,2}:\d{2}:\d{2} (AM|PM))/,
@@ -758,7 +761,21 @@ const OrderList = () => {
                         </span>
                       </td>
 
-                      <td>{new Date(order.createdAt).toLocaleString()}</td>
+                      <td>
+                        {order?.createdAt
+                          ? `${new Date(order.createdAt).getDate()}/${
+                              new Date(order.createdAt).getMonth() + 1
+                            }/${new Date(
+                              order.createdAt
+                            ).getFullYear()} ${new Date(
+                              order.createdAt
+                            ).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              second: "2-digit",
+                            })}`
+                          : "N/A"}
+                      </td>
                       <td>
                         <div style={styles.container}>
                           {/* Call Icon */}
@@ -782,7 +799,7 @@ const OrderList = () => {
                               order._id,
                               order.status === 1 ? 0 : 1
                             )
-                          } // Toggle between 1 and 0
+                          }
                         >
                           {order.status === 1 ? "Active" : "Inactive"}
                         </button>
@@ -797,6 +814,11 @@ const OrderList = () => {
                             )
                           }
                         />
+                      </td>
+                      <td>
+                        {order.userReviewRatingArray?.length > 0
+                          ? order.userReviewRatingArray[0]
+                          : "No Rating"}
                       </td>
                     </tr>
                   ))
