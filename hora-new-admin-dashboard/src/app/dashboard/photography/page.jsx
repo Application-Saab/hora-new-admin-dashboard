@@ -11,11 +11,21 @@ import {
 import CircularProgress from "@mui/material/CircularProgress";
 
 const timeSlotOptions = [
-  { value: "7:00 AM - 10:00 AM", label: "7:00 AM - 10:00 AM" },
-  { value: "10:00 AM - 1:00 PM", label: "10:00 AM - 1:00 PM" },
-  { value: "1:00 PM - 4:00 PM", label: "1:00 PM - 4:00 PM" },
-  { value: "4:00 PM - 7:00 PM", label: "4:00 PM - 7:00 PM" },
-  { value: "7:00 PM - 10:00 PM", label: "7:00 PM - 10:00 PM" },
+  { value: "7:00 AM - 8:00 AM", label: "7:00 AM - 8:00 AM" },
+  { value: "8:00 AM - 9:00 AM", label: "8:00 AM - 9:00 AM" },
+  { value: "9:00 AM - 10:00 AM", label: "9:00 AM - 10:00 AM" },
+  { value: "10:00 AM - 11:00 AM", label: "10:00 AM - 11:00 AM" },
+  { value: "11:00 AM - 12:00 PM", label: "11:00 AM - 12:00 PM" },
+  { value: "12:00 PM - 1:00 PM", label: "12:00 PM - 1:00 PM" },
+  { value: "1:00 PM - 2:00 PM", label: "1:00 PM - 2:00 PM" },
+  { value: "2:00 PM - 3:00 PM", label: "2:00 PM - 3:00 PM" },
+  { value: "3:00 PM - 4:00 PM", label: "3:00 PM - 4:00 PM" },
+  { value: "4:00 PM - 5:00 PM", label: "4:00 PM - 5:00 PM" },
+  { value: "5:00 PM - 6:00 PM", label: "5:00 PM - 6:00 PM" },
+  { value: "6:00 PM - 7:00 PM", label: "6:00 PM - 7:00 PM" },
+  { value: "7:00 PM - 8:00 PM", label: "7:00 PM - 8:00 PM" },
+  { value: "8:00 PM - 9:00 PM", label: "8:00 PM - 9:00 PM" },
+  { value: "9:00 PM - 10:00 PM", label: "9:00 PM - 10:00 PM" },
 ];
 
 const cityOptions = [
@@ -606,21 +616,19 @@ function Photography() {
   const [messageColor, setMessageColor] = useState("");
   const [showPopup, setShowPopup] = useState(false);
   const [showButton, setShowButton] = useState(false);
-  const [loadingCheckCustomerNumber, setLoadingCheckCustomerNumber] =
-    useState(false);
+  const [loadingCheckCustomerNumber, setLoadingCheckCustomerNumber] = useState(false);
   const [newCustomerName, setNewCustomerName] = useState("");
   const [newCustomerPhone, setNewCustomerPhone] = useState("");
   const [messagePincode, setMessagePincode] = useState("");
-
   const [loadingOrder, setLoadingOrder] = useState(false);
-  
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          "https://horaservices.com:3000/api/photography/searchByTag/64b8c4e8f5a4c9e341234568"
+          "https://horaservices.com:3000/api/photography/searchByTag/66c96b4e22ed47b72117e09a"
         );
+        console.log(response, "responsedata");
         if (!response.data.error) {
           setData(response.data.data);
         } else {
@@ -764,8 +772,8 @@ function Photography() {
     } catch (error) {
       console.error("Submission error:", error);
       alert("Error while creating order. Please try again.");
-    }finally {
-      setLoadingOrder(false); // Hide loading spinner
+    } finally {
+      setLoadingOrder(false); 
     }
   };
 
@@ -865,6 +873,17 @@ function Photography() {
     }
   };
 
+  const inclusions =
+    selectedPackage?.inclusion?.length > 0
+      ? selectedPackage.inclusion[0].split(/<\/div><div>/).map((item) =>
+          item
+            .replace(/<\/?div>/g, "")
+            .replace(/<\/?span>/g, "")
+            .replace(/<br\s*\/?>/g, "")
+            .trim()
+        )
+      : [];
+
   return (
     <div className="app">
       <h1>Photography 📸</h1>
@@ -910,16 +929,18 @@ function Photography() {
         )}
 
         {/* Display Inclusion */}
-        {selectedPackage?.inclusion?.length > 0 && (
-          <div className="form-group">
-            <label>Inclusions:</label>
-            <ul>
-              {selectedPackage.inclusion.map((item, index) => (
-                <li key={index}>{item}</li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <div>
+          {inclusions.length > 0 && (
+            <div className="form-group">
+              <label>Inclusions:</label>
+              <ul>
+                {inclusions.map((item, index) => (
+                  <li key={index}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
 
         {/* Customer Number */}
         <div className="form-group">
@@ -1126,8 +1147,12 @@ function Photography() {
               />
               {messagePincode && <p style={messageColor}>{messagePincode}</p>}
             </div>
- 
-            <button type="submit" className="submit-btn" disabled={loadingOrder}>
+
+            <button
+              type="submit"
+              className="submit-btn"
+              disabled={loadingOrder}
+            >
               {/* Create Order */}
               {loadingOrder ? "Creating Order..." : "Create Order"}
             </button>

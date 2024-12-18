@@ -218,7 +218,7 @@ useEffect(() => {
       8: "Photography",
     };
 
-    return orderTypes[orderTypeValue] || "Unknown Order Type"; // Default value if not found
+    return orderTypes[orderTypeValue] || "Unknown Order Type"; 
   };
 
   return (

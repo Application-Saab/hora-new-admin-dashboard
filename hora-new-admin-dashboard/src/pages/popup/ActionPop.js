@@ -13,6 +13,7 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
       5: "Cleaner",
       6: "Food Delivery",
       7: "Live Catering",
+      8: "Photography",
     };
     return orderTypes[orderTypeValue] || "Unknown Order Type";
   };
@@ -145,24 +146,12 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
                     <strong>Supplier Order Id:</strong>{" "}
                     {getOrderId(orderDetails._doc.order_id)}
                   </p>
-                  {/* <p><strong>Order Id:</strong> {orderDetails._doc.otp}</p> */}
                   <p>
                     <strong>Order Date:</strong>{" "}
                     {new Date(
                       orderDetails._doc.order_date
                     ).toLocaleDateString()}
                   </p>
-                  {/* <p>
-                    <strong>No of burners:</strong>{" "}
-                    {orderDetails._doc.burners || 0}
-                  </p>
-                  <p>
-                    <strong>No of people:</strong>{" "}
-                    {orderDetails._doc.no_of_people || 0}
-                  </p> */}
-                  {/* <p>
-                    <strong>Type:</strong> {orderDetails._doc.type || "N/A"}
-                  </p> */}
                   <p>
                     <strong>Order Type:</strong>{" "}
                     {getOrderType(orderDetails._doc.type)}
@@ -209,10 +198,6 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
                   {decorations.length > 0 ? (
                     decorations.map((dec, index) => (
                       <div key={index} style={{ marginBottom: "10px" }}>
-                        {/* <p>
-                          <strong>Inclusion:</strong>{" "}
-                          {getCleanInclusionText(dec.inclusion)}{" "}
-                        </p> */}
                         <p>
                           <strong>Inclusion:</strong>
                           <div>
@@ -237,7 +222,6 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
                         <p>
                           {dec.name}: ₹{dec.price}
                         </p>
-                        {/* <div>{parse(dec.inclusion[0])}</div> */}
                         <button
                           className="startbutton"
                           onClick={sendOrderDetailsToWhatsApp}
@@ -267,44 +251,7 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
                     <strong>Advance Amount:</strong>{" "}
                     <span>₹{orderDetails._doc.advance_amount || 0}</span>
                   </li>
-                  {/* <li
-                    style={{ display: "flex", justifyContent: "space-between" }}
-                  >
-                    {orderDetails._doc.phone_no ? (
-                      orderDetails._doc.total_amount -
-                      orderDetails._doc.advance_amount
-                    ) : (
-                      <span>
-                        Balance Amount
-                        {orderDetails._doc?.type === 2 ||
-                        orderDetails._doc?.type === 3 ||
-                        orderDetails._doc?.type === 4 ||
-                        orderDetails._doc?.type === 5 ? (
-                          <span style={{ marginLeft: "72px" }}>
-                            {"₹" +
-                              Math.round(
-                                (orderDetails._doc?.payable_amount * 4) / 5
-                              )}
-                          </span>
-                        ) : orderDetails._doc?.type === 6 ||
-                          orderDetails._doc?.type === 7 ? (
-                          <span style={{ marginLeft: "72px" }}>
-                            {"₹" +
-                              Math.round(
-                                orderDetails._doc?.payable_amount * 0.35
-                              )}
-                          </span>
-                        ) : (
-                          <span style={{ marginLeft: "72px" }}>
-                            {"₹" +
-                              Math.round(
-                                orderDetails._doc?.payable_amount * 0.65
-                              )}
-                          </span>
-                        )}
-                      </span>
-                    )}
-                  </li> */}
+                 
                   <li style={{ display: "flex", justifyContent: "space-between" }}>
     
       <span>Balance Amount</span>

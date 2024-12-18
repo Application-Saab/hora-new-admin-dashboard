@@ -43,13 +43,11 @@ const AddOrder = () => {
   const [message, setMessage] = useState("");
   const [messageColor, setMessageColor] = useState("");
 
-  const [customerId, setCustomerId] = useState(null); 
+  const [customerId, setCustomerId] = useState(null);
 
   const [showPopup, setShowPopup] = useState(false); // For toggling the popup
   const [newCustomerName, setNewCustomerName] = useState(""); // For name input
-  const [newCustomerPhone, setNewCustomerPhone] = useState(""); 
-
-
+  const [newCustomerPhone, setNewCustomerPhone] = useState("");
 
   const handleInputChange = (index, field, value) => {
     const newProducts = [...products];
@@ -66,132 +64,130 @@ const AddOrder = () => {
     setComment(commentText);
   };
 
-    useEffect(() => {
-      if (dishName && isContinueClicked && !isFetched) {
-        const fetchProductDetails = async () => {
-          try {
-            const url = `${BASE_URL}${GET_DECORATION_BY_NAME}${encodeURIComponent(dishName)}`;
-            const response = await axios.get(url);
-            if (
-              response.data &&
-              !response.data.error &&
-              response.data.data.length > 0
-            ) {
-              const productData = response.data.data[0];
-              setProduct(productData);
-              setProductID(productData._id);
-              setCategory(productData.price);
-              setShowProductDetails(true);
-              setIsFetched(true);
-            } else {
-              setShowProductDetails(false);
-            }
-          } catch (error) {
-            console.error("Error fetching product:", error.message);
+  useEffect(() => {
+    if (dishName && isContinueClicked && !isFetched) {
+      const fetchProductDetails = async () => {
+        try {
+          const url = `${BASE_URL}${GET_DECORATION_BY_NAME}${encodeURIComponent(
+            dishName
+          )}`;
+          const response = await axios.get(url);
+          if (
+            response.data &&
+            !response.data.error &&
+            response.data.data.length > 0
+          ) {
+            const productData = response.data.data[0];
+            setProduct(productData);
+            setProductID(productData._id);
+            setCategory(productData.price);
+            setShowProductDetails(true);
+            setIsFetched(true);
+          } else {
+            setShowProductDetails(false);
           }
-        };
-    
-        fetchProductDetails();
-      }
-    }, [dishName, isContinueClicked, isFetched]);
+        } catch (error) {
+          console.error("Error fetching product:", error.message);
+        }
+      };
+
+      fetchProductDetails();
+    }
+  }, [dishName, isContinueClicked, isFetched]);
 
   useEffect(() => {
     if (pincode) {
       if (pincodes.includes(pincode)) {
         setPincodeMessage("Pincode available");
-        setPincodeMessageColor("green"); 
+        setPincodeMessageColor("green");
       } else {
         setPincodeMessage("Pincode not available");
-        setPincodeMessageColor("red"); 
+        setPincodeMessageColor("red");
       }
     } else {
-      setPincodeMessage(""); 
-      setPincodeMessageColor(""); 
+      setPincodeMessage("");
+      setPincodeMessageColor("");
     }
   }, []);
-  
 
-const handleCheckCustomer = async (e) => {
-  e.preventDefault();
-  setMessage("");
-  setLoading(true);
+  const handleCheckCustomer = async (e) => {
+    e.preventDefault();
+    setMessage("");
+    setLoading(true);
 
-  try {
-    const response = await axios.post(
-      "https://horaservices.com:3000/api/admin/admin_user_list",
-      {
-        email: "",
-        page: "",
-        per_page: 2000,
-        phone: "",
-        role: "customer",
-      }
-    );
+    try {
+      const response = await axios.post(
+        "https://horaservices.com:3000/api/admin/admin_user_list",
+        {
+          email: "",
+          page: "",
+          per_page: 2000,
+          phone: "",
+          role: "customer",
+        }
+      );
 
-    const users = response?.data?.data?.users;
+      const users = response?.data?.data?.users;
 
-    if (Array.isArray(users)) {
-      const customer = users.find((user) => user.phone === customerNumber);
-      console.log(customer, "customer");
-      setCustomerId(customer);
-      if (customer) {
-        setMessage("Customer exists.");
-        setMessageColor("green");
-        setShowButton(true);
+      if (Array.isArray(users)) {
+        const customer = users.find((user) => user.phone === customerNumber);
+        console.log(customer, "customer");
+        setCustomerId(customer);
+        if (customer) {
+          setMessage("Customer exists.");
+          setMessageColor("green");
+          setShowButton(true);
+        } else {
+          setMessage("Customer does not exist.");
+          setMessageColor("red");
+          setShowPopup(true);
+          setShowButton(false);
+        }
       } else {
-        setMessage("Customer does not exist.");
-        setMessageColor("red");
-        setShowPopup(true); 
+        setMessage("No users found in the response.");
         setShowButton(false);
       }
-    } else {
-      setMessage("No users found in the response.");
+    } catch (err) {
+      setMessage("An error occurred while checking the customer.");
+      console.error(err);
       setShowButton(false);
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    setMessage("An error occurred while checking the customer.");
-    console.error(err);
-    setShowButton(false);
-  } finally {
-    setLoading(false); 
-  }
-};
-
-
-const [showButton, setShowButton] = useState(false);
-
-
-const handleAddCustomer = async () => {
-  const requestData = {
-    name: newCustomerName,
-    phone: newCustomerPhone,
-    email: "",
-    role: "customer",
   };
-  console.log(requestData, "requestion data");
-  try {
-    const response = await axios.post(
-      "https://horaservices.com:3000/api/admin/user_signup",
-      requestData
-    );
+
+  const [showButton, setShowButton] = useState(false);
+
+  const handleAddCustomer = async () => {
+    const requestData = {
+      name: newCustomerName,
+      phone: newCustomerPhone,
+      email: "",
+      role: "customer",
+    };
+    console.log(requestData, "requestion data");
+    try {
+      const response = await axios.post(
+        "https://horaservices.com:3000/api/admin/user_signup",
+        requestData
+      );
 
       console.log("Customer added:", response.data.dataToSave._id);
       setCustomerId(response.data.dataToSave);
       setMessage("Customer successfully added.");
       setMessageColor("green");
-      setShowPopup(false); 
+      setShowPopup(false);
       setShowButton(true); // Show button if response is successful
-  } catch (err) {
-    console.error("Error adding customer:", err);
-    setMessage("Failed to add customer.");
-    setMessageColor("red");
-  }
-};
+    } catch (err) {
+      console.error("Error adding customer:", err);
+      setMessage("Failed to add customer.");
+      setMessageColor("red");
+    }
+  };
 
-useEffect(() => {
-  console.log("showButton state updated:", showButton);
-}, [showButton]);
-
+  useEffect(() => {
+    console.log("showButton state updated:", showButton);
+  }, [showButton]);
 
   const handleContinueClick = () => {
     setIsContinueClicked(true);
@@ -247,66 +243,66 @@ useEffect(() => {
     }
   };
 
-  
   const [lloading, setlLoading] = useState(false);
   const handleSubmit = async (e) => {
     e.preventDefault();
     setlLoading(true);
-  
+
     const addOnProduct = products.map((product) => ({
       name: product.name,
       price: product.price,
     }));
-  
+
     const formattedDate = date ? formatDate(date) : null;
-  
-      const addressID = await saveAddress();
-  
-      if (!addressID) {
-        console.error("Address ID is missing");
-        return;
-      }
-  
-      const requestData = {
-        add_on: addOnProduct,
-        phone_no: customerNumber,
-        toId: "",
-        order_time: timeSlot.value,
-        no_of_people: 0,
-        type: 1,
-        fromId: customerId,
-        is_discount: "0",
-        addressId: addressID,
-        order_date: formattedDate,
-        no_of_burner: 0,
-        order_locality: city,
-        total_amount: totalamount,
-        orderApplianceIds: [],
-        payable_amount: totalamount,
-        advance_amount: advanceamount,
-        is_gst: "0",
-        order_type: true,
-        items: [product._id],
-        decoration_comments: comment,
-        status: 1,
-        balance_amount: balanceamount,
-        order_taken_by: orderTakenBy,
-      };
 
-      console.log(requestData, "requestData decoration");
+    const addressID = await saveAddress();
 
-      try {
-        const response = await axios.post(`${BASE_URL}${CONFIRM_ORDER_ENDPOINTT}`, requestData);
-        alert("Order created successfully:", response.data);
-      } catch (error) {
-        console.error("Error creating order:", error);
-        alert("There was an error creating the order. Please try again.");
-      }
-      finally {
-        setlLoading(false); 
-      }
-    } 
+    if (!addressID) {
+      console.error("Address ID is missing");
+      return;
+    }
 
+    const requestData = {
+      add_on: addOnProduct,
+      phone_no: customerNumber,
+      toId: "",
+      order_time: timeSlot.value,
+      no_of_people: 0,
+      type: 1,
+      fromId: customerId,
+      is_discount: "0",
+      addressId: addressID,
+      order_date: formattedDate,
+      no_of_burner: 0,
+      order_locality: city,
+      total_amount: totalamount,
+      orderApplianceIds: [],
+      payable_amount: totalamount,
+      advance_amount: advanceamount,
+      is_gst: "0",
+      order_type: true,
+      items: [product._id],
+      decoration_comments: comment,
+      status: 1,
+      balance_amount: balanceamount,
+      order_taken_by: orderTakenBy,
+    };
+
+    console.log(requestData, "requestData decoration");
+
+    try {
+      const response = await axios.post(
+        `${BASE_URL}${CONFIRM_ORDER_ENDPOINTT}`,
+        requestData
+      );
+      alert("Order created successfully:", response.data);
+    } catch (error) {
+      console.error("Error creating order:", error);
+      alert("There was an error creating the order. Please try again.");
+    } finally {
+      setlLoading(false);
+    }
+  };
 
   const timeSlotOptions = [
     { value: "7:00 AM - 10:00 AM", label: "7:00 AM - 10:00 AM" },
@@ -317,7 +313,6 @@ useEffect(() => {
   ];
 
   const pincodes = [
-        
     "400097",
     "560035",
     "122004",
@@ -872,12 +867,12 @@ useEffect(() => {
     "400075",
     "400072",
     "400089",
-    ]
+  ];
 
-useEffect(() => {
-  const balance = totalamount - advanceamount;
-  setBalanceAmount(balance);
-}, [totalamount, advanceamount]);
+  useEffect(() => {
+    const balance = totalamount - advanceamount;
+    setBalanceAmount(balance);
+  }, [totalamount, advanceamount]);
 
   return (
     <div className="container">
@@ -926,7 +921,6 @@ useEffect(() => {
                 />
               </div>
             </div>
-
             <label htmlFor="orderTakenBy">Order Taken By*</label>
             <input
               type="text"
@@ -936,7 +930,6 @@ useEffect(() => {
               placeholder="Order Taken By"
               required
             />
-
             <div
               className="date-time-container"
               style={{
@@ -991,23 +984,20 @@ useEffect(() => {
                 />
               </div>
             </div>
-
-<label htmlFor="customerNumber">Customer Number*</label>
-      <input
-        type="text"
-        id="customerNumber"
-        value={customerNumber}
-        onChange={(e) => setCustomerNumber(e.target.value)}
-        placeholder="Customer Number"
-        required
-      />
-      <button onClick={handleCheckCustomer} disabled={loading}>
-        {loading ? "Checking..." : "Check Customer"}
-      </button>
-      {loading && <p>Loading...</p>} {/* Loader */}
-      {<p style={{ color: messageColor }}>{message}</p>}
-
-
+            <label htmlFor="customerNumber">Customer Number*</label>
+            <input
+              type="text"
+              id="customerNumber"
+              value={customerNumber}
+              onChange={(e) => setCustomerNumber(e.target.value)}
+              placeholder="Customer Number"
+              required
+            />
+            <button onClick={handleCheckCustomer} disabled={loading}>
+              {loading ? "Checking..." : "Check Customer"}
+            </button>
+            {loading && <p>Loading...</p>} {/* Loader */}
+            {<p style={{ color: messageColor }}>{message}</p>}
             <label htmlFor="address">Address*</label>
             <textarea
               type="text"
@@ -1018,7 +1008,6 @@ useEffect(() => {
               style={{ width: "665px" }}
               required
             />
-
             <label htmlFor="googleLocation">Google Location</label>
             <textarea
               type="text"
@@ -1027,78 +1016,77 @@ useEffect(() => {
               onChange={(e) => setGoogleLocation(e.target.value)}
               placeholder="googleLocation"
               style={{ width: "665px" }}
-            
             />
-
-<label htmlFor="addOn">Add On</label>
-<div className="addon-container">
-  <form className="addon-form">
-    {products.map((product, index) => (
-      <div className="addon-row" key={index}>
-        <input
-          type="text"
-          className="addon-input name-input"
-          placeholder="Name"
-          value={product.name}
-          onChange={(e) => handleInputChange(index, "name", e.target.value)}
-        />
-        <input
-          type="number"
-          className="addon-input price-input"
-          placeholder="Price"
-          value={product.price}
-          onChange={(e) => handleInputChange(index, "price", e.target.value)}
-        />
-        <button type="button" className="add-new-btn" onClick={addProduct}>
-          Add New
-        </button>
-      </div>
-    ))}
-  </form>
-</div>
-
-  
-
-<label htmlFor="totalamount">Total Amount*</label>
-      <input
-        type="text"
-        id="totalamount"
-        value={totalamount}
-        onChange={(e) => setTotalAmount(e.target.value)}
-        placeholder="Total Amount"
-        required
-      />
-
-      <label htmlFor="advanceamount">Advance Amount</label>
-      <input
-        type="text"
-        id="advanceamount"
-        value={advanceamount}
-        onChange={(e) => setAdvanceAmount(e.target.value)}
-        placeholder="Advance Amount"
-      />
-
-      <label htmlFor="balanceamount">Balance Amount</label>
-      <input
-        type="text"
-        id="balanceamount"
-        value={balanceamount}
-        placeholder="Balance Amount"
-        disabled
-      />
-
-<div className='checkoutInputType border-1 rounded-4'>
-                  <h4>Share your comments (if any)</h4>
-                  <textarea className='rounded border border-1 p-1 bg-white text-black'
-                    value={comment}
-                    onChange={handleComment}
-                    rows={4}
-                    placeholder="Enter your comment."
-                    style={{ width:"100%"}}
-                  />
-                </div>
-
-
+            <label htmlFor="addOn">Add On</label>
+            <div className="addon-container">
+              <form className="addon-form">
+                {products.map((product, index) => (
+                  <div className="addon-row" key={index}>
+                    <input
+                      type="text"
+                      className="addon-input name-input"
+                      placeholder="Name"
+                      value={product.name}
+                      onChange={(e) =>
+                        handleInputChange(index, "name", e.target.value)
+                      }
+                    />
+                    <input
+                      type="number"
+                      className="addon-input price-input"
+                      placeholder="Price"
+                      value={product.price}
+                      onChange={(e) =>
+                        handleInputChange(index, "price", e.target.value)
+                      }
+                    />
+                    <button
+                      type="button"
+                      className="add-new-btn"
+                      onClick={addProduct}
+                    >
+                      Add New
+                    </button>
+                  </div>
+                ))}
+              </form>
+            </div>
+            <label htmlFor="totalamount">Total Amount*</label>
+            <input
+              type="text"
+              id="totalamount"
+              value={totalamount}
+              onChange={(e) => setTotalAmount(e.target.value)}
+              placeholder="Total Amount"
+              required
+            />
+            <label htmlFor="advanceamount">Advance Amount</label>
+            <input
+              type="text"
+              id="advanceamount"
+              value={advanceamount}
+              onChange={(e) => setAdvanceAmount(e.target.value)}
+              placeholder="Advance Amount"
+            />
+            <label htmlFor="balanceamount">Balance Amount</label>
+            <input
+              type="text"
+              id="balanceamount"
+              value={balanceamount}
+              placeholder="Balance Amount"
+              disabled
+            />
+            <div className="checkoutInputType border-1 rounded-4">
+              <h4>Share your comments (if any)</h4>
+              <textarea
+                className="rounded border border-1 p-1 bg-white text-black"
+                value={comment}
+                onChange={handleComment}
+                rows={4}
+                placeholder="Enter your comment."
+                style={{ width: "100%" }}
+              />
+            </div>
             <div style={{ margin: "10px 0", width: "100%" }}>
               <label
                 htmlFor="city"
@@ -1132,7 +1120,6 @@ useEffect(() => {
                 <option value="Hyderbad">Hyderbad</option>
               </select>
             </div>
-
             <label htmlFor="pincode">Pincode *</label>
             <input
               type="text"
@@ -1140,13 +1127,20 @@ useEffect(() => {
               value={pincode}
               onChange={(e) => setPincode(e.target.value)}
             />
-            <p style={{fontWeight: "bold", fontSize: "15px", color: pincodeMessageColor }}>{pincodeMessage}</p>
-
+            <p
+              style={{
+                fontWeight: "bold",
+                fontSize: "15px",
+                color: pincodeMessageColor,
+              }}
+            >
+              {pincodeMessage}
+            </p>
             {showButton && (
-            <button className="button1" type="submit">
-              {lloading ? "Creating Order..." : "Create Order"}
-            </button>
-)}
+              <button className="button1" type="submit">
+                {lloading ? "Creating Order..." : "Create Order"}
+              </button>
+            )}
           </>
         )}
       </form>
