@@ -6,6 +6,6 @@ export const ADMIN_USER_DETAILS="/api/admin/getUserDetails/";
 export const ADMIN_ORDER_LIST="/api/admin/adminOrderList";
 export const GET_MEAL_DISH_ENDPOINT = "/api/user/getMealDish";
 export const API_SUCCESS_CODE = 200;
-
-
-// https://horaservices.com:3000/api/admin/admin_user_list
+export const GET_PHOTOGRAPHY_BY_NAME = "/api/photography/searchByTag/66c96b4e22ed47b72117e09a";
+export const ADMIN_USER_LIST = '/api/admin/admin_user_list';
+export const ADMIN_USER_SIGNUP = '/api/admin/user_signup';

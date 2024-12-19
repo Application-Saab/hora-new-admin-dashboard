@@ -39,15 +39,14 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
   const getCleanInclusionText = (inclusionArray) => {
     if (!inclusionArray || inclusionArray.length === 0)
       return "No inclusion details available";
-  
+
     return inclusionArray
-      .join("") 
-      .replace(/<\/?(div|span)>/g, "") 
-      .replace(/&#10;/g, "\n") 
+      .join("")
+      .replace(/<\/?(div|span)>/g, "")
+      .replace(/&#10;/g, "\n")
       .replace(/\s*-\s*/g, "\n- ")
-      .trim(); 
+      .trim();
   };
-  
 
   const sendOrderDetailsToWhatsApp = () => {
     const orderId = getOrderId(orderDetails._doc.order_id) || "N/A";
@@ -88,8 +87,6 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
       }
     }
 
-    
-
     let message = `Order Details:\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\nOrder Type: ${orderType}\nAddress: ${address}\nGoogleMapLocation: ${googleMapLocation}\nOrder Time: ${orderTime}\nBalance Amount: ₹${balanceAmount}\nComments: ${decorationComments}\n`;
 
     if (addOnItems.length > 0) {
@@ -103,14 +100,14 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
 
     decorations.forEach((dec, index) => {
       const inclusion = getCleanInclusionText(dec.inclusion) || "N/A"; // Get the formatted inclusion list
-      message += `\n\nOrder Summary:\nItem ${index + 1}: ${dec.name}\nInclusion:\n${inclusion}\n`;
+      message += `\n\nOrder Summary:\nItem ${index + 1}: ${
+        dec.name
+      }\nInclusion:\n${inclusion}\n`;
 
       if (dec.featuredImage) {
         message += `Featured Image: ${dec.featuredImage}\n`;
       }
     });
-
-    
 
     // Open WhatsApp with the pre-filled message
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
@@ -251,17 +248,20 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
                     <strong>Advance Amount:</strong>{" "}
                     <span>₹{orderDetails._doc.advance_amount || 0}</span>
                   </li>
-                 
-                  <li style={{ display: "flex", justifyContent: "space-between" }}>
-    
-      <span>Balance Amount</span>
-      <span>
-        ₹
-        {orderDetails._doc?.total_amount && orderDetails._doc?.advance_amount
-          ? orderDetails._doc.total_amount - orderDetails._doc.advance_amount
-          : "N/A"}
-      </span>
-</li>
+
+                  <li
+                    style={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    <span>Balance Amount</span>
+                    <span>
+                      ₹
+                      {orderDetails._doc?.total_amount &&
+                      orderDetails._doc?.advance_amount
+                        ? orderDetails._doc.total_amount -
+                          orderDetails._doc.advance_amount
+                        : "N/A"}
+                    </span>
+                  </li>
 
                   <li
                     style={{ display: "flex", justifyContent: "space-between" }}
