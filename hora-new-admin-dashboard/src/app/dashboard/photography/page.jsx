@@ -14,7 +14,6 @@ import {
 } from "../../../utils/apiconstant";
 import { timeSlotOptions, pincodes } from "../../../utils/timeSlots";
 
-
 const AddOrder = () => {
   const [dishName, setDishName] = useState("");
   const [productid, setProductID] = useState("");
@@ -67,8 +66,6 @@ const AddOrder = () => {
             response.data.data.length > 0
           ) {
             const productData = response.data.data[0];
-            console.log(productData, "productdata");
-            console.log(productData.inclusion, "product inclusion");
             setProduct(productData);
             setProductID(productData._id);
             setCategory(productData.price);
@@ -293,7 +290,6 @@ const AddOrder = () => {
     }
   };
 
-
   useEffect(() => {
     const balance = totalamount - advanceamount;
     setBalanceAmount(balance);
@@ -440,7 +436,6 @@ const AddOrder = () => {
               placeholder="googleLocation"
               style={{ width: "665px" }}
             />
-            
             <label htmlFor="totalamount">Total Amount*</label>
             <input
               type="text"
