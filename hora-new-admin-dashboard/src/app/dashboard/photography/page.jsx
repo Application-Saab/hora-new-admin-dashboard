@@ -12,7 +12,8 @@ import {
   ADMIN_USER_SIGNUP,
   API_SUCCESS_CODE,
 } from "../../../utils/apiconstant";
-import { timeSlotOptions, pincodes } from "../../../utils/timeSlots";
+import { timeSlotOptions } from "../../../utils/timeSlots";
+import { pincodes } from "../../../utils/pincodes";
 
 const AddOrder = () => {
   const [dishName, setDishName] = useState("");
@@ -65,24 +66,37 @@ const AddOrder = () => {
             !response.data.error &&
             response.data.data.length > 0
           ) {
-            const productData = response.data.data[0];
-            setProduct(productData);
-            setProductID(productData._id);
-            setCategory(productData.price);
-            const inclusions =
-              productData?.inclusion?.length > 0
-                ? productData.inclusion[0].split(/<\/div><div>/).map((item) =>
-                    item
-                      .replace(/<\/?div>/g, "")
-                      .replace(/<\/?span>/g, "")
-                      .replace(/<br\s*\/?>/g, "")
-                      .trim()
-                  )
-                : [];
+            const matchedProduct = response.data.data.find(
+              (product) => product.name.toLowerCase() === dishName.toLowerCase()
+            );
 
-            setInclusion(inclusions);
-            setShowProductDetails(true);
-            setIsFetched(true);
+            if (matchedProduct) {
+              console.log(matchedProduct, "productdata");
+              setProduct(matchedProduct);
+              setProductID(matchedProduct._id);
+              setCategory(matchedProduct.price);
+
+              const inclusions =
+                matchedProduct?.inclusion?.length > 0
+                  ? matchedProduct.inclusion[0]
+                      .split(/<\/div><div>/)
+                      .map((item) =>
+                        item
+                          .replace(/<\/?div>/g, "")
+                          .replace(/<\/?span>/g, "")
+                          .replace(/<br\s*\/?>/g, "")
+                          .trim()
+                      )
+                  : [];
+
+              setInclusion(inclusions);
+              setShowProductDetails(true);
+              setIsFetched(true);
+            } else {
+              setShowProductDetails(false);
+              console.log("No matching product found.");
+              alert("please enter valid product name");
+            }
           } else {
             setShowProductDetails(false);
           }
@@ -275,6 +289,7 @@ const AddOrder = () => {
       balance_amount: balanceamount,
       order_taken_by: orderTakenBy,
     };
+    console.log(requestData, "sdjfodf");
 
     try {
       const response = await axios.post(

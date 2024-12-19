@@ -1,5 +1,5 @@
 
-const pincodes = [
+export const pincodes = [
     "400097",
     "560035",
     "122004",
