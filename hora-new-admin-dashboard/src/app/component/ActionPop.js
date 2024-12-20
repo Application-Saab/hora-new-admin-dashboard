@@ -6,12 +6,12 @@ const ActionPopup = ({ isOpen, actionPopupOrderId,actionPopupChefOrderId,  actio
  
   const [popupType, setPopupType] = useState("");
   const [orderDetails, setOrderDetails] = useState(null);
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   let apiUrl = "";
 
   useEffect(() => {
-    setLoading(true);
+    // setLoading(true);
     setError(null);
 
     // Set the popup type and corresponding API URL based on order type
@@ -33,7 +33,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId,actionPopupChefOrderId,  actio
     } 
     else {
       setError("Currently, data is not available");
-      setLoading(false);
+      // setLoading(false);
       return;
     }
 
@@ -41,7 +41,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId,actionPopupChefOrderId,  actio
     fetch(apiUrl)
       .then((response) => response.json())
       .then((data) => {
-        setLoading(false);
+        // setLoading(false);
         if (!data.error && data.status === 200) {
           setOrderDetails(data.data);
         } else {
@@ -49,7 +49,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId,actionPopupChefOrderId,  actio
         }
       })
       .catch((error) => {
-        setLoading(false);
+        // setLoading(false);
         setError("Error fetching order details");
         console.error("Error fetching order details:", error);
       });

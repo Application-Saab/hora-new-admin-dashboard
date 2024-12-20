@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import "./photography.css";
-import Image from "next/image";
 import axios from "axios";
 import {
   BASE_URL,
@@ -50,17 +49,6 @@ const AddOrder = () => {
   const [newCustomerName, setNewCustomerName] = useState(""); // For name input
   const [newCustomerPhone, setNewCustomerPhone] = useState("");
 
-
-
-  const handleInputChange = (index, field, value) => {
-    const newProducts = [...products];
-    newProducts[index][field] = value;
-    setProducts(newProducts);
-  };
-
-  const addProduct = () => {
-    setProducts([...products, { name: "", price: "" }]);
-  };
 
   const handleComment = (e) => {
     const commentText = e.target.value;
