@@ -169,7 +169,6 @@ const ActionPopup = ({ isOpen, actionPopupOrderId,actionPopupChefOrderId,  actio
           item.decoration.map((dec) => {
             // Append each item's details to the message
             message += `\n\nProduct Name: ${dec.name}\n`; // Product name
-            message += `Product Price: ${dec.price}\n`; // Product price
             message += `Image URL: https://horaservices.com/api/uploads/${dec.featured_image}\n`; // Image URL
             const inclusionText = getCleanInclusionText(dec.inclusion);
             message += `Inclusion: \n${inclusionText}\n`;
