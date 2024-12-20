@@ -289,7 +289,6 @@ const AddOrder = () => {
       balance_amount: balanceamount,
       order_taken_by: orderTakenBy,
     };
-    console.log(requestData, "sdjfodf");
 
     try {
       const response = await axios.post(

@@ -127,11 +127,13 @@ useEffect(() => {
     let apiUrl;
     let popupTypeValue;
 
+    console.log(orderId, orderType, order_Id,"fsdffdsf");
+
     // Determine the API URL based on the order type
     if (orderType === 1) {
       apiUrl = `https://horaservices.com:3000/api/order/order_details_decoration/${orderId}`;
       popupTypeValue = "decoration";
-    } else if (orderType === 2) {
+    } else if (orderType === 2 || orderType === 8) {
       apiUrl = `https://horaservices.com:3000/api/order/order_details/v1/${order_Id}`;
       popupTypeValue = "chef";
     } else if (orderType === 6 || orderType === 7) {

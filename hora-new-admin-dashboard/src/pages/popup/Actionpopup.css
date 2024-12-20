@@ -63,7 +63,7 @@
   }
   
   .order-items-container {
-    max-height: 200px; /* Set a max height for scrolling */
+    /* max-height: 200px; Set a max height for scrolling */
     overflow-y: auto; /* Enable vertical scrolling */
     padding: 10px 0;
     margin-top: 10px;
