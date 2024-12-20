@@ -34,7 +34,6 @@ const AddOrder = () => {
   const [balanceamount, setBalanceAmount] = useState("");
   const [orderTakenBy, setOrderTakenBy] = useState("");
 
-  const [products, setProducts] = useState([{ name: "", price: "" }]);
   const [comment, setComment] = useState("");
   const [dishNameError, setDishNameError] = useState('')
   // const [error, setError] = useState(null);
@@ -233,10 +232,7 @@ const AddOrder = () => {
     e.preventDefault();
     setlLoading(true);
     console.log('handlesubmit')
-    const addOnProduct = products.map((product) => ({
-      name: product.name,
-      price: product.price,
-    }));
+
 
     const formattedDate = date ? formatDate(date) : null;
 
@@ -248,7 +244,7 @@ const AddOrder = () => {
     }
 
     const requestData = {
-      add_on: addOnProduct,
+      add_on: [],
       phone_no: customerNumber,
       toId: "",
       order_time: timeSlot.value,
