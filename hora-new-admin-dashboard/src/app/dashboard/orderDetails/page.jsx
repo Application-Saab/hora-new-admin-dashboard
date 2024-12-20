@@ -25,6 +25,8 @@ const OrderList = () => {
   const [actionPopupChefOrderId, setActionPopupChefOrderId] = useState("");
   const [actionPopupOrderType, setActionPopupOrderType] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
+  const [supplierDetails, setSupplierDetails] = useState(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
   // const [supplierDetails, setSupplierDetails] = useState(null);
 
   const [selectedDate, setSelectedDate] = useState("");
@@ -40,6 +42,9 @@ const OrderList = () => {
       case "Chef":
         typeId = 2;
         break;
+      case "Photography":
+        typeId = 8;
+        break;
       case "Food Delivery":
         typeId = 6;
         break;
@@ -54,8 +59,6 @@ const OrderList = () => {
 
     // `newId` calculation - update this based on actual use case, or use `orderId` directly if needed
     let filteredId = Math.abs(orderId - 10800);  // Confirm if this is needed or if `orderId` should be used as is
-    // let filteredDate=( `${selectedDate}T00:00:00.000Z`).toString()
-    console.log("1111", orderstatus)
     // Prepare requestData
     let requestData = {
       page: page,
@@ -84,7 +87,6 @@ const OrderList = () => {
       if (response.status === 200) {
         // Success - handle valid response
         const data = await response.json();
-        console.log("Fetched Orders:", data);
 
         if (data && data.data && data.data.order) {
           setOrders(data.data.order);
@@ -111,21 +113,6 @@ const OrderList = () => {
   
   }, [currentPage, searchTerm , selectedOrderStatus, selectedActiveStatus ,selectedOrderType, selectedCity, selectedDate, selectedPhoneNumber]);
 
-
-
-  // const FilterSearch = (orderId) => {
-  //   setSearchTerm(orderId);
-  //   fetchOrders(currentPage, orderId, selectedOrderStatus, selectedOrderType, selectedCity, selectedPhoneNumber);
-  //   setSearchTerm('');
-  // };
-
-
-  // const FilterPhoneNumber = (selectedPhoneNumber) => {
-  //   console.log(selectedPhoneNumber)
-  //   setSelectedPhoneNumber(selectedPhoneNumber);
-  //   fetchOrders(currentPage, searchTerm, selectedOrderStatus, selectedActiveStatus , selectedOrderType, selectedCity, selectedDate, selectedPhoneNumber);
-  //   // SelectedPhoneNumber('');
-  // }
 
 
   const getOrderStatus = (orderStatusValue) => {
@@ -157,6 +144,7 @@ const OrderList = () => {
       2: "Chef",
       6: "Food Delivery",
       7: "Live Catering",
+      8: "Photography",
     };
     return orderTypes[orderTypeValue] || "Unknown Order Type";
   };
@@ -199,8 +187,28 @@ const OrderList = () => {
     setPopupOpen(true); // Open the popup
   };
 
+
+
+  const openSupplierPopup = async (orderId) => {
+    try {
+      const response = await fetch(
+        `https://horaservices.com:3000/api/admin/getUserDetails/${orderId}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch user details");
+      }
+      const data = await response.json();
+      setSupplierDetails(data);
+      setIsPopupOpen(true);
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+    }
+  };
+
   const closePopup = () => {
     setPopupOpen(false); // Close the popup
+    setIsPopupOpen(false);
+    setSupplierDetails(null);
   };
 
   return (
@@ -223,7 +231,6 @@ const OrderList = () => {
                   }}
 
                 />
-              {/* <button className="filter-btn" onClick={() => FilterSearch(searchTerm)}>Search</button>  */}
 
               </div>
             </div>
@@ -240,18 +247,7 @@ const OrderList = () => {
 
                 }
               />
-              {/* <button className="filter-btn" onClick={() => FilterPhoneNumber(selectedPhoneNumber)}>Search</button> */}
-              {/* <input
-                type="text"
-                className="small-search byPhone"
-                placeholder="Search by online customer"
-                value={selectedPhoneNumber}
-
-                onChange={(e) =>
-                  setSelectedOnlinecusNum(e.target.value)
-
-                }
-              /> */}
+           
             </div>
             {/* date search */}
               <div className="date-filter-container">
@@ -302,6 +298,7 @@ const OrderList = () => {
                       <option value="Chef">Chef</option>
                       <option value="Food Delivery">Food Delivery</option>
                       <option value="Live Catering">Live Catering</option>
+                      <option value="Photography">Photography</option>
                     </select>
 
                   </span>
@@ -373,6 +370,7 @@ const OrderList = () => {
                   </select>
                 </th>
                 <th>Action</th>
+                <th>Rating</th>
               </tr>
             </thead>
             <tbody>
@@ -386,9 +384,10 @@ const OrderList = () => {
                     <td>{order.order_locality || "N/A"}</td>
                     <td>
                     {order?.order_date
-  ? new Date(order.order_date.split("T")[0]).toLocaleDateString()
-  : "N/A"}
 
+? new Date(order.order_date.split("T")[0]).toLocaleDateString()
+
+: "N/A"}
                     </td>
                     <td>
                       {order?.order_time
@@ -400,16 +399,50 @@ const OrderList = () => {
                     <td>{order.otp}</td>
                     <td>{order.order_taken_by || "N/A"}</td>
                     <td>{order.phone_no || "N/A"}</td>
-                    {/* <td>{order.online_phone_no || "N/A"}</td> */}
-                    <td>
+                      <td>
+
                       {order.toId ? (
-                        <FaEye
-                          onClick={() => openSupplierPopup(order.toId)}
-                        />
+                      <FaEye onClick={() => openSupplierPopup(order.toId)}/>
                       ) : (
-                        <p>NA</p>
+                      <p>NA</p>
                       )}
-                    </td>
+                      {isPopupOpen && supplierDetails && (
+
+                      <div className="popup-overlay" onClick={closePopup}>
+
+                      <div
+
+                      className="popup"
+
+                      onClick={(e) => e.stopPropagation()}
+
+                      >
+
+                      <button
+
+                      className="close-button"
+
+                      onClick={closePopup}
+
+                      >
+
+                      ×
+
+                      </button>
+
+                      <h3>Supplier Details</h3>
+
+                      <p>Name: {supplierDetails.data.name}</p>
+
+                      <p>Phone: {supplierDetails.data.phone}</p>
+
+                      </div>
+
+                      </div>
+
+                      )}
+                      </td>
+
 
                     <td>
                       {`${order.job_start_time.replace(/(\d{4})(\d{1,2}:\d{2}:\d{2} (AM|PM))/, '$1 $2')} - 
@@ -457,11 +490,20 @@ const OrderList = () => {
                       </button>
                     </td>
                     <td>
-                      <FaEye
+                      {
+                        order.type === 8 ? 'NA'
+                         : 
+                         <FaEye
                         onClick={() => {
                           openActionPopup(order.order_id, order._id, order.type)
                         }}
                       />
+                      }
+        
+                 
+                    </td>
+                    <td>
+                    {order.userReviewRatingArray[0]}
                     </td>
                   </tr>
                 ))

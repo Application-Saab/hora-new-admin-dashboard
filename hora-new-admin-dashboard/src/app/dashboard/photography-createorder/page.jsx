@@ -1,12 +1,12 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
-import "./createorder.css";
+import "./photography.css";
 import Image from "next/image";
 import axios from "axios";
 import {
   BASE_URL,
-  GET_DECORATION_BY_NAME,
+  GET_PHOTOGRAPHY_BY_TAG,
   CONFIRM_ORDER_ENDPOINT,
   SAVE_LOCATION_ENDPOINT,
   API_SUCCESS_CODE,
@@ -71,14 +71,16 @@ const AddOrder = () => {
     if (dishName && isContinueClicked && !isFetched) {
       const fetchProductDetails = async () => {
         try {
-          const url = `${BASE_URL}${GET_DECORATION_BY_NAME}${encodeURIComponent(dishName)}`;
+          const url = `${BASE_URL}${GET_PHOTOGRAPHY_BY_TAG}/66c96b4e22ed47b72117e09a`;
           const response = await axios.get(url);
-          const productData = response.data?.data?.[0];
-          console.log(response.data?.data?.[0])
+          const productData = response.data?.data;
           if (productData) {
-            setProduct(productData);
-            setProductID(productData._id);
-            setProductPrice(productData.price);
+            const matchedProduct = productData.find(
+              (product) => product.name.toLowerCase() === dishName.toLowerCase()
+            );
+            setProduct(matchedProduct);
+            setProductID(matchedProduct._id);
+            setProductPrice(matchedProduct.price);
             setShowProductDetails(true);
             setDishNameError('')
           } else {
@@ -263,7 +265,7 @@ const AddOrder = () => {
       toId: "",
       order_time: timeSlot.value,
       no_of_people: 0,
-      type: 1,
+      type: 8,
       fromId: customerId,
       is_discount: "0",
       addressId: addressID,
@@ -314,7 +316,7 @@ const AddOrder = () => {
 
   return (
     <div className="container">
-      <h1 className="createOrder pageHeading">Create Decoration Order</h1>
+      <h1 className="createOrder pageHeading">Create Photography Order</h1>
       <form className='orderCreation form' onSubmit={handleSubmit}>
         {/* product check */}
         <label htmlFor="dishName">Product Name *</label>
@@ -353,18 +355,6 @@ const AddOrder = () => {
             <input type="text" id="productid" value={productid} readOnly />
             <label htmlFor="productprice">Product Price</label>
             <input type="text" id="productprice" value={productprice} readOnly />
-            <div style={{ marginTop: "10px" }}>
-              <label htmlFor="featuredImage">Product Image</label>
-              <div>
-                <Image
-                  src={`https://horaservices.com/api/uploads/${product.featured_image}`}
-                  alt="Product"
-                  width={200}
-                  height={200}
-                  onError={(e) => (e.target.style.display = "none")}
-                />
-              </div>
-            </div>
             {/* costumer chcek======================== */}
             <label htmlFor="customerNumber">Customer Number*</label>
             <input
@@ -464,34 +454,7 @@ const AddOrder = () => {
 
                   />
                 </div>
-                <div className="addon-container">
-                  <label htmlFor="addOn">Add On</label>
-
-                  <form className="addon-form">
-                    {products.map((product, index) => (
-                      <div className="addon-row" key={index}>
-                        <input
-                          type="text"
-                          className="addon-input name-input"
-                          placeholder="Name"
-                          value={product.name}
-                          onChange={(e) => handleInputChange(index, "name", e.target.value)}
-                        />
-                        <input
-                          type="number"
-                          className="addon-input price-input"
-                          placeholder="Price"
-                          value={product.price}
-                          onChange={(e) => handleInputChange(index, "price", e.target.value)}
-                        />
-                        <button type="button" className="add-new-btn" onClick={addProduct}>
-                          Add New
-                        </button>
-                      </div>
-                    ))}
-                  </form>
-                </div>
-
+             
 
                 <div className="amount-box">
                   <label htmlFor="totalamount">Total Amount*</label>

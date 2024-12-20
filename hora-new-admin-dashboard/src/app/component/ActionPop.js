@@ -25,7 +25,13 @@ const ActionPopup = ({ isOpen, actionPopupOrderId,actionPopupChefOrderId,  actio
     } else if (actionPopupOrderType === 6 || actionPopupOrderType === 7) {
       apiUrl = `https://horaservices.com:3000/api/order/order_details_food_delivery/${actionPopupOrderId}`;
       setPopupType("foodDelivery");
-    } else {
+    } else if (actionPopupOrderType === 8 ) {
+      // Need new api for photograpgy
+      const photographyOrderId = actionPopupChefOrderId.toString();
+      apiUrl = `https://horaservices.com:3000/api/order/order_details/v1/${photographyOrderId}`;
+      setPopupType("Photography");
+    } 
+    else {
       setError("Currently, data is not available");
       setLoading(false);
       return;
@@ -66,6 +72,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId,actionPopupChefOrderId,  actio
       5: "Cleaner",
       6: "Food Delivery",
       7: "Live Catering",
+      8: "Photography",
     };
     return orderTypes[orderTypeValue] || "Unknown Order Type";
   };
@@ -171,21 +178,6 @@ const ActionPopup = ({ isOpen, actionPopupOrderId,actionPopupChefOrderId,  actio
         )};
     </p>
 
-  //   {
-  //    orderDetails.items.decorations.forEach((dec, index) => {
-  //     const inclusion = getCleanInclusionText(dec.inclusion) || "N/A"; // Get the formatted inclusion list
-  //     message += `\n\nOrder Summary:\nItem ${index + 1}: ${dec.name}\nInclusion:\n${inclusion}\n`;
-    
-  //     if (dec.featuredImage) {
-  //       message += `Featured Image: ${dec.featuredImage}\n`;
-  //     }
-  //   });
-  //   };
-  // </p>
-
-
-
-    
 
     // Open WhatsApp with the pre-filled message
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
@@ -287,7 +279,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId,actionPopupChefOrderId,  actio
             <button onClick={onClose} className="close-btn">
               ✖
             </button>
-            {loading && <div>Loading...</div>}
+            {/* {loading && <div>Loading...</div>} */}
             {error && <div className="error-message">{error}</div>}
             {popupType === "decoration" && orderDetails ? (
               <div className="order-details-container">

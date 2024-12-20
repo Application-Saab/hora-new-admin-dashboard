@@ -10,6 +10,11 @@ const menuItems = [
     url: "/dashboard/decoration-createorder",
   },
   {
+    label: "Photography Create Order",
+    icon: <FaPlusCircle />,
+    url: "/dashboard/photography-createorder",
+  },
+  {
     label: "Order Details",
     icon: <FaTachometerAlt />,
     url: "/dashboard/orderDetails",
