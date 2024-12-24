@@ -10,6 +10,7 @@ import {
   CONFIRM_ORDER_ENDPOINT,
   SAVE_LOCATION_ENDPOINT,
   API_SUCCESS_CODE,
+  ADMIN_USER_SIGNUP,
 } from "../../../utils/apiconstant";
 import { pincodes } from '../../../utils/pincodes.js';
 
@@ -122,7 +123,7 @@ const AddOrder = () => {
         {
           email: "",
           page: "",
-          per_page: 2000,
+          per_page: 5000,
           phone: "",
           role: "customer",
         }
@@ -156,6 +157,7 @@ const AddOrder = () => {
 
 
   const handleAddCustomer = async () => {
+    console.log('11111');
     const requestData = {
       name: newCustomerName,
       phone: newCustomerPhone,

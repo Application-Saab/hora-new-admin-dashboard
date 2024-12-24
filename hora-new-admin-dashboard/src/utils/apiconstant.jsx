@@ -7,4 +7,5 @@ export const ADMIN_ORDER_LIST="/api/admin/adminOrderList";
 export const GET_PHOTOGRAPHY_BY_TAG = "/api/photography/searchByTag";
 export const API_SUCCESS_CODE = 200;
 export const GET_PHOGRAPHY_BY_TAG = 'api/photography/searchByTag';
+export const ADMIN_USER_SIGNUP = '/api/admin/user_signup';
 // https://horaservices.com:3000/api/admin/admin_user_list
