@@ -14,6 +14,9 @@
     "@emotion/styled": "^11.14.0",
     "@mobiscroll/react-lite": "^4.10.9",
     "@mui/material": "^6.2.0",
+    "@tensorflow/tfjs": "^4.22.0",
+    "@tensorflow/tfjs-backend-webgl": "^4.22.0",
+    "@tensorflow/tfjs-core": "^4.22.0",
     "axios": "^1.7.7",
     "baseui": "^14.0.0",
     "datatables.net": "^2.1.8",
@@ -33,6 +36,7 @@
     "react-router-dom": "^6.26.2",
     "react-select": "^5.8.1",
     "react-virtualized": "^9.22.5",
+    "upscaler": "^1.0.0-beta.19",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

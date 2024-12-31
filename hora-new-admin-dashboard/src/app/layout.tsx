@@ -36,14 +36,15 @@ const Sidebar = () => {
           </Link>
         </li>
 
-        <li>
+    
+        {/* <li>
           <Link
             href="/dashboard/photography"
             className="link-button"
           >
             <FaPlusCircle style={{ marginRight: "8px" }} /> Photography Create
           </Link>
-        </li>
+        </li> */}
       </ul>
     </div>
   );

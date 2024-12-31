@@ -237,6 +237,8 @@ const DishSearch = () => {
         },
       });
 
+      console.log(response, "response");
+
       if (response.status === API_SUCCESS_CODE) {
         const dishes = response.data.data.flatMap((entry) => entry.dish || []);
         setMealList(dishes);
