@@ -5,10 +5,10 @@ body {
 }
 
 .sidebar {
-  width: 220px;
+  width: 200px;
   height: 100vh;
-  background: linear-gradient(90deg,rgba(221,94,137,.8),#97538c);
-  padding: 20px;
+  background: linear-gradient(90deg, rgba(221, 94, 137, 0.8), #97538c);
+  /* padding: 20px; */
   position: fixed;
   left: 0;
   top: 0;
@@ -32,13 +32,15 @@ body {
 }
 
 .main-content {
-  margin-left: 240px;
-  padding: 20px;
+  margin-left: 175px;
+  /* padding: 20px; */
   flex: 1;
   transition: margin-left 0.3s ease;
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   color: #333;
 }
 
@@ -68,7 +70,7 @@ h1, h2, h3 {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-.startbutton{
+.startbutton {
   width: 80%;
   background-color: #fa4e4d;
   color: #fff;
@@ -83,41 +85,41 @@ h1, h2, h3 {
 }
 
 .pagination {
-  display: flex; /* Aligns child elements horizontally */
-  justify-content: center; /* Centers the buttons horizontally */
-  align-items: center; /* Centers the buttons vertically */
-  position: fixed; /* Keeps it in the middle of the viewport */
-  top: 95%; /* Moves it 50% down from the top */
-  left: 55%; /* Moves it 50% from the left */
-  transform: translate(-50%, -50%); /* Centers the element perfectly */
-  gap: 10px; /* Adds spacing between buttons */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 95%;
+  left: 55%;
+  transform: translate(-50%, -50%);
+  gap: 10px;
 }
 
 .pagination button {
-  padding: 10px 15px; /* Adds space inside the buttons */
-  font-size: 16px; /* Makes text readable */
-  cursor: pointer; /* Changes cursor to pointer on hover */
-  border: 1px solid #ccc; /* Adds a border around buttons */
-  border-radius: 5px; /* Slightly rounds the corners */
-  background-color: #f9f9f9; /* Sets a light background */
-  color: #333; /* Sets text color */
-  transition: background-color 0.3s, transform 0.2s; /* Smooth animations */
+  padding: 10px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  color: #333;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
 .pagination button:hover {
-  background-color: #ddd; /* Changes background on hover */
+  background-color: #ddd;
 }
 
 .pagination button:disabled {
-  cursor: not-allowed; /* Disables pointer for disabled buttons */
-  background-color: #e0e0e0; /* Sets a disabled background color */
-  color: #aaa; /* Sets disabled text color */
+  cursor: not-allowed;
+  background-color: #e0e0e0;
+  color: #aaa;
 }
 
 .pagination button.active {
-  background-color: #007bff; /* Highlights active page button */
-  color: #fff; /* Sets active text color */
-  border-color: #007bff; /* Matches border to highlight color */
+  background-color: #007bff;
+  color: #fff;
+  border-color: #007bff;
 }
 
 
@@ -274,4 +276,585 @@ h1, h2, h3 {
   padding: 10px;
   text-align: center;
   color: #888;
+}
+
+/* new things */
+/* body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+} */
+
+.container {
+  max-width: 650px;
+  margin: auto;
+  background: white;
+  padding: 50px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  text-align: center;
+}
+
+label {
+  display: block;
+  margin-top: 15px;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.button1 {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #5cb85c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.button1:hover {
+  background-color: #4cae4c;
+}
+/* 
+.form_css {
+  flex-direction: row;
+  flex-wrap: wrap;
+  display: flex;
+}
+
+
+input[type="text1"],
+input[type="number1"] {
+  width: 150px;
+  margin-right: 10px;
+}
+
+input[type="comment"] {
+  width: 500px;
+} */
+
+
+.form_css {
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  width: 630px;
+}
+
+.form_css label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.form_css input[type="text"] {
+  width: 97%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+}
+
+.form_css button[type="button"] {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/*  */
+
+
+.addon-container {
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  width: 630px;
+}
+
+.addon-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.addon-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.addon-input {
+  padding: 8px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 200px; /* Adjust width as needed */
+}
+
+.name-input {
+  flex: 1;
+}
+
+.price-input {
+  flex: 0.5;
+}
+
+.add-new-btn {
+  padding: 8px 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-new-btn:hover {
+  background-color: #45a049;
+}
+.loader {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 60px;
+  font-weight: bold;
+  color: #f01212;
+}
+
+
+/* popup new customer css */
+/* General Styles */
+
+
+/* Popup Container */
+.popup {
+position: fixed;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+width: 400px;
+padding: 20px;
+background: #ffffff; /* Clean white background */
+border-radius: 16px; /* Rounded corners */
+box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1); /* Soft shadow */
+z-index: 1000;
+animation: fade-in 0.3s ease-in-out;
+}
+
+/* Fade-In Animation */
+@keyframes fade-in {
+from {
+  opacity: 0;
+  transform: translate(-50%, -60%);
+}
+to {
+  opacity: 1;
+  transform: translate(-50%, -50%);
+}
+}
+
+/* Title */
+.popup h2 {
+margin: 0 0 15px;
+font-size: 1.6rem;
+font-weight: 600;
+color: #333;
+text-align: center;
+}
+
+/* Labels */
+.popup label {
+display: block;
+margin: 12px 0 6px;
+font-size: 0.9rem;
+color: #555;
+}
+
+/* Input Fields */
+.popup input {
+width: calc(100% - 20px);
+padding: 12px;
+margin-bottom: 15px;
+border: 1px solid #ddd;
+border-radius: 12px;
+background: #f9f9f9;
+font-size: 1rem;
+outline: none;
+transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.popup input:focus {
+border-color: #4caf50; /* Soft green for focus */
+box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
+}
+
+/* Buttons */
+.popup button {
+width: 48%;
+padding: 12px;
+margin: 10px 1%;
+border: none;
+border-radius: 12px;
+background: #4caf50; /* Light green button */
+color: #ffffff;
+font-size: 1rem;
+font-weight: 600;
+cursor: pointer;
+transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.popup button:hover {
+background-color: #45a049; /* Darker green hover effect */
+transform: translateY(-2px); /* Slight lift on hover */
+}
+
+/* Cancel Button */
+.popup button.cancel {
+background: #e0e0e0; /* Light grey for cancel */
+color: #333;
+}
+
+.popup button.cancel:hover {
+background: #d6d6d6; /* Darker grey on hover */
+}
+
+/* Responsive Design for Mobile */
+@media (max-width: 480px) {
+.popup {
+  width: 90%;
+  padding: 15px;
+}
+
+.popup h2 {
+  font-size: 1.4rem;
+}
+}
+
+
+/* selected dishes */
+.selected-dishes-container {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 20px auto;
+  max-width: 800px;
+  font-family: 'Arial', sans-serif;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.selected-dishes-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.selected-dish-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.dish-name {
+  font-weight: bold;
+  color: #555;
+  flex: 2;
+}
+
+.dish-price,
+.dish-total {
+  flex: 1;
+  color: #777;
+  text-align: center;
+  font-size: 14px;
+}
+
+.dish-quantity{
+  font-size: 14px;
+  color: #777;
+}
+
+.dish-total {
+  font-weight: bold;
+  color: #333;
+}
+
+.total-price {
+  text-align: right;
+  font-size: 20px;
+  color: #444;
+  font-weight: bold;
+  margin-top: 20px;
+}
+
+
+.people-input-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px auto;
+  font-family: Arial, sans-serif;
+}
+
+.people-label {
+  font-size: 16px;
+  font-weight: normal;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.people-input {
+  width: 60px;
+  text-align: center;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  padding: 5px;
+  margin: 0 10px;
+  border-radius: 4px;
+}
+
+.btn {
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 18px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn:hover {
+  background-color: #e0e0e0;
+}
+
+.btn:disabled {
+  background-color: #ddd;
+  cursor: not-allowed;
+}
+
+/* Style the container */
+.order-summary {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Add a soft border and spacing for each row */
+.order-summary .space-y-2 {
+  margin-bottom: 10px;
+}
+
+/* Style the checkbox container */
+.order-summary .flex.items-center {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+/* Style the labels and text */
+.order-summary label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  transition: color 0.3s ease;
+}
+
+/* Checkbox styles */
+.order-summary input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+  appearance: none;
+  background-color: #fff;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Fancy checkbox: Checked state */
+.order-summary input[type="checkbox"]:checked {
+  background-color: #4CAF50;
+  border-color: #4CAF50;
+}
+
+/* Fancy checkbox inner circle */
+.order-summary input[type="checkbox"]:checked::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 12px;
+  height: 12px;
+  background-color: #fff;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+/* Hover effect for the label */
+.order-summary label:hover {
+  color: #4CAF50;
+  cursor: pointer;
+}
+
+/* Bold final total with divider */
+.order-summary .font-bold {
+  font-size: 18px;
+  color: #333;
+}
+
+.order-summary .border-t {
+  border-top: 1px solid #ddd;
+  padding-top: 10px;
+}
+
+/* Responsive Styles */
+@media (max-width: 600px) {
+  .order-summary label {
+    font-size: 14px;
+  }
+
+  .order-summary input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+
+.ordersummary-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px; /* Adjust the gap between items */
+}
+
+.ordersummaryproduct {
+  flex: 1 1 calc(10% - 8px); /* Ensures 10 items per row */
+  box-sizing: border-box;
+  text-align: center;
+  margin-bottom: 16px; /* Add some space between rows */
+}
+
+.ordersummary-sec1,
+.ordersummary-sec2 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.checkoutRightImg.chef {
+  width: 80px; /* Make the image much smaller */
+  height: 80px; /* Make the image much smaller */
+}
+
+.ordersummeryname {
+  font-size: 10px; /* Make the text very small */
+  margin: 4px 0;
+}
+
+.ingredientrightsecsibheading {
+  font-size: 8px; /* Make the ingredient text smaller */
+  color: #9252AA;
+}
+
+.button2 {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #4CAF50; /* Green background */
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.button2:hover {
+  background-color: #45a049; /* Darker green on hover */
+  transform: translateY(-2px); /* Slight lift effect on hover */
+}
+
+.button2:active {
+  background-color: #388e3c; /* Even darker green when clicked */
+  transform: translateY(0); /* Reset lift effect */
+}
+/* new */
+.price-breakdown {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.price-breakdown h4 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.price-breakdown p {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0;
+}
+
+.price-breakdown p span:first-child {
+  flex: 1;
+  text-align: left;
+}
+
+.price-breakdown p span:last-child {
+  flex: 1;
+  text-align: right;
+}
+
+.options-container {
+  margin-top: 15px;
+}
+
+.options-container label {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.options-container input {
+  margin-right: 10px;
 }
