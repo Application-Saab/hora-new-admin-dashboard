@@ -29,7 +29,7 @@ const OrderList = () => {
 
   const [selectedDate, setSelectedDate] = useState("");
 
-  const fetchOrders = async (page, orderId = '', orderstatus = '', activeStatus= '' ,orderType = '', orderCity = '', selectedDate = '', selectedOfflineNum = '') => {
+  const fetchOrders = async (page, orderId = '', orderstatus = '', activeStatus = '', orderType = '', orderCity = '', selectedDate = '', selectedOfflineNum = '') => {
     console.log("Selected Date in fetchOrders:", selectedOfflineNum);  // Log the selected date for debugging
     // Handle orderType mapping
     let typeId;
@@ -55,12 +55,13 @@ const OrderList = () => {
     // `newId` calculation - update this based on actual use case, or use `orderId` directly if needed
     let filteredId = Math.abs(orderId - 10800);  // Confirm if this is needed or if `orderId` should be used as is
     // Prepare requestData
+    console.log(Number(orderstatus))
     let requestData = {
       page: page,
       per_page: itemsPerPage,
       order_id: orderId.length > 0 ? filteredId : "", // `match orderId`
-      order_status: Number(orderstatus) || "", // 'match OrderStatus'
-      status: (Number(activeStatus) === 0 || Number(activeStatus) === 1)  ? Number(activeStatus)  : "",
+      order_status: (Number(orderstatus) === 0 || Number(orderstatus)) ? Number(orderstatus) : "", // 'match OrderStatus'
+      status: (Number(activeStatus) === 0 || Number(activeStatus) === 1) ? Number(activeStatus) : "",
       type: typeId || "", // match order type
       order_locality: orderCity || "",
       order_date: selectedDate || "",
@@ -68,7 +69,7 @@ const OrderList = () => {
       // online_phone_no :selectedOfflineNum || "",
     };
 
-    console.log(requestData); 
+    console.log(requestData);
 
     try {
       const response = await fetch(url, {
@@ -104,9 +105,9 @@ const OrderList = () => {
 
 
   useEffect(() => {
-    fetchOrders(currentPage, searchTerm, selectedOrderStatus, selectedActiveStatus , selectedOrderType, selectedCity, selectedDate, selectedPhoneNumber);
-  
-  }, [currentPage, searchTerm , selectedOrderStatus, selectedActiveStatus ,selectedOrderType, selectedCity, selectedDate, selectedPhoneNumber]);
+    fetchOrders(currentPage, searchTerm, selectedOrderStatus, selectedActiveStatus, selectedOrderType, selectedCity, selectedDate, selectedPhoneNumber);
+
+  }, [currentPage, searchTerm, selectedOrderStatus, selectedActiveStatus, selectedOrderType, selectedCity, selectedDate, selectedPhoneNumber]);
 
 
   const getOrderStatus = (orderStatusValue) => {
@@ -179,11 +180,6 @@ const OrderList = () => {
     setActionPopupOrderType(orderType)
     setPopupOpen(true); // Open the popup
   };
-
-
-
-
-
   const [supplierDetails, setSupplierDetails] = useState(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
@@ -225,12 +221,12 @@ const OrderList = () => {
                   className="small-search byId"
                   placeholder="Search by Order ID"
                   value={searchTerm}
-                  onChange={(e) =>{
+                  onChange={(e) => {
                     setSearchTerm(e.target.value);
                   }}
 
                 />
-              
+
 
               </div>
             </div>
@@ -247,22 +243,22 @@ const OrderList = () => {
 
                 }
               />
-     
+
             </div>
             {/* date search */}
-              <div className="date-filter-container">
-            
-                  <label className="date-label">Order Fullfilement Date</label>
-                  <input
-                    type="date"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}  // Update the selectedDate state
-                    placeholder="Select Date"
-                    className="date-input"
-                  />
-                
-              </div>
-           
+            <div className="date-filter-container">
+
+              <label className="date-label">Order Fullfilement Date</label>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}  // Update the selectedDate state
+                placeholder="Select Date"
+                className="date-input"
+              />
+
+            </div>
+
           </div>
           <div className="right-part">
 
@@ -272,7 +268,7 @@ const OrderList = () => {
         </div>
 
         <div className="orders-box">
-    
+
 
           <table className="order-table">
             <thead>
@@ -380,9 +376,9 @@ const OrderList = () => {
                     <td>{getOrderType(order.type)}</td>
                     <td>{order.order_locality || "N/A"}</td>
                     <td>
-                    {order?.order_date
-                          ? new Date(order.order_date.split("T")[0]).toLocaleDateString()
-                          : "N/A"}
+                      {order?.order_date
+                        ? new Date(order.order_date.split("T")[0]).toLocaleDateString()
+                        : "N/A"}
 
                     </td>
                     <td>
@@ -404,25 +400,25 @@ const OrderList = () => {
                       ) : (
                         <p>NA</p>
                       )}
-                      
+
                       {isPopupOpen && supplierDetails && (
-                          <div className="popup-overlay" onClick={closePopup}>
-                            <div
-                              className="popup"
-                              onClick={(e) => e.stopPropagation()}
+                        <div className="popup-overlay" onClick={closePopup}>
+                          <div
+                            className="popup"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <button
+                              className="close-button"
+                              onClick={closePopup}
                             >
-                              <button
-                                className="close-button"
-                                onClick={closePopup}
-                              >
-                                ×
-                              </button>
-                              <h3>Supplier Details</h3>
-                              <p>Name: {supplierDetails.data.name}</p>
-                              <p>Phone: {supplierDetails.data.phone}</p>
-                            </div>
+                              ×
+                            </button>
+                            <h3>Supplier Details</h3>
+                            <p>Name: {supplierDetails.data?.name || "NA"}</p>
+                            <p>Phone: {supplierDetails.data?.phone || "NA"}</p>
                           </div>
-                        )}
+                        </div>
+                      )}
                     </td>
 
                     <td>
@@ -446,7 +442,7 @@ const OrderList = () => {
                       <div style={styles.container}>
                         {/* Call Icon */}
                         <div
-                        
+
                           onClick={() => handleCallClick(order.phone_no)}
                         >
                           N/A
@@ -477,8 +473,19 @@ const OrderList = () => {
                         }}
                       />
                     </td>
-                    <td>
-                     {order.userReviewRatingArray[0]}
+                    <td style={{width:"200px",paddingLeft:"16px"}}>
+                      {order.type === 2 ?(
+                        <ul style={{paddingLeft:"0" , }}>
+                      {  order.userReviewRatingArray.map((i) => 
+                        (
+                            <li>{i.name}-{i.rating}</li>                          
+                        ))}
+                      </ul>
+                      ): (
+                           order.userReviewRatingArray[0]
+                          )
+
+                      }
                     </td>
                   </tr>
                 ))
