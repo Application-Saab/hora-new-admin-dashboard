@@ -254,13 +254,21 @@ const AddOrder = () => {
       return;
     }
 
+    let type;
+
+if (selectedOption === "food-delivery") {
+  type = 6; 
+} else if (selectedOption === "live-catering") {
+  type = 7; 
+}
+
     const requestData = {
       add_on: inclusion,
       phone_no: customerNumber,
       toId: "",
       order_time: timeSlot.value,
       no_of_people: numberOfPeople,
-      type: 6,
+      type: type,
       fromId: customerId,
       is_discount: "0",
       addressId: addressID,
