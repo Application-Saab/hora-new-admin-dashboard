@@ -426,7 +426,7 @@ const ActionPopup = ({ isOpen, orderDetails, onClose, popupType }) => {
                     <p>
                       <strong>Order Address:</strong>{" "}
                       {orderDetails[0].addressId?.address1 || "N/A"}
-                    </p>
+                    </p>g
                   </div>
                   <h3>Ordered Items:</h3>
 

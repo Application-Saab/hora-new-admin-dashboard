@@ -60,6 +60,8 @@ const AddOrder = () => {
 
   const [selectedDishQuantities, setSelectedDishQuantities] = useState([]);
 
+  const [itemDataId, setItemDataId] = useState({ items: [] });
+
   const handleComment = (e) => {
     const commentText = e.target.value;
     setComment(commentText);
@@ -134,7 +136,6 @@ const AddOrder = () => {
 
       if (Array.isArray(users)) {
         const customer = users.find((user) => user.phone === customerNumber);
-        console.log(customer, "customer");
         setCustomerId(customer);
         if (customer) {
           setMessage("Customer exists.");
@@ -168,7 +169,6 @@ const AddOrder = () => {
       email: "",
       role: "customer",
     };
-    console.log(requestData, "requestion data");
     try {
       const response = await axios.post(
         `${BASE_URL}${ADMIN_USER_SIGNUP}`,
@@ -211,7 +211,6 @@ const AddOrder = () => {
       const url = BASE_URL + SAVE_LOCATION_ENDPOINT;
 
       const address2 = address + pincode;
-      console.log(address2, "address2");
       const requestDataa = {
         address1: address2,
         address2: googleLocation,
@@ -220,7 +219,6 @@ const AddOrder = () => {
         userId: customerId,
       };
 
-      console.log(requestDataa, "requestdataa");
       const token =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2M2VkYjIzOWQ2ODBkNDdkOTU4NzBmYTAiLCJuYW1lIjoiQmhhcmF0IiwiZW1haWwiOiJiaGFyYXRneWFuY2hhbmRhbmkwMDFAZ21haWwuY29tIiwicGhvbmUiOiI4ODg0MjIxNDg3Iiwicm9sZSI6ImN1c3RvbWVyIiwiaWF0IjoxNzI2MTI1NDkyLCJleHAiOjE3NTc2NjE0OTJ9.HuVjkLUBi0sCpH9p3uPzQKtnO2OR910g9MviBlLY0QY";
 
@@ -261,26 +259,27 @@ const AddOrder = () => {
       phone_no: customerNumber,
       toId: "",
       order_time: timeSlot.value,
-      no_of_people: 0,
-      type: 8,
+      no_of_people: numberOfPeople,
+      type: 6,
       fromId: customerId,
       is_discount: "0",
       addressId: addressID,
       order_date: formattedDate,
-      no_of_burner: 0,
+      no_of_burner: true,
       order_locality: city,
-      total_amount: totalamount,
+      total_amount: priceDetails.finalTotal,
       orderApplianceIds: [],
-      payable_amount: totalamount,
-      advance_amount: advanceamount,
+      payable_amount: priceDetails.finalTotal,
+      advance_amount: priceDetails.advancePayment,
       is_gst: "0",
       order_type: true,
-      items: [product._id],
+      items: itemDataId,
       decoration_comments: comment,
       status: 1,
       balance_amount: balanceamount,
       order_taken_by: orderTakenBy,
     };
+
 
     try {
       const response = await axios.post(
@@ -439,34 +438,36 @@ const AddOrder = () => {
   const handleChange = (event) => {
     setSelectedOption(event.target.value);
   };
-  const calculateTotalPrice = () =>
-    selectedDishes.reduce((total, dish) => {
-      const price = dish.cuisineArray[0];
-      return total + price * numberOfPeople;
-    }, 0);
 
-  var selectedDeliveryOption = "food-delivery";
   useEffect(() => {
     const updatedQuantities = selectedDishes.map((dish) => {
-      let categoryId = "63edc4757e1b370928b149b3";
-      if (dish.category === "main_course") {
-        categoryId = "63f1b6b7ed240f7a09f7e2de";
-      } else if (dish.category === "appetizer") {
-        categoryId = "63f1b39a4082ee76673a0a9f";
-      }
+        let categoryId = "63edc4757e1b370928b149b3"; // Default ID
+        if (dish.category === "main_course") {
+            categoryId = "63f1b6b7ed240f7a09f7e2de";
+        } else if (dish.category === "appetizer") {
+            categoryId = "63f1b39a4082ee76673a0a9f";
+        }
 
-      return {
-        name: dish.name,
-        image: dish.image || "default-image.png",
-        price: dish.cuisineArray[0],
-        quantity: dish.cuisineArray[1],
-        unit: dish.cuisineArray[2],
-        id: [categoryId],
-      };
+        return {
+            name: dish.name,
+            image: dish.image || "default-image.png",
+            price: dish.cuisineArray[0],
+            quantity: dish.cuisineArray[1],
+            unit: dish.cuisineArray[2],
+            id: categoryId, // Store the id directly
+            _id: dish._id
+        };
     });
 
+    // Prepare the requestData object
+    const newRequestData = updatedQuantities.map((item) => item.id);
+
+    console.log(newRequestData,"newrequestdata");
     setSelectedDishQuantities(updatedQuantities);
-  }, [selectedDishes]);
+    setItemDataId(newRequestData); // Store requestData in state
+
+    console.log(newRequestData, "requestData");
+}, [selectedDishes]);
 
   const RenderDishQuantity = ({ item }) => {
     const itemCount = selectedDishQuantities.length;
@@ -581,7 +582,7 @@ Google Map Location: ${googleLocation}
     if (selectedOption === "live-catering") {
       orderData += `
 Dishes:
-${selectedDishQuantities.map((item) => item.name).join("\n  ")}`;
+${selectedDishQuantities.map((item) => item.name).join("\n")}`;
   
       const priceDetails = calculatePriceDetails();
       const liveCateringTotal = (priceDetails.subtotal * 1.1 + 6500).toFixed(0);
