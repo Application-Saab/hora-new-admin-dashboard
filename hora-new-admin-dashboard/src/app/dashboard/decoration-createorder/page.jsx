@@ -13,8 +13,8 @@ import {
   API_SUCCESS_CODE,
 } from "../../../utils/apiconstant";
 import { pincodes } from '../../../utils/pincodes.js';
-
-const AddOrder = () => {
+import { timeSlotOptions } from "../../../utils/timeSlots";
+const AddDecOrder = () => {
   const [dishName, setDishName] = useState("");
   const [productid, setProductID] = useState("");
   const [productprice, setProductPrice] = useState("");
@@ -298,14 +298,14 @@ const AddOrder = () => {
     }
   }
 
-
-  const timeSlotOptions = [
-    { value: "7:00 AM - 10:00 AM", label: "7:00 AM - 10:00 AM" },
-    { value: "10:00 AM - 1:00 PM", label: "10:00 AM - 1:00 PM" },
-    { value: "1:00 PM - 4:00 PM", label: "1:00 PM - 4:00 PM" },
-    { value: "4:00 PM - 7:00 PM", label: "4:00 PM - 7:00 PM" },
-    { value: "7:00 PM - 10:00 PM", label: "7:00 PM - 10:00 PM" },
-  ];
+  // import by aarti===
+  // const timeSlotOptions = [
+  //   { value: "7:00 AM - 10:00 AM", label: "7:00 AM - 10:00 AM" },
+  //   { value: "10:00 AM - 1:00 PM", label: "10:00 AM - 1:00 PM" },
+  //   { value: "1:00 PM - 4:00 PM", label: "1:00 PM - 4:00 PM" },
+  //   { value: "4:00 PM - 7:00 PM", label: "4:00 PM - 7:00 PM" },
+  //   { value: "7:00 PM - 10:00 PM", label: "7:00 PM - 10:00 PM" },
+  // ];
 
 
   useEffect(() => {
@@ -345,7 +345,7 @@ const AddOrder = () => {
           </button>
 
         )}
-        {<p class='error-msg' style={{ color: " red" }}>{dishName && isContinueClicked ? dishNameError : ''}</p>}
+        {<p className='error-msg' style={{ color: " red" }}>{dishName && isContinueClicked ? dishNameError : ''}</p>}
         {/* product details =================================================*/}
 
         {showProductDetails && product && (
@@ -372,11 +372,14 @@ const AddOrder = () => {
               type="text"
               id="customerNumber"
               value={customerNumber}
-              onChange={(e) => setCustomerNumber(e.target.value)}
+              onInput={(e) => setCustomerNumber(e.target.value.replace(/\D/g, ''))} // Remove non-digits as the user types
               placeholder="Customer Number"
               required
+              maxLength={10}  // Limit to 10 digits
+              pattern="\d{10}" // Enforce exactly 10 digits
+              inputMode="numeric" // Optimize for numeric input on mobile devices
             />
-            <button class="orderCheck-btn" onClick={handleCheckCustomer} disabled={loading}>
+            <button className="orderCheck-btn" onClick={handleCheckCustomer} disabled={loading || customerNumber.length !== 10}>
               {loading ? "Checking..." : "Check Customer"}
             </button>
             {loading && <p>Loading...</p>} {/* Loader */}
@@ -468,7 +471,7 @@ const AddOrder = () => {
                 <div className="addon-container">
                   <label htmlFor="addOn">Add On</label>
 
-                  <form className="addon-form">
+                  <div className="addon-form">
                     {products.map((product, index) => (
                       <div className="addon-row" key={index}>
                         <input
@@ -490,7 +493,7 @@ const AddOrder = () => {
                         </button>
                       </div>
                     ))}
-                  </form>
+                  </div>
                 </div>
 
 
@@ -592,40 +595,47 @@ const AddOrder = () => {
               </div>)
               :
               <> {lloading && <div className="loader">Loading...</div>}
-                {/* Pop of NEW CUSTOMER ADD=============================== */}
+                {showPopup && (
+                  <div className="popup">
+                    <h2>Add New Customer</h2>
+                    <label>
+                      Name:
+                      <input
+                        type="text"
+                        value={newCustomerName}
+                        onChange={(e) => setNewCustomerName(e.target.value)}
+                      />
+                    </label>
+                    <br />
+                    <label>
+                      Phone:
+
+                      <input
+                        type="text"
+                        id="customerNumber"
+                        value={newCustomerPhone}
+                        onInput={(e) => setNewCustomerPhone(e.target.value.replace(/\D/g, ''))} // Remove non-digits as the user types
+                        placeholder="Customer Number"
+                        required
+                        maxLength={10}  // Limit to 10 digits
+                        pattern="\d{10}" // Enforce exactly 10 digits
+                        inputMode="numeric" // Optimize for numeric input on mobile devices
+                      />
+                    </label>
+                    <br />
+                    <button onClick={handleAddCustomer}>Add Customer</button>
+                    <button onClick={() => setShowPopup(false)}>Cancel</button>
+                  </div>
+                )}
 
               </>
             }
           </>
         )}
       </form>
-      {showPopup && (
-        <div className="popup">
-          <h2>Add New Customer</h2>
-          <label>
-            Name:
-            <input
-              type="text"
-              value={newCustomerName}
-              onChange={(e) => setNewCustomerName(e.target.value)}
-            />
-          </label>
-          <br />
-          <label>
-            Phone:
-            <input
-              type="text"
-              value={newCustomerPhone}
-              onChange={(e) => setNewCustomerPhone(e.target.value)}
-            />
-          </label>
-          <br />
-          <button onClick={handleAddCustomer}>Add Customer</button>
-          <button onClick={() => setShowPopup(false)}>Cancel</button>
-        </div>
-      )}
+
     </div>
   );
 };
 
-export default AddOrder;
+export default AddDecOrder;

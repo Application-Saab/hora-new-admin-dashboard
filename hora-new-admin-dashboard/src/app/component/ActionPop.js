@@ -169,8 +169,15 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
     });
 
     // Open WhatsApp with the pre-filled message
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, "_blank");
+    // const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    // window.open(whatsappUrl, "_blank");
+    navigator.clipboard.writeText(message)
+      .then(() => {
+        alert("Order details have been copied to the clipboard!");
+      })
+      .catch((err) => {
+        console.error("Failed to copy order details to clipboard: ", err);
+      });
   };
 
   const sendOrderDetailsToWhatsAppchef = (orderDetails) => {
@@ -202,10 +209,16 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
     } else {
       message += "No dishes selected";
     }
-
+    navigator.clipboard.writeText(message)
+      .then(() => {
+        alert("Order details have been copied to the clipboard!");
+      })
+      .catch((err) => {
+        console.error("Failed to copy order details to clipboard: ", err);
+      });
     // Open WhatsApp with the pre-filled message
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, "_blank");
+    // const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    // window.open(whatsappUrl, "_blank");
   };
   const sendOrderDetailsToWhatsAppFood = (orderDetails) => {
     console.log(orderDetails);
@@ -218,37 +231,55 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
     const orderTime = orderDetails?.order_time || "N/A";
     const orderCity = orderDetails?.order_locality || "NA"
     const peopleCount = orderDetails?.no_of_people || "NA"
+    const ItemQuantity = orderDetails?.userOrderDishImageArray || "NA"
     // Create a Google Maps link
-    const googleMapUrl = orderDetails?.addressId?.address2  ? (`https://www.google.com/maps/search/?q=${encodeURIComponent(googleMapLocation)}`) : 'NA';
+    const googleMapUrl = orderDetails?.addressId?.address2 ? (`https://www.google.com/maps/search/?q=${encodeURIComponent(googleMapLocation)}`) : 'NA';
     // Calculate balance amount
     const balanceAmount =
       orderDetails?.total_amount && orderDetails?.advance_amount
         ? orderDetails?.total_amount - orderDetails?.advance_amount
         : "N/A";
-        const inclusions = [
-          "Complementary - Green salad, Mint Chutney, Achar",
-          "Doorstep Delivery",
-          "Disposable plates, Fork, Spoon, Tissue papers, Bisleri Water bottles",
-          "Freshly cooked food"
-        ];
+    const inclusions = [
+      "Complementary - Green salad, Mint Chutney, Achar",
+      "Doorstep Delivery",
+      "Disposable plates, Fork, Spoon, Tissue papers, Bisleri Water bottles",
+      "Freshly cooked food"
+    ];
     // Start building the message
     let message = `*Food Delivery Order Summary:*\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\n\nCity: ${orderCity}\nGuest Count: ${peopleCount}\nTime of Delivery: ${orderTime}\n\nAddress: ${address}\n\nGoogleMapLocation: ${googleMapUrl}\n*Amount: ₹${balanceAmount}*\n\n*Dishes*\n`;
 
     // Append each dish to the message
-    if (orderDetails?.selecteditems?.length) {
-      message += orderDetails.selecteditems
-        .map((item) => {
-          return `${item.name}: ${item.cuisineArray[1] ? item.cuisineArray[1]  : ''} ${item.cuisineArray[2] ? item.cuisineArray[2] : ''}`;
+    if (orderDetails?.userOrderDishImageArray?.length) {
+      const dishesObject = orderDetails.userOrderDishImageArray[0]; // Access the first object in the array
+      message += Object.entries(dishesObject)
+        .map(([dishName, details]) => {
+          if (details.quantity && details.unit) {
+            return `${dishName}: ${details.quantity} ${details.unit}`;
+          } else if (details.quantity) {
+            return `${dishName}: ${details.quantity}`;
+          }
+          return null; // Handle cases where details are incomplete
         })
+        .filter(Boolean) // Remove any null or invalid entries
         .join("\n");
+
+
     } else {
       message += "No dishes selected";
     }
-    message += "\n\n*Inclusions:*\n" + inclusions.join("\n");
 
+
+    message += "\n\n*Inclusions:*\n" + inclusions.join("\n");
+    navigator.clipboard.writeText(message)
+      .then(() => {
+        alert("Order details have been copied to the clipboard!");
+      })
+      .catch((err) => {
+        console.error("Failed to copy order details to clipboard: ", err);
+      });
     // Open WhatsApp with the pre-filled message
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, "_blank");
+    // const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    // window.open(whatsappUrl, "_blank");
   };
   // fetch orderdetails
   const FetchOrderDetails = ({ orderDetails }) => {
@@ -288,24 +319,34 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
               <div className="order-items-container">
                 {(orderDetails?.type === 6 || orderDetails?.type === 7) ?
                   (<ul className="order-items-list">
-                    {orderDetails?.selecteditems?.map((item) => (
+                    {orderDetails?.selecteditems?.map((item) => {
+                      // by aarti
+                      const dishDetails =
+                        orderDetails?.userOrderDishImageArray[0]?.[item.name] || null;
+                      return (
 
-                      <li key={item._id} className="order-item">
-                        <Image
-                          src={`https://horaservices.com/api/uploads/${item.image}`}
-                          alt={item.name}
-                          width={80}
-                          height={80}
-                          className="order-item-image"
-                        />
+                        <li key={item._id} className="order-item">
+                          <Image
+                            src={`https://horaservices.com/api/uploads/${item.image}`}
+                            alt={item.name}
+                            width={80}
+                            height={80}
+                            className="order-item-image"
+                          />
 
-                        <div className="order-item-details">
-                          <strong className="order-item-title">{item.name}</strong>
-                          <span>{item.cuisineArray[1]}{item.cuisineArray[2]}</span>
-                          <span className="order-item-price">₹{item.cuisineArray[0]}</span>
-                        </div>
-                      </li>
-                    ))}
+                          <div className="order-item-details">
+                            <strong className="order-item-title">{item.name}</strong>
+                            {dishDetails?.quantity && (
+                              <span className="order-item-quantity">
+                                {dishDetails.quantity} {dishDetails.unit || ""}
+                              </span>
+                            )}
+                            <span className="order-item-price">₹{dishDetails?.price}</span>
+                          </div>
+                        </li>
+                      )
+                    }
+                    )}
                   </ul>)
                   : (<ul className="order-items-list">
                     {orderDetails?.selecteditems?.map((item) => (
@@ -385,7 +426,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                   }
                 }}
               >
-                Share on WhatsApp
+                Copy Order Summary
               </button>
 
             </div>
@@ -539,7 +580,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                           className="startbutton"
                           onClick={sendOrderDetailsToWhatsAppDoc}
                         >
-                          Share On WhatsApp
+                          Copy Order Summary
                         </button>
                       </div>
                     </div>

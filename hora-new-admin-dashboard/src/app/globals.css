@@ -3,6 +3,10 @@ body {
   font-family: Arial, sans-serif;
   background-color: #f0f0f0;
 }
+ul{
+  padding-left: 0;
+  list-style: none;
+}
 .main-content{
   width:84%;
 }
