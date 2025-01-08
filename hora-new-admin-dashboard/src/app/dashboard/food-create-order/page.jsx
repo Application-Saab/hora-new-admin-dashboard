@@ -10,7 +10,7 @@ import {
 	GET_MEAL_DISH_ENDPOINT,
 } from "../../../utils/apiconstant"
 
-import CreateFoodOrderForm from "../../component/CreateFoodOrderForm"
+import CreateOrderForm from "../../component/CreateOrderForm"
 
 function AddFoodOrder() {
 	const [loading, setLoading] = useState(false);
@@ -597,7 +597,7 @@ function AddFoodOrder() {
 				);
 			})()}
 
-			<CreateFoodOrderForm calculatePriceDetails={calculatePriceDetails} priceDetails={priceDetails} numberOfPeople={numberOfPeople} selectedOption={selectedOption} selectedDishQuantities={selectedDishQuantities} includeTables={includeTables} />
+			<CreateOrderForm calculatePriceDetails={calculatePriceDetails} priceDetails={priceDetails} numberOfPeople={numberOfPeople} selectedOption={selectedOption} selectedDishQuantities={selectedDishQuantities} includeTables={includeTables} />
 
 
 
