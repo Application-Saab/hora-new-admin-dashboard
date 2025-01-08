@@ -10,7 +10,7 @@ import {
 	GET_MEAL_DISH_ENDPOINT,
 } from "../../../utils/apiconstant"
 
-import CreateOrderForm from "../../component/CreateOrderForm"
+import CreateFoodOrderForm from "../../component/CreateFoodOrderForm"
 
 function AddFoodOrder() {
 	const [loading, setLoading] = useState(false);
@@ -23,7 +23,7 @@ function AddFoodOrder() {
 	const [selectedDishes, setSelectedDishes] = useState([]);
 	const [selectedDishQuantities, setSelectedDishQuantities] = useState([]);
 	const [includeDisposable, setIncludeDisposable] = useState(false);
-	
+	const [includeTables, setIncludeTables] = useState(false);
 	const deliveryCharges = 300;
 	const packingCost = 200;
 	const validMealIds = [
@@ -479,7 +479,7 @@ function AddFoodOrder() {
 				return (
 					<div className="price-breakdown" style={style.priceBreakdown}>
 						<h4 style={{ textAlign: "center" }}>Price Breakdown</h4>
-						<ul>
+						<ul className="PriceBreakdownList">
 							<li>
 								<span>Number of Dishes:</span>
 								<span>{priceDetails.dishCount}</span>
@@ -597,7 +597,7 @@ function AddFoodOrder() {
 				);
 			})()}
 
-			<CreateOrderForm calculatePriceDetails={calculatePriceDetails} priceDetails={priceDetails} numberOfPeople={numberOfPeople} selectedOption={selectedOption} selectedDishQuantities={selectedDishQuantities} />
+			<CreateFoodOrderForm calculatePriceDetails={calculatePriceDetails} priceDetails={priceDetails} numberOfPeople={numberOfPeople} selectedOption={selectedOption} selectedDishQuantities={selectedDishQuantities} includeTables={includeTables} />
 
 
 

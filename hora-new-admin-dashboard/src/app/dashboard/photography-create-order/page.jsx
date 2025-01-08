@@ -2,22 +2,25 @@
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import "react-datepicker/dist/react-datepicker.css";
-import "./createorder.css";
-import Image from "next/image";
+import "../decoration-createorder/createorder.css";
 import axios from "axios";
 import {
   BASE_URL,
-  GET_DECORATION_BY_NAME,
   CONFIRM_ORDER_ENDPOINT,
   SAVE_LOCATION_ENDPOINT,
+  GET_PHOTOGRAPHY_BY_NAME,
+  ADMIN_USER_LIST,
+  ADMIN_USER_SIGNUP,
   API_SUCCESS_CODE,
 } from "../../../utils/apiconstant";
-import { pincodes } from '../../../utils/pincodes.js';
 import { timeSlotOptions } from "../../../utils/timeSlots";
-const AddDecOrder = () => {
+import { pincodes } from "../../../utils/pincodes";
+
+const AddPhotoOrder = () => {
   const [dishName, setDishName] = useState("");
   const [productid, setProductID] = useState("");
-  const [productprice, setProductPrice] = useState("");
+  const [category, setCategory] = useState("");
+  const [inclusion, setInclusion] = useState("");
   const [date, setDate] = useState("");
   const [customerNumber, setCustomerNumber] = useState("");
   const [address, setAddress] = useState("");
@@ -36,10 +39,7 @@ const AddDecOrder = () => {
   const [balanceamount, setBalanceAmount] = useState("");
   const [orderTakenBy, setOrderTakenBy] = useState("");
 
-  const [products, setProducts] = useState([{ name: "", price: "" }]);
   const [comment, setComment] = useState("");
-  const [dishNameError, setDishNameError] = useState('')
-  // const [error, setError] = useState(null);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -47,20 +47,11 @@ const AddDecOrder = () => {
 
   const [customerId, setCustomerId] = useState(null);
 
-  const [showPopup, setShowPopup] = useState(false); // For toggling the popup
-  const [newCustomerName, setNewCustomerName] = useState(""); // For name input
+  const [showPopup, setShowPopup] = useState(false);
+  const [newCustomerName, setNewCustomerName] = useState("");
   const [newCustomerPhone, setNewCustomerPhone] = useState("");
-
-  const handleInputChange = (index, field, value) => {
-    const newProducts = [...products];
-    newProducts[index][field] = value;
-    setProducts(newProducts);
-  };
-
-  const addProduct = () => {
-    setProducts([...products, { name: "", price: "" }]);
-  };
-
+  const [lloading, setlLoading] = useState(false);
+  const [showButton, setShowButton] = useState(false);
   const handleComment = (e) => {
     const commentText = e.target.value;
     setComment(commentText);
@@ -70,19 +61,46 @@ const AddDecOrder = () => {
     if (dishName && isContinueClicked && !isFetched) {
       const fetchProductDetails = async () => {
         try {
-          const url = `${BASE_URL}${GET_DECORATION_BY_NAME}${encodeURIComponent(dishName)}`;
+          const url = `${BASE_URL}${GET_PHOTOGRAPHY_BY_NAME}`;
           const response = await axios.get(url);
-          const productData = response.data?.data?.[0];
-          console.log(response.data?.data?.[0])
-          if (productData) {
-            setProduct(productData);
-            setProductID(productData._id);
-            setProductPrice(productData.price);
-            setShowProductDetails(true);
-            setDishNameError('')
+          if (
+            response.data &&
+            !response.data.error &&
+            response.data.data.length > 0
+          ) {
+            const matchedProduct = response.data.data.find(
+              (product) => product.name.toLowerCase() === dishName.toLowerCase()
+            );
+
+            if (matchedProduct) {
+              console.log(matchedProduct, "productdata");
+              setProduct(matchedProduct);
+              setProductID(matchedProduct._id);
+              setCategory(matchedProduct.price);
+
+              const inclusions =
+                matchedProduct?.inclusion?.length > 0
+                  ? matchedProduct.inclusion[0]
+                    .split(/<\/div><div>/)
+                    .map((item) =>
+                      item
+                        .replace(/<\/?div>/g, "")
+                        .replace(/<\/?span>/g, "")
+                        .replace(/<br\s*\/?>/g, "")
+                        .trim()
+                    )
+                  : [];
+
+              setInclusion(inclusions);
+              setShowProductDetails(true);
+              setIsFetched(true);
+            } else {
+              setShowProductDetails(false);
+              console.log("No matching product found.");
+              alert("please enter valid product name");
+            }
           } else {
             setShowProductDetails(false);
-            setDishNameError('No product found')
           }
         } catch (error) {
           console.error("Error fetching product:", error.message);
@@ -96,7 +114,6 @@ const AddDecOrder = () => {
   useEffect(() => {
     if (pincode) {
       if (pincodes.includes(pincode)) {
-
         setPincodeMessage("Pincode available");
         setPincodeMessageColor("green");
       } else {
@@ -109,50 +126,50 @@ const AddDecOrder = () => {
     }
   }, [pincode]);
 
-
   const handleCheckCustomer = async (e) => {
     e.preventDefault();
     setMessage("");
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        "https://horaservices.com:3000/api/admin/admin_user_list",
-        {
-          email: "",
-          page: "",
-          per_page: 2000,
-          phone: "",
-          role: "customer",
-        }
-      );
+      const response = await axios.post(`${BASE_URL}${ADMIN_USER_LIST}`, {
+        email: "",
+        page: "",
+        per_page: 2000,
+        phone: "",
+        role: "customer",
+      });
 
       const users = response?.data?.data?.users;
 
-      if (users.length > 0) {
-        console.log(users.length)
+      if (Array.isArray(users)) {
         const customer = users.find((user) => user.phone === customerNumber);
-
+        console.log(customer, "customer");
         setCustomerId(customer);
         if (customer) {
           setMessage("Customer exists.");
           setMessageColor("green");
+          setShowButton(true);
         } else {
           setMessage("Customer does not exist.");
           setMessageColor("red");
           setShowPopup(true);
+          setShowButton(false);
         }
       } else {
         setMessage("No users found in the response.");
+        setShowButton(false);
       }
     } catch (err) {
       setMessage("An error occurred while checking the customer.");
       console.error(err);
+      setShowButton(false);
     } finally {
       setLoading(false);
     }
   };
 
+ 
 
   const handleAddCustomer = async () => {
     const requestData = {
@@ -164,16 +181,15 @@ const AddDecOrder = () => {
     console.log(requestData, "requestion data");
     try {
       const response = await axios.post(
-        "https://horaservices.com:3000/api/admin/user_signup",
+        `${BASE_URL}${ADMIN_USER_SIGNUP}`,
         requestData
       );
 
-      console.log("Customer added:", response.data.dataToSave._id);
       setCustomerId(response.data.dataToSave);
       setMessage("Customer successfully added.");
-      // window.location.reload(false);
       setMessageColor("green");
       setShowPopup(false);
+      setShowButton(true);
     } catch (err) {
       console.error("Error adding customer:", err);
       setMessage("Failed to add customer.");
@@ -181,6 +197,9 @@ const AddDecOrder = () => {
     }
   };
 
+  useEffect(() => {
+    console.log("showButton state updated:", showButton);
+  }, [showButton]);
 
   const handleContinueClick = () => {
     setIsContinueClicked(true);
@@ -196,8 +215,6 @@ const AddDecOrder = () => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", options);
   };
-
-
 
   const saveAddress = async () => {
     try {
@@ -237,16 +254,9 @@ const AddDecOrder = () => {
   };
 
 
-  const [lloading, setlLoading] = useState(false);
   const handleSubmit = async (e) => {
     e.preventDefault();
     setlLoading(true);
-    console.log('handlesubmit')
-    const addOnProduct = products.map((product) => ({
-      name: product.name,
-      price: product.price,
-    }));
-
     const formattedDate = date ? formatDate(date) : null;
 
     const addressID = await saveAddress();
@@ -257,12 +267,12 @@ const AddDecOrder = () => {
     }
 
     const requestData = {
-      add_on: addOnProduct,
+      add_on: inclusion,
       phone_no: customerNumber,
       toId: "",
       order_time: timeSlot.value,
       no_of_people: 0,
-      type: 1,
+      type: 8,
       fromId: customerId,
       is_discount: "0",
       addressId: addressID,
@@ -275,110 +285,71 @@ const AddDecOrder = () => {
       advance_amount: advanceamount,
       is_gst: "0",
       order_type: true,
-      items: [product._id],
+      items: [product?._id],
       decoration_comments: comment,
       status: 1,
       balance_amount: balanceamount,
       order_taken_by: orderTakenBy,
     };
 
-    console.log(requestData, "requestData decoration");
-
     try {
-      const response = await axios.post(`${BASE_URL}${CONFIRM_ORDER_ENDPOINT}`, requestData);
+      const response = await axios.post(
+        `${BASE_URL}${CONFIRM_ORDER_ENDPOINT}`,
+        requestData
+      );
       alert("Order created successfully:", response.data);
     } catch (error) {
       console.error("Error creating order:", error);
       alert("There was an error creating the order. Please try again.");
-    }
-    finally {
+    } finally {
       setlLoading(false);
     }
-  }
-
-  // import by aarti===
-  // const timeSlotOptions = [
-  //   { value: "7:00 AM - 10:00 AM", label: "7:00 AM - 10:00 AM" },
-  //   { value: "10:00 AM - 1:00 PM", label: "10:00 AM - 1:00 PM" },
-  //   { value: "1:00 PM - 4:00 PM", label: "1:00 PM - 4:00 PM" },
-  //   { value: "4:00 PM - 7:00 PM", label: "4:00 PM - 7:00 PM" },
-  //   { value: "7:00 PM - 10:00 PM", label: "7:00 PM - 10:00 PM" },
-  // ];
-
+  };
 
   useEffect(() => {
     const balance = totalamount - advanceamount;
     setBalanceAmount(balance);
   }, [totalamount, advanceamount]);
+  // Function to check if all required fields are filled
 
-  const proDuctInclusions = (product) => {
-    if (!product.inclusion || product.inclusion.length === 0) {
-      return "No inclusion details available"; // Return plain text for inclusion summary
-    }
-
-    const inclusionItems = product.inclusion[0]
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
-      .replace(/&#[^;]*;/g, ' ') // Replace special characters
-      .split('-') // Split by "-"
-      .map(item => item.trim())
-      .filter(item => item); // Remove empty items
-
-    return inclusionItems.map(item => `- ${item}`).join('\n'); // Format inclusion items as a list for text
-  };
-
-  const handleCopyOrderSummary = () => {
-    let addons = '';
-    const inclusionSummary = proDuctInclusions(product);
-
-    // Check if products exist and loop over them
-    if (products && products.length > 0) {
-      products.forEach((item, index) => {
-        addons += `\n  ${index + 1}. ${item.name}: ₹${item.price}`;
-      });
-    } else {
-      addons += ' None'; // Show "None" directly if there are no add-ons
-    }
-
-
-    // Create the order summary string
+  const copyOrderSummary = () => {
+    // Construct the order summary message
     const orderSummary = `
-  *Decoration Order Details*
-  
-  Date: ${date}
-  Time Slot: ${timeSlot?.label || ""}
-  Contact Number: ${customerNumber}
-  Address: ${address}
-  Google Map Location: ${googleLocation}
-  
-  Total Amount: ₹${totalamount || "N/A"}
-  Advance Amount: ₹${advanceamount || "N/A"}
-  Balance Amount: ₹${balanceamount || "N/A"}
-  
-  *Product Name*: ${dishName}
-  Product Image URL: https://horaservices.com/api/uploads/${product.featured_image}
-  
-  *Add-On Items*:
-  ${addons}
-  
-  *Inclusions*:
-  ${inclusionSummary}
-  
-  Comment: ${comment}
-  Order Taken By: ${orderTakenBy}
+
+      Date: ${date}
+      Time Slot: ${timeSlot?.label || "N/A"}
+
+      *Product Name*: ${dishName}
+      Product Price: ${category || "N/A"}
+      Product Inclusions:
+       ${inclusion.length > 0 ? inclusion.join("\n -") : "None"}
+      
+      Contact number Number: ${customerNumber}
+      
+      Total Amount: ${totalamount}
+      Advance Amount: ${advanceamount || "N/A"}
+      Balance Amount: ${balanceamount || "N/A"}
+
+      *Address*: ${address}
+      Google Location: ${googleLocation || "N/A"}
+      City: ${city}
+      Pincode: ${pincode}
+      Comments: ${comment || "None"}
+      Order Taken By: ${orderTakenBy}
     `;
 
-    // Copy the order summary to clipboard
-    navigator.clipboard.writeText(orderSummary.trim());
-
-    // Alert the user
-    alert('Order summary copied!');
+    // Copy to clipboard
+    navigator.clipboard.writeText(orderSummary.trim()).then(() => {
+      alert("Order Summary copied to clipboard!");
+    }).catch((err) => {
+      alert("Failed to copy: ", err);
+    });
   };
 
   return (
     <div className="container">
-      <h1 className="createOrder pageHeading">Create Decoration Order</h1>
-      <form className='orderCreation form' onSubmit={handleSubmit}>
-        {/* product check */}
+      <h1>Photography 📸</h1>
+      <form onSubmit={handleSubmit}>
         <label htmlFor="dishName">Product Name *</label>
         <input
           type="text"
@@ -397,39 +368,33 @@ const AddDecOrder = () => {
         {!showProductDetails && (
           <button
             type="button"
-            className="orderCheck-btn"
+              className="orderCheck-btn"
             onClick={handleContinueClick}
             style={{ marginTop: "10px" }}
             disabled={dishName === '' ? true : false}
           >
             Continue
           </button>
-
+          
         )}
-        {<p className='error-msg' style={{ color: " red" }}>{dishName && isContinueClicked ? dishNameError : ''}</p>}
-
-        {/* product details =================================================*/}
-
         {showProductDetails && product && (
           <>
             <label htmlFor="productid">Product ID</label>
             <input type="text" id="productid" value={productid} readOnly />
-            <label htmlFor="productprice">Product Price</label>
-            <input type="text" id="productprice" value={productprice} readOnly />
-            <div style={{ marginTop: "10px" }}>
-              <label htmlFor="featuredImage">Product Image</label>
-              <div>
-                <Image
-                  src={`https://horaservices.com/api/uploads/${product.featured_image}`}
-                  alt="Product"
-                  width={200}
-                  height={200}
-                  onError={(e) => (e.target.style.display = "none")}
-                />
-              </div>
-          
+            <label htmlFor="category">Product Price</label>
+            <input type="text" id="category" value={category} readOnly />
+            <div className="ProductInclusions" style={{border:"1px solid black" ,marginTop:"10px", padding:"10px"}}>
+              <label htmlFor="productid">Product Inclusions:</label>
+              <ul style={{listStyle:"disc", paddingLeft:"10px"}}>
+                {inclusion.length > 0 ? (
+                  inclusion.map((item, index) => <li key={index}>{item}</li>)
+                ) : (
+                  <li>No inclusions available</li>
+                )}
+              </ul>
             </div>
-            {/* costumer chcek======================== */}
+            {/* customer checek  */}
+
             <label htmlFor="customerNumber">Customer Number*</label>
             <input
               type="text"
@@ -447,9 +412,9 @@ const AddDecOrder = () => {
             </button>
             {loading && <p>Loading...</p>} {/* Loader */}
             {<p style={{ color: messageColor }}>{message}</p>}
+
           </>
         )}
-        {/* order details ==========================.Customer does not exist */}
         {message === "Customer exists."
           ?
           (<div className='orderDeatils'>
@@ -485,7 +450,6 @@ const AddDecOrder = () => {
                   required
                 />
               </div>
-
               <div style={{ marginLeft: "10px" }}>
                 <label
                   htmlFor="timeSlot"
@@ -506,9 +470,6 @@ const AddDecOrder = () => {
                 />
               </div>
             </div>
-
-
-
             <div className="address-box">
               <label htmlFor="address">Address*</label>
               <textarea
@@ -528,39 +489,8 @@ const AddDecOrder = () => {
                 value={googleLocation}
                 onChange={(e) => setGoogleLocation(e.target.value)}
                 placeholder="googleLocation"
-
-
               />
             </div>
-            <div className="addon-container">
-              <label htmlFor="addOn">Add On</label>
-
-              <div className="addon-form">
-                {products.map((product, index) => (
-                  <div className="addon-row" key={index}>
-                    <input
-                      type="text"
-                      className="addon-input name-input"
-                      placeholder="Name"
-                      value={product.name}
-                      onChange={(e) => handleInputChange(index, "name", e.target.value)}
-                    />
-                    <input
-                      type="number"
-                      className="addon-input price-input"
-                      placeholder="Price"
-                      value={product.price}
-                      onChange={(e) => handleInputChange(index, "price", e.target.value)}
-                    />
-                    <button type="button" className="add-new-btn" onClick={addProduct}>
-                      Add New
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-
             <div className="amount-box">
               <label htmlFor="totalamount">Total Amount*</label>
               <input
@@ -580,7 +510,6 @@ const AddDecOrder = () => {
                 onChange={(e) => setAdvanceAmount(e.target.value)}
                 placeholder="Advance Amount"
               />
-
               <label htmlFor="balanceamount">Balance Amount</label>
               <input
                 type="text"
@@ -590,9 +519,6 @@ const AddDecOrder = () => {
                 disabled
               />
             </div>
-
-
-
             <div className="cityPincode-box" style={{ margin: "10px 0", width: "100%" }}>
               <div className="city-box">
                 <label
@@ -638,7 +564,6 @@ const AddDecOrder = () => {
                 />
                 <p style={{ fontWeight: "bold", fontSize: "15px", color: pincodeMessageColor }}>{pincodeMessage}</p>
               </div>
-
             </div>
             <div className='checkoutInputType border-1 rounded-4'>
               <h4>Share your comments (if any)</h4>
@@ -648,14 +573,12 @@ const AddDecOrder = () => {
                 cols={90}
                 rows={4}
                 placeholder="Enter your comment."
-
-
               />
             </div>
+           
 
-
-            <button className="orderCheck-btn" type="submit">
               {/* Create Order */}
+            <button className="orderCheck-btn" type="submit" >
               {lloading ? "Creating Order..." : "Create Order"}
             </button>
           </div>)
@@ -698,11 +621,11 @@ const AddDecOrder = () => {
         }
 
       </form>
-      {message === "Customer exists." && (
-      <button onClick={handleCopyOrderSummary}
-        style={style.buttonPrimary}>Copy Order Summary
-      </button>
-)}
+
+            { message === "Customer exists." && <button onClick={copyOrderSummary} style={style.buttonPrimary}>
+                            Copy Order Summary
+                        </button>
+                        }
     </div>
   );
 };
@@ -726,4 +649,4 @@ buttonPrimary: {
   width:"100%"
 },
 }
-export default AddDecOrder;
+export default AddPhotoOrder;

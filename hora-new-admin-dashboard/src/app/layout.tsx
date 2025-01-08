@@ -1,9 +1,12 @@
 import React from "react";
 import Link from "next/link";
 import "./globals.css";
-import { FaTachometerAlt, FaPlusCircle } from "react-icons/fa";
+import { FaTachometerAlt, FaPlusCircle , FaCamera} from "react-icons/fa";
 const menuItems = [
-  { label: "Dashboard", icon: <FaTachometerAlt />, url: "/dashboard" },
+  { label: "Dashboard",
+     icon: <FaTachometerAlt />,
+      url: "/dashboard" 
+    },
   {
     label: "Decoration Create Order",
     icon: <FaPlusCircle />,
@@ -18,6 +21,11 @@ const menuItems = [
     label: "Food Create Order",
     icon: <FaPlusCircle />,
     url: "/dashboard/food-create-order",
+  },
+  {
+    label: "PhotoGraphy Create Order",
+    icon: < FaCamera />,
+    url: "/dashboard/photography-create-order",
   },
 ];
 const Sidebar = () => {

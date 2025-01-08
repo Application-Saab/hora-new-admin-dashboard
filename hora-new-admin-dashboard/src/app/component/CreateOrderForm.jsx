@@ -39,7 +39,7 @@ const CreateOrderForm = ({ priceDetails, numberOfPeople, selectedOption, selecte
     const [customerId, setCustomerId] = useState(null);
     const [showButton, setShowButton] = useState(false);
     const [inclusion, setInclusion] = useState("");
-    const [includeTables, setIncludeTables] = useState(false);
+    // const [includeTables, setIncludeTables] = useState(false);
     const [lloading, setlLoading] = useState(false);
     const [itemDataId, setItemDataId] = useState({ items: [] });
     useEffect(() => {
@@ -276,7 +276,7 @@ const CreateOrderForm = ({ priceDetails, numberOfPeople, selectedOption, selecte
         if (selectedOption === "live-catering") {
             orderData += `
         Dishes:
-        ${selectedDishQuantities.map((item) => item.name).join("\n")}`;
+        ${selectedDishQuantities.map((item) => item.name).join("\n -")}`;
 
             const priceDetails = calculatePriceDetails();
             const liveCateringTotal = (priceDetails.subtotal * 1.1 + 6500).toFixed(0);
@@ -413,7 +413,7 @@ const CreateOrderForm = ({ priceDetails, numberOfPeople, selectedOption, selecte
                     pattern="\d{10}" // Enforce exactly 10 digits
                     inputMode="numeric" // Optimize for numeric input on mobile devices
                 />
-                <button onClick={handleCheckCustomer} style={style.buttonSecondary} disabled={loading || customerNumber.length !== 10}>
+                <button onClick={handleCheckCustomer}  className='orderCheck-btn'disabled={loading || customerNumber.length !== 10}>
                     {loading ? "Checking..." : "Check Customer"}
                 </button>
                 {loading && <p>Loading...</p>} {/* Loader */}
@@ -548,12 +548,10 @@ const CreateOrderForm = ({ priceDetails, numberOfPeople, selectedOption, selecte
                             {pincodeMessage}
                         </p>
 
-                        <button onClick={copyOrderSummary} style={style.buttonPrimary}>
-                            Copy Order Summary
-                        </button>
+                       
 
 
-                        <button className="button1" type="submit" style={style.buttonSecondary}>
+                        <button className="orderCheck-btn" type="submit" >
                             {lloading ? "Creating Order..." : "Create Order"}
                         </button>
                     </div>
@@ -595,6 +593,10 @@ const CreateOrderForm = ({ priceDetails, numberOfPeople, selectedOption, selecte
                 }
             </>
         </form>
+       { message === "Customer exists." && <button onClick={copyOrderSummary} style={style.buttonPrimary}>
+                            Copy Order Summary
+                        </button>
+                        }
 
     </>)
 }
@@ -637,6 +639,8 @@ const style = {
         border: "none",
         borderRadius: "5px",
         cursor: "pointer",
+        marginTop:"10px",
+        width:"100%"
     },
     buttonSecondary: {
         padding: "10px 20px",
