@@ -64,8 +64,8 @@ const OrderList = () => {
       page: page,
       per_page: itemsPerPage,
       order_id: orderId.length > 0 ? filteredId : "", // `match orderId`
-      order_status: Number(orderstatus) || "", // 'match OrderStatus'
-      status: (Number(activeStatus) === 0 || Number(activeStatus) === 1)  ? Number(activeStatus)  : "",
+      order_status: (Number(orderstatus) === 0 || Number(orderstatus)) ? Number(orderstatus) : "", // 'match OrderStatus'
+      status: (Number(activeStatus) === 0 || Number(activeStatus) === 1) ? Number(activeStatus) : "", 
       type: typeId || "", // match order type
       order_locality: orderCity || "",
       order_date: selectedDate || "",
@@ -370,7 +370,27 @@ const OrderList = () => {
                   </select>
                 </th>
                 <th>Action</th>
-                <th>Rating</th>
+                <th>
+                  <span>Rating</span>
+                  {/* <span>
+                    <select
+                      value={selectedOrderStatus}
+                      onChange={(e) => {
+                        const filterdStatus = e.target.value; // Get the updated value directly
+                        setSelectedRating(filterRating);  // Update state
+                        // FilterByStatus(newStatus);          // Pass the updated value immediately
+                      }}
+                      className="order-type-dropdown"
+                    >
+                      <option value="">All</option>
+                      <option value="9-10">9-10</option>
+                      <option value="6-8">6-8</option>
+                      <option value="0-6">0-6</option>
+                    </select>
+                  </span> */}
+
+                </th>
+               
               </tr>
             </thead>
             <tbody>
@@ -432,9 +452,9 @@ const OrderList = () => {
 
                       <h3>Supplier Details</h3>
 
-                      <p>Name: {supplierDetails.data.name}</p>
+                      <p>Name: {supplierDetails.data?.name || "NA"}</p>
 
-                      <p>Phone: {supplierDetails.data.phone}</p>
+                      <p>Phone: {supplierDetails.data?.phone || "NA"}</p>
 
                       </div>
 
