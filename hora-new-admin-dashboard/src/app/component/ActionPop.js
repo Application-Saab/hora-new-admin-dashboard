@@ -26,7 +26,14 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
       // alert(actionPopupOrderType)
       apiUrl = `https://horaservices.com:3000/api/order/order_details_food_delivery/${actionPopupOrderId}`;
       setPopupType("foodDelivery");
-    } else {
+    }  
+    // else if (actionPopupOrderType === 8 ) {
+    //   // Need new api for photograpgy
+    //   const photographyOrderId = actionPopupChefOrderId.toString();
+    //   apiUrl = `https://horaservices.com:3000/api/order/order_details/v1/${photographyOrderId}`;
+    //   setPopupType("Photography");
+    // } 
+    else {
       setError("Currently, data is not available");
       setLoading(false);
       return;
@@ -73,6 +80,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
       5: "Cleaner",
       6: "Food Delivery",
       7: "Live Catering",
+      8: "Photography",
     };
     return orderTypes[orderTypeValue] || "Unknown Order Type";
   };
@@ -119,7 +127,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
     console.log(JSON.stringify(orderDetails.items));
 
     // Extract order details
-    const orderId = orderDetails._doc.order_id || "N/A";
+    const orderId = getOrderId(orderDetails._doc.order_id) || "N/A";
     const orderDate = new Date(orderDetails._doc.order_date).toLocaleDateString() || "N/A";
     const orderType = getOrderType(orderDetails._doc.type) || "N/A";
     const address = orderDetails._doc.addressId?.address1 || "N/A";
@@ -184,7 +192,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
     console.log(orderDetails);
 
     // Extract details
-    const orderId = orderDetails?.order_id || "N/A";
+    const orderId = getOrderId(orderDetails?.order_id) || "N/A";
     const orderDate = new Date(orderDetails?.order_date).toLocaleDateString() || "N/A";
     const address = orderDetails?.addressId?.address1 || "N/A";
     const googleMapLocation = orderDetails?.addressId?.address2 || "N/A";
@@ -224,7 +232,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
     console.log(orderDetails);
 
     // Extract details
-    const orderId = orderDetails?.order_id || "N/A";
+    const orderId = getOrderId(orderDetails?.order_id) || "N/A";
     const orderDate = new Date(orderDetails?.order_date).toLocaleDateString() || "N/A";
     const address = orderDetails?.addressId?.address1;
     const googleMapLocation = orderDetails?.addressId?.address2 || "N/A";

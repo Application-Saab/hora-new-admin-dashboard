@@ -46,6 +46,9 @@ const OrderList = () => {
       case "Live Catering":
         typeId = 7;
         break;
+      case "Photography":
+        typeId = 8;
+        break;
       default:
         typeId = null; // or another default value if needed
     }
@@ -139,6 +142,7 @@ const OrderList = () => {
       2: "Chef",
       6: "Food Delivery",
       7: "Live Catering",
+      8:"Photography",
     };
     return orderTypes[orderTypeValue] || "Unknown Order Type";
   };
@@ -292,6 +296,7 @@ const OrderList = () => {
                       <option value="Chef">Chef</option>
                       <option value="Food Delivery">Food Delivery</option>
                       <option value="Live Catering">Live Catering</option>
+                      <option value="Photography">Photography</option>
                     </select>
 
                   </span>
