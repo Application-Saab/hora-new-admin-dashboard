@@ -467,38 +467,19 @@ if (selectedOption === "food-delivery") {
         };
     });
 
-    // Prepare the requestData object
     const newRequestData = updatedQuantities.map((item) => item.id);
 
     console.log(newRequestData,"newrequestdata");
     setSelectedDishQuantities(updatedQuantities);
-    setItemDataId(newRequestData); // Store requestData in state
+    setItemDataId(newRequestData); 
 
     console.log(newRequestData, "requestData");
 }, [selectedDishes]);
 
   const RenderDishQuantity = ({ item }) => {
     const itemCount = selectedDishQuantities.length;
-
-    const mainCourseItemCount = selectedDishQuantities.filter(
-      (meal) => meal.id[0] === "63f1b6b7ed240f7a09f7e2de"
-    ).length;
-
-    const appetizerItemCount = selectedDishQuantities.filter(
-      (meal) => meal.id[0] === "63f1b39a4082ee76673a0a9f"
-    ).length;
-
-    const breadItemCount = selectedDishQuantities.filter(
-      (meal) => meal.id[0] === "63edc4757e1b370928b149b3"
-    ).length;
-
     let quantity = parseFloat(item.quantity) * numberOfPeople;
 
-    if (
-      (item.id[0] === "63f1b6b7ed240f7a09f7e2de" && mainCourseItemCount > 1) ||
-      (item.id[0] === "63f1b39a4082ee76673a0a9f" && appetizerItemCount > 1) ||
-      (item.id[0] === "63edc4757e1b370928b149b3" && breadItemCount > 1)
-    ) {
       if (itemCount <= 5) {
       } else if (itemCount === 6) {
         quantity = quantity * (1 - 0.15);
@@ -519,15 +500,18 @@ if (selectedOption === "food-delivery") {
       } else if (itemCount === 15) {
         quantity = quantity * (1 - 0.55);
       }
-    }
 
     quantity = Math.round(quantity);
     let unit = item.unit;
-
     if (quantity >= 1000) {
       quantity = quantity / 1000;
-      if (unit === "Gram") unit = "KG";
-      else if (unit === "ml") unit = "L";
+      if (unit === "Gram") {
+        unit = "KG";
+      } else if (unit === "ml") {
+        unit = "L";
+      } else if (unit === "Peices") {
+        unit = "PCS";
+      }
     }
 
     return (
@@ -615,23 +599,23 @@ ${selectedDishQuantities
       .map((item) => {
         let quantity = parseFloat(item.quantity) * numberOfPeople;
         const itemCount = selectedDishQuantities.length;
-        const mainCourseItemCount = selectedDishQuantities.filter(
-          (meal) => meal.id[0] === "63f1b6b7ed240f7a09f7e2de"
-        ).length;
-        const appetizerItemCount = selectedDishQuantities.filter(
-          (meal) => meal.id[0] === "63f1b39a4082ee76673a0a9f"
-        ).length;
-        const breadItemCount = selectedDishQuantities.filter(
-          (meal) => meal.id[0] === "63edc4757e1b370928b149b3"
-        ).length;
+        // const mainCourseItemCount = selectedDishQuantities.filter(
+        //   (meal) => meal.id[0] === "63f1b6b7ed240f7a09f7e2de"
+        // ).length;
+        // const appetizerItemCount = selectedDishQuantities.filter(
+        //   (meal) => meal.id[0] === "63f1b39a4082ee76673a0a9f"
+        // ).length;
+        // const breadItemCount = selectedDishQuantities.filter(
+        //   (meal) => meal.id[0] === "63edc4757e1b370928b149b3"
+        // ).length;
   
-        if (
-          (item.id[0] === "63f1b6b7ed240f7a09f7e2de" &&
-            mainCourseItemCount > 1) ||
-          (item.id[0] === "63f1b39a4082ee76673a0a9f" &&
-            appetizerItemCount > 1) ||
-          (item.id[0] === "63edc4757e1b370928b149b3" && breadItemCount > 1)
-        ) {
+        // if (
+        //   (item.id[0] === "63f1b6b7ed240f7a09f7e2de" &&
+        //     mainCourseItemCount > 1) ||
+        //   (item.id[0] === "63f1b39a4082ee76673a0a9f" &&
+        //     appetizerItemCount > 1) ||
+        //   (item.id[0] === "63edc4757e1b370928b149b3" && breadItemCount > 1)
+        // ) {
           if (itemCount > 5) {
             const adjustment =
               itemCount === 6
@@ -647,7 +631,7 @@ ${selectedDishQuantities
                 : 0;
             quantity *= 1 - adjustment;
           }
-        }
+        
   
         quantity = Math.round(quantity);
         let unit = item.unit;
