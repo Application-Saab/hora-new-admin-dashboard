@@ -9,13 +9,13 @@ import {
 	API_SUCCESS_CODE,
 	GET_MEAL_DISH_ENDPOINT,
 } from "../../../utils/apiconstant"
-
+import checkImage from '../../../assets/check.png';
 import CreateOrderForm from "../../component/CreateOrderForm"
 
 function AddFoodOrder() {
 	const [loading, setLoading] = useState(false);
-	const [selectedOption, setSelectedOption] = useState("");
-	const [numberOfPeople, setNumberOfPeople] = useState(10);
+	const [selectedDeliveryOption, setSelectedDeliveryOption] = useState("");
+	const [peopleCount, setPeopleCount] = useState(10);
 	const [mealList, setMealList] = useState([]);
 	const [filteredDishes, setFilteredDishes] = useState([]);
 	const [searchQuery, setSearchQuery] = useState("");
@@ -26,27 +26,23 @@ function AddFoodOrder() {
 	const [includeTables, setIncludeTables] = useState(false);
 	const deliveryCharges = 300;
 	const packingCost = 200;
-	const validMealIds = [
-		"63f1b6b7ed240f7a09f7e2de",
-		"63f1b39a4082ee76673a0a9f",
-		"63edc4757e1b370928b149b3",
-	];
+	
 	const handleChange = (event) => {
-		setSelectedOption(event.target.value);
+		setSelectedDeliveryOption(event.target.value);
 	};
-	// Dynamically update `numberOfPeople` based on `selectedOption`
+	// Dynamically update `peopleCount` based on `selectedOption`
 	useEffect(() => {
-		if (selectedOption === "live-catering") {
-			setNumberOfPeople(35);
+		if (  selectedDeliveryOption   === "live-catering") {
+			setPeopleCount(35);
 		} else {
-			setNumberOfPeople(10);
+			setPeopleCount(10);
 		}
-	}, [selectedOption]);
+	}, [selectedDeliveryOption]);
 	const handlePeopleChange = (e) => {
-		const minNum = selectedOption === "live-catering" ? 35 : 10;
+		const minNum = selectedDeliveryOption === "live-catering" ? 35 : 10;
 
 		const value = Math.max(minNum, Number(e.target.value)); // Use minNum dynamically
-		setNumberOfPeople(value);
+		setPeopleCount(value);
 	};
 
 	const fetchMealBasedOnCuisine = async () => {
@@ -102,15 +98,21 @@ function AddFoodOrder() {
 
 		setFilteredDishes(filtered);
 	};
+
 	const handleDishSelect = (dish) => {
 		setSelectedDishes((prevSelected) => {
-			const exists = prevSelected.some((item) => item.name === dish.name);
-			return exists
-				? prevSelected.filter((item) => item.name !== dish.name)
-				: [...prevSelected, dish];
+		  const exists = prevSelected.some((item) => item.name === dish.name);
+		  return exists
+			? prevSelected.filter((item) => item.name !== dish.name)
+			: [...prevSelected, dish];
 		});
-	};
-	useEffect(() => {
+	  };
+
+
+
+
+	  
+	  useEffect(() => {
 		const updatedQuantities = selectedDishes.map((dish) => {
 			let categoryId = "63edc4757e1b370928b149b3"; // Default ID
 			if (dish.category === "main_course") {
@@ -139,194 +141,252 @@ function AddFoodOrder() {
 
 		console.log(newRequestData, "requestData");
 	}, [selectedDishes]);
-
-	const RenderDishQuantity = ({ item }) => {
-		const itemCount = selectedDishQuantities.length;
-
-		const mainCourseItemCount = selectedDishQuantities.filter(
-			(meal) => meal.id[0] === "63f1b6b7ed240f7a09f7e2de"
-		).length;
-
-		const appetizerItemCount = selectedDishQuantities.filter(
-			(meal) => meal.id[0] === "63f1b39a4082ee76673a0a9f"
-		).length;
-
-		const breadItemCount = selectedDishQuantities.filter(
-			(meal) => meal.id[0] === "63edc4757e1b370928b149b3"
-		).length;
-
-		let quantity = parseFloat(item.quantity) * numberOfPeople;
-
-		if (
-			(item.id[0] === "63f1b6b7ed240f7a09f7e2de" && mainCourseItemCount > 1) ||
-			(item.id[0] === "63f1b39a4082ee76673a0a9f" && appetizerItemCount > 1) ||
-			(item.id[0] === "63edc4757e1b370928b149b3" && breadItemCount > 1)
-		) {
-			if (itemCount <= 5) {
-			} else if (itemCount === 6) {
-				quantity = quantity * (1 - 0.15);
-			} else if (itemCount === 7) {
-				quantity = quantity * (1 - 0.15);
-			} else if (itemCount === 8) {
-				quantity = quantity * (1 - 0.25);
-			} else if (itemCount === 9) {
-				quantity = quantity * (1 - 0.3);
-			} else if (itemCount === 10) {
-				quantity = quantity * (1 - 0.35);
-			} else if (itemCount === 11) {
-				quantity = quantity * (1 - 0.4);
-			} else if (itemCount === 12) {
-				quantity = quantity * (1 - 0.5);
-			} else if (itemCount === 13) {
-				quantity = quantity * (1 - 0.53);
-			} else if (itemCount === 15) {
-				quantity = quantity * (1 - 0.55);
-			}
-		}
-
-		quantity = Math.round(quantity);
-		let unit = item.unit;
-
-		if (quantity >= 1000) {
-			quantity = quantity / 1000;
-			if (unit === "Gram") unit = "KG";
-			else if (unit === "ml") unit = "L";
-		}
-
-		return (
-			<div className="ordereditemCard" style={style.ordereditemCard}>
-				<div className="ordersummaryproduct-Img">
-					<Image
-						src={`https://horaservices.com/api/uploads/${item.image}`}
-						alt={item.name}
-						className="checkoutRightImg chef"
-						width={150}
-						height={150}
-					/>
-				</div>
-				<div
-					style={{ color: "rgb(146, 82, 170)", fontWeight: "600" }}
-					className="ordersummaryproduct-info"
-				>
-					<p className="ordersummeryname">{item.name}</p>
-					{selectedOption === "food-delivery" && (
-						<div
-							style={{
-								fontSize: "90%",
-								fontWeight: "700",
-								color: "#9252AA",
-								textTransform: "uppercase",
-							}}
-							className="ingredientrightsecsibheading"
-						>
-							{`${quantity} ${unit}`}
-						</div>
-					)}
-				</div>
-			</div>
-		);
-	};
 	
-	const calculatePriceDetails = () => {
-		const dishCount = selectedDishes.filter(
-			(dish) =>
-				dish.name !== "Tawa Rotis" &&
-				dish.name !== "Rumali Rotis" &&
-				validMealIds.some((id) => dish.mealId.includes(id))
-		).length;
+	const selectedMealList = selectedDishes
+        ? Object.values(selectedDishes).map(dish => {
+            return {
+                name: dish.name,
+                image: dish.image,
+                price: Number(dish.cuisineArray[0]),
+                id: dish._id,
+                mealId: dish.mealId
+            };
+        }): [];
 
-		let subtotal = selectedDishes.reduce((total, dish) => {
-			return total + dish.cuisineArray[0] * numberOfPeople;
-		}, 0);
+		console.log('selected' , selectedMealList);
 
-		const quantityDiscountPercent = (() => {
-			if (dishCount === 4) return -15;
-			if (dishCount === 5) return 0;
-			if (dishCount === 6 || dishCount === 7) return 15;
-			if (dishCount === 8) return 25;
-			if (dishCount === 9 || dishCount === 10) return 35;
-			if (dishCount === 11) return 40;
-			if (dishCount === 12 || dishCount === 13) return 50;
-			if (dishCount === 14) return 53;
-			if (dishCount === 15) return 55;
-			return 0;
-		})();
+		const dishObject = selectedMealList.filter(x =>
+			x.name !== "Tawa Rotis" &&
+			x.name !== "Rumali Rotis"
+		)
+			  
+			  
+		const dishCount = dishObject.filter(x => x.mealId == "63f1b6b7ed240f7a09f7e2de" || x.mealId == "63f1b39a4082ee76673a0a9f" || x.mealId == "63edc4757e1b370928b149b3").length;
+	
+		console.log(dishCount)
 
-		const peopleDiscountPercent = (() => {
-			if (numberOfPeople >= 60) return 10;
-			if (numberOfPeople >= 40) return 7;
-			return 0;
-		})();
+		function calculateDiscountPercentage(peopleCount) {
+			console.log(peopleCount)
+			if (peopleCount <= 39){
+			  return 1
+			}
+			else if (peopleCount >= 40 && peopleCount <= 59){
+			  return 0.93
+			}
+			else if (peopleCount >= 60){
+			  return 0.9
+			}
+		  }
 
-		let priceAfterQuantityDiscount = subtotal;
-		let quantityDiscountAmount = 0;
+		  function calculateDiscountPercentageQuantity(dishCount){
+			if (dishCount == 4)
+			  return 1.15
+			else if (dishCount == 5)
+			  return 1
+			else if (dishCount == 6 || dishCount == 7)
+			  return 0.85
+			else if (dishCount == 8)
+			  return 0.75
+			else if (dishCount == 9 || dishCount == 10)
+			  return 0.65
+			else if (dishCount == 11)
+			  return 0.6
+			else if (dishCount == 12 || dishCount == 13)
+			  return 0.5
+			else if (dishCount == 14)
+			  return 0.47
+			else if (dishCount == 15)
+			  return 0.45
+			else 
+			  return 1
+		  }
 
-		if (selectedOption === "food-delivery") {
-			selectedDishes.forEach((dish) => {
-				if (
-					dish.name !== "Tawa Rotis" &&
-					dish.name !== "Rumali Rotis" &&
-					validMealIds.some((id) => dish.mealId.includes(id))
-				) {
-					const dishPrice = dish.cuisineArray[0] * numberOfPeople;
-					const dishDiscount = dishPrice * (quantityDiscountPercent / 100);
-					console.log(dishDiscount, "discounted");
-					quantityDiscountAmount += dishDiscount;
-					console.log(quantityDiscountAmount, "quantityDiscountAmount111");
-					priceAfterQuantityDiscount -= dishDiscount;
-					console.log(priceAfterQuantityDiscount, "priceAfterQuantityDiscount");
+
+		  const validMealIds = [
+			"63f1b6b7ed240f7a09f7e2de",
+			"63f1b39a4082ee76673a0a9f",
+			"63edc4757e1b370928b149b3"
+		  ];
+	  
+	  
+	  
+	  
+		  console.log(selectedMealList)
+		  
+		  
+		  const discountPercentagePrice = calculateDiscountPercentage(peopleCount);
+		  
+		  const discountPercentageQuantity = calculateDiscountPercentageQuantity(dishCount)
+		  
+	  
+
+		  var newTotalPrice = 0
+		  var totalPrice = 0
+		  selectedMealList.forEach((dish) => {
+			console.log(dish)
+			if (
+			  dish.name !== "Tawa Rotis" &&
+			  dish.name !== "Rumali Rotis" &&
+			  dish.mealId.some((id) => validMealIds.includes(id))
+			) {
+			  
+			   newTotalPrice += dish.price * peopleCount * discountPercentageQuantity
+			}
+			else {
+			  newTotalPrice += dish.price * peopleCount
+			}
+			totalPrice = totalPrice + dish.price * peopleCount
+		  });
+	  
+		  console.log(newTotalPrice)
+		  console.log(totalPrice)
+		  newTotalPrice = newTotalPrice * discountPercentagePrice
+	  
+		  console.log(newTotalPrice)
+		  console.log(totalPrice)
+		  var discountedPrice = selectedDeliveryOption === 'live-catering' ?  ((newTotalPrice) * 1.1 + 6500).toFixed(0) : newTotalPrice.toFixed(0);
+		  totalPrice = selectedDeliveryOption === 'live-catering' ?  ((totalPrice) * 1.1 + 6500).toFixed(0) : totalPrice.toFixed(0);
+		  console.log(discountedPrice)
+		  console.log(totalPrice)
+		  const calculateFinalTotal = () => {
+			  let finalTotal = 0; // Initialize finalTotal with 0
+		  
+			  // Check for the selected delivery option
+			  if (selectedDeliveryOption === 'food-delivery') {
+				  {
+				  finalTotal = parseFloat(discountedPrice) > 4000
+				  ? parseFloat(discountedPrice)
+				  : parseFloat(discountedPrice) + deliveryCharges;
+	  
+				  }
+	  
+				  //finalTotal = totalPrice - parseFloat(discountedPrice) + deliveryCharges;
+				  console.log("Initial total after applying discount and delivery charges: " + finalTotal);
+				  
+				  finalTotal += parseFloat(packingCost);
+				  console.log("Total after adding packing cost: " + finalTotal);
+		  
+				  if (includeDisposable) {
+					  finalTotal += parseFloat((20 * peopleCount).toFixed(0)); // Convert to float to add
+					  console.log("Total after adding disposable cost: " + finalTotal);
+				  }
+			  } else if (selectedDeliveryOption === 'live-catering') {
+				  finalTotal = parseFloat(discountedPrice) > 4000
+				  ? parseFloat(discountedPrice)
+				  : parseFloat(discountedPrice) + deliveryCharges;
+			  
+				  console.log("Initial total after applying discount: " + finalTotal);
+		  
+				  if (includeTables) {
+					  finalTotal += 1200;
+					  console.log("Total after adding table cost: " + finalTotal);
+				  }
+			  }
+		  
+			  // Ensure finalTotal is a number and rounded to the nearest whole number
+			  finalTotal = parseFloat(finalTotal.toFixed(0));
+			  console.log("Final total after adjustments: " + finalTotal);
+		  
+			  return finalTotal;
+		  };
+		  
+	  
+		  // Function to calculate the advance payment
+		  const calculateAdvancePayment = () => {
+			  return Math.round(calculateFinalTotal() * 0.65);
+		  };
+	  
+		  // useEffect(() => {
+		  //     Object.values(selectedDishData).map((item) => cat.push(item.cuisineId[0]));
+		  // }, []);
+	  
+		  const RenderDishQuantity = ({ item }) => {
+	  
+	  
+			  var dishObject = selectedMealList.filter(x =>
+				  x.name !== "Tawa Rotis" &&
+				  x.name !== "Rumali Rotis"
+			  )
+	  
+			  const itemCount = dishObject.filter(meal => meal.id[0] === "63f1b6b7ed240f7a09f7e2de" || meal.id[0] === "63f1b39a4082ee76673a0a9f" || meal.id[0] === "63edc4757e1b370928b149b3").length
+			  const mainCourseItemCount = dishObject.filter(meal => meal.id[0] === "63f1b6b7ed240f7a09f7e2de").length
+			  const appetizerItemCount = dishObject.filter(meal => meal.id[0] === "63f1b39a4082ee76673a0a9f").length
+			  const breadItemCount = dishObject.filter(meal => meal.id[0] === "63edc4757e1b370928b149b3").length
+			  console.log('item.quantity', item.quantity)
+			  
+			  let quantity = item.quantity * peopleCount;
+	  
+			  
+			  if (item.name !== "Tawa Rotis" && item.name !== "Rumali Rotis" && (item.id[0] === "63f1b6b7ed240f7a09f7e2de"  || item.id[0] === "63f1b39a4082ee76673a0a9f" || item.id[0] === "63edc4757e1b370928b149b3")) {
+				  if (itemCount == 4) {
+					  quantity = quantity * (1 + 0.15)
+				  }
+				  else if (itemCount == 6) {
+					  quantity = quantity * (1 - 0.15)
+				  }
+				  else if (itemCount == 7) {
+					  quantity = quantity * (1 - 0.15)
+				  }
+				  else if (itemCount == 8) {
+					  quantity = quantity * (1 - 0.25)
+				  }
+				  else if (itemCount == 9) {
+					  quantity = quantity * (1 - 0.35)
+				  }
+				  else if (itemCount == 10) {
+					  quantity = quantity * (1 - 0.35)
+				  }
+				  else if (itemCount == 11) {
+					  quantity = quantity * (1 - 0.40)
+				  }
+				  else if (itemCount == 12 || itemCount == 13) {
+					  quantity = quantity * (1 - 0.50)
+				  } else if (itemCount == 14) {
+					  quantity = quantity * (1 - 0.53)
+				  } else if (itemCount == 15) {
+					  quantity = quantity * (1 - 0.55)
+				  }
+			  }
+			  quantity = Math.round(quantity)
+			  let unit = item.unit;
+			  if (quantity >= 1000) {
+				  quantity = quantity / 1000;
+				  if (unit === 'Gram') {
+					unit = 'KG';
+				  } else if (unit === 'ml') {
+					unit = 'L';
+				  }
+				  else if (unit === 'Peices') {
+					unit = 'PCS';
+				  }
 				}
-			});
-		} else if (selectedOption === "live-catering") {
-			priceAfterQuantityDiscount = subtotal;
-			if (quantityDiscountPercent !== 0) {
-				quantityDiscountAmount = subtotal * (quantityDiscountPercent / 100);
+			
+			  return (
+				  <div className='ordersummaryproduct'>
+					  <div className='ordersummary-sec1'>
+						  <Image
+							  src={`https://horaservices.com/api/uploads/${item.image}`}
+							  alt={item.name}
+							  className='checkoutRightImg chef'
+							  width={100} height={100}
+						  />
+					  </div>
+					  <div style={{ color: "rgb(146, 82, 170)", fontWeight: "600" }} className='ordersummary-sec2'>
+						  <p className='ordersummeryname'>{item.name}</p>
+						  {
+				  selectedDeliveryOption === 'food-delivery' ? 
+				  <div style={{ fontSize: "90%", fontWeight: '700', color: '#9252AA' , textTransform:"uppercase"}} className='ingredientrightsecsibheading'>{quantity + ' ' + unit}</div>
+				  :
+				  null
+				}
+					  </div>
+				  </div>
+			  );
+		  };
+	  
 
-				console.log(quantityDiscountAmount, "quantityDiscountAmount11111");
-				priceAfterQuantityDiscount = subtotal - quantityDiscountAmount;
+	
 
-				console.log(priceAfterQuantityDiscount, "priceAfterQuantityDiscount");
-			}
-		}
-
-		console.log(priceAfterQuantityDiscount, "priceafterquantitydisfdjfkldsf");
-		const peopleDiscount =
-			priceAfterQuantityDiscount * (peopleDiscountPercent / 100);
-		let priceAfterAllDiscounts = priceAfterQuantityDiscount - peopleDiscount;
-
-		let additionalCharges = 0;
-		let finalTotal = priceAfterAllDiscounts;
-
-		if (selectedOption === "food-delivery") {
-			if (finalTotal <= 4000) additionalCharges += deliveryCharges;
-			additionalCharges += packingCost;
-			if (includeDisposable) {
-				additionalCharges += 20 * numberOfPeople;
-			}
-		} else if (selectedOption === "live-catering") {
-			const serviceCharge = finalTotal * 0.1;
-			additionalCharges += serviceCharge + 6500;
-			if (includeTables) {
-				additionalCharges += 1200;
-			}
-		}
-
-		finalTotal += additionalCharges;
-
-		return {
-			subtotal: Math.round(subtotal),
-			quantityDiscountPercent,
-			quantityDiscountAmount: Math.round(quantityDiscountAmount),
-			peopleDiscountPercent,
-			peopleDiscountAmount: Math.round(peopleDiscount),
-			priceAfterDiscounts: Math.round(priceAfterAllDiscounts),
-			additionalCharges: Math.round(additionalCharges),
-			finalTotal: Math.round(finalTotal),
-			advancePayment: Math.round(finalTotal * 0.65),
-			dishCount,
-		};
-	};
-	const priceDetails = calculatePriceDetails();
 	return (<>
 		<div className="container">
 			<h1>Create Food Order</h1>
@@ -336,7 +396,7 @@ function AddFoodOrder() {
 						Select Category:
 					</label>
 					<select
-						value={selectedOption}
+						value={selectedDeliveryOption }
 						onChange={handleChange}
 						style={style.selectDropDown}
 					>
@@ -356,9 +416,9 @@ function AddFoodOrder() {
 							type="button"
 							className="btn decrement-btn"
 							onClick={() =>
-								handlePeopleChange({ target: { value: numberOfPeople - 1 } })
+								handlePeopleChange({ target: { value: peopleCount - 1 } })
 							}
-							disabled={numberOfPeople <= 10}
+							disabled={peopleCount <= 10}
 							style={style.PlusMinusBtn}
 						>
 							-
@@ -366,9 +426,9 @@ function AddFoodOrder() {
 						<input
 							id="peopleInput"
 							type="number"
-							value={numberOfPeople}
+							value={peopleCount}
 							onChange={handlePeopleChange}
-							min={selectedOption === "live-catering" ? 35 : 10}
+							min={selectedDeliveryOption === "live-catering" ? 35 : 10}
 							className="people-input"
 							style={style.noOfPeopleValue}
 						/>
@@ -376,7 +436,7 @@ function AddFoodOrder() {
 							type="button"
 							className="btn increment-btn"
 							onClick={() =>
-								handlePeopleChange({ target: { value: numberOfPeople + 1 } })
+								handlePeopleChange({ target: { value: peopleCount + 1 } })
 							}
 							style={style.PlusMinusBtn}
 						>
@@ -386,9 +446,9 @@ function AddFoodOrder() {
 				</div>
 			</div>
 			<div style={style.selectionMsg}>
-				{selectedOption === "" ? (
+				{selectedDeliveryOption === "" ? (
 					<p>Please select a service to continue.</p>
-				) : selectedOption === "food-delivery" ? (
+				) : selectedDeliveryOption === "food-delivery" ? (
 					<p>
 						You have selected <strong>Food Delivery</strong>.
 					</p>
@@ -461,144 +521,132 @@ function AddFoodOrder() {
 					</>
 				)}
 			</div>
-			{selectedDishQuantities.length > 0 &&
+			{selectedMealList.length > 0 &&
 				<div style={style.dishSelectedContainer}>
 					<div style={style.header}>
 						<p style={style.headerText}>Dishes selected</p>
 					</div>
 
 					<div style={style.selectedItemsContainer}>
-						{selectedDishQuantities.map((item, index) => (
+						{selectedMealList.map((item, index) => (
 							<RenderDishQuantity key={index} item={item} />
 						))}
 					</div>
 				</div>
 			}
-			{(() => {
-				const priceDetails = calculatePriceDetails();
-				return (
-					<div className="price-breakdown" style={style.priceBreakdown}>
-						<h4 style={{ textAlign: "center" }}>Price Breakdown</h4>
-						<ul className="PriceBreakdownList">
-							<li>
-								<span>Number of Dishes:</span>
-								<span>{priceDetails.dishCount}</span>
-							</li>
-							<li>
-								<span>Number of Guests:</span>
-								<span>{numberOfPeople}</span>
-							</li>
 
-							{selectedOption === "live-catering" && (
-								<>
-									<li>
-										<span>Live Catering Item Total:</span>
-										<span>
-											₹ {(priceDetails.subtotal * 1.1 + 6500).toFixed(0)}
-										</span>
-									</li>
-									<li>
-										<span>Live Catering Item Discount:</span>
-										<span>
-											₹{" "}
-											{(
-												priceDetails.subtotal * 1.1 +
-												6500 -
-												(priceDetails.priceAfterDiscounts * 1.1 + 6500)
-											).toFixed(0)}
-										</span>
-									</li>
-									{includeTables && (
-										<li>
-											<span>Table Charges:</span>
-											<span>+₹ 1200</span>
-										</li>
-									)}
-									<div className="options-container">
-										<label>
-											<input
-												type="checkbox"
-												checked={includeTables}
-												onChange={(e) =>
-													setIncludeTables(e.target.checked)
-												}
-											/>
-											3-4 Serving Tables with Cloth
-										</label>
-									</div>
-								</>
-							)}
+			<div class="details">
+			<div style={{ display: "flex", flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div style={{ marginHorizontal: 16, flexDirection: 'column', width: 120, borderRadius: 6, border: "1px solid #E6E6E6", padding: 5 }}>
+                                        <p style={{ color: '#A3A3A3', fontSize: 9, fontWeight: '400', margin: 0 }}>Total Dishes</p>
+                                        <p style={{ color: '#9252AA', fontSize: 13, fontWeight: '600', margin: 0 }}>{selectedDishes.length}</p>
+                                    </div>
+                                    <div style={{ marginHorizontal: 16, flexDirection: 'column', width: 120, borderRadius: 6, border: "1px solid #E6E6E6", padding: 5 }}>
+                                        <p style={{ color: '#A3A3A3', fontSize: 9, fontWeight: '400', margin: 0 }}>No. of People</p>
+                                        <p style={{ color: '#9252AA', fontSize: 13, fontWeight: '600', margin: 0 }}>{peopleCount}</p>
+                                    </div>
+                                </div>
+								<div style={{ paddingTop: "5px" }}>
+                                    <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', marginTop: 3  }}>
+                                        <p style={{ color: "#9252AA", fontWeight: '600', fontSize: 14, lineHeight: '20px' }}>Item Total</p>
+                                        <p style={{ color: "#9252AA", fontWeight: '600', fontSize: 14, lineHeight: '20px' }}>₹ {totalPrice}</p>
+                                    </div>
+                                    {/* <img style={{ width: 290, height: 1, marginTop: 5, marginBottom: 5 }} src="../../assets/Rectangleline.png" alt="line" /> */}
+                                    {discountedPrice > 0 && (
+                                        <div>
+                                            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', marginTop: 3, alignItems: "center"  , borderBottom:"1px solid rgb(215, 215, 215)" }}>
+                                                <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: "center", flexDirection: 'row' }}>
+                                                    <p style={{ color: "#9252AA", fontWeight: '600', fontSize: 14, lineHeight: '20px' }}>Item Discount:</p>
+                                                </div>
+                                                <p style={{ color: "#008631", fontWeight: '600', fontSize: 14, lineHeight: '20px' }}>
+                                                    {'-'} ₹ {totalPrice - discountedPrice}
+                                                </p>
+                                            </div>
+                                            {/* <img style={{ width: 290, height: 1, marginTop: 5, marginBottom: 5 }} src="../../assets/Rectangleline.png" alt="line" /> */}
+                                        </div>
+                                    )}
+                                    {selectedDeliveryOption === 'food-delivery' && (
+                                        <div>
+                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: includeDisposable ? '#efefef' : '#fff', padding: "4px", margin: "0px 0 17px 0"  , borderBottom:"1px solid rgb(215, 215, 215)"  , borderTop:"1px solid rgb(215, 215, 215)"}}>
+                                                <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                                                    <button onClick={() => setIncludeDisposable(!includeDisposable)} style={{ background: 'none', border: 'none', padding: 0 }}>
+                                                        <div style={{ width: 19, height: 19, borderWidth: 1, border: includeDisposable ? '1px solid #008631' : '1px solid #008631', borderRadius: 3, alignItems: 'center', justifyContent: 'center', marginRight: 4, display: 'flex' }}>
+                                                            {includeDisposable && <Image src={checkImage} alt="Info" width={13} height={13} />}
+                                                        </div>
+                                                    </button>
+                                                    <div>
+                                                        <p style={{ color: '#9252AA', fontWeight: '600', fontSize: 13, lineHeight: '20px', marginBottom: 0 }}>Disposable plates + water bottle:₹ 20/Person</p>
+                                                    </div>
+                                                </div>
 
-							{selectedOption === "food-delivery" && (
-								<>
-									<li>
-										<span>Item Total:</span>
-										<span>₹ {priceDetails.subtotal}</span>
-									</li>
-									{priceDetails.quantityDiscountAmount > 0 && (
-										<li>
-											<span>Item Discount:</span>
-											<span>
-												-₹ {priceDetails.quantityDiscountAmount}
-											</span>
-										</li>
-									)}
-									{priceDetails.foodDeliveryDiscount > 0 && (
-										<li>
-											<span>Food Delivery Discount:</span>
-											<span>
-												-₹ {priceDetails.foodDeliveryDiscountAmount}
-											</span>
-										</li>
-									)}
-									<li>
-										<span>Packing Charges:</span>
-										<span>+₹ {packingCost}</span>
-									</li>
-									{includeDisposable && (
-										<li>
-											<span>Disposable Charges:</span>
-											<span>+₹ {20 * numberOfPeople}</span>
-										</li>
-									)}
-									{priceDetails.priceAfterDiscounts <= 4000 ? (
-										<li>
-											<span>Delivery Charges:</span>
-											<span>+₹ {deliveryCharges}</span>
-										</li>
-									) : (
-										<li>
-											<span>Delivery Charges:</span>
-											<span>FREE</span>
-										</li>
-									)}
-									<div className="options-container">
-										<label>
-											<input
-												type="checkbox"
-												checked={includeDisposable}
-												onChange={(e) =>
-													setIncludeDisposable(e.target.checked)
-												}
-											/>
-											Disposable plates + water bottle: ₹ 20/Person
-										</label>
-									</div>
-								</>
-							)}
+                                                <div>
+                                                    <p style={{ color: '#9252AA', fontWeight: '600', fontSize: 14, marginBottom: 0 }}>₹ {includeDisposable ? 20 * peopleCount : 0}</p>
+                                                </div>
+                                            </div>
+                                            {/* <img style={{ width: 290, height: 1, marginTop: 10, marginBottom: 5 }} src="../../assets/Rectangleline.png" alt="line" /> */}
+                                            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', marginTop: 3 }}>
+                                                <p style={{ color: "#9252AA", fontWeight: '600', fontSize: 14, lineHeight: '20px' }}>Packing Cost</p>
+                                                <div style={{ display: 'flex', color: "#9252AA", fontWeight: '600', fontSize: 14, lineHeight: '20px' }}>
+                                                    <p style={{ color: "#9252AA", fontWeight: '600' }}> ₹ {packingCost}</p>
+                                                </div>
+                                            </div>
 
-							<h4>Final Amount: ₹ {priceDetails.finalTotal}</h4>
-							<li>
-								<span>Advance Payment (65%):</span>
-								<span>₹ {priceDetails.advancePayment}</span>
-							</li>
-						</ul>
-					</div>
-				);
-			})()}
+                                            <div>
+                                                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', marginTop: 3  , borderBottom:"1px solid rgb(215, 215, 215)" }}>
+                                                    <p style={{ color: "#9252AA", fontWeight: '600', fontSize: 14, lineHeight: '20px' }}>Delivery Charges</p>
+                                                    <div style={{ color: "#9252AA", fontWeight: '600', fontSize: 14, lineHeight: '20px', display: 'flex', flexDirection: "row" }}>
+                                                        {discountedPrice > 4000 ? (
+                                                            <>
+                                                                <p style={{ color: "#008631", fontWeight: '600', marginRight: 5 }}>FREE</p>
+                                                                <p style={{ textDecoration: "line-through", color: "#9252AA", fontWeight: '600' }}>₹ {deliveryCharges}</p>
+                                                            </>
+                                                        ) :
+                                                         (
+                                                            <p style={{ color: "#9252AA", fontWeight: '600' }}>₹ {deliveryCharges}</p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {selectedDeliveryOption === 'live-catering' && (
+                                        <div>
+                                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: includeTables ? '#efefef' : '#fff', paddingHorizontal: 5, paddingVertical: 4, marginTop: 4   , borderBottom:"1px solid rgb(215, 215, 215)"}}>
+                                                <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                                                    <button onClick={() => setIncludeTables(!includeTables)} style={{ background: 'none', border: 'none', padding: 0 }}>
+                                                        <div style={{ width: 19, height: 19, borderWidth: 1, borderColor: includeTables ? '#008631' : '#008631', borderRadius: 3, alignItems: 'center', justifyContent: 'center', marginRight: 4, display: 'flex' }}>
+                                                            {includeDisposable && <Image src={checkImage} alt="Info" height={13} width={13} />}
+                                                        </div>
+                                                    </button>
+                                                    <div>
+                                                        <p style={{ color: '#9252AA', fontWeight: '600', fontSize: 13, lineHeight: '20px' }}>3-4 Serving Tables with Cloth:</p>
+                                                    </div>
+                                                </div>
 
-			<CreateOrderForm calculatePriceDetails={calculatePriceDetails} priceDetails={priceDetails} numberOfPeople={numberOfPeople} selectedOption={selectedOption} selectedDishQuantities={selectedDishQuantities} includeTables={includeTables} />
+                                                <div>
+                                                    <p style={{ color: '#9252AA', fontWeight: '600', fontSize: 14 }}>₹ {includeTables ? 1200 : 0}</p>
+                                                </div>
+                                            </div>
+                                            {/* <img style={{ width: 290, height: 1, marginTop: 10, marginBottom: 5 }} src="../../assets/Rectangleline.png" alt="line" /> */}
+                                        </div>
+                                    )}
+                                    {/* Calculation for final total amount */}
+                                    <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', marginTop: 3  }}>
+                                        <p style={{ color: "#9252AA", fontWeight: '600', fontSize: 14, lineHeight: '20px' }}>Final Amount</p>
+                                        <p style={{ color: "#9252AA", fontWeight: '600', fontSize: 14, lineHeight: '20px' }}>₹ {calculateFinalTotal()}</p>
+                                    </div>
 
+                                    {/* Calculation for advance payment */}
+                                    <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', marginTop: 3 }}>
+                                        <p style={{ color: "#9252AA", fontWeight: '600', fontSize: 14, lineHeight: '20px' }}>Advance Payment</p>
+                                        <p style={{ color: "#9252AA", fontWeight: '600', fontSize: 14, lineHeight: '20px' }}>₹ {calculateAdvancePayment()}</p>
+                                    </div>
+                                </div>
+			</div>
+			
+		 {/* <CreateOrderForm calculatePriceDetails={calculatePriceDetails} priceDetails={priceDetails} peopleCount={peopleCount} selecte={selectedDeliveryOption} selectedDishQuantities={selectedDishQuantities} includeTables={includeTables} />  */}
+
+		 <CreateOrderForm calculateFinalTotal={calculateFinalTotal} peopleCount={peopleCount} selectedOption={selectedDeliveryOption}  includeTables={includeTables} /> 
 
 
 		</div>
@@ -726,4 +774,3 @@ const style = {
 
 
 export default AddFoodOrder;
-

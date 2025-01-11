@@ -14,7 +14,7 @@ import {
 // import { json } from 'stream/consumers';
 
 
-const CreateOrderForm = ({ priceDetails, numberOfPeople, selectedOption, selectedDishQuantities }) => {
+const CreateOrderForm = ({ calculateFinalTotal, numberOfPeople, selectedOption, selectedDishQuantities }) => {
     const [newCustomerName, setNewCustomerName] = useState("");
     const [newCustomerPhone, setNewCustomerPhone] = useState("");
     const [date, setDate] = useState("");
@@ -57,6 +57,7 @@ const CreateOrderForm = ({ priceDetails, numberOfPeople, selectedOption, selecte
         }
     }, []);
     useEffect(() => {
+        console.log(calculateFinalTotal)
         const balance = priceDetails.finalTotal - priceDetails.advancePayment;
         setBalanceAmount(balance);
     }, [priceDetails.finalTotal, priceDetails.advancePayment]);
