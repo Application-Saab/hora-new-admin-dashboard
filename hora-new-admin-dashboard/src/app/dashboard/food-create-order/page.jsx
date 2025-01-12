@@ -97,6 +97,7 @@ function AddFoodOrder() {
 		);
 
 		setFilteredDishes(filtered);
+		console.log(mealList)
 	};
 
 	const handleDishSelect = (dish) => {
@@ -149,7 +150,9 @@ function AddFoodOrder() {
                 image: dish.image,
                 price: Number(dish.cuisineArray[0]),
                 id: dish._id,
-                mealId: dish.mealId
+                mealId: dish.mealId,
+				quantity: Number(dish.cuisineArray[1]),
+				unit: dish.cuisineArray[2]
             };
         }): [];
 
@@ -303,6 +306,7 @@ function AddFoodOrder() {
 		  const RenderDishQuantity = ({ item }) => {
 	  
 	  
+			console.log(item)
 			  var dishObject = selectedMealList.filter(x =>
 				  x.name !== "Tawa Rotis" &&
 				  x.name !== "Rumali Rotis"
@@ -360,7 +364,7 @@ function AddFoodOrder() {
 					unit = 'PCS';
 				  }
 				}
-			
+			console.log(quantity)
 			  return (
 				  <div className='ordersummaryproduct'>
 					  <div className='ordersummary-sec1'>
@@ -646,7 +650,7 @@ function AddFoodOrder() {
 			
 		 {/* <CreateOrderForm calculatePriceDetails={calculatePriceDetails} priceDetails={priceDetails} peopleCount={peopleCount} selecte={selectedDeliveryOption} selectedDishQuantities={selectedDishQuantities} includeTables={includeTables} />  */}
 
-		 <CreateOrderForm calculateFinalTotal={calculateFinalTotal} peopleCount={peopleCount} selectedOption={selectedDeliveryOption}  includeTables={includeTables} /> 
+		 {/* <CreateOrderForm calculateFinalTotal={calculateFinalTotal} peopleCount={peopleCount} selectedOption={selectedDeliveryOption}  includeTables={includeTables} />  */}
 
 
 		</div>
