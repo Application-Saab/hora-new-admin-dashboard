@@ -648,10 +648,7 @@ function AddFoodOrder() {
                                 </div>
 			</div>
 			
-		 {/* <CreateOrderForm calculatePriceDetails={calculatePriceDetails} priceDetails={priceDetails} peopleCount={peopleCount} selecte={selectedDeliveryOption} selectedDishQuantities={selectedDishQuantities} includeTables={includeTables} />  */}
-
-		 {/* <CreateOrderForm calculateFinalTotal={calculateFinalTotal} peopleCount={peopleCount} selectedOption={selectedDeliveryOption}  includeTables={includeTables} />  */}
-
+			<CreateOrderForm selectedMealList={selectedMealList} deliveryCharges={deliveryCharges} totalPrice={totalPrice} discountedPrice={discountedPrice} calculateFinalTotal={calculateFinalTotal} calculateAdvancePayment={calculateAdvancePayment} peopleCount={peopleCount} selectedOption={selectedDeliveryOption}  includeTables={includeTables} />
 
 		</div>
 	</>);

@@ -14,7 +14,7 @@ import {
 // import { json } from 'stream/consumers';
 
 
-const CreateOrderForm = ({ calculateFinalTotal, numberOfPeople, selectedOption, selectedDishQuantities }) => {
+const CreateOrderForm = ({ calculateFinalTotal,deliveryCharges , calculateAdvancePayment ,numberOfPeople, totalPrice ,discountedPrice ,selectedOption, selectedMealList ,includeTables}) => {
     const [newCustomerName, setNewCustomerName] = useState("");
     const [newCustomerPhone, setNewCustomerPhone] = useState("");
     const [date, setDate] = useState("");
@@ -27,9 +27,9 @@ const CreateOrderForm = ({ calculateFinalTotal, numberOfPeople, selectedOption, 
     const [isContinueClicked, setIsContinueClicked] = useState(false);
     const [pincodeMessage, setPincodeMessage] = useState("");
     const [pincodeMessageColor, setPincodeMessageColor] = useState("");
-    const [totalamount, setTotalAmount] = useState("");
-    const [advanceamount, setAdvanceAmount] = useState("");
-    const [balanceamount, setBalanceAmount] = useState("");
+    const [totalamount, setTotalAmount] = useState();
+    const [advanceamount, setAdvanceAmount] = useState();
+    const [balanceamount, setBalanceAmount] = useState();
     const [orderTakenBy, setOrderTakenBy] = useState("");
     const [comment, setComment] = useState("");
     const [showPopup, setShowPopup] = useState(false)
@@ -39,6 +39,7 @@ const CreateOrderForm = ({ calculateFinalTotal, numberOfPeople, selectedOption, 
     const [customerId, setCustomerId] = useState(null);
     const [showButton, setShowButton] = useState(false);
     const [inclusion, setInclusion] = useState("");
+    const [totalDiscount ,setTotalDiscount] = useState()
     // const [includeTables, setIncludeTables] = useState(false);
     const [lloading, setlLoading] = useState(false);
     const [itemDataId, setItemDataId] = useState({ items: [] });
@@ -55,12 +56,21 @@ const CreateOrderForm = ({ calculateFinalTotal, numberOfPeople, selectedOption, 
             setPincodeMessage("");
             setPincodeMessageColor("");
         }
-    }, []);
+    }, [pincode]);
     useEffect(() => {
-        console.log(calculateFinalTotal)
-        const balance = priceDetails.finalTotal - priceDetails.advancePayment;
-        setBalanceAmount(balance);
-    }, [priceDetails.finalTotal, priceDetails.advancePayment]);
+        
+        setTotalAmount(calculateFinalTotal)
+        setAdvanceAmount(calculateAdvancePayment)
+       
+    }, [calculateFinalTotal ,calculateAdvancePayment]);
+    useEffect(() => {
+        const finalTotal = calculateFinalTotal();
+        const advanceTotal = calculateAdvancePayment();   
+        let ReminingAmount = finalTotal - advanceTotal;    
+        setBalanceAmount(ReminingAmount);
+        setTotalDiscount(Number(deliveryCharges) + Number(discountedPrice));
+    }, [calculateFinalTotal, calculateAdvancePayment,deliveryCharges]);
+    
     const handleCheckCustomer = async (e) => {
         e.preventDefault();
         setMessage("");
@@ -224,10 +234,10 @@ const CreateOrderForm = ({ calculateFinalTotal, numberOfPeople, selectedOption, 
             order_date: formattedDate,
             no_of_burner: true,
             order_locality: city,
-            total_amount: priceDetails.finalTotal,
+            total_amount: totalamount,
             orderApplianceIds: [],
-            payable_amount: priceDetails.finalTotal,
-            advance_amount: priceDetails.advancePayment,
+            payable_amount:balanceamount,          
+            advance_amount:advanceamount,
             is_gst: "0",
             order_type: true,
             items: itemDataId,
@@ -277,19 +287,11 @@ const CreateOrderForm = ({ calculateFinalTotal, numberOfPeople, selectedOption, 
         if (selectedOption === "live-catering") {
             orderData += `
         Dishes:
-        ${selectedDishQuantities.map((item) => item.name).join("\n -")}`;
-
-            const priceDetails = calculatePriceDetails();
-            const liveCateringTotal = (priceDetails.subtotal * 1.1 + 6500).toFixed(0);
-            const liveCateringDiscount = (
-                priceDetails.subtotal * 1.1 +
-                6500 -
-                (priceDetails.priceAfterDiscounts * 1.1 + 6500)
-            ).toFixed(0);
+        ${selectedMealList.map((item) => item.name).join("\n -")}`;
 
             orderData += `           
-        Total Amount: ₹ ${liveCateringTotal}
-        Discounts: ₹ ${liveCateringDiscount}
+        Total Amount: ₹ ${totalPrice}
+        Discounts: ₹ ${totalDiscount}
         ${includeTables ? `Table Charges: +₹ 1200` : ""}
             `;
         }
@@ -297,17 +299,16 @@ const CreateOrderForm = ({ calculateFinalTotal, numberOfPeople, selectedOption, 
         if (selectedOption === "food-delivery") {
             orderData += `
         Dishes:
-        ${selectedDishQuantities
-                    .map((item) => {
+        ${selectedMealList?.map((item) => {
                         let quantity = parseFloat(item.quantity) * numberOfPeople;
-                        const itemCount = selectedDishQuantities.length;
-                        const mainCourseItemCount = selectedDishQuantities.filter(
+                        const itemCount = selectedMealList.length;
+                        const mainCourseItemCount = selectedMealList.filter(
                             (meal) => meal.id[0] === "63f1b6b7ed240f7a09f7e2de"
                         ).length;
-                        const appetizerItemCount = selectedDishQuantities.filter(
+                        const appetizerItemCount = selectedMealList.filter(
                             (meal) => meal.id[0] === "63f1b39a4082ee76673a0a9f"
                         ).length;
-                        const breadItemCount = selectedDishQuantities.filter(
+                        const breadItemCount = selectedMealList.filter(
                             (meal) => meal.id[0] === "63edc4757e1b370928b149b3"
                         ).length;
 
@@ -348,36 +349,20 @@ const CreateOrderForm = ({ calculateFinalTotal, numberOfPeople, selectedOption, 
                     })
                     .join("\n")}`;
 
-            // const priceDetails = calculatePriceDetails();
-
             orderData += `
         
-        Total Amount: ₹${priceDetails.subtotal.toFixed(2)}
-        `;
+        Total Amount: ₹${Number(totalPrice).toFixed(2)}`;
 
-            if (priceDetails.quantityDiscountAmount > 0) {
-                orderData += `Discounts: -₹${priceDetails.quantityDiscountAmount.toFixed(
-                    2
-                )}
-            `;
-            }
 
-            if (priceDetails.foodDeliveryDiscount > 0) {
-                orderData += `Food Delivery Discount: -₹${priceDetails.foodDeliveryDiscountAmount.toFixed(
-                    2
-                )}
-            `;
-            }
+            if (totalDiscount > 0) {
+                orderData += `Discounts: -₹${Number(totalDiscount).toFixed(2)}`;}
         }
         // aarti
         orderData += `
-        *Final amount after discount: ₹${priceDetails.finalTotal.toFixed(
-            2
-        )}*
-            `;
+        *Final amount after discount: ₹${totalamount.toFixed(2)}* `;
 
         orderData += `
-        Advance Amount: ₹${priceDetails.advancePayment}
+        Advance Amount: ₹${advanceamount}
         Balance Amount: ₹${balanceamount}
             `;
 
@@ -398,6 +383,7 @@ const CreateOrderForm = ({ calculateFinalTotal, numberOfPeople, selectedOption, 
                 console.error("Error copying to clipboard", error);
             });
     };
+
     return (<>
 
         <form onSubmit={handleSubmit}>
@@ -484,8 +470,8 @@ const CreateOrderForm = ({ calculateFinalTotal, numberOfPeople, selectedOption, 
                         <label htmlFor="totalamount" style={style.label}>Total Amount*</label>
                         <input
                             type="text"
-                            id="totalamount"
-                            value={priceDetails.finalTotal}
+                            id="totalamount"    
+                            value={totalamount}
                             onChange={(e) => setTotalAmount(e.target.value)}
                             placeholder="Total Amount"
                             required
@@ -495,7 +481,7 @@ const CreateOrderForm = ({ calculateFinalTotal, numberOfPeople, selectedOption, 
                         <input
                             type="text"
                             id="advanceamount"
-                            value={priceDetails.advancePayment}
+                            value={advanceamount}
                             onChange={(e) => setAdvanceAmount(e.target.value)}
                             placeholder="Advance Amount"
                         />
