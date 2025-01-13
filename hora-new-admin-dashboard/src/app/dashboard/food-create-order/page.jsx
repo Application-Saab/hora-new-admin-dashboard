@@ -24,6 +24,7 @@ function AddFoodOrder() {
 	const [selectedDishQuantities, setSelectedDishQuantities] = useState([]);
 	const [includeDisposable, setIncludeDisposable] = useState(false);
 	const [includeTables, setIncludeTables] = useState(false);
+	const [itemDataId, setItemDataId] = useState({ items: [] });
 	const deliveryCharges = 300;
 	const packingCost = 200;
 	
@@ -138,7 +139,7 @@ function AddFoodOrder() {
 
 		console.log(newRequestData, "newrequestdata");
 		setSelectedDishQuantities(updatedQuantities);
-		// setItemDataId(newRequestData); // Store requestData in state
+		setItemDataId(newRequestData); // Store requestData in state
 
 		console.log(newRequestData, "requestData");
 	}, [selectedDishes]);
@@ -152,7 +153,8 @@ function AddFoodOrder() {
                 id: dish._id,
                 mealId: dish.mealId,
 				quantity: Number(dish.cuisineArray[1]),
-				unit: dish.cuisineArray[2]
+				unit: dish.cuisineArray[2],
+				_id: dish._id
             };
         }): [];
 
@@ -394,7 +396,7 @@ function AddFoodOrder() {
 	return (<>
 		<div className="container">
 			<h1>Create Food Order</h1>
-			<div className="selectServiceTyle" style={style.selectServiceTyle}>
+			<div className="selectServiceType" style={style.selectServiceType}>
 				<div style={style.selectDiv}>
 					<label htmlFor="peopleInput" className="people-label" style={style.label}>
 						Select Category:
@@ -618,7 +620,7 @@ function AddFoodOrder() {
                                             <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: includeTables ? '#efefef' : '#fff', paddingHorizontal: 5, paddingVertical: 4, marginTop: 4   , borderBottom:"1px solid rgb(215, 215, 215)"}}>
                                                 <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                                                     <button onClick={() => setIncludeTables(!includeTables)} style={{ background: 'none', border: 'none', padding: 0 }}>
-                                                        <div style={{ width: 19, height: 19, borderWidth: 1, borderColor: includeTables ? '#008631' : '#008631', borderRadius: 3, alignItems: 'center', justifyContent: 'center', marginRight: 4, display: 'flex' }}>
+                                                        <div style={{ width: 19, height: 19, borderWidth: 1,borderStyle:'solid' ,borderColor: includeTables ? '#008631' : '#008631', borderRadius: 3, alignItems: 'center', justifyContent: 'center', marginRight: 4, display: 'flex' }}>
                                                             {includeDisposable && <Image src={checkImage} alt="Info" height={13} width={13} />}
                                                         </div>
                                                     </button>
@@ -648,18 +650,21 @@ function AddFoodOrder() {
                                 </div>
 			</div>
 			
-			<CreateOrderForm selectedMealList={selectedMealList} deliveryCharges={deliveryCharges} totalPrice={totalPrice} discountedPrice={discountedPrice} calculateFinalTotal={calculateFinalTotal} calculateAdvancePayment={calculateAdvancePayment} peopleCount={peopleCount} selectedOption={selectedDeliveryOption}  includeTables={includeTables} />
+			<CreateOrderForm itemDataId={itemDataId} selectedMealList={selectedMealList} deliveryCharges={deliveryCharges} totalPrice={totalPrice} discountedPrice={discountedPrice} calculateFinalTotal={calculateFinalTotal} calculateAdvancePayment={calculateAdvancePayment} peopleCount={peopleCount} selectedOption={selectedDeliveryOption}  includeTables={includeTables} />
 
 		</div>
 	</>);
 }
+const isSmallScreen = window.innerWidth < 768;
 const style = {
 	selectDiv: {
 		display: "inline-flex", flexDirection: "column", alignItems: "center",
-		marginTop: "22px", marginLeft: "40px", width: "50%",
+		marginTop: "22px",  width: isSmallScreen ? "1005" : "50%",
 	},
-	selectServiceTyle: {
-		display: "flex", alignItems: "center"
+	selectServiceType: {
+		display: "flex",
+		 alignItems: "center",
+		 flexDirection: isSmallScreen ? "column" : "row", // Conditional direction
 	},
 	selectDropDown: {
 
@@ -676,7 +681,7 @@ const style = {
 		fontSize: "16px",
 	},
 	noOfPeople: {
-		display: "inline-flex", flexDirection: "column", alignItems: "center", width: "50%",
+		display: "inline-flex", flexDirection: "column", alignItems: "center", width: isSmallScreen ? "1005" : "50%",
 	},
 	PlusMinusBtn: {
 		padding: "8px 12px",

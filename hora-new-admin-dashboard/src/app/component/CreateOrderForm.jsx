@@ -14,7 +14,7 @@ import {
 // import { json } from 'stream/consumers';
 
 
-const CreateOrderForm = ({ calculateFinalTotal,deliveryCharges , calculateAdvancePayment ,numberOfPeople, totalPrice ,discountedPrice ,selectedOption, selectedMealList ,includeTables}) => {
+const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, calculateAdvancePayment, peopleCount, totalPrice, discountedPrice, selectedOption, selectedMealList, includeTables }) => {
     const [newCustomerName, setNewCustomerName] = useState("");
     const [newCustomerPhone, setNewCustomerPhone] = useState("");
     const [date, setDate] = useState("");
@@ -39,10 +39,10 @@ const CreateOrderForm = ({ calculateFinalTotal,deliveryCharges , calculateAdvanc
     const [customerId, setCustomerId] = useState(null);
     const [showButton, setShowButton] = useState(false);
     const [inclusion, setInclusion] = useState("");
-    const [totalDiscount ,setTotalDiscount] = useState()
+    const [totalDiscount, setTotalDiscount] = useState()
     // const [includeTables, setIncludeTables] = useState(false);
     const [lloading, setlLoading] = useState(false);
-    const [itemDataId, setItemDataId] = useState({ items: [] });
+
     useEffect(() => {
         if (pincode) {
             if (pincodes.includes(pincode)) {
@@ -58,19 +58,19 @@ const CreateOrderForm = ({ calculateFinalTotal,deliveryCharges , calculateAdvanc
         }
     }, [pincode]);
     useEffect(() => {
-        
+
         setTotalAmount(calculateFinalTotal)
         setAdvanceAmount(calculateAdvancePayment)
-       
-    }, [calculateFinalTotal ,calculateAdvancePayment]);
+
+    }, [calculateFinalTotal, calculateAdvancePayment]);
     useEffect(() => {
         const finalTotal = calculateFinalTotal();
-        const advanceTotal = calculateAdvancePayment();   
-        let ReminingAmount = finalTotal - advanceTotal;    
+        const advanceTotal = calculateAdvancePayment();
+        let ReminingAmount = finalTotal - advanceTotal;
         setBalanceAmount(ReminingAmount);
-        setTotalDiscount(Number(deliveryCharges) + Number(discountedPrice));
-    }, [calculateFinalTotal, calculateAdvancePayment,deliveryCharges]);
-    
+        setTotalDiscount(Number(deliveryCharges) + Number(totalPrice - discountedPrice));
+    }, [calculateFinalTotal, calculateAdvancePayment, deliveryCharges]);
+
     const handleCheckCustomer = async (e) => {
         e.preventDefault();
         setMessage("");
@@ -161,7 +161,7 @@ const CreateOrderForm = ({ calculateFinalTotal,deliveryCharges , calculateAdvanc
         const date = new Date(dateString);
         return date.toLocaleDateString("en-US", options);
     };
-
+    console.log(itemDataId, "itemDataId")
     const saveAddress = async () => {
         try {
             const url = BASE_URL + SAVE_LOCATION_ENDPOINT;
@@ -226,7 +226,7 @@ const CreateOrderForm = ({ calculateFinalTotal,deliveryCharges , calculateAdvanc
             phone_no: customerNumber,
             toId: "",
             order_time: timeSlot.value,
-            no_of_people: numberOfPeople,
+            no_of_people: peopleCount,
             type: type,
             fromId: customerId,
             is_discount: "0",
@@ -236,17 +236,18 @@ const CreateOrderForm = ({ calculateFinalTotal,deliveryCharges , calculateAdvanc
             order_locality: city,
             total_amount: totalamount,
             orderApplianceIds: [],
-            payable_amount:balanceamount,          
-            advance_amount:advanceamount,
+            payable_amount: balanceamount,
+            advance_amount: advanceamount,
             is_gst: "0",
             order_type: true,
-            items: itemDataId,
+            items: selectedMealList,
             decoration_comments: comment,
             status: 1,
             balance_amount: balanceamount,
             order_taken_by: orderTakenBy,
+            // selecteditems: selectedMealList,
         };
-
+        console.log(requestData, "request data")
 
         try {
             const response = await axios.post(
@@ -278,7 +279,7 @@ const CreateOrderForm = ({ calculateFinalTotal,deliveryCharges , calculateAdvanc
           
         City: ${city}
         Date: ${formattedDate}
-        Guest Count: ${numberOfPeople}
+        Guest Count: ${peopleCount}
         Time of Delivery: ${timeSlot.value}
         Address: ${address}
         Google Map Location: ${googleLocation}
@@ -289,81 +290,81 @@ const CreateOrderForm = ({ calculateFinalTotal,deliveryCharges , calculateAdvanc
         Dishes:
         ${selectedMealList.map((item) => item.name).join("\n -")}`;
 
-            orderData += `           
-        Total Amount: ₹ ${totalPrice}
-        Discounts: ₹ ${totalDiscount}
-        ${includeTables ? `Table Charges: +₹ 1200` : ""}
-            `;
+            //     orderData += `           
+            // Total Amount: ₹ ${totalPrice}
+            // Discounts: ₹ ${totalDiscount}
+            // ${includeTables ? `Table Charges: +₹ 1200` : ""}
+            //     `;
         }
 
         if (selectedOption === "food-delivery") {
             orderData += `
         Dishes:
         ${selectedMealList?.map((item) => {
-                        let quantity = parseFloat(item.quantity) * numberOfPeople;
-                        const itemCount = selectedMealList.length;
-                        const mainCourseItemCount = selectedMealList.filter(
-                            (meal) => meal.id[0] === "63f1b6b7ed240f7a09f7e2de"
-                        ).length;
-                        const appetizerItemCount = selectedMealList.filter(
-                            (meal) => meal.id[0] === "63f1b39a4082ee76673a0a9f"
-                        ).length;
-                        const breadItemCount = selectedMealList.filter(
-                            (meal) => meal.id[0] === "63edc4757e1b370928b149b3"
-                        ).length;
+                let quantity = parseFloat(item.quantity) * peopleCount;
+                const itemCount = selectedMealList.length;
+                const mainCourseItemCount = selectedMealList.filter(
+                    (meal) => meal.id[0] === "63f1b6b7ed240f7a09f7e2de"
+                ).length;
+                const appetizerItemCount = selectedMealList.filter(
+                    (meal) => meal.id[0] === "63f1b39a4082ee76673a0a9f"
+                ).length;
+                const breadItemCount = selectedMealList.filter(
+                    (meal) => meal.id[0] === "63edc4757e1b370928b149b3"
+                ).length;
 
-                        if (
-                            (item.id[0] === "63f1b6b7ed240f7a09f7e2de" &&
-                                mainCourseItemCount > 1) ||
-                            (item.id[0] === "63f1b39a4082ee76673a0a9f" &&
-                                appetizerItemCount > 1) ||
-                            (item.id[0] === "63edc4757e1b370928b149b3" && breadItemCount > 1)
-                        ) {
-                            if (itemCount > 5) {
-                                const adjustment =
-                                    itemCount === 6
-                                        ? 0.15
-                                        : itemCount === 8
-                                            ? 0.25
-                                            : itemCount === 9
-                                                ? 0.3
-                                                : itemCount === 10
-                                                    ? 0.35
-                                                    : itemCount >= 12
-                                                        ? 0.5
-                                                        : 0;
-                                quantity *= 1 - adjustment;
-                            }
-                        }
+                if (
+                    (item.id[0] === "63f1b6b7ed240f7a09f7e2de" &&
+                        mainCourseItemCount > 1) ||
+                    (item.id[0] === "63f1b39a4082ee76673a0a9f" &&
+                        appetizerItemCount > 1) ||
+                    (item.id[0] === "63edc4757e1b370928b149b3" && breadItemCount > 1)
+                ) {
+                    if (itemCount > 5) {
+                        const adjustment =
+                            itemCount === 6
+                                ? 0.15
+                                : itemCount === 8
+                                    ? 0.25
+                                    : itemCount === 9
+                                        ? 0.3
+                                        : itemCount === 10
+                                            ? 0.35
+                                            : itemCount >= 12
+                                                ? 0.5
+                                                : 0;
+                        quantity *= 1 - adjustment;
+                    }
+                }
 
-                        quantity = Math.round(quantity);
-                        let unit = item.unit;
+                quantity = Math.round(quantity);
+                let unit = item.unit;
 
-                        if (quantity >= 1000) {
-                            quantity /= 1000;
-                            if (unit === "Gram") unit = "KG";
-                            else if (unit === "ml") unit = "L";
-                        }
+                if (quantity >= 1000) {
+                    quantity /= 1000;
+                    if (unit === "Gram") unit = "KG";
+                    else if (unit === "ml") unit = "L";
+                }
 
-                        return `${item.name}: ${quantity} ${unit}`;
-                    })
+                return `${item.name}: ${quantity} ${unit}`;
+            })
                     .join("\n")}`;
+            // aarti
+            //     orderData += `
 
-            orderData += `
-        
-        Total Amount: ₹${Number(totalPrice).toFixed(2)}`;
+            // Total Amount: ₹${Number(totalPrice).toFixed(2)}`;
 
 
-            if (totalDiscount > 0) {
-                orderData += `Discounts: -₹${Number(totalDiscount).toFixed(2)}`;}
+            //     if (totalDiscount > 0) {
+            //         orderData += `Discounts: -₹${Number(totalDiscount).toFixed(2)}`;}
         }
-        // aarti
-        orderData += `
-        *Final amount after discount: ₹${totalamount.toFixed(2)}* `;
 
+        // orderData += `
+        // *Final amount after discount: ₹${totalamount.toFixed(2)}* `;
+
+        // Advance Amount: ₹${advanceamount}
         orderData += `
-        Advance Amount: ₹${advanceamount}
-        Balance Amount: ₹${balanceamount}
+        *Balance Amount: ₹${balanceamount}*
             `;
 
         orderData += `
@@ -400,7 +401,7 @@ const CreateOrderForm = ({ calculateFinalTotal,deliveryCharges , calculateAdvanc
                     pattern="\d{10}" // Enforce exactly 10 digits
                     inputMode="numeric" // Optimize for numeric input on mobile devices
                 />
-                <button onClick={handleCheckCustomer}  className='orderCheck-btn'disabled={loading || customerNumber.length !== 10}>
+                <button onClick={handleCheckCustomer} className='orderCheck-btn' disabled={loading || customerNumber.length !== 10}>
                     {loading ? "Checking..." : "Check Customer"}
                 </button>
                 {loading && <p>Loading...</p>} {/* Loader */}
@@ -443,9 +444,6 @@ const CreateOrderForm = ({ calculateFinalTotal,deliveryCharges , calculateAdvanc
                                 />
                             </div>
                         </div>
-
-
-
                         <label htmlFor="address" style={style.label}>Address*</label>
                         <textarea
                             type="text"
@@ -470,7 +468,7 @@ const CreateOrderForm = ({ calculateFinalTotal,deliveryCharges , calculateAdvanc
                         <label htmlFor="totalamount" style={style.label}>Total Amount*</label>
                         <input
                             type="text"
-                            id="totalamount"    
+                            id="totalamount"
                             value={totalamount}
                             onChange={(e) => setTotalAmount(e.target.value)}
                             placeholder="Total Amount"
@@ -534,10 +532,6 @@ const CreateOrderForm = ({ calculateFinalTotal,deliveryCharges , calculateAdvanc
                         <p style={style.pincodeMessage}>
                             {pincodeMessage}
                         </p>
-
-                       
-
-
                         <button className="orderCheck-btn" type="submit" >
                             {lloading ? "Creating Order..." : "Create Order"}
                         </button>
@@ -580,10 +574,10 @@ const CreateOrderForm = ({ calculateFinalTotal,deliveryCharges , calculateAdvanc
                 }
             </>
         </form>
-       { message === "Customer exists." && <button onClick={copyOrderSummary} style={style.buttonPrimary}>
-                            Copy Order Summary
-                        </button>
-                        }
+        {message === "Customer exists." && <button onClick={copyOrderSummary} style={style.buttonPrimary}>
+            Copy Order Summary
+        </button>
+        }
 
     </>)
 }
@@ -626,8 +620,8 @@ const style = {
         border: "none",
         borderRadius: "5px",
         cursor: "pointer",
-        marginTop:"10px",
-        width:"100%"
+        marginTop: "10px",
+        width: "100%"
     },
     buttonSecondary: {
         padding: "10px 20px",
