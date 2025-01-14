@@ -481,9 +481,9 @@ const OrderList = () => {
                     <td style={{width:"200px",paddingLeft:"16px"}}>
                       {order.type === 2 ?(
                         <ul style={{paddingLeft:"0" , }}>
-                      {  order.userReviewRatingArray.map((i) => 
+                      {  order.userReviewRatingArray.map((i , index) => 
                         (
-                            <li>{i.name}-{i.rating}</li>                          
+                            <li key={index}>{i.name}-{i.rating}</li>                          
                         ))}
                       </ul>
                       ): (

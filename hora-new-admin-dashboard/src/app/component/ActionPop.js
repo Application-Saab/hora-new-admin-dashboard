@@ -129,7 +129,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
     // Extract order details
     const orderId = getOrderId(orderDetails._doc.order_id) || "N/A";
     const orderDate = new Date(orderDetails._doc.order_date).toLocaleDateString() || "N/A";
-    const orderType = getOrderType(orderDetails._doc.type) || "N/A";
+    // const orderType = getOrderType(orderDetails._doc.type) || "N/A";
     const address = orderDetails._doc.addressId?.address1 || "N/A";
     const googleMapLocation = orderDetails._doc.addressId?.address2 || "N/A";
     const orderTime = orderDetails._doc.order_time || "N/A";
@@ -169,7 +169,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
     // Add Decoration Items
     orderDetails.items.forEach((item) => {
       // \n*Product Price:* ₹${dec.price}
-      item.decoration.forEach((dec, index) => {
+      item.decoration.forEach((dec) => {
         message += `\n\n*Product Name:* ${dec.name}\n*Image URL:* https://horaservices.com/api/uploads/${dec.featured_image}\n`;
         const inclusionText = getCleanInclusionText(dec.inclusion); // Assuming this function formats the inclusion text
         message += `\n*Inclusion:* \n${inclusionText}`;
@@ -239,7 +239,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
     const orderTime = orderDetails?.order_time || "N/A";
     const orderCity = orderDetails?.order_locality || "NA"
     const peopleCount = orderDetails?.no_of_people || "NA"
-    const ItemQuantity = orderDetails?.userOrderDishImageArray || "NA"
+    // const ItemQuantity = orderDetails?.userOrderDishImageArray || "NA"
     // Create a Google Maps link
     const googleMapUrl = orderDetails?.addressId?.address2 ? (`https://www.google.com/maps/search/?q=${encodeURIComponent(googleMapLocation)}`) : 'NA';
     // Calculate balance amount

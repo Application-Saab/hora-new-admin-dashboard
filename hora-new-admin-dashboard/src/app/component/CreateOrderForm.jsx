@@ -14,7 +14,7 @@ import {
 // import { json } from 'stream/consumers';
 
 
-const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, calculateAdvancePayment, peopleCount, totalPrice, discountedPrice, selectedOption, selectedMealList, includeTables }) => {
+const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, calculateAdvancePayment, peopleCount, selectedOption, selectedMealList }) => {
     const [newCustomerName, setNewCustomerName] = useState("");
     const [newCustomerPhone, setNewCustomerPhone] = useState("");
     const [date, setDate] = useState("");
@@ -24,7 +24,7 @@ const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, cal
     const [timeSlot, setTimeSlot] = useState("");
     const [city, setCity] = useState("");
     const [pincode, setPincode] = useState("");
-    const [isContinueClicked, setIsContinueClicked] = useState(false);
+  
     const [pincodeMessage, setPincodeMessage] = useState("");
     const [pincodeMessageColor, setPincodeMessageColor] = useState("");
     const [totalamount, setTotalAmount] = useState();
@@ -37,12 +37,16 @@ const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, cal
     const [message, setMessage] = useState("");
     const [messageColor, setMessageColor] = useState("");
     const [customerId, setCustomerId] = useState(null);
-    const [showButton, setShowButton] = useState(false);
-    const [inclusion, setInclusion] = useState("");
-    const [totalDiscount, setTotalDiscount] = useState()
-    // const [includeTables, setIncludeTables] = useState(false);
+    // const [showButton, setShowButton] = useState(false);
+    // const [inclusion, setInclusion] = useState("");
+    // const [totalDiscount, setTotalDiscount] = useState()
     const [lloading, setlLoading] = useState(false);
-
+    let inclusion = ` *Inclusions:*
+                - Complementary - Green salad, Mint Chutney, Achar
+                - Doorstep Delivery
+                - Disposable plates, Fork, Spoon, Tissue papers, Bisleri Water bottles
+                - Freshly cooked food.
+            `
     useEffect(() => {
         if (pincode) {
             if (pincodes.includes(pincode)) {
@@ -68,7 +72,7 @@ const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, cal
         const advanceTotal = calculateAdvancePayment();
         let ReminingAmount = finalTotal - advanceTotal;
         setBalanceAmount(ReminingAmount);
-        setTotalDiscount(Number(deliveryCharges) + Number(totalPrice - discountedPrice));
+        // setTotalDiscount(Number(deliveryCharges) + Number(totalPrice - discountedPrice));
     }, [calculateFinalTotal, calculateAdvancePayment, deliveryCharges]);
 
     const handleCheckCustomer = async (e) => {
@@ -143,13 +147,9 @@ const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, cal
     };
 
 
-    useEffect(() => {
-        console.log("showButton state updated:", showButton);
-    }, [showButton]);
-
-    const handleContinueClick = () => {
-        setIsContinueClicked(true);
-    };
+    // useEffect(() => {
+    //     console.log("showButton state updated:", showButton);
+    // }, [showButton]);
 
     const formatDate = (dateString) => {
         const options = {
@@ -529,7 +529,7 @@ const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, cal
                             value={pincode}
                             onChange={(e) => setPincode(e.target.value)}
                         />
-                        <p style={style.pincodeMessage}>
+                        <p style={{ ...style.pincodeMessage, color: pincodeMessageColor }}>
                             {pincodeMessage}
                         </p>
                         <button className="orderCheck-btn" type="submit" >

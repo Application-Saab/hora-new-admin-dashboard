@@ -21,7 +21,7 @@ function AddFoodOrder() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [foodListDownDropOpen, setFoodListDownDropOpen] = useState(false); //name changed from popupOpen
 	const [selectedDishes, setSelectedDishes] = useState([]);
-	const [selectedDishQuantities, setSelectedDishQuantities] = useState([]);
+
 	const [includeDisposable, setIncludeDisposable] = useState(false);
 	const [includeTables, setIncludeTables] = useState(false);
 	const [itemDataId, setItemDataId] = useState({ items: [] });
@@ -138,7 +138,7 @@ function AddFoodOrder() {
 		const newRequestData = updatedQuantities.map((item) => item.id);
 
 		console.log(newRequestData, "newrequestdata");
-		setSelectedDishQuantities(updatedQuantities);
+		// setSelectedDishQuantities(updatedQuantities);
 		setItemDataId(newRequestData); // Store requestData in state
 
 		console.log(newRequestData, "requestData");
@@ -655,16 +655,16 @@ function AddFoodOrder() {
 		</div>
 	</>);
 }
-const isSmallScreen = window.innerWidth < 768;
+
 const style = {
 	selectDiv: {
 		display: "inline-flex", flexDirection: "column", alignItems: "center",
-		marginTop: "22px",  width: isSmallScreen ? "1005" : "50%",
+		marginTop: "22px",  width: "50%",
 	},
 	selectServiceType: {
 		display: "flex",
 		 alignItems: "center",
-		 flexDirection: isSmallScreen ? "column" : "row", // Conditional direction
+		 flexDirection: "row", // Conditional direction
 	},
 	selectDropDown: {
 
@@ -681,7 +681,7 @@ const style = {
 		fontSize: "16px",
 	},
 	noOfPeople: {
-		display: "inline-flex", flexDirection: "column", alignItems: "center", width: isSmallScreen ? "1005" : "50%",
+		display: "inline-flex", flexDirection: "column", alignItems: "center", width:"50%",
 	},
 	PlusMinusBtn: {
 		padding: "8px 12px",
