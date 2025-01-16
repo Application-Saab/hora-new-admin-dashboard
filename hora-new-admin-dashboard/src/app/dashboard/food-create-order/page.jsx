@@ -315,9 +315,9 @@ function AddFoodOrder() {
 			  )
 	  
 			  const itemCount = dishObject.filter(meal => meal.id[0] === "63f1b6b7ed240f7a09f7e2de" || meal.id[0] === "63f1b39a4082ee76673a0a9f" || meal.id[0] === "63edc4757e1b370928b149b3").length
-			  const mainCourseItemCount = dishObject.filter(meal => meal.id[0] === "63f1b6b7ed240f7a09f7e2de").length
-			  const appetizerItemCount = dishObject.filter(meal => meal.id[0] === "63f1b39a4082ee76673a0a9f").length
-			  const breadItemCount = dishObject.filter(meal => meal.id[0] === "63edc4757e1b370928b149b3").length
+			//   const mainCourseItemCount = dishObject.filter(meal => meal.id[0] === "63f1b6b7ed240f7a09f7e2de").length
+			//   const appetizerItemCount = dishObject.filter(meal => meal.id[0] === "63f1b39a4082ee76673a0a9f").length
+			//   const breadItemCount = dishObject.filter(meal => meal.id[0] === "63edc4757e1b370928b149b3").length
 			  console.log('item.quantity', item.quantity)
 			  
 			  let quantity = item.quantity * peopleCount;
