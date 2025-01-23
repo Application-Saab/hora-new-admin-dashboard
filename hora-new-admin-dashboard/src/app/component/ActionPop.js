@@ -207,7 +207,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
         : "N/A";
 
     // Start building the message
-    let message = `Order Details:\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\n\nAddress: ${address}\nGoogleMapLocation: ${googleMapUrl}\n\nArrival Time: ${orderTime}\n\n*Amount: ₹${balanceAmount}*\nComments: ${decorationComments}\n\n*Dishes*\n`;
+    let message = `Live-catering Order Summary::\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\n\nAddress: ${address}\nGoogleMapLocation: ${googleMapUrl}\n\nArrival Time: ${orderTime}\n\n*Amount: ₹${balanceAmount}*\nComments: ${decorationComments}\n\n*Dishes*\n`;
 
     // Append each dish to the message
     if (orderDetails?.selecteditems?.length) {
