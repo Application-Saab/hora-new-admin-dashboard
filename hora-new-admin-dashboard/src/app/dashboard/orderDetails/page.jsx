@@ -12,7 +12,7 @@ import {
 const OrderList = () => {
   const [orders, setOrders] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPage, setTotalPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(0);
   // const [setTotalItems] = useState(0);
   const itemsPerPage = 15;
   const [searchTerm, setSearchTerm] = useState("");
@@ -29,7 +29,7 @@ const OrderList = () => {
 
   const [selectedDate, setSelectedDate] = useState("");
 
-  const fetchOrders = async (page, orderId = '', orderstatus = '', activeStatus = '', orderType = '', orderCity = '', selectedDate = '', selectedOfflineNum = '') => {
+  const fetchOrders = async (page, orderId = '', orderstatus = '', activeStatus = '', orderType = '', orderCity = '', selectedDate = '', selectedOfflineNum = '') => { 
     console.log("Selected Date in fetchOrders:", selectedOfflineNum);  // Log the selected date for debugging
     // Handle orderType mapping
     let typeId;
@@ -89,7 +89,8 @@ const OrderList = () => {
 
         if (data && data.data && data.data.order) {
           setOrders(data.data.order);
-          setTotalPage(data.data.paginate.last_page);
+          let totalPages = Math.ceil(data.data.paginate.total_item / itemsPerPage) ;
+          setTotalPage(totalPages);
         } else {
           // No orders found, show an alert with a message
           setOrders('');
