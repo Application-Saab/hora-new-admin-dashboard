@@ -275,8 +275,8 @@ const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, cal
         const formattedDate = formatDate(date); // Format the date
 
         let orderData = `
-              *Food Delivery Order Summary:*
-          
+         *${selectedOption.charAt(0).toUpperCase() + selectedOption.slice(1)} Order Summary:*
+         
         City: ${city}
         Date: ${formattedDate}
         Guest Count: ${peopleCount}
