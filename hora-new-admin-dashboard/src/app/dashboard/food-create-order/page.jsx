@@ -34,13 +34,13 @@ function AddFoodOrder() {
 	// Dynamically update `peopleCount` based on `selectedOption`
 	useEffect(() => {
 		if (  selectedDeliveryOption   === "live-catering") {
-			setPeopleCount(35);
+			setPeopleCount(20);
 		} else {
 			setPeopleCount(10);
 		}
 	}, [selectedDeliveryOption]);
 	const handlePeopleChange = (e) => {
-		const minNum = selectedDeliveryOption === "live-catering" ? 35 : 10;
+		const minNum = selectedDeliveryOption === "live-catering" ? 20 : 10;
 
 		const value = Math.max(minNum, Number(e.target.value)); // Use minNum dynamically
 		setPeopleCount(value);
@@ -388,7 +388,7 @@ function AddFoodOrder() {
 						  <p className='ordersummeryname'>{item.name}</p>
 						  {
 				  
-				  <div style={{ fontSize: "90%", fontWeight: '700', color: '#9252AA' , textTransform:"uppercase"}} className='ingredientrightsecsibheading'>{quantity + ' ' + unit}</div>
+				  <div style={{ fontSize: "90%", fontWeight: '700', color: '#9252AA' , textTransform:"uppercase"}} className='ingredientrightsecsibheading'>{parseFloat(quantity).toFixed(2) + ' ' + unit}</div>
 				  
 				}
 					  </div>
@@ -440,7 +440,7 @@ function AddFoodOrder() {
 							type="number"
 							value={peopleCount}
 							onChange={handlePeopleChange}
-							min={selectedDeliveryOption === "live-catering" ? 35 : 10}
+							min={selectedDeliveryOption === "live-catering" ? 25 : 10}
 							className="people-input"
 							style={style.noOfPeopleValue}
 						/>

@@ -221,6 +221,8 @@ const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, cal
             type = 7;
         }
 
+     
+
         const requestData = {
             add_on: inclusion,
             phone_no: customerNumber,
@@ -236,7 +238,7 @@ const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, cal
             order_locality: city,
             total_amount: totalamount,
             orderApplianceIds: [],
-            payable_amount: balanceamount,
+            payable_amount: totalamount,
             advance_amount: advanceamount,
             is_gst: "0",
             order_type: true,
