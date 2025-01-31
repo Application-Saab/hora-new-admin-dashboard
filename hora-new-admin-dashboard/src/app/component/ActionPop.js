@@ -207,7 +207,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
         : "N/A";
     
     // Start building the message
-    let message = `Live-catering Order Summary::\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\n\nAddress: ${address}\nGoogleMapLocation: ${googleMapUrl}\n\nArrival Time: ${orderTime}\n\n*Amount: ₹${balanceAmount}*\nComments: ${decorationComments}\n\n*Dishes*\n`;
+    let message = `Chef Order Summary::\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\n\nAddress: ${address}\nGoogleMapLocation: ${googleMapUrl}\n\nArrival Time: ${orderTime}\n\n*Amount: ₹${balanceAmount}*\nComments: ${decorationComments}\n\n*Dishes*\n`;
 
     // Append each dish to the message
     if (orderDetails?.selecteditems?.length) {
@@ -273,31 +273,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
         } else {
           inclusions = ["No specific inclusions for this order type"];
         }
-      
-       
-        if (orderType === "Food Delivery") {
-         
-          inclusions = [
-            "Complementary - Green salad, Mint Chutney, Achar",
-            "Doorstep Delivery",
-            "Disposable plates, Fork, Spoon, Tissue papers, Bisleri Water bottles",
-            "Freshly cooked food"
-          ];
-        } else if (orderType === "Live Catering") {
-          inclusions = [
-          
-            "Well Groomed Waiters (2 Nos)",
-            "Bone-china Crockery & Quality disposal for loose items",
-            "Transport (to & fro)",
-            "Dustbin with Garbage bag",
-            "Head Mask for waiters & chefs",
-            "Chafing Dish",
-            "Cocktail Napkins",
-            "2 Chefs"
-          ];
-        } else {
-          inclusions = ["No specific inclusions for this order type"];
-        }
+  
 
     // Start building the message
     let message = `*${orderType} Order Summary:*\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\n\nCity: ${orderCity}\nGuest Count: ${peopleCount}\nTime of Delivery: ${orderTime}\n\nAddress: ${address}\n\nGoogleMapLocation: ${googleMapUrl}\n*Amount: ₹${balanceAmount}*\n\n*Dishes*\n`;
