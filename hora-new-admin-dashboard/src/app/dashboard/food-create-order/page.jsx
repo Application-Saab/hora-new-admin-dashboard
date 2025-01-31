@@ -34,13 +34,13 @@ function AddFoodOrder() {
 	// Dynamically update `peopleCount` based on `selectedOption`
 	useEffect(() => {
 		if (  selectedDeliveryOption   === "live-catering") {
-			setPeopleCount(35);
+			setPeopleCount(20);
 		} else {
 			setPeopleCount(10);
 		}
 	}, [selectedDeliveryOption]);
 	const handlePeopleChange = (e) => {
-		const minNum = selectedDeliveryOption === "live-catering" ? 35 : 10;
+		const minNum = selectedDeliveryOption === "live-catering" ? 20 : 10;
 
 		const value = Math.max(minNum, Number(e.target.value)); // Use minNum dynamically
 		setPeopleCount(value);
@@ -314,17 +314,20 @@ function AddFoodOrder() {
 				  x.name !== "Rumali Rotis"
 			  )
 	  
-			  const itemCount = dishObject.filter(meal => meal.id[0] === "63f1b6b7ed240f7a09f7e2de" || meal.id[0] === "63f1b39a4082ee76673a0a9f" || meal.id[0] === "63edc4757e1b370928b149b3").length
+			  
+			  const itemCount = dishObject.filter(meal => meal.mealId[0] === "63f1b6b7ed240f7a09f7e2de" || meal.mealId[0] === "63f1b39a4082ee76673a0a9f" || meal.mealId[0] === "63edc4757e1b370928b149b3").length
 			//   const mainCourseItemCount = dishObject.filter(meal => meal.id[0] === "63f1b6b7ed240f7a09f7e2de").length
 			//   const appetizerItemCount = dishObject.filter(meal => meal.id[0] === "63f1b39a4082ee76673a0a9f").length
 			//   const breadItemCount = dishObject.filter(meal => meal.id[0] === "63edc4757e1b370928b149b3").length
-			  console.log('item.quantity', item.quantity)
+			  
 			  
 			  let quantity = item.quantity * peopleCount;
 	  
 			  
-			  if (item.name !== "Tawa Rotis" && item.name !== "Rumali Rotis" && (item.id[0] === "63f1b6b7ed240f7a09f7e2de"  || item.id[0] === "63f1b39a4082ee76673a0a9f" || item.id[0] === "63edc4757e1b370928b149b3")) {
-				  if (itemCount == 4) {
+			  if (item.name !== "Tawa Rotis" && item.name !== "Rumali Rotis" && (item.mealId[0] == "63f1b6b7ed240f7a09f7e2de"  || item.mealId[0] == "63f1b39a4082ee76673a0a9f" || item.mealId[0] == "63edc4757e1b370928b149b3")) {
+				
+				
+				if (itemCount == 4) {
 					  quantity = quantity * (1 + 0.15)
 				  }
 				  else if (itemCount == 6) {
@@ -354,6 +357,10 @@ function AddFoodOrder() {
 				  }
 			  }
 			  quantity = Math.round(quantity)
+
+			  if (selectedDeliveryOption === "live-catering"){
+				quantity = quantity * 1.1
+			  }
 			  let unit = item.unit;
 			  if (quantity >= 1000) {
 				  quantity = quantity / 1000;
@@ -366,7 +373,7 @@ function AddFoodOrder() {
 					unit = 'PCS';
 				  }
 				}
-			console.log(quantity)
+			
 			  return (
 				  <div className='ordersummaryproduct'>
 					  <div className='ordersummary-sec1'>
@@ -380,10 +387,9 @@ function AddFoodOrder() {
 					  <div style={{ color: "rgb(146, 82, 170)", fontWeight: "600" }} className='ordersummary-sec2'>
 						  <p className='ordersummeryname'>{item.name}</p>
 						  {
-				  selectedDeliveryOption === 'food-delivery' ? 
-				  <div style={{ fontSize: "90%", fontWeight: '700', color: '#9252AA' , textTransform:"uppercase"}} className='ingredientrightsecsibheading'>{quantity + ' ' + unit}</div>
-				  :
-				  null
+				  
+				  <div style={{ fontSize: "90%", fontWeight: '700', color: '#9252AA' , textTransform:"uppercase"}} className='ingredientrightsecsibheading'>{parseFloat(quantity).toFixed(2) + ' ' + unit}</div>
+				  
 				}
 					  </div>
 				  </div>
@@ -434,7 +440,7 @@ function AddFoodOrder() {
 							type="number"
 							value={peopleCount}
 							onChange={handlePeopleChange}
-							min={selectedDeliveryOption === "live-catering" ? 35 : 10}
+							min={selectedDeliveryOption === "live-catering" ? 25 : 10}
 							className="people-input"
 							style={style.noOfPeopleValue}
 						/>
@@ -555,10 +561,10 @@ function AddFoodOrder() {
 								<div style={{ paddingTop: "5px" }}>
                                     <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', marginTop: 3  }}>
                                         <p style={{ color: "#9252AA", fontWeight: '600', fontSize: 14, lineHeight: '20px' }}>Item Total</p>
-                                        <p style={{ color: "#9252AA", fontWeight: '600', fontSize: 14, lineHeight: '20px' }}>₹ {totalPrice}</p>
+                                        <p style={{ color: "#9252AA", fontWeight: '600', fontSize: 14, lineHeight: '20px' }}>₹ {(totalPrice - discountedPrice) < 0 ? discountedPrice : totalPrice}</p>
                                     </div>
                                     {/* <img style={{ width: 290, height: 1, marginTop: 5, marginBottom: 5 }} src="../../assets/Rectangleline.png" alt="line" /> */}
-                                    {discountedPrice > 0 && (
+                                    {totalPrice - discountedPrice> 0 && (
                                         <div>
                                             <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', marginTop: 3, alignItems: "center"  , borderBottom:"1px solid rgb(215, 215, 215)" }}>
                                                 <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: "center", flexDirection: 'row' }}>

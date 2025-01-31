@@ -13,7 +13,7 @@ import {
   API_SUCCESS_CODE,
 } from "../../../utils/apiconstant";
 import { pincodes } from '../../../utils/pincodes.js';
-import { timeSlotOptions } from "../../../utils/timeSlots";
+
 
 const AddDecOrder = () => {
   const [dishName, setDishName] = useState("");
@@ -297,14 +297,13 @@ const AddDecOrder = () => {
     }
   }
 
-  // import by aarti===
-  // const timeSlotOptions = [
-  //   { value: "7:00 AM - 10:00 AM", label: "7:00 AM - 10:00 AM" },
-  //   { value: "10:00 AM - 1:00 PM", label: "10:00 AM - 1:00 PM" },
-  //   { value: "1:00 PM - 4:00 PM", label: "1:00 PM - 4:00 PM" },
-  //   { value: "4:00 PM - 7:00 PM", label: "4:00 PM - 7:00 PM" },
-  //   { value: "7:00 PM - 10:00 PM", label: "7:00 PM - 10:00 PM" },
-  // ];
+  const timeSlotOptions = [
+    { value: "7:00 AM - 10:00 AM", label: "7:00 AM - 10:00 AM" },
+    { value: "10:00 AM - 1:00 PM", label: "10:00 AM - 1:00 PM" },
+    { value: "1:00 PM - 4:00 PM", label: "1:00 PM - 4:00 PM" },
+    { value: "4:00 PM - 7:00 PM", label: "4:00 PM - 7:00 PM" },
+    { value: "7:00 PM - 10:00 PM", label: "7:00 PM - 10:00 PM" },
+  ];
 
 
   useEffect(() => {

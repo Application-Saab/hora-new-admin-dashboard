@@ -140,3 +140,15 @@ h3 {
   align-items: center;
 }
 
+.orderDetails_pagination button {
+  background-color: green;
+  border: 1px solid green;
+  width: 26px;
+  height: 30px;
+  font-size: 20px;
+}
+.orderDetails_pagination button:disabled {
+  background-color: grey;
+  border: 1px solid grey;
+}
+

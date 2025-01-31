@@ -221,6 +221,8 @@ const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, cal
             type = 7;
         }
 
+     
+
         const requestData = {
             add_on: inclusion,
             phone_no: customerNumber,
@@ -236,7 +238,7 @@ const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, cal
             order_locality: city,
             total_amount: totalamount,
             orderApplianceIds: [],
-            payable_amount: balanceamount,
+            payable_amount: totalamount,
             advance_amount: advanceamount,
             is_gst: "0",
             order_type: true,
@@ -275,8 +277,8 @@ const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, cal
         const formattedDate = formatDate(date); // Format the date
 
         let orderData = `
-              *Food Delivery Order Summary:*
-          
+         *${selectedOption.charAt(0).toUpperCase() + selectedOption.slice(1)} Order Summary:*
+         
         City: ${city}
         Date: ${formattedDate}
         Guest Count: ${peopleCount}
