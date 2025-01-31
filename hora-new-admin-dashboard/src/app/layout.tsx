@@ -7,15 +7,15 @@ const menuItems = [
      icon: <FaTachometerAlt />,
       url: "/dashboard" 
     },
+    {
+      label: "Order Details",
+      icon: <FaTachometerAlt />,
+      url: "/dashboard/orderDetails",
+    },
   {
     label: "Decoration Create Order",
     icon: <FaPlusCircle />,
     url: "/dashboard/decoration-createorder",
-  },
-  {
-    label: "Order Details",
-    icon: <FaTachometerAlt />,
-    url: "/dashboard/orderDetails",
   },
   {
     label: "Food Create Order",

@@ -62,7 +62,6 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
     fetchOrderapi();
 
   }, [actionPopupOrderId, actionPopupChefOrderId, actionPopupOrderType]);
-  console.log(JSON.stringify(orderDetails))
 
   const getOrderId = (e) => {
     const orderId1 = 10800 + e;
@@ -112,15 +111,12 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
         {item.trim()}
       </li>
     ));
-    return (
-      <div>
+    return (<>   
         <div style={{ fontSize: "21px", borderBottom: "1px solid #e7eff9", marginBottom: "10px" }}>Inclusions</div>
-        <ul>
-          {inclusionList}
+        <ul style={{ listStyle:'disc'}}>
+          <li>{inclusionList}</li>
         </ul>
-      </div>
-
-    );
+        </>);
   };
   // share on whatsapp========================
   const sendOrderDetailsToWhatsAppDoc = () => {
@@ -207,7 +203,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
         : "N/A";
 
     // Start building the message
-    let message = `Live-catering Order Summary::\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\n\nAddress: ${address}\nGoogleMapLocation: ${googleMapUrl}\n\nArrival Time: ${orderTime}\n\n*Amount: ₹${balanceAmount}*\nComments: ${decorationComments}\n\n*Dishes*\n`;
+    let message = `Chef Order Summary::\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\n\nAddress: ${address}\nGoogleMapLocation: ${googleMapUrl}\n\nArrival Time: ${orderTime}\n\n*Amount: ₹${balanceAmount}*\nComments: ${decorationComments}\n\n*Dishes*\n`;
 
     // Append each dish to the message
     if (orderDetails?.selecteditems?.length) {
@@ -545,7 +541,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                                     <p>
                                       <Image src={`https://horaservices.com/api/uploads/${dec.featured_image}`} width={200} height={200} alt={`${dec.featured_image}-name`} />
                                     </p>
-                                    <p>{getItemInclusion(dec.inclusion)}</p>
+                                    <div>{getItemInclusion(dec.inclusion)}</div>
                                   </div>
                                 ))
                               )
