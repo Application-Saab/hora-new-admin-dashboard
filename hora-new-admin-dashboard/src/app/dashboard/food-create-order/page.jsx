@@ -401,7 +401,7 @@ function AddFoodOrder() {
 
 	return (<>
 		<div className="container">
-			<h1>Create Food Order</h1>
+		<h1 className="createOrder pageHeading">Create Food Order</h1>
 			<div className="selectServiceType" style={style.selectServiceType}>
 				<div style={style.selectDiv}>
 					<label htmlFor="peopleInput" className="people-label" style={style.label}>

@@ -113,7 +113,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
     ));
     return (<>   
         <div style={{ fontSize: "21px", borderBottom: "1px solid #e7eff9", marginBottom: "10px" }}>Inclusions</div>
-        <ul style={{ listStyle:'disc'}}>
+        <ul>
           <li>{inclusionList}</li>
         </ul>
         </>);
@@ -306,7 +306,6 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
   // fetch orderdetails
   const FetchOrderDetails = ({ orderDetails }) => {
     // console.log(getOrderType(orderDetails?.type), JSON.stringify(orderDetails))
-    console.log(orderDetails)
     return (
       <div>
         <div className="order-details-container">
@@ -395,21 +394,16 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
             <div className="order-summary-box">
               <h3 style={{ color: "white" }}>Order Summary</h3>
               <ul style={{ listStyleType: "none", padding: 0 }}>
-                <li
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
+              <li className="priceList">
                   <strong>Total Amount:</strong>{" "}
                   <span>₹{orderDetails.total_amount}</span>
                 </li>
-                <li
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
+                <li className="priceList">
                   <strong>Advance Amount:</strong>{" "}
                   <span>₹{orderDetails.advance_amount || 0}</span>
                 </li>
 
-                <li style={{ display: "flex", justifyContent: "space-between" }}>
-
+                <li className="priceList">
                   <span>Balance Amount</span>
                   <span>
                     {orderDetails?.total_amount && orderDetails?.advance_amount
@@ -418,21 +412,15 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                   </span>
                 </li>
 
-                <li
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
+                <li className="priceList">
                   <strong>Discount:</strong>{" "}
                   <span>₹{orderDetails.discount || 0}</span>
                 </li>
-                <li
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
+                <li className="priceList">
                   <strong>GST:</strong>{" "}
                   <span>₹{orderDetails.gst || 0}</span>
                 </li>
-                <li
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
+                <li className="priceList">
                   <strong>Per person cost:</strong>{" "}
                   <span>₹{orderDetails.per_person_cost || 0}</span>
                 </li>
@@ -548,27 +536,20 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                             }
                           </p>
                         </div>
-
-
                       </div>
-
                       <div className="order-summary-box">
                         <h3 style={{ color: "white" }}>Order Summary</h3>
                         <ul style={{ listStyleType: "none", padding: 0 }}>
-                          <li
-                            style={{ display: "flex", justifyContent: "space-between" }}
-                          >
+                          <li className="priceList">
                             <strong>Total Amount:</strong>{" "}
                             <span>₹{orderDetails._doc.total_amount}</span>
                           </li>
-                          <li
-                            style={{ display: "flex", justifyContent: "space-between" }}
-                          >
+                          <li className="priceList">
                             <strong>Advance Amount:</strong>{" "}
                             <span>₹{orderDetails._doc.advance_amount || 0}</span>
                           </li>
 
-                          <li style={{ display: "flex", justifyContent: "space-between" }}>
+                          <li className="priceList">
 
                             <span>Balance Amount</span>
                             <span>
@@ -578,21 +559,15 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                             </span>
                           </li>
 
-                          <li
-                            style={{ display: "flex", justifyContent: "space-between" }}
-                          >
+                          <li className="priceList">
                             <strong>Discount:</strong>{" "}
                             <span>₹{orderDetails._doc.discount || 0}</span>
                           </li>
-                          <li
-                            style={{ display: "flex", justifyContent: "space-between" }}
-                          >
+                          <li className="priceList">
                             <strong>GST:</strong>{" "}
                             <span>₹{orderDetails._doc.gst || 0}</span>
                           </li>
-                          <li
-                            style={{ display: "flex", justifyContent: "space-between" }}
-                          >
+                          <li className="priceList">
                             <strong>Per person cost:</strong>{" "}
                             <span>₹{orderDetails._doc.per_person_cost || 0}</span>
                           </li>

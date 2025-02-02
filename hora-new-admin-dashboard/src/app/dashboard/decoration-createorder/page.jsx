@@ -110,41 +110,30 @@ const AddDecOrder = () => {
     }
   }, [pincode]);
 
-
+// by aarti-----
   const handleCheckCustomer = async (e) => {
     e.preventDefault();
     setMessage("");
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        "https://horaservices.com:3000/api/admin/admin_user_list",
-        {
-          email: "",
-          page: "",
-          per_page: 2000,
-          phone: "",
+      const response = await axios.post(`${BASE_URL}${ADMIN_USER_LIST}`, {
+          phone: customerNumber,  // Filter by phone directly
+          per_page: 1,            // Fetch only 1 result
           role: "customer",
         }
       );
 
-      const users = response?.data?.data?.users;
+      const users = response?.data?.data?.users || [];
 
       if (users.length > 0) {
-        console.log(users.length)
-        const customer = users.find((user) => user.phone === customerNumber);
-
-        setCustomerId(customer);
-        if (customer) {
-          setMessage("Customer exists.");
-          setMessageColor("green");
-        } else {
-          setMessage("Customer does not exist.");
-          setMessageColor("red");
-          setShowPopup(true);
-        }
+        setMessage("Customer exists.");
+        setMessageColor("green");
+        setCustomerId(users[0]);  // Store the first matching user
       } else {
-        setMessage("No users found in the response.");
+        setMessage("Customer does not exist.");
+        setMessageColor("red");
+        setShowPopup(true);
       }
     } catch (err) {
       setMessage("An error occurred while checking the customer.");
@@ -152,7 +141,8 @@ const AddDecOrder = () => {
     } finally {
       setLoading(false);
     }
-  };
+};
+
 
 
   const handleAddCustomer = async () => {
@@ -482,6 +472,7 @@ const AddDecOrder = () => {
                   id="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
+                  // min={new Date().toISOString().split("T")[0]} // Directly setting min date is this need?
                   required
                 />
               </div>
@@ -490,7 +481,6 @@ const AddDecOrder = () => {
                 <label
                   htmlFor="timeSlot"
                   style={{
-
                     marginBottom: "5px",
                     display: "block",
                   }}
