@@ -318,3 +318,247 @@ const ImageResizerComponent = ({ params }) => {
 // };
 
 // export default CreatePhotoProject;
+// -==================================================================================
+"use client";
+import React, { useState, useEffect } from "react";
+import Resizer from "react-image-file-resizer";
+import Image from "next/image";
+import { useSearchParams } from "next/navigation";
+
+const ImageResizerComponent = () => {
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [resizedImages, setResizedImages] = useState([]);
+  const [fullSizeImages, setFullSizeImages] = useState([]);
+  const [popupImage, setPopupImage] = useState(null);
+  const [userDetails, setUserDetails] = useState(null);
+  const [uploadedImages, setUploadedImages] = useState([]);
+
+  const searchParams = useSearchParams();
+  const folderName = searchParams.get("folderName");
+
+  // Ensure localStorage is accessed only on client-side
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("userDetails");
+      if (storedUser) setUserDetails(JSON.parse(storedUser));
+
+      // Restore uploaded images
+      const storedImages = localStorage.getItem("uploadedImages");
+      if (storedImages) setUploadedImages(JSON.parse(storedImages));
+    }
+  }, []);
+
+  // Resize Image function
+  const resizeImage = (file) => {
+    return new Promise((resolve, reject) => {
+      Resizer.imageFileResizer(
+        file,
+        800, // Max width
+        800, // Max height
+        "WEBP", // Format
+        80, // Quality
+        0, // Rotation
+        (uri) => {
+          resolve({
+            uri,
+            name: file.name.replace(/\.[^/.]+$/, ".webp"),
+            file: new File([uri], file.name.replace(/\.[^/.]+$/, ".webp"), { type: "image/webp" })
+          });
+        },
+        "blob"
+      );
+    });
+  };
+
+  // Handle file selection
+  const handleFileChange = async (event) => {
+    const files = Array.from(event.target.files);
+    if (files.length === 0) return;
+
+    // Avoid duplicate files
+    const newFiles = files.filter(
+      (file) => !selectedFiles.some((selected) => selected.name === file.name)
+    );
+
+    if (newFiles.length === 0) return;
+
+    setSelectedFiles((prev) => [...prev, ...newFiles]);
+
+    // Store full-size images
+    const newFullSizeImages = newFiles.map((file) => ({
+      uri: URL.createObjectURL(file),
+      name: file.name,
+    }));
+    setFullSizeImages((prev) => [...prev, ...newFullSizeImages]);
+  };
+
+  // Resize and Upload Images
+  const handleUpload = async () => {
+    if (selectedFiles.length === 0 || !userDetails) return;
+
+    const resizedFiles = await Promise.all(selectedFiles.map((file) => resizeImage(file)));
+
+    // Update the UI with resized images
+    setResizedImages((prev) => [...prev, ...resizedFiles]);
+
+    // Prepare FormData
+    const formData = new FormData();
+    formData.append("folderName", userDetails.folderId);
+    formData.append("customerId", userDetails.customerNumber);
+
+    resizedFiles.forEach((image) => {
+      formData.append("files", image.file);
+    });
+
+    try {
+      const response = await fetch("https://horaservices.com:3000/api/photo/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("Upload failed");
+
+      const result = await response.json();
+      console.log("Upload Success:", result);
+
+      // Save uploaded images
+      const updatedImages = [...uploadedImages, ...resizedFiles];
+      setUploadedImages(updatedImages);
+      localStorage.setItem("uploadedImages", JSON.stringify(updatedImages));
+    } catch (error) {
+      console.error("Error uploading images:", error);
+    }
+
+    // Keep images after upload
+    setSelectedFiles([]);
+  };
+
+  // Handle Image Click for Full Preview
+  const handleImageClick = (imageUri, fullSizeIndex) => {
+    if (!fullSizeImages[fullSizeIndex]) return;
+    setPopupImage({
+      uri: imageUri,
+      fullSize: fullSizeImages[fullSizeIndex].uri,
+      name: fullSizeImages[fullSizeIndex].name,
+    });
+  };
+
+  return (
+    <div style={{ padding: "20px" }}>
+      <h2>Image Upload & Resizer</h2>
+      {userDetails ? (
+        <p><strong>Folder Name:</strong> {userDetails.folderId || "No folder selected"}</p>
+      ) : (
+        <p>Loading user details...</p>
+      )}
+
+      <input
+        type="file"
+        accept="image/*"
+        multiple
+        onChange={handleFileChange}
+        style={{ display: "none" }}
+        id="image-upload"
+      />
+      <button
+        onClick={() => document.getElementById("image-upload").click()}
+        style={{
+          padding: "10px 20px",
+          backgroundColor: "#007BFF",
+          color: "#fff",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+        }}
+      >
+        Upload Images
+      </button>
+
+      {selectedFiles.length > 0 && (
+        <div style={{ marginTop: "20px" }}>
+          <h3>Selected Images:</h3>
+          <div style={{ display: "flex", flexWrap: "wrap" }}>
+            {fullSizeImages.map((image, index) => (
+              <div key={index} style={{ margin: "10px", position: "relative" }}>
+                <Image
+                  src={image.uri}
+                  alt={`Selected ${index}`}
+                  width={200}
+                  height={200}
+                  style={{ objectFit: "cover", cursor: "pointer" }}
+                  onClick={() => handleImageClick(image.uri, index)}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <button
+        onClick={handleUpload}
+        disabled={selectedFiles.length === 0}
+        style={{
+          padding: "10px 20px",
+          backgroundColor: "#28a745",
+          color: "#fff",
+          border: "none",
+          borderRadius: "5px",
+          marginLeft: "10px",
+          cursor: selectedFiles.length === 0 ? "not-allowed" : "pointer",
+        }}
+      >
+        Resize and Upload
+      </button>
+
+      {uploadedImages.length > 0 && (
+        <div style={{ marginTop: "20px" }}>
+          <h3>Previously Uploaded Images:</h3>
+          <div style={{ display: "flex", flexWrap: "wrap" }}>
+            {uploadedImages.map((image, index) => (
+              <div key={index} style={{ margin: "10px", position: "relative" }}>
+                <Image
+                  src={URL.createObjectURL(image.file)}
+                  alt={`Uploaded ${index}`}
+                  width={200}
+                  height={200}
+                  style={{ objectFit: "cover", cursor: "pointer" }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {popupImage && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+          onClick={() => setPopupImage(null)}
+        >
+          <img
+            src={popupImage.uri}
+            alt="Popup"
+            width={800}
+            style={{
+              maxHeight: "90%",
+              maxWidth: "90%",
+              cursor: "zoom-out",
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ImageResizerComponent;
