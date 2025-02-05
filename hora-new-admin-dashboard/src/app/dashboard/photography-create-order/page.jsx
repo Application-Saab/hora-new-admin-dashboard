@@ -623,7 +623,7 @@ const AddPhotoOrder = () => {
       </form>
 
             { message === "Customer exists." && <button onClick={copyOrderSummary} style={style.buttonPrimary}>
-                            Copy Order Summary
+                            Copy Order Summary(For Customer)
                         </button>
                         }
     </div>
