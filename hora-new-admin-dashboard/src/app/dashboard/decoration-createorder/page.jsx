@@ -11,6 +11,7 @@ import {
   CONFIRM_ORDER_ENDPOINT,
   SAVE_LOCATION_ENDPOINT,
   API_SUCCESS_CODE,
+  ADMIN_USER_LIST,
 } from "../../../utils/apiconstant";
 import { pincodes } from '../../../utils/pincodes.js';
 
@@ -316,7 +317,7 @@ const AddDecOrder = () => {
     return inclusionItems.map(item => `- ${item}`).join('\n'); // Format inclusion items as a list for text
   };
 
-  const handleCopyOrderSummary = () => {
+  const copyOrderSummary = () => {
     let addons = '';
     const inclusionSummary = proDuctInclusions(product);
 
@@ -689,8 +690,8 @@ const AddDecOrder = () => {
 
       </form>
       {message === "Customer exists." && (
-      <button onClick={handleCopyOrderSummary}
-        style={style.buttonPrimary}>Copy Order Summary
+      <button onClick={copyOrderSummary}
+        style={style.buttonPrimary}>Copy Order Summary(For Customer)
       </button>
 )}
     </div>
