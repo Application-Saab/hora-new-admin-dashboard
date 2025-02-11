@@ -6,8 +6,11 @@ import "./orderdetails.css";
 import {
   BASE_URL,
   ADMIN_ORDER_LIST,
+  ACCEPT_ORDER,
 } from "../../../utils/apiconstant";
-// import * as XLSX from "xlsx";
+
+import axios from "axios";
+import CreateSupplierPopup from "../../component/createsupplier/CreateSupplierPopup";
 
 const OrderList = () => {
   const [orders, setOrders] = useState([]);
@@ -25,13 +28,31 @@ const OrderList = () => {
   const [actionPopupChefOrderId, setActionPopupChefOrderId] = useState("");
   const [actionPopupOrderType, setActionPopupOrderType] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
-  // const [supplierDetails, setSupplierDetails] = useState(null);
 
   const [selectedDate, setSelectedDate] = useState("");
 
-  const fetchOrders = async (page, orderId = '', orderstatus = '', activeStatus = '', orderType = '', orderCity = '', selectedDate = '', selectedOfflineNum = '') => {
-    console.log("Selected Date in fetchOrders:", selectedOfflineNum);  // Log the selected date for debugging
-    // Handle orderType mapping
+  const [customerNumber, setCustomerNumber] = useState("");
+  const [message, setMessage] = useState("");
+  const [messageColor, setMessageColor] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [supplierData, setSupplierData] = useState(null);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+
+  const fetchOrders = async (
+    page,
+    orderId = "",
+    orderstatus = "",
+    activeStatus = "",
+    orderType = "",
+    orderCity = "",
+    selectedDate = "",
+    selectedOfflineNum = ""
+  ) => {
+    console.log("Selected Date in fetchOrders:", selectedOfflineNum);
+
     let typeId;
     switch (orderType) {
       case "Decoration":
@@ -50,21 +71,27 @@ const OrderList = () => {
         typeId = 8;
         break;
       default:
-        typeId = null; // or another default value if needed
+        typeId = null;
     }
 
     const url = `${BASE_URL}${ADMIN_ORDER_LIST}`;
 
     // `newId` calculation - update this based on actual use case, or use `orderId` directly if needed
-    let filteredId = Math.abs(orderId - 10800);  // Confirm if this is needed or if `orderId` should be used as is
+    let filteredId = Math.abs(orderId - 10800); // Confirm if this is needed or if `orderId` should be used as is
     // Prepare requestData
-    console.log(Number(orderstatus))
+    console.log(Number(orderstatus));
     let requestData = {
       page: page,
       per_page: itemsPerPage,
       order_id: orderId.length > 0 ? filteredId : "", // `match orderId`
-      order_status: (Number(orderstatus) === 0 || Number(orderstatus)) ? Number(orderstatus) : "", // 'match OrderStatus'
-      status: (Number(activeStatus) === 0 || Number(activeStatus) === 1) ? Number(activeStatus) : "",
+      order_status:
+        Number(orderstatus) === 0 || Number(orderstatus)
+          ? Number(orderstatus)
+          : "", // 'match OrderStatus'
+      status:
+        Number(activeStatus) === 0 || Number(activeStatus) === 1
+          ? Number(activeStatus)
+          : "",
       type: typeId || "", // match order type
       order_locality: orderCity || "",
       order_date: selectedDate || "",
@@ -92,8 +119,8 @@ const OrderList = () => {
           setTotalPage(data.data.paginate.last_page);
         } else {
           // No orders found, show an alert with a message
-          setOrders('');
-          setTotalPage('');
+          setOrders("");
+          setTotalPage("");
           console.warn("No orders found");
         }
       }
@@ -102,16 +129,31 @@ const OrderList = () => {
       // Show an alert with the error message
       alert(`Error fetching orders: ${error.message}`);
     } finally {
-      console.log('filan');
+      console.log("filan");
     }
   };
 
-
   useEffect(() => {
-    fetchOrders(currentPage, searchTerm, selectedOrderStatus, selectedActiveStatus, selectedOrderType, selectedCity, selectedDate, selectedPhoneNumber);
-
-  }, [currentPage, searchTerm, selectedOrderStatus, selectedActiveStatus, selectedOrderType, selectedCity, selectedDate, selectedPhoneNumber]);
-
+    fetchOrders(
+      currentPage,
+      searchTerm,
+      selectedOrderStatus,
+      selectedActiveStatus,
+      selectedOrderType,
+      selectedCity,
+      selectedDate,
+      selectedPhoneNumber
+    );
+  }, [
+    currentPage,
+    searchTerm,
+    selectedOrderStatus,
+    selectedActiveStatus,
+    selectedOrderType,
+    selectedCity,
+    selectedDate,
+    selectedPhoneNumber,
+  ]);
 
   const getOrderStatus = (orderStatusValue) => {
     switch (orderStatusValue) {
@@ -134,15 +176,13 @@ const OrderList = () => {
     }
   };
 
-
-
   const getOrderType = (orderTypeValue) => {
     const orderTypes = {
       1: "Decoration",
       2: "Chef",
       6: "Food Delivery",
       7: "Live Catering",
-      8:"Photography",
+      8: "Photography",
     };
     return orderTypes[orderTypeValue] || "Unknown Order Type";
   };
@@ -180,8 +220,8 @@ const OrderList = () => {
 
   const openActionPopup = (orderId, order_id, orderType) => {
     setActionPopupOrderId(orderId);
-    setActionPopupChefOrderId(order_id)
-    setActionPopupOrderType(orderType)
+    setActionPopupChefOrderId(order_id);
+    setActionPopupOrderType(orderType);
     setPopupOpen(true); // Open the popup
   };
   const [supplierDetails, setSupplierDetails] = useState(null);
@@ -203,11 +243,112 @@ const OrderList = () => {
     }
   };
 
-
   const closePopup = () => {
-    setPopupOpen(false); // Close the popup
+    setPopupOpen(false);
     setIsPopupOpen(false);
     setSupplierDetails(null);
+  };
+
+  const handleOpenPopup = (order) => {
+    setSelectedOrder(order);
+    setIsModalOpen(true);
+  };
+
+  const handleClosePopup = () => {
+    setIsModalOpen(false);
+  };
+
+  const [showCreatePopup, setShowCreatePopup] = useState(false);
+
+  const handleCreateSupplier = () => {
+    setShowCreatePopup(true);
+  };
+
+  const handleAssignPopup = async () => {
+    try {
+      const response = await fetch(BASE_URL + ACCEPT_ORDER, {
+        method: "POST",
+        headers: {
+          Accept: "application/json, text/plain, /",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          Authorisation: supplierData.device_token,
+          otp: selectedOrder.otp,
+          _id: selectedOrder._id,
+          userId: supplierData._id,
+        }),
+      });
+      console.log(otp, "otp", apiOrderId, "_id", supplierID, "userid");
+      console.log(response, "responseaccept");
+    } catch (error) {
+      console.error("Error during API request:", error);
+    }
+  };
+
+  const handleCheckCustomer = async (e) => {
+    e.preventDefault();
+    setMessage("");
+    setLoading(true);
+
+    try {
+      console.log("Checking supplier number:", customerNumber);
+
+      const response = await axios.post(
+        "https://horaservices.com:3000/api/admin/admin_user_list",
+        {
+          email: "",
+          page: "",
+          per_page: 2000,
+          phone: "",
+          role: "supplier",
+        }
+      );
+
+      console.log("Full API Response:", response.data);
+
+      const users =
+        response?.data?.data?.users ||
+        response?.data?.data ||
+        response?.data?.users ||
+        [];
+
+      console.log("Extracted Users List:", users);
+
+      if (!Array.isArray(users) || users.length === 0) {
+        setMessage("No suppliers found in the response.");
+        setMessageColor("orange");
+        setSupplierData(null);
+        return;
+      }
+
+      console.log("Total suppliers found:", users.length);
+
+      const formattedCustomerNumber = customerNumber.trim();
+      const supplier = users.find(
+        (user) => user.phone?.trim() === formattedCustomerNumber
+      );
+
+      console.log("Matched Supplier:", supplier);
+
+      if (supplier) {
+        setSupplierData(supplier);
+        setMessage("Supplier exists.");
+        setMessageColor("green");
+      } else {
+        setSupplierData(null);
+        setMessage("Supplier does not exist.");
+        setMessageColor("red");
+        setShowPopup(true);
+      }
+    } catch (err) {
+      setMessage("An error occurred while checking the supplier.");
+      setMessageColor("red");
+      console.error("Error:", err);
+      setSupplierData(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -228,10 +369,7 @@ const OrderList = () => {
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
                   }}
-
                 />
-
-
               </div>
             </div>
             {/* Phone Number Search */}
@@ -241,39 +379,32 @@ const OrderList = () => {
                 className="small-search byPhone"
                 placeholder="Search by customer Number"
                 value={selectedPhoneNumber}
-
-                onChange={(e) =>
-                  setSelectedPhoneNumber(e.target.value)
-
-                }
+                onChange={(e) => setSelectedPhoneNumber(e.target.value)}
               />
-
             </div>
             {/* date search */}
             <div className="date-filter-container">
-
               <label className="date-label">Order Fullfilement Date</label>
               <input
                 type="date"
                 value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}  // Update the selectedDate state
+                onChange={(e) => setSelectedDate(e.target.value)} // Update the selectedDate state
                 placeholder="Select Date"
                 className="date-input"
               />
-
             </div>
-
           </div>
           <div className="right-part">
-
-            <button className="filter-btn" onClick={() => window.location.reload()}>Reset all filters</button>
+            <button
+              className="filter-btn"
+              onClick={() => window.location.reload()}
+            >
+              Reset all filters
+            </button>
           </div>
-
         </div>
 
         <div className="orders-box">
-
-
           <table className="order-table">
             <thead>
               <tr>
@@ -298,7 +429,6 @@ const OrderList = () => {
                       <option value="Live Catering">Live Catering</option>
                       <option value="Photography">Photography</option>
                     </select>
-
                   </span>
                 </th>
 
@@ -309,7 +439,7 @@ const OrderList = () => {
                       value={selectedCity}
                       onChange={(e) => {
                         const newOrderCity = e.target.value; // Get the updated value directly
-                        setSelectedCity(newOrderCity);  // Update state
+                        setSelectedCity(newOrderCity); // Update state
                         // FilterByCity(newOrderCity);          // Pass the updated value immediately
                       }}
                       className="order-type-dropdown"
@@ -329,6 +459,7 @@ const OrderList = () => {
                 <th>Customer No</th>
                 {/* <th>Online Customer No</th> */}
                 <th>Supplier</th>
+                <th>Assign Supplier</th>
                 <th>Order Start & End Time</th>
                 <th>Total Amount</th>
                 <th className="order-type-header">
@@ -338,7 +469,7 @@ const OrderList = () => {
                       value={selectedOrderStatus}
                       onChange={(e) => {
                         const filterdStatus = e.target.value; // Get the updated value directly
-                        setSelectedOrderStatus(filterdStatus);  // Update state
+                        setSelectedOrderStatus(filterdStatus); // Update state
                         // FilterByStatus(newStatus);          // Pass the updated value immediately
                       }}
                       className="order-type-dropdown"
@@ -372,26 +503,25 @@ const OrderList = () => {
               </tr>
             </thead>
             <tbody>
-
               {orders.length > 0 ? (
                 orders.map((order, index) => (
-
                   <tr key={index}>
                     <td>{getOrderId(order.order_id)}</td>
                     <td>{getOrderType(order.type)}</td>
                     <td>{order.order_locality || "N/A"}</td>
                     <td>
                       {order?.order_date
-                        ? new Date(order.order_date.split("T")[0]).toLocaleDateString()
+                        ? new Date(
+                            order.order_date.split("T")[0]
+                          ).toLocaleDateString()
                         : "N/A"}
-
                     </td>
                     <td>
                       {order?.order_time
                         ? `${order.order_time}` // If `order_time` is available, show it
                         : order?.order_date
-                          ? `${order.order_date.split("T")[1].slice(0, 8)}`
-                          : "N/A"}
+                        ? `${order.order_date.split("T")[1].slice(0, 8)}`
+                        : "N/A"}
                     </td>
                     <td>{order.otp}</td>
                     <td>{order.order_taken_by || "N/A"}</td>
@@ -399,9 +529,7 @@ const OrderList = () => {
                     {/* <td>{order.online_phone_no || "N/A"}</td> */}
                     <td>
                       {order.toId ? (
-                        <FaEye
-                          onClick={() => openSupplierPopup(order.toId)}
-                        />
+                        <FaEye onClick={() => openSupplierPopup(order.toId)} />
                       ) : (
                         <p>NA</p>
                       )}
@@ -427,7 +555,99 @@ const OrderList = () => {
                     </td>
 
                     <td>
-                      {`${order.job_start_time.replace(/(\d{4})(\d{1,2}:\d{2}:\d{2} (AM|PM))/, '$1 $2')} - 
+                      <FaEye onClick={() => handleOpenPopup(order)} />
+                      {/* supplier assign popup */}
+                      {isModalOpen && selectedOrder && (
+                        <div style={modalStyles}>
+                          <div style={modalContentStyles}>
+                            <h3>Enter a number:</h3>
+                            <input
+                              type="text"
+                              id="customerNumber"
+                              value={customerNumber}
+                              onInput={(e) =>
+                                setCustomerNumber(
+                                  e.target.value.replace(/\D/g, "")
+                                )
+                              }
+                              placeholder="Customer Number"
+                              required
+                              maxLength={10}
+                              pattern="\d{10}"
+                              inputMode="numeric"
+                            />
+                            <button
+                              className="orderCheck-btn"
+                              onClick={handleCheckCustomer}
+                              disabled={loading || customerNumber.length !== 10}
+                            >
+                              {loading ? "Checking..." : "Check Customer"}
+                            </button>
+
+                            {message && (
+                              <p
+                                style={{
+                                  color: messageColor,
+                                  fontWeight: "bold",
+                                }}
+                              >
+                                {message}
+                              </p>
+                            )}
+
+                            {/* Show fields only if supplier exists */}
+                            {supplierData && selectedOrder && (
+                              <div style={{ marginTop: "10px" }}>
+                                <p>
+                                  <strong>Supplier ID:</strong>{" "}
+                                  {supplierData._id}
+                                </p>
+
+                                <p>
+                                  <strong>Token:</strong>
+                                  {supplierData.device_token}
+                                </p>
+
+                                <p>
+                                  <strong>Order ID:</strong> {selectedOrder._id}
+                                </p>
+
+                                <p>
+                                  <strong>Order OTP:</strong>{" "}
+                                  {selectedOrder.otp}
+                                </p>
+
+                                <button onClick={handleAssignPopup}>
+                                  Assign
+                                </button>
+                                <br />
+                              </div>
+                            )}
+
+                            {/* Show "Create Supplier" button only if the supplier does not exist */}
+                            {showPopup &&
+                              !loading &&
+                              customerNumber.length === 10 && (
+                                <button onClick={handleCreateSupplier}>
+                                  Create Supplier
+                                </button>
+                              )}
+
+                            <CreateSupplierPopup
+                              isOpen={showCreatePopup}
+                              onClose={() => setShowCreatePopup(false)}
+                            />
+                            <button onClick={handleClosePopup}>Close</button>
+                          </div>
+                        </div>
+                      )}
+                    </td>
+
+                    <td>
+                      {`${order.job_start_time.replace(
+                        /(\d{4})(\d{1,2}:\d{2}:\d{2} (AM|PM))/,
+                        "$1 $2"
+                      )} - 
                                ${order.job_end_time}`}
                     </td>
 
@@ -435,8 +655,9 @@ const OrderList = () => {
 
                     <td>
                       <span
-                        className={`status ${getOrderStatus(order.order_status).className
-                          }`}
+                        className={`status ${
+                          getOrderStatus(order.order_status).className
+                        }`}
                       >
                         {getOrderStatus(order.order_status).status}
                       </span>
@@ -446,21 +667,18 @@ const OrderList = () => {
                     <td>
                       <div style={styles.container}>
                         {/* Call Icon */}
-                        <div
-
-                          onClick={() => handleCallClick(order.phone_no)}
-                        >
+                        <div onClick={() => handleCallClick(order.phone_no)}>
                           N/A
                           {/* <FaPhone /> */}
                         </div>
-                        <div style={styles.btnGroup}>
-                        </div>
+                        <div style={styles.btnGroup}></div>
                       </div>
                     </td>
                     <td>
                       <button
-                        className={`status-button ${order.status === 0 ? "active" : "inactive"
-                          }`}
+                        className={`status-button ${
+                          order.status === 0 ? "active" : "inactive"
+                        }`}
                         onClick={() =>
                           updateOrderStatus(
                             order._id,
@@ -474,23 +692,26 @@ const OrderList = () => {
                     <td>
                       <FaEye
                         onClick={() => {
-                          openActionPopup(order.order_id, order._id, order.type)
+                          openActionPopup(
+                            order.order_id,
+                            order._id,
+                            order.type
+                          );
                         }}
                       />
                     </td>
-                    <td style={{width:"200px",paddingLeft:"16px"}}>
-                      {order.type === 2 ?(
-                        <ul style={{paddingLeft:"0" , }}>
-                      {  order.userReviewRatingArray.map((i , index) => 
-                        (
-                            <li key={index}>{i.name}-{i.rating}</li>                          
-                        ))}
-                      </ul>
-                      ): (
-                           order.userReviewRatingArray[0]
-                          )
-
-                      }
+                    <td style={{ width: "200px", paddingLeft: "16px" }}>
+                      {order.type === 2 ? (
+                        <ul style={{ paddingLeft: "0" }}>
+                          {order.userReviewRatingArray.map((i, index) => (
+                            <li key={index}>
+                              {i.name}-{i.rating}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        order.userReviewRatingArray[0]
+                      )}
                     </td>
                   </tr>
                 ))
@@ -499,8 +720,6 @@ const OrderList = () => {
                   <td colSpan="13">No orders found</td>
                 </tr>
               )}
-
-
             </tbody>
           </table>
         </div>
@@ -512,17 +731,21 @@ const OrderList = () => {
           actionPopupOrderType={actionPopupOrderType}
           onClose={closePopup}
         />
-
       </div>
       {/* pagination */}
       <div className="orderDetails_pagination">
         <button
-          onClick={() => setCurrentPage((prevPage) => Math.max(prevPage - 1, 1))}
+          onClick={() =>
+            setCurrentPage((prevPage) => Math.max(prevPage - 1, 1))
+          }
           disabled={currentPage === 1} // Disable Previous button on first page
         >
           {"<"}
         </button>
-        <span> Page {currentPage} of {totalPage} </span>
+        <span>
+          {" "}
+          Page {currentPage} of {totalPage}{" "}
+        </span>
         <button
           onClick={() => setCurrentPage((prevPage) => prevPage + 1)}
           disabled={currentPage === totalPage} // Disable Next button on last page
@@ -534,6 +757,27 @@ const OrderList = () => {
       {/* </>} */}
     </div>
   );
+};
+
+const modalStyles = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100%",
+  height: "100%",
+  backgroundColor: "rgba(0, 0, 0, 0.5)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 999,
+};
+
+const modalContentStyles = {
+  backgroundColor: "white",
+  padding: "20px",
+  borderRadius: "8px",
+  textAlign: "center",
+  minWidth: "250px",
 };
 
 export default OrderList;
