@@ -4,7 +4,7 @@ import "./CreateSupplierPopup.css";
 
 const CreateSupplierPopup = ({ isOpen, onClose }) => {
   const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
+  // const [email, setEmail] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
   const [foodType, setFoodType] = useState("true");
   const [city, setCity] = useState("");
@@ -16,7 +16,7 @@ const CreateSupplierPopup = ({ isOpen, onClose }) => {
       aadhar_no: "",
       age: "",
       city: city,
-      email: email,
+      // email: email,
       experience: "",
       is_veg: foodType,
       job_type: "",
@@ -38,7 +38,7 @@ const CreateSupplierPopup = ({ isOpen, onClose }) => {
         alert("Supplier Already Exists");
       } else if (response.status === 200) {
         alert("Supplier Created Successfully!");
-        onClose(); // Close popup
+        onClose(); 
       }
     } catch (error) {
       console.error("Error creating supplier:", error);
@@ -64,7 +64,7 @@ const CreateSupplierPopup = ({ isOpen, onClose }) => {
             required
           />
         </div>
-        <div className="popup-field">
+        {/* <div className="popup-field">
           <label>Email</label>
           <input
             type="email"
@@ -73,7 +73,7 @@ const CreateSupplierPopup = ({ isOpen, onClose }) => {
             placeholder="Enter email"
             required
           />
-        </div>
+        </div> */}
         <div className="popup-field">
           <label>Mobile Number</label>
           <input
@@ -91,8 +91,13 @@ const CreateSupplierPopup = ({ isOpen, onClose }) => {
             value={foodType}
             onChange={(e) => setFoodType(e.target.value)}
           >
-            <option value="true">Veg</option>
-            <option value="false">Non-Veg</option>
+            {/* <option value="true">Veg</option>
+            <option value="false">Non-Veg</option> */}
+            <option value="Decoration">Decoration</option>
+            <option value="Chef">Chef</option>
+            <option value="Food Delivery or Live Catering">Food Delivery/Live Catering</option>
+            {/* <option value="Live Catering">Live Catering</option> */}
+            <option value="Photography">Photography</option>
           </select>
         </div>
         <div className="popup-field">

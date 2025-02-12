@@ -279,12 +279,22 @@ const OrderList = () => {
           userId: supplierData._id,
         }),
       });
-      console.log(otp, "otp", apiOrderId, "_id", supplierID, "userid");
-      console.log(response, "responseaccept");
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Successfully assigned!");
+        setIsModalOpen(false);
+      } else {
+        alert(data.message || "Failed to assign. Try again.");
+      }
     } catch (error) {
       console.error("Error during API request:", error);
+      alert("An error occurred. Please try again.");
     }
   };
+
+  <button onClick={handleAssignPopup}>Assign</button>;
 
   const handleCheckCustomer = async (e) => {
     e.preventDefault();
@@ -555,93 +565,108 @@ const OrderList = () => {
                     </td>
 
                     <td>
-                      <FaEye onClick={() => handleOpenPopup(order)} />
-                      {/* supplier assign popup */}
-                      {isModalOpen && selectedOrder && (
-                        <div style={modalStyles}>
-                          <div style={modalContentStyles}>
-                            <h3>Enter a number:</h3>
-                            <input
-                              type="text"
-                              id="customerNumber"
-                              value={customerNumber}
-                              onInput={(e) =>
-                                setCustomerNumber(
-                                  e.target.value.replace(/\D/g, "")
-                                )
-                              }
-                              placeholder="Customer Number"
-                              required
-                              maxLength={10}
-                              pattern="\d{10}"
-                              inputMode="numeric"
-                            />
-                            <button
-                              className="orderCheck-btn"
-                              onClick={handleCheckCustomer}
-                              disabled={loading || customerNumber.length !== 10}
-                            >
-                              {loading ? "Checking..." : "Check Customer"}
-                            </button>
+  {order.toId ? (
+    <button className="assigned-btn">Assigned</button>
+  ) : (
+    <>
+      <button
+        className="not-assigned-btn"
+        onClick={() => handleOpenPopup(order)}
+      >
+        Not Assigned
+      </button>
 
-                            {message && (
-                              <p
-                                style={{
-                                  color: messageColor,
-                                  fontWeight: "bold",
-                                }}
-                              >
-                                {message}
-                              </p>
-                            )}
+      {/* supplier assign popup */}
+      {isModalOpen && selectedOrder && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Check Vendor is available or not:</h3>
+            <input
+              type="text"
+              id="customerNumber"
+              value={customerNumber}
+              onInput={(e) =>
+                setCustomerNumber(e.target.value.replace(/\D/g, ""))
+              }
+              placeholder="Enter Number"
+              required
+              maxLength={10}
+              pattern="\d{10}"
+              inputMode="numeric"
+              className="input-field"
+            />
+            <button
+              className="order-check-btn"
+              onClick={handleCheckCustomer}
+              disabled={loading || customerNumber.length !== 10}
+            >
+              {loading ? "Checking..." : "Check Vendor"}
+            </button>
 
-                            {/* Show fields only if supplier exists */}
-                            {supplierData && selectedOrder && (
-                              <div style={{ marginTop: "10px" }}>
-                                <p>
-                                  <strong>Supplier ID:</strong>{" "}
-                                  {supplierData._id}
-                                </p>
+            {message && (
+              <p
+                className="message-text"
+                style={{
+                  color: messageColor,
+                  fontWeight: "bold",
+                }}
+              >
+                {message}
+              </p>
+            )}
 
-                                <p>
-                                  <strong>Token:</strong>
-                                  {supplierData.device_token}
-                                </p>
+            {/* Show fields only if supplier exists */}
+            {supplierData && selectedOrder && (
+              <div className="supplier-info">
+                <p>
+                  <strong>Supplier ID:</strong> {supplierData._id}
+                </p>
 
-                                <p>
-                                  <strong>Order ID:</strong> {selectedOrder._id}
-                                </p>
+                <p>
+                  <strong>Token:</strong> {supplierData.device_token}
+                </p>
 
-                                <p>
-                                  <strong>Order OTP:</strong>{" "}
-                                  {selectedOrder.otp}
-                                </p>
+                <p>
+                  <strong>Order ID:</strong> {selectedOrder._id}
+                </p>
 
-                                <button onClick={handleAssignPopup}>
-                                  Assign
-                                </button>
-                                <br />
-                              </div>
-                            )}
+                <p>
+                  {/* <strong>Order OTP:</strong> {selectedOrder.otp} */}
+                </p>
 
-                            {/* Show "Create Supplier" button only if the supplier does not exist */}
-                            {showPopup &&
-                              !loading &&
-                              customerNumber.length === 10 && (
-                                <button onClick={handleCreateSupplier}>
-                                  Create Supplier
-                                </button>
-                              )}
+                <button
+                  className="assign-btn"
+                  onClick={handleAssignPopup}
+                >
+                  Assign
+                </button>
+              </div>
+            )}
 
-                            <CreateSupplierPopup
-                              isOpen={showCreatePopup}
-                              onClose={() => setShowCreatePopup(false)}
-                            />
-                            <button onClick={handleClosePopup}>Close</button>
-                          </div>
-                        </div>
-                      )}
-                    </td>
+            {/* Show "Create Supplier" button only if the supplier does not exist */}
+            {showPopup && !loading && customerNumber.length === 10 && (
+              <button
+                className="create-supplier-btn"
+                onClick={handleCreateSupplier}
+              >
+                Create Supplier
+              </button>
+            )}
+
+            <CreateSupplierPopup
+              isOpen={showCreatePopup}
+              onClose={() => setShowCreatePopup(false)}
+            />
+            <button className="close-btn" onClick={handleClosePopup}>
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  )}
+</td>
+
 
                     <td>
                       {`${order.job_start_time.replace(
