@@ -320,6 +320,239 @@ const ImageResizerComponent = ({ params }) => {
 // export default CreatePhotoProject;
 // -==================================================================================
 "use client";
+import React, { useState } from "react";
+import Resizer from "react-image-file-resizer";
+import ThumbnailGallery from "./ThumbnailGallery";
+const ImageUpload = () => {
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [allImages, setAllImages] = useState([]);
+  const [driveLinks, setDriveLinks] = useState(""); // Store multiple Drive links
+
+  const storedUser = JSON.parse(localStorage.getItem("userDetails")) || {};
+  const { folderTitle, customerId } = storedUser;
+
+  // Handle Local File Selection
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    const resizedImages = [];
+
+    files.forEach((file) => {
+      Resizer.imageFileResizer(
+        file,
+        800,
+        800,
+        "JPEG",
+        80,
+        0,
+        (uri) => {
+          resizedImages.push({ file: uri, name: file.name });
+          if (resizedImages.length === files.length) {
+            setSelectedImages((prev) => [...prev, ...resizedImages]);
+          }
+        },
+        "file"
+      );
+    });
+  };
+
+  // Extract File IDs from Google Drive Links
+  const extractGoogleDriveFileIds = (links) => {
+    alert(links)
+    return links
+      .split(",")
+      .map((url) => {
+        const match = url.match(/[-\w]{25,}/);
+        console.log(match,"match")
+        console.log( url, "url") 
+        return match ? match[0] : null;
+      })
+      .filter(Boolean);
+  };
+
+  // Handle Google Drive Image Fetching in Bulk
+  const handleGoogleDriveUpload = async () => {
+    if (!driveLinks) {
+      alert("Please enter Google Drive links.");
+      return;
+    }
+
+    const fileIds = extractGoogleDriveFileIds(driveLinks);
+    alert(fileIds,"fileIds")  
+    if (fileIds.length === 0) {
+      alert("No valid Google Drive links found.");
+      return;
+    }
+
+    const fetchedImages = await Promise.all(
+      fileIds.map(async (fileId) => {
+        try {
+          const imageUrl = `https://drive.google.com/uc?id=${fileId}`;
+          const response = await fetch(imageUrl);
+          const blob = await response.blob();
+          const file = new File([blob], `drive_image_${fileId}.jpg`, { type: blob.type });
+
+          return new Promise((resolve) => {
+            Resizer.imageFileResizer(
+              file,
+              800,
+              800,
+              "JPEG",
+              80,
+              0,
+              (uri) => resolve({ file: uri, name: file.name }),
+              "file"
+            );
+          });
+        } catch (error) {
+          console.error("Error fetching Google Drive image:", error);
+          return null;
+        }
+      })
+    );
+
+    setSelectedImages((prev) => [...prev, ...fetchedImages.filter(Boolean)]);
+    setDriveLinks("");
+  };
+
+  // Upload Images in Bulk
+  const handleUpload = async () => {
+    if (!folderTitle || !customerId) {
+      alert("Missing user details in local storage.");
+      return;
+    }
+
+    if (selectedImages.length === 0) {
+      alert("No images selected for upload.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("folderName", folderTitle);
+    formData.append("customerId", customerId);
+
+    selectedImages.forEach((image) => {
+      formData.append("files", image.file, image.name);
+    });
+
+    try {
+      const response = await fetch("https://horaservices.com:3000/api/photo/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      setAllImages((prev) => [...prev, ...selectedImages]);
+      setSelectedImages([]);
+    } catch (error) {
+      console.error("Upload failed", error);
+      alert("Upload failed");
+    }
+  };
+
+  return (<>
+    <div className="p-4">
+      {/* Local File Upload */}
+      <input
+        type="file"
+        multiple
+        onChange={handleImageChange}
+        accept="image/*"
+        style={{
+          padding: "10px 20px",
+          backgroundColor: "#007BFF",
+          color: "#fff",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+        }}
+      />
+
+      {/* Google Drive Image Upload */}
+      <div className="mt-4">
+        <textarea
+          placeholder="Paste Google Drive Image Links (comma-separated)"
+          value={driveLinks}
+          onChange={(e) => setDriveLinks(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "10px",
+            marginBottom: "10px",
+            border: "1px solid #ddd",
+            borderRadius: "5px",
+            height: "80px",
+          }}
+        />
+        <button
+          onClick={handleGoogleDriveUpload}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#28A745",
+            color: "#fff",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+        >
+          Fetch Images from Drive
+        </button>
+      </div>
+
+      {/* Display Selected Images */}
+      {selectedImages.length > 0 && (
+        <div className="mt-4">
+          <h3>Newly Selected Images:</h3>
+          <div className="flex flex-wrap">
+            {selectedImages.map((image, index) => (
+              <img
+                key={index}
+                src={URL.createObjectURL(image.file)}
+                alt={image.name}
+                className="w-32 h-32 m-2 object-cover rounded"
+              />
+            ))}
+          </div>
+          <button
+            onClick={handleUpload}
+            className="mt-4"
+            style={{
+              padding: "10px 20px",
+              backgroundColor: "#007BFF",
+              color: "#fff",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+          >
+            Upload All Images
+          </button>
+        </div>
+      )}
+
+      {/* Display Uploaded Images */}
+      {allImages.length > 0 && (
+        <div className="mt-4">
+          <h3>All Uploaded Images:</h3>
+          <div className="flex flex-wrap">
+            {allImages.map((image, index) => (
+              <img
+                key={index}
+                src={URL.createObjectURL(image.file)}
+                alt={image.name}
+                className="w-32 h-32 m-2 object-cover rounded"
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+    <h3>gallery</h3>
+    <ThumbnailGallery folderName={folderTitle} customerId={customerId} />
+  </>);
+};
+
+export default ImageUpload;
+// ================================================================================
+"use client";
 import React, { useState, useEffect } from "react";
 import Resizer from "react-image-file-resizer";
 import Image from "next/image";
