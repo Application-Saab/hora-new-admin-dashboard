@@ -1,10 +1,11 @@
+
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation'; // Corrected import
-import CheckCustomer from './CheckCustomer'; // Corrected import
-import CheckFolder from './CheckFolder'; // Corrected import
+import CheckCustomer from './CheckCustomer.jsx'; // Corrected import
+import CheckExistFolder from './CheckExistFolder.jsx'; // Corrected import
 import "./photoFolder.css"
-const CreatePhotoProject = () => {
+const PhotoCreateProject = () => {
   const [folderTitle, setfolderTitle] = useState('');
   const [vendorId, setVendorId] = useState('');
 
@@ -13,18 +14,6 @@ const CreatePhotoProject = () => {
 
   const handleCreateFolder = async (e) => {
     e.preventDefault();
-
-    // Validate inputs
-    // if (!folderTitle.match(/^[a-zA-Z0-9]+$/)) {
-    //   alert('Folder name should only contain letters and numbers.');
-    //   return;
-    // }
-
-    // Validate customer number (must be exactly 10 digits)
-    // if (!customerNumber.match(/^\d{10}$/)) {
-    //   alert('Customer number must be exactly 10 digits.');
-    //   return;
-    // }
 
     try {
       // Make API call to create folder
@@ -39,22 +28,22 @@ const CreatePhotoProject = () => {
           vendorId: vendorId || "HORA", // Add vendorId if available
         }),
       });
+      const data = await response.json();
 
       if (!response.ok) {
-        throw new Error('Failed to create folder');
+        throw new Error(data.message || "Failed to create folder"); // Show actual error message if available
       }
-
-      const data = await response.json();
+  
       console.log('Folder created successfully:', data);
 
       // Store the folder name in localStorage for future reference
       localStorage.setItem('userDetails', JSON.stringify({ folderTitle, customerId }));
 
       // Redirect to the dynamic folder page using URL parameters
-      router.push(`/dashboard/photography-upload/${encodeURIComponent(folderTitle)}`);
+      router.push(`/dashboard/photo-folder/${encodeURIComponent(folderTitle)}`);
     } catch (error) {
-      console.error('Error creating folder:', error);
-      alert('Failed to create folder. Please try again.');
+      console.error("Error creating folder:", error);
+      alert(error.message); // Show the actual error message in an alert
     }
   };
   const handleCustomerId = (id) => {
@@ -89,11 +78,11 @@ const CreatePhotoProject = () => {
 
           />
         </div>
-        <button type="submit" className='buttonPrimary'>Create Folder</button>
+        <button type="submit" className="buttonPrimary" disabled={!customerId}>Create Folder</button>
       </form>
       <div className='checkFolder'>
         <h2>Check already existing folder</h2>
-        <CheckFolder onCustomerFolderChange={handleFolderCheck} />
+        <CheckExistFolder onCustomerFolderChange={handleFolderCheck} />
       </div>
     </div>
 
@@ -102,35 +91,5 @@ const CreatePhotoProject = () => {
   </>);
 };
 
-export default CreatePhotoProject;
+export default PhotoCreateProject;
 
-{/* 
-      
-
-               <input
-          type="text"
-          placeholder="Enter customer number*"
-          value={customerNumber}
-          onChange={(e) => setCustomerNumber(e.target.value)}
-          style={{ marginRight: '10px', padding: '5px' }}
-          required
-        /> 
-      
-      
-      {createdFolders.length > 0 && (
-        <div style={{ marginTop: '20px' }}>
-          <h2>Previous Folders</h2>
-          <ul>
-            {createdFolders.map((folder, index) => (
-              <li key={index}>
-                <a
-                  href={`/dashboard/photography-upload?folderId=${encodeURIComponent(folder)}`}
-                  style={{ textDecoration: 'none' }}
-                >
-                  {folder}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )} */}

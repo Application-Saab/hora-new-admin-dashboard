@@ -10,5 +10,5 @@ export const GET_PHOTOGRAPHY_BY_NAME = "/api/photography/searchByTag/66c96b4e22e
 export const ADMIN_USER_LIST = '/api/admin/admin_user_list';
 export const ADMIN_USER_SIGNUP = '/api/admin/user_signup';
 
-
+export const ACCEPT_ORDER = "/api/order/acceptOrder";
 // https://horaservices.com:3000/api/admin/admin_user_list

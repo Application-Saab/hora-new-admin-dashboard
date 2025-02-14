@@ -10,7 +10,7 @@ import {
 	GET_MEAL_DISH_ENDPOINT,
 } from "../../../utils/apiconstant"
 import checkImage from '../../../assets/check.png';
-import CreateOrderForm from "../../component/CreateOrderForm"
+import CreateFoodOrderForm from "../../component/CreateFoodOrderForm"
 
 function AddFoodOrder() {
 	const [loading, setLoading] = useState(false);
@@ -676,7 +676,7 @@ function AddFoodOrder() {
                                 </div>
 			</div>
 			
-			<CreateOrderForm itemDataId={itemDataId} selectedMealList={selectedMealList} deliveryCharges={deliveryCharges} totalPrice={totalPrice} discountedPrice={discountedPrice} calculateFinalTotal={calculateFinalTotal} calculateAdvancePayment={calculateAdvancePayment} peopleCount={peopleCount} selectedOption={selectedDeliveryOption}  includeTables={includeTables} includeDisposable={includeDisposable}/>
+			<CreateFoodOrderForm itemDataId={itemDataId} selectedMealList={selectedMealList} deliveryCharges={deliveryCharges} totalPrice={totalPrice} discountedPrice={discountedPrice} calculateFinalTotal={calculateFinalTotal} calculateAdvancePayment={calculateAdvancePayment} peopleCount={peopleCount} selectedOption={selectedDeliveryOption}  includeTables={includeTables} includeDisposable={includeDisposable}/>
 
 		</div>
 	</>);

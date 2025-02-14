@@ -27,6 +27,11 @@ const menuItems = [
     icon: < FaCamera />,
     url: "/dashboard/photography-create-order",
   },
+  {
+    label: "PhotoGraphy Create Folder",
+    icon: < FaCamera />,
+    url: "/dashboard/photo-folder",
+  },
 ];
 const Sidebar = () => {
   return (

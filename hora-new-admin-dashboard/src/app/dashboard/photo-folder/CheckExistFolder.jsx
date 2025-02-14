@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import CheckCustomer from "./CheckCustomer"; // Import the CheckCustomer component
 
-const FolderCheck = () => {
+const CheckExistFolder = () => {
   const [customerId, setCustomerId] = useState("");
   const [folders, setFolders] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -93,7 +93,7 @@ const FolderCheck = () => {
                 {/* <p>Vendor ID: {folder.vendorId}</p>
                 <p>Created At: {new Date(folder.createdAt).toLocaleString()}</p> */}
                 <a
-                  href={`/dashboard/photography-upload/${encodeURIComponent(folder.folderName)}`}
+                  href={`/dashboard/photo-folder/${encodeURIComponent(folder.folderName)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="buttonPrimary deletFolder"
@@ -127,4 +127,4 @@ const FolderCheck = () => {
   );
 };
 
-export default FolderCheck;
+export default CheckExistFolder;
