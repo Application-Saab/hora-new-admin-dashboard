@@ -362,7 +362,7 @@ const [isSupplierAssigned, setIsSupplierAssigned] = useState(false);
                 <th>Customer No</th>
                 {/* <th>Online Customer No</th> */}
                 <th>Supplier</th>
-                <th>Assign Supplier</th>
+                
                 <th>Order Start & End Time</th>
                 <th>Total Amount</th>
                 <th className="order-type-header">
@@ -439,7 +439,7 @@ const [isSupplierAssigned, setIsSupplierAssigned] = useState(false);
                             className="not-assigned-btn"
                             onClick={() => openSupplierAssignPopup(order)}
                           >
-                            {isSupplierAssigned ?"Assigned":"Not Assigned"}
+                            Not Assigned
                           </button>                    
                             {/* supplier assign popup */}
                           {isModalOpen && selectedSupplierOrder && (<>
