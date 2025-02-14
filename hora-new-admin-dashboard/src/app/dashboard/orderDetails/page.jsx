@@ -8,6 +8,7 @@ import {
   ADMIN_ORDER_LIST,
 } from "../../../utils/apiconstant";
 // import * as XLSX from "xlsx";
+import CheckSupplier from "../../component/createsupplier/CheckSupplier";
 
 const OrderList = () => {
   const [orders, setOrders] = useState([]);
@@ -25,10 +26,13 @@ const OrderList = () => {
   const [actionPopupChefOrderId, setActionPopupChefOrderId] = useState("");
   const [actionPopupOrderType, setActionPopupOrderType] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
-  // const [supplierDetails, setSupplierDetails] = useState(null);
-
+  // supplier
+  const [isSupplierAssigned, setIsSupplierAssigned] = useState(false);
   const [selectedDate, setSelectedDate] = useState("");
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedSupplierOrder, setSelectedSupplierOrder] = useState(null);
+  const [supplierDetails, setSupplierDetails] = useState(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
   const fetchOrders = async (page, orderId = '', orderstatus = '', activeStatus = '', orderType = '', orderCity = '', selectedDate = '', selectedOfflineNum = '') => { 
     // Handle orderType mapping
     let typeId;
@@ -185,10 +189,7 @@ const OrderList = () => {
     setActionPopupOrderType(orderType)
     setPopupOpen(true); // Open the popup
   };
-  const [supplierDetails, setSupplierDetails] = useState(null);
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-
-  const openSupplierPopup = async (orderId) => {
+  const openSupplierDeatilsPopup = async (orderId) => {
     try {
       const response = await fetch(
         `https://horaservices.com:3000/api/admin/getUserDetails/${orderId}`
@@ -204,11 +205,19 @@ const OrderList = () => {
     }
   };
 
-
   const closePopup = () => {
-    setPopupOpen(false); // Close the popup
+    setPopupOpen(false);
     setIsPopupOpen(false);
     setSupplierDetails(null);
+  };
+
+  const openSupplierAssignPopup = (order) => {
+    setSelectedSupplierOrder(order);
+    setIsModalOpen(true);
+  };
+
+  const CloseSupplierAssignPopup = () => {
+    setIsModalOpen(false);
   };
 
   return (
@@ -399,31 +408,23 @@ const OrderList = () => {
                     <td>{order.phone_no || "N/A"}</td>
                     {/* <td>{order.online_phone_no || "N/A"}</td> */}
                     <td>
-                      {order.toId ? (
-                        <FaEye
-                          onClick={() => openSupplierPopup(order.toId)}
-                        />
-                      ) : (
-                        <p>NA</p>
-                      )}
-
-                      {isPopupOpen && supplierDetails && (
-                        <div className="popup-overlay" onClick={closePopup}>
-                          <div
-                            className="popup"
-                            onClick={(e) => e.stopPropagation()}
+                      {order.toId ? (<>
+                        <FaEye onClick={() => openSupplierDeatilsPopup(order.toId)} /><span>Assigned</span>
+                        </>) : (
+                          <>
+                          <button
+                            className="not-assigned-btn"
+                            onClick={() => openSupplierAssignPopup(order)}
                           >
-                            <button
-                              className="close-button"
-                              onClick={closePopup}
-                            >
-                              ×
-                            </button>
-                            <h3>Supplier Details</h3>
-                            <p>Name: {supplierDetails.data?.name || "NA"}</p>
-                            <p>Phone: {supplierDetails.data?.phone || "NA"}</p>
-                          </div>
-                        </div>
+                            Not Assigned
+                          </button>                    
+                            {/* supplier assign popup */}
+                          {isModalOpen && selectedSupplierOrder && (<>
+                            {console.log(isSupplierAssigned)}
+                            <CheckSupplier SelectedOrder={selectedSupplierOrder} setShowModal={setIsModalOpen} setIsSupplierAssigned={setIsSupplierAssigned}/>
+                            </>)
+                          }
+                        </>
                       )}
                     </td>
 
@@ -515,6 +516,25 @@ const OrderList = () => {
         />
 
       </div>
+          {/* supplier details popup */}
+          {isPopupOpen && supplierDetails && (
+                        <div className="popup-overlay" onClick={closePopup}>
+                          <div
+                            className="popup"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <button
+                              className="close-button"
+                              onClick={closePopup}
+                            >
+                              ×
+                            </button>
+                            <h3>Supplier Details</h3>
+                            <p>Name: {supplierDetails.data?.name || "NA"}</p>
+                            <p>Phone: {supplierDetails.data?.phone || "NA"}</p>
+                          </div>
+                        </div>
+                      )}
       {/* pagination */}
       <div className="orderDetails_pagination">
         <button

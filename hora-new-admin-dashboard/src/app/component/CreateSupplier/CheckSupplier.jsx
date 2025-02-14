@@ -112,8 +112,8 @@ console.log(SelectedOrder ,"hio")
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
+    <div className="popup-overlay">
+      <div className="popup-content">
         <h3>Check Vendor is available or not:</h3>
         <input
           type="text"
@@ -133,7 +133,7 @@ console.log(SelectedOrder ,"hio")
           className="input-field"
         />
         <button
-          className="order-check-btn"
+          className="vendor-check-btn buttonPrimary"
           onClick={handleCheckCustomer}
           disabled={loading || customerNumber.length !== 10}
         >

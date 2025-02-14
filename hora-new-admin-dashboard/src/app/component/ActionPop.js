@@ -43,13 +43,13 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
       // alert(actionPopupOrderType)
       apiUrl = `https://horaservices.com:3000/api/order/order_details_food_delivery/${actionPopupOrderId}`;
       setPopupType("foodDelivery");
-    }  
-    // else if (actionPopupOrderType === 8 ) {
-    //   // Need new api for photograpgy
-    //   const photographyOrderId = actionPopupChefOrderId.toString();
-    //   apiUrl = `https://horaservices.com:3000/api/order/order_details/v1/${actionPopupOrderId}`;
-    //   setPopupType("Photography");
-    // } 
+    }
+    else if (actionPopupOrderType === 8) {
+      // Need new api for photograpgy
+      const photographyOrderId = actionPopupChefOrderId.toString();
+      apiUrl = `https://horaservices.com:3000/api/order/order_details/v1/${photographyOrderId}`;
+      setPopupType("Photography");
+    }
     else {
       setError("Currently, data is not available");
       setPopupType("");
@@ -135,6 +135,171 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
       </ul>
     </>);
   };
+  // fetch orderdetails
+  const FetchOrderDetails = ({ orderDetails }) => {
+    // console.log(getOrderType(orderDetails?.type), JSON.stringify(orderDetails))
+    console.log(orderDetails)
+    return (
+      <div>
+        <div className="order-details-container">
+          <h2 className="popup-title">Order Details</h2>
+          <div className="order-grid">
+            <div className="order-details-box">
+              <div className="order-detail-row">
+                <p>
+                  <strong>Order Number:</strong> {getOrderId(orderDetails?.order_id)}
+                </p>
+                <p>
+                  <strong>Order Date:</strong>{" "}
+                  {new Date(orderDetails?.order_date).toLocaleDateString()}
+                </p>
+                <p>
+                  <strong>No of burners:</strong> {orderDetails?.no_of_burner || 0}
+                </p>
+                <p>
+                  <strong>No of people:</strong> {orderDetails?.no_of_people || 0}
+                </p>
+                <p>
+                  <strong>City:</strong> {orderDetails?.order_locality || "N/A"}
+                </p>
+                <p>
+                  <strong>Order Type:</strong> {getOrderType(orderDetails?.type)}
+                </p>
+                <p>
+                  <strong>Order Address:</strong> {orderDetails?.addressId?.address1 || "N/A"}
+                </p>
+              </div>
+              <h3>Ordered Items:</h3>
+              <div className="order-items-container">
+                {(orderDetails?.type === 6 || orderDetails?.type === 7) ?
+                  (<ul className="order-items-list">
+                    {orderDetails?.selecteditems?.map((item) => {
+                      // by aarti
+                      const dishDetails =
+                        orderDetails?.userOrderDishImageArray[0]?.[item.name] || null;
+                      return (
+
+                        <li key={item._id} className="order-item">
+                          <Image
+                            src={`https://horaservices.com/api/uploads/${item.image}`}
+                            alt={item.name}
+                            width={80}
+                            height={80}
+                            className="order-item-image"
+                          />
+
+                          <div className="order-item-details">
+                            <strong className="order-item-title">{item.name}</strong>
+                            {dishDetails?.quantity && (
+                              <span className="order-item-quantity">
+                                {dishDetails.quantity} {dishDetails.unit || ""}
+                              </span>
+                            )}
+                            <span className="order-item-price">₹{dishDetails?.price}</span>
+                          </div>
+                        </li>
+                      )
+                    }
+                    )}
+                  </ul>)
+                  : (<ul className="order-items-list">
+                    {orderDetails?.selecteditems?.map((item) => (
+
+                      <li key={item._id} className="order-item">
+                        <Image
+                          src={`https://horaservices.com/api/uploads/${item.image}`}
+                          alt={item.name}
+                          width={80}
+                          height={80}
+                          className="order-item-image"
+                        />
+
+                        <div className="order-item-details">
+                          <strong className="order-item-title">{item.name}</strong>
+                          <span className="order-item-price">₹{item.price}</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>)
+                }
+              </div>
+              {orderDetails?.type === 6 ? (<>
+              <h3>Inclusions</h3>
+                <ul>
+                  {foodDeliveryInclusions.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                  {orderDetails?.userOrderDishImageArray[0].hasOwnProperty("water/disposal") && (
+                    <li>Disposable plates,Bisleri Water bottles</li>
+                  )}
+                </ul>
+              </>) : orderDetails?.type === 7 ? (<>
+              <h3>Inclusions</h3>
+                <ul>
+                  {liveCateringInclusions.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                </ul>
+              </>): (null)
+             }
+
+            </div>
+            <div className="order-summary-box">
+              <h3 style={{ color: "white" }}>Order Summary</h3>
+              <ul style={{ listStyleType: "none", padding: 0 }}>
+                <li className="priceList">
+                  <strong>Total Amount:</strong>{" "}
+                  <span>₹{orderDetails.total_amount}</span>
+                </li>
+                <li className="priceList">
+                  <strong>Advance Amount:</strong>{" "}
+                  <span>₹{orderDetails.advance_amount || 0}</span>
+                </li>
+
+                <li className="priceList">
+
+                  <span>Balance Amount</span>
+                  <span>
+                    {orderDetails?.total_amount && orderDetails?.advance_amount
+                      ? `₹ ${(orderDetails.total_amount - orderDetails.advance_amount)}`
+                      : 0}
+                  </span>
+                </li>
+
+                <li className="priceList">
+                  <strong>Discount:</strong>{" "}
+                  <span>₹{orderDetails.discount || 0}</span>
+                </li>
+                <li className="priceList">
+                  <strong>GST:</strong>{" "}
+                  <span>₹{orderDetails.gst || 0}</span>
+                </li>
+                <li className="priceList">
+                  <strong>Per person cost:</strong>{" "}
+                  <span>₹{orderDetails.per_person_cost || 0}</span>
+                </li>
+
+              </ul>
+              <button
+                className="startbutton"
+                onClick={() => {
+                  if (orderDetails?.type === 2) {
+                    sendOrderDetailsToWhatsAppchef(orderDetails); // Call for type 2
+                  } else if (orderDetails?.type === 6 || orderDetails?.type === 7) {
+                    sendOrderDetailsToWhatsAppFood(orderDetails); // Call for type 6 or 7
+                  }
+                }}
+              >
+                Copy Order Summary(For Vendor)
+              </button>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // share on whatsapp========================
   const sendOrderDetailsToWhatsAppDoc = () => {
     console.log(JSON.stringify(orderDetails.items));
@@ -263,17 +428,17 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
       orderDetails?.total_amount && orderDetails?.advance_amount
         ? orderDetails?.total_amount - orderDetails?.advance_amount
         : "N/A";
-        if (orderType === "Food Delivery") {
-          inclusions = [...foodDeliveryInclusions]; // Copy the food delivery inclusions
-    
-          if (disposalInclusion) {
-            inclusions.push("Disposable plates, Fork, Spoon, Tissue papers, Bisleri Water bottles");
-          }
-        } else if (orderType === "Live Catering") {
-          inclusions = [...liveCateringInclusions]; // Copy the live catering inclusions
-        } else {
-          inclusions = ["No specific inclusions for this order type"];
-        }
+    if (orderType === "Food Delivery") {
+      inclusions = [...foodDeliveryInclusions]; // Copy the food delivery inclusions
+
+      if (disposalInclusion) {
+        inclusions.push("Disposable plates, Fork, Spoon, Tissue papers, Bisleri Water bottles");
+      }
+    } else if (orderType === "Live Catering") {
+      inclusions = [...liveCateringInclusions]; // Copy the live catering inclusions
+    } else {
+      inclusions = ["No specific inclusions for this order type"];
+    }
     // Start building the message
     let message = `*${orderType} Order Summary:*\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\n\nCity: ${orderCity}\nGuest Count: ${peopleCount}\nTime of Delivery: ${orderTime}\n\nAddress: ${address}\n\nGoogleMapLocation: ${googleMapUrl}\n*Amount: ₹${balanceAmount}*\n\n*Dishes*\n`;
     // Append each dish to the message
@@ -309,174 +474,8 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
     // const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     // window.open(whatsappUrl, "_blank");
   };
-  // fetch orderdetails
-  const FetchOrderDetails = ({ orderDetails }) => {
-    // console.log(getOrderType(orderDetails?.type), JSON.stringify(orderDetails))
-    console.log(orderDetails)
-    return (
-      <div>
-        <div className="order-details-container">
-          <h2 className="popup-title">Order Details</h2>
-          <div className="order-grid">
-            <div className="order-details-box">
-              <div className="order-detail-row">
-                <p>
-                  <strong>Order Number:</strong> {getOrderId(orderDetails?.order_id)}
-                </p>
-                <p>
-                  <strong>Order Date:</strong>{" "}
-                  {new Date(orderDetails?.order_date).toLocaleDateString()}
-                </p>
-                <p>
-                  <strong>No of burners:</strong> {orderDetails?.no_of_burner || 0}
-                </p>
-                <p>
-                  <strong>No of people:</strong> {orderDetails?.no_of_people || 0}
-                </p>
-                <p>
-                  <strong>City:</strong> {orderDetails?.order_locality || "N/A"}
-                </p>
-                <p>
-                  <strong>Order Type:</strong> {getOrderType(orderDetails?.type)}
-                </p>
-                <p>
-                  <strong>Order Address:</strong> {orderDetails?.addressId?.address1 || "N/A"}
-                </p>
-              </div>
-              <h3>Ordered Items:</h3>
-              <div className="order-items-container">
-                {(orderDetails?.type === 6 || orderDetails?.type === 7) ?
-                  (<ul className="order-items-list">
-                    {orderDetails?.selecteditems?.map((item) => {
-                      // by aarti
-                      const dishDetails =
-                        orderDetails?.userOrderDishImageArray[0]?.[item.name] || null;
-                      return (
-
-                        <li key={item._id} className="order-item">
-                          <Image
-                            src={`https://horaservices.com/api/uploads/${item.image}`}
-                            alt={item.name}
-                            width={80}
-                            height={80}
-                            className="order-item-image"
-                          />
-
-                          <div className="order-item-details">
-                            <strong className="order-item-title">{item.name}</strong>
-                            {dishDetails?.quantity && (
-                              <span className="order-item-quantity">
-                                {dishDetails.quantity} {dishDetails.unit || ""}
-                              </span>
-                            )}
-                            <span className="order-item-price">₹{dishDetails?.price}</span>
-                          </div>
-                        </li>
-                      )
-                    }
-                    )}
-                  </ul>)
-                  : (<ul className="order-items-list">
-                    {orderDetails?.selecteditems?.map((item) => (
-
-                      <li key={item._id} className="order-item">
-                        <Image
-                          src={`https://horaservices.com/api/uploads/${item.image}`}
-                          alt={item.name}
-                          width={80}
-                          height={80}
-                          className="order-item-image"
-                        />
-
-                        <div className="order-item-details">
-                          <strong className="order-item-title">{item.name}</strong>
-                          <span className="order-item-price">₹{item.price}</span>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>)
-                }
-              </div>
-              <h3>Inclusions</h3>
-              {orderDetails?.type === 6 ? (
-                <ul>
-                  {foodDeliveryInclusions.map((item, index) => (
-                    <li key={index}>{item}</li>
-                  ))}
-                  {orderDetails?.userOrderDishImageArray[0].hasOwnProperty("water/disposal") && (
-                    <li>Disposable plates,Bisleri Water bottles</li>
-                  )}
-                </ul>
-              ) : orderDetails?.type === 7 ? (
-                <ul>
-                  {liveCateringInclusions.map((item, index) => (
-                    <li key={index}>{item}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p>No inclusions available for this order type.</p>
-              )}
-
-            </div>
-            <div className="order-summary-box">
-              <h3 style={{ color: "white" }}>Order Summary</h3>
-              <ul style={{ listStyleType: "none", padding: 0 }}>
-              <li className="priceList">
-                  <strong>Total Amount:</strong>{" "}
-                  <span>₹{orderDetails.total_amount}</span>
-                </li>
-                <li className="priceList">
-                  <strong>Advance Amount:</strong>{" "}
-                  <span>₹{orderDetails.advance_amount || 0}</span>
-                </li>
-
-                <li className="priceList">
-
-                  <span>Balance Amount</span>
-                  <span>
-                    {orderDetails?.total_amount && orderDetails?.advance_amount
-                      ? `₹ ${(orderDetails.total_amount - orderDetails.advance_amount)}`
-                      : 0}
-                  </span>
-                </li>
-
-                <li className="priceList">
-                  <strong>Discount:</strong>{" "}
-                  <span>₹{orderDetails.discount || 0}</span>
-                </li>
-                <li className="priceList">
-                  <strong>GST:</strong>{" "}
-                  <span>₹{orderDetails.gst || 0}</span>
-                </li>
-                <li className="priceList">
-                  <strong>Per person cost:</strong>{" "}
-                  <span>₹{orderDetails.per_person_cost || 0}</span>
-                </li>
-
-              </ul>
-              <button
-                className="startbutton"
-                onClick={() => {
-                  if (orderDetails?.type === 2) {
-                    sendOrderDetailsToWhatsAppchef(orderDetails); // Call for type 2
-                  } else if (orderDetails?.type === 6 || orderDetails?.type === 7) {
-                    sendOrderDetailsToWhatsAppFood(orderDetails); // Call for type 6 or 7
-                  }
-                }}
-              >
-               Copy Order Summary(For Vendor)
-              </button>
-
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-
-  return (
-    isOpen ?
+  return (<>
+    {isOpen &&
       (
         <div className="popup-overlay">
           <div className="popup-content">
@@ -571,7 +570,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                       <div className="order-summary-box">
                         <h3 style={{ color: "white" }}>Order Summary</h3>
                         <ul style={{ listStyleType: "none", padding: 0 }}>
-                        <li className="priceList">
+                          <li className="priceList">
                             <strong>Total Amount:</strong>{" "}
                             <span>₹{orderDetails._doc.total_amount}</span>
                           </li>
@@ -608,7 +607,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                           className="startbutton"
                           onClick={sendOrderDetailsToWhatsAppDoc}
                         >
-                          Copy Order Summary
+                          Copy Order Summary(For Vendor)
                         </button>
                       </div>
                     </div>
@@ -623,6 +622,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                 <FetchOrderDetails orderDetails={orderDetails} />
               )
             ) : null}
+
             {popupType === "foodDelivery" && orderDetails ? (
               loading ? (
                 <div className="loader">Loading...</div> // Replace with a styled loader if needed
@@ -630,16 +630,103 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                 <FetchOrderDetails orderDetails={orderDetails} />
               )
             ) : null}
+            {popupType === "Photography" && orderDetails ? (
+              loading ? (
+                <div className="loader">Loading...</div> // Replace with a styled loader if needed
+              ) : (
+                <div className="order-details-container">
+                  <h2 className="popup-title">Order Details</h2>
+                  <div className="order-grid">
+                    <div className="order-details-box">
+                      <div className="order-detail-row">
+                        <p>
+                          <strong>Order Id:</strong> {getOrderId(orderDetails.order_id)}
+                        </p>
+                        <p>
+                          <strong>Order Date:</strong> {new Date(orderDetails.order_date).toLocaleDateString()}
+                        </p>
+                        <p>
+                          <strong>Order Type:</strong> {getOrderType(orderDetails.type)}
+                        </p>
+                        <p>
+                          <strong>Order City:</strong> {orderDetails.order_locality || "N/A"}
+                        </p>
+                        <p>
+                          <strong>Order Address:</strong> {orderDetails.addressId?.address1 || "N/A"}
+                        </p>
+                        <p>
+                          <strong>Order Google Map Location:</strong> {orderDetails.addressId?.address2 || "N/A"}
+                        </p>
+                        <p>
+                          <strong>Order Time:</strong> {orderDetails.order_time || "N/A"}
+                        </p>
+                        <p>
+                          <strong>Order Comments:</strong> {orderDetails.decoration_comments || "N/A"}
+                        </p>
+                        <p>
+                          <strong>Order Included:</strong>
+                          {orderDetails.add_on.length > 0 ? (
+                            <ul>
+                              {orderDetails.add_on.map((item, index) => (
+                                <li key={index}>
+                                  - {item}
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            "N/A"
+                          )}
+                        </p>
 
+
+
+                      </div>
+                    </div>
+
+                    <div className="order-summary-box">
+                      <h3 style={{ color: "white" }}>Order Summary</h3>
+                      <ul style={{ listStyleType: "none", padding: 0 }}>
+                        <li className="priceList">
+                          <strong>Total Amount:</strong> <span>₹{orderDetails.total_amount}</span>
+                        </li>
+                        <li className="priceList">
+                          <strong>Advance Amount:</strong> <span>₹{orderDetails.advance_amount || 0}</span>
+                        </li>
+                        <li className="priceList">
+                          <span>Balance Amount</span>
+                          <span>
+                            {orderDetails.total_amount && orderDetails.advance_amount
+                              ? `₹ ${(orderDetails.total_amount - orderDetails.advance_amount)}`
+                              : "N/A"}
+                          </span>
+                        </li>
+                        <li className="priceList">
+                          <strong>Discount:</strong> <span>₹{orderDetails.discount || 0}</span>
+                        </li>
+                        <li className="priceList">
+                          <strong>GST:</strong> <span>₹{orderDetails.gst || 0}</span>
+                        </li>
+                        <li className="priceList">
+                          <strong>Per person cost:</strong> <span>₹{orderDetails.per_person_cost || 0}</span>
+                        </li>
+                      </ul>
+                      {/* <button className="startbutton" onClick={sendOrderDetailsToWhatsAppDoc}>
+                        Copy Order Summary<br/>(For Vendor)
+                      </button> */}
+                    </div>
+                  </div>
+                </div>
+              )
+            ) : null}
 
 
           </div>
         </div>
       )
-      :
-      null
+      
 
-  );
+}
+</>);
 };
 
 export default ActionPopup;
