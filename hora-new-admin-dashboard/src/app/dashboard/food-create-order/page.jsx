@@ -401,7 +401,7 @@ function AddFoodOrder() {
 
 	return (<>
 		<div className="container">
-			<h1>Create Food Order</h1>
+		<h1 className="createOrder pageHeading">Create Food Order</h1>
 			<div className="selectServiceType" style={style.selectServiceType}>
 				<div style={style.selectDiv}>
 					<label htmlFor="peopleInput" className="people-label" style={style.label}>
@@ -424,7 +424,7 @@ function AddFoodOrder() {
 						Number of People:
 					</label>
 					<div className="input-wrapper" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-						<button
+						{/* <button
 							type="button"
 							className="btn decrement-btn"
 							onClick={() =>
@@ -434,17 +434,17 @@ function AddFoodOrder() {
 							style={style.PlusMinusBtn}
 						>
 							-
-						</button>
+						</button> */}
 						<input
 							id="peopleInput"
 							type="number"
 							value={peopleCount}
 							onChange={handlePeopleChange}
-							min={selectedDeliveryOption === "live-catering" ? 25 : 10}
+							min={selectedDeliveryOption === "live-catering" ? 20 : 10}
 							className="people-input"
 							style={style.noOfPeopleValue}
 						/>
-						<button
+						{/* <button
 							type="button"
 							className="btn increment-btn"
 							onClick={() =>
@@ -453,8 +453,20 @@ function AddFoodOrder() {
 							style={style.PlusMinusBtn}
 						>
 							+
-						</button>
+						</button> */}
+						
 					</div>
+					{/* Range Slider by aarti   */}
+					<input
+							type="range"
+							min={selectedDeliveryOption === "live-catering" ? 20 : 10}
+							max="100" // Adjust max limit as needed
+							value={peopleCount}
+							onChange={(e) => handlePeopleChange(e, 'range')}
+							step={1} // Smoother increments
+							className="people-range"
+							style={{ width: "100%", marginTop: "10px", accentColor: "#007bff", cursor: "pointer" }}
+						/>
 				</div>
 			</div>
 			<div style={style.selectionMsg}>
@@ -500,7 +512,13 @@ function AddFoodOrder() {
 											const unit = dish.per_plate_qty.unit;
 
 											return (
-												<li key={dish._id} className="popup-dish-item" style={style.foodListinPopup}>
+												// by aarti onClick={() => handleDishSelect(dish)} // Clicking anywhere on the <li> selects the dish
+												<li
+													key={dish._id}
+													className="popup-dish-item"
+													style={style.foodListinPopup}
+													onClick={() => handleDishSelect(dish)} // Clicking anywhere on the <li> selects the dish
+												>
 													<div className="dishImgname" style={style.dishImgname}>
 														<Image
 															src={`https://horaservices.com/api/uploads/${dish.image}`}
@@ -520,8 +538,10 @@ function AddFoodOrder() {
 														checked={selectedDishes.some((item) => item.name === dish.name)}
 														onChange={() => handleDishSelect(dish)}
 														className="dish-checkbox"
+														onClick={(e) => e.stopPropagation()} // Prevents <li> click event from firing twice
 													/>
 												</li>
+
 											);
 										})
 									) : (
@@ -656,7 +676,7 @@ function AddFoodOrder() {
                                 </div>
 			</div>
 			
-			<CreateOrderForm itemDataId={itemDataId} selectedMealList={selectedMealList} deliveryCharges={deliveryCharges} totalPrice={totalPrice} discountedPrice={discountedPrice} calculateFinalTotal={calculateFinalTotal} calculateAdvancePayment={calculateAdvancePayment} peopleCount={peopleCount} selectedOption={selectedDeliveryOption}  includeTables={includeTables} />
+			<CreateOrderForm itemDataId={itemDataId} selectedMealList={selectedMealList} deliveryCharges={deliveryCharges} totalPrice={totalPrice} discountedPrice={discountedPrice} calculateFinalTotal={calculateFinalTotal} calculateAdvancePayment={calculateAdvancePayment} peopleCount={peopleCount} selectedOption={selectedDeliveryOption}  includeTables={includeTables} includeDisposable={includeDisposable}/>
 
 		</div>
 	</>);

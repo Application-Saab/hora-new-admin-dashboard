@@ -10,6 +10,23 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
   const [error, setError] = useState(null);
   let apiUrl = "";
 
+  let foodDeliveryInclusions = [
+    "Complementary - Green salad, Mint Chutney, Achar",
+    "Doorstep Delivery",
+    "Freshly cooked food",
+    "Fork, Spoon, Tissue papers",
+  ]
+  let liveCateringInclusions = [
+    "Well Groomed Waiters (2 Nos)",
+    "Bone-china Crockery & Quality disposal for loose items",
+    "Transport (to & fro)",
+    "Dustbin with Garbage bag",
+    "Head Mask for waiters & chefs",
+    "Chafing Dish",
+    "Cocktail Napkins",
+    "2 Chefs"
+  ]
+
   useEffect(() => {
     setLoading(true);
     setError(null);
@@ -30,11 +47,12 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
     // else if (actionPopupOrderType === 8 ) {
     //   // Need new api for photograpgy
     //   const photographyOrderId = actionPopupChefOrderId.toString();
-    //   apiUrl = `https://horaservices.com:3000/api/order/order_details/v1/${photographyOrderId}`;
+    //   apiUrl = `https://horaservices.com:3000/api/order/order_details/v1/${actionPopupOrderId}`;
     //   setPopupType("Photography");
     // } 
     else {
       setError("Currently, data is not available");
+      setPopupType("");
       setLoading(false);
       return;
     }
@@ -62,14 +80,12 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
     fetchOrderapi();
 
   }, [actionPopupOrderId, actionPopupChefOrderId, actionPopupOrderType]);
-  console.log(JSON.stringify(orderDetails))
 
   const getOrderId = (e) => {
     const orderId1 = 10800 + e;
     const updateOrderId = "#" + orderId1;
     return updateOrderId;
   };
-
 
   const getOrderType = (orderTypeValue) => {
     const orderTypes = {
@@ -112,15 +128,12 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
         {item.trim()}
       </li>
     ));
-    return (
-      <div>
-        <div style={{ fontSize: "21px", borderBottom: "1px solid #e7eff9", marginBottom: "10px" }}>Inclusions</div>
-        <ul>
-          {inclusionList}
-        </ul>
-      </div>
-
-    );
+    return (<>
+      <div style={{ fontSize: "21px", borderBottom: "1px solid #e7eff9", marginBottom: "10px" }}>Inclusions</div>
+      <ul>
+        <li>{inclusionList}</li>
+      </ul>
+    </>);
   };
   // share on whatsapp========================
   const sendOrderDetailsToWhatsAppDoc = () => {
@@ -207,7 +220,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
         : "N/A";
 
     // Start building the message
-    let message = `Live-catering Order Summary::\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\n\nAddress: ${address}\nGoogleMapLocation: ${googleMapUrl}\n\nArrival Time: ${orderTime}\n\n*Amount: ₹${balanceAmount}*\nComments: ${decorationComments}\n\n*Dishes*\n`;
+    let message = `Chef Order Summary::\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\n\nAddress: ${address}\nGoogleMapLocation: ${googleMapUrl}\n\nArrival Time: ${orderTime}\n\n*Amount: ₹${balanceAmount}*\nComments: ${decorationComments}\n\n*Dishes*\n`;
 
     // Append each dish to the message
     if (orderDetails?.selecteditems?.length) {
@@ -237,10 +250,11 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
     const address = orderDetails?.addressId?.address1;
     const googleMapLocation = orderDetails?.addressId?.address2 || "N/A";
     const orderTime = orderDetails?.order_time || "N/A";
-    const orderCity = orderDetails?.order_locality || "NA"
-    const peopleCount = orderDetails?.no_of_people || "NA"
-    const orderType = getOrderType(orderDetails?.type) || "NA"
-    let inclusions;
+    const orderCity = orderDetails?.order_locality || "NA";
+    const peopleCount = orderDetails?.no_of_people || "NA";
+    const orderType = getOrderType(orderDetails?.type) || "NA";
+    let disposalInclusion = orderDetails?.userOrderDishImageArray[0].hasOwnProperty("water/disposal");
+    let inclusions = [];
     // const ItemQuantity = orderDetails?.userOrderDishImageArray || "NA"
     // Create a Google Maps link
     const googleMapUrl = orderDetails?.addressId?.address2 ? (`https://www.google.com/maps/search/?q=${encodeURIComponent(googleMapLocation)}`) : 'NA';
@@ -250,25 +264,13 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
         ? orderDetails?.total_amount - orderDetails?.advance_amount
         : "N/A";
         if (orderType === "Food Delivery") {
-
-          inclusions = [
-            "Complementary - Green salad, Mint Chutney, Achar",
-            "Doorstep Delivery",
-            "Disposable plates, Fork, Spoon, Tissue papers, Bisleri Water bottles",
-            "Freshly cooked food"
-          ];
+          inclusions = [...foodDeliveryInclusions]; // Copy the food delivery inclusions
+    
+          if (disposalInclusion) {
+            inclusions.push("Disposable plates, Fork, Spoon, Tissue papers, Bisleri Water bottles");
+          }
         } else if (orderType === "Live Catering") {
-          inclusions = [
-
-            "Well Groomed Waiters (2 Nos)",
-            "Bone-china Crockery & Quality disposal for loose items",
-            "Transport (to & fro)",
-            "Dustbin with Garbage bag",
-            "Head Mask for waiters & chefs",
-            "Chafing Dish",
-            "Cocktail Napkins",
-            "2 Chefs"
-          ];
+          inclusions = [...liveCateringInclusions]; // Copy the live catering inclusions
         } else {
           inclusions = ["No specific inclusions for this order type"];
         }
@@ -295,7 +297,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
     }
 
 
-    message += "\n\n*Inclusions:*\n" + inclusions.join("\n");
+    message += "\n\n*Inclusions:*\n-" + inclusions.join("\n-");
     navigator.clipboard.writeText(message)
       .then(() => {
         alert("Order details have been copied to the clipboard!");
@@ -395,24 +397,40 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                   </ul>)
                 }
               </div>
+              <h3>Inclusions</h3>
+              {orderDetails?.type === 6 ? (
+                <ul>
+                  {foodDeliveryInclusions.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                  {orderDetails?.userOrderDishImageArray[0].hasOwnProperty("water/disposal") && (
+                    <li>Disposable plates,Bisleri Water bottles</li>
+                  )}
+                </ul>
+              ) : orderDetails?.type === 7 ? (
+                <ul>
+                  {liveCateringInclusions.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No inclusions available for this order type.</p>
+              )}
+
             </div>
             <div className="order-summary-box">
               <h3 style={{ color: "white" }}>Order Summary</h3>
               <ul style={{ listStyleType: "none", padding: 0 }}>
-                <li
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
+              <li className="priceList">
                   <strong>Total Amount:</strong>{" "}
                   <span>₹{orderDetails.total_amount}</span>
                 </li>
-                <li
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
+                <li className="priceList">
                   <strong>Advance Amount:</strong>{" "}
                   <span>₹{orderDetails.advance_amount || 0}</span>
                 </li>
 
-                <li style={{ display: "flex", justifyContent: "space-between" }}>
+                <li className="priceList">
 
                   <span>Balance Amount</span>
                   <span>
@@ -422,21 +440,15 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                   </span>
                 </li>
 
-                <li
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
+                <li className="priceList">
                   <strong>Discount:</strong>{" "}
                   <span>₹{orderDetails.discount || 0}</span>
                 </li>
-                <li
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
+                <li className="priceList">
                   <strong>GST:</strong>{" "}
                   <span>₹{orderDetails.gst || 0}</span>
                 </li>
-                <li
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
+                <li className="priceList">
                   <strong>Per person cost:</strong>{" "}
                   <span>₹{orderDetails.per_person_cost || 0}</span>
                 </li>
@@ -452,7 +464,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                   }
                 }}
               >
-                Copy Order Summary
+               Copy Order Summary(For Vendor)
               </button>
 
             </div>
@@ -545,7 +557,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                                     <p>
                                       <Image src={`https://horaservices.com/api/uploads/${dec.featured_image}`} width={200} height={200} alt={`${dec.featured_image}-name`} />
                                     </p>
-                                    <p>{getItemInclusion(dec.inclusion)}</p>
+                                    <div>{getItemInclusion(dec.inclusion)}</div>
                                   </div>
                                 ))
                               )
@@ -559,20 +571,16 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                       <div className="order-summary-box">
                         <h3 style={{ color: "white" }}>Order Summary</h3>
                         <ul style={{ listStyleType: "none", padding: 0 }}>
-                          <li
-                            style={{ display: "flex", justifyContent: "space-between" }}
-                          >
+                        <li className="priceList">
                             <strong>Total Amount:</strong>{" "}
                             <span>₹{orderDetails._doc.total_amount}</span>
                           </li>
-                          <li
-                            style={{ display: "flex", justifyContent: "space-between" }}
-                          >
+                          <li className="priceList">
                             <strong>Advance Amount:</strong>{" "}
                             <span>₹{orderDetails._doc.advance_amount || 0}</span>
                           </li>
 
-                          <li style={{ display: "flex", justifyContent: "space-between" }}>
+                          <li className="priceList">
 
                             <span>Balance Amount</span>
                             <span>
@@ -582,21 +590,15 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                             </span>
                           </li>
 
-                          <li
-                            style={{ display: "flex", justifyContent: "space-between" }}
-                          >
+                          <li className="priceList">
                             <strong>Discount:</strong>{" "}
                             <span>₹{orderDetails._doc.discount || 0}</span>
                           </li>
-                          <li
-                            style={{ display: "flex", justifyContent: "space-between" }}
-                          >
+                          <li className="priceList">
                             <strong>GST:</strong>{" "}
                             <span>₹{orderDetails._doc.gst || 0}</span>
                           </li>
-                          <li
-                            style={{ display: "flex", justifyContent: "space-between" }}
-                          >
+                          <li className="priceList">
                             <strong>Per person cost:</strong>{" "}
                             <span>₹{orderDetails._doc.per_person_cost || 0}</span>
                           </li>

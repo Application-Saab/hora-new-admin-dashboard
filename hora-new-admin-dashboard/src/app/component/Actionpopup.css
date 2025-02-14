@@ -134,3 +134,8 @@
     color: #ffffff;
   }
   
+  .order-summary-box .priceList {
+    display:flex;
+   justify-Content: space-between;
+   margin:4px 0;
+  }
