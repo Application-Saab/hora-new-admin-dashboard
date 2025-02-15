@@ -61,6 +61,7 @@ const ImageUpload = () => {
     }
 
     if (selectedImages.length === 0) {
+      console.log(allImages)
       alert("No images selected for upload.");
       return;
     }
