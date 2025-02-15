@@ -109,6 +109,7 @@ th.order-type-header span {
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  width: 200px;
 }
 
 .download-button {
@@ -144,27 +145,37 @@ th.order-type-header span {
 
 
 /* input date and time */
+.filter-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.filter-container .left {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap:8px;
+  flex-wrap: wrap;
+}
 .filter-btn {
-
   padding: 10px;
   background-color: #5cb85c;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  width: 92px;
+  width:160px;
   margin: 4px
 }
 
-.search-box {
+.filter-box {
   display: flex;
   align-items: center;
-  gap: 8px;
-  width: 100%;
   border: 1px;
 }
 
-.date-filter-container {
+.date.filter-box {
   border: 2px solid #ddd;
   padding: 4px;
   border-radius: 8px;
@@ -182,8 +193,6 @@ th.order-type-header span {
   margin-bottom: 16px;
   color: #333;
 }
-
-
 
 .date-input {
   padding: 8px;

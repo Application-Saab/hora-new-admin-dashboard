@@ -128,17 +128,6 @@ h3 {
   border-color: #007bff;
 }
 
-.filter-container {
-  display: flex;
-
-  gap: 10px;
-  align-items: center;
-}
-.filter-container .left {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-}
 
 .orderDetails_pagination button {
   background-color: green;

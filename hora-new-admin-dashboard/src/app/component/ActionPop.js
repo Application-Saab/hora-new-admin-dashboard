@@ -365,6 +365,56 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
         console.error("Failed to copy order details to clipboard: ", err);
       });
   };
+  const sendOrderDetailsToWhatsAppPhoto = () => {
+    console.log(JSON.stringify(orderDetails.items));
+
+    // Extract order details
+    const orderId = getOrderId(orderDetails.order_id) || "N/A";
+    const orderDate = new Date(orderDetails.order_date).toLocaleDateString() || "N/A";
+    // const orderType = getOrderType(orderDetails._doc.type) || "N/A";
+    const address = orderDetails.addressId?.address1 || "N/A";
+    const googleMapLocation = orderDetails.addressId?.address2 || "N/A";
+    const orderTime = orderDetails.order_time || "N/A";
+    const decorationComments = orderDetails.decoration_comments || "N/A";
+    const addOnItems = orderDetails.add_on || [];
+    // Create a Google Maps link
+    const googleMapUrl = `https://www.google.com/maps/search/?q=${encodeURIComponent(googleMapLocation)}`;
+    // Calculate balance amount
+    let balanceAmount = 0;
+    if (orderDetails.phone_no) {
+      balanceAmount = orderDetails.total_amount - orderDetails.advance_amount;
+    } else {
+      if ([2, 3, 4, 5].includes(orderDetails?.type)) {
+        balanceAmount = Math.round((orderDetails?.payable_amount * 4) / 5);
+      } else if ([6, 7].includes(orderDetails?.type)) {
+        balanceAmount = Math.round(orderDetails?.payable_amount * 0.35);
+      } else {
+        balanceAmount = Math.round(orderDetails?.payable_amount * 0.65);
+      }
+    }
+
+    // Construct the message
+    // Order Type: ${orderType}\n
+    let message = `Photography Order Details:\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\nAddress: ${address}\nGoogleMapLocation: ${googleMapUrl}\nArrival Time: ${orderTime}\n\n*Amount:₹${balanceAmount}*\n\n*Comments*:\n ${decorationComments}\n`;
+
+    // Add Inclusion Items
+    message += `\n*Inclusion:*\n`;
+    if (addOnItems && addOnItems.length > 0) {
+      addOnItems.forEach((item, index) => {
+        message += `\n${index + 1}. ${item}`;
+      });
+    } else {
+      message += ` None`;  // Show "None" if there are no add-ons
+    }
+
+    navigator.clipboard.writeText(message)
+      .then(() => {
+        alert("Order details have been copied to the clipboard!");
+      })
+      .catch((err) => {
+        console.error("Failed to copy order details to clipboard: ", err);
+      });
+  };
 
   const sendOrderDetailsToWhatsAppchef = (orderDetails) => {
     console.log(orderDetails);
@@ -710,9 +760,9 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                           <strong>Per person cost:</strong> <span>₹{orderDetails.per_person_cost || 0}</span>
                         </li>
                       </ul>
-                      {/* <button className="startbutton" onClick={sendOrderDetailsToWhatsAppDoc}>
+                      <button className="startbutton" onClick={sendOrderDetailsToWhatsAppPhoto}>
                         Copy Order Summary<br/>(For Vendor)
-                      </button> */}
+                      </button>
                     </div>
                   </div>
                 </div>

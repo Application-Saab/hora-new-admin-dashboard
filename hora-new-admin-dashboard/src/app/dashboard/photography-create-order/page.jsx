@@ -268,6 +268,7 @@ const AddPhotoOrder = () => {
 
     const requestData = {
       add_on: inclusion,
+      selecteditems: dishName,
       phone_no: customerNumber,
       toId: "",
       order_time: timeSlot.value,

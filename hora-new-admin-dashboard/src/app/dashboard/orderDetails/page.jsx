@@ -224,12 +224,12 @@ const OrderList = () => {
     <div className="orderDetailsList">
       <div className="order-list-container">
         <div className="order-header">
-          <h2>Order Details</h2>
+          <h1>Order Details</h1>
         </div>
         <div className="filter-container">
           <div className="left part">
-            <div className="search-filter-box">
-              <div className="search-box">
+          
+              <div className="search filter-box">
                 <input
                   type="text"
                   className="small-search byId"
@@ -243,9 +243,9 @@ const OrderList = () => {
 
 
               </div>
-            </div>
+         
             {/* Phone Number Search */}
-            <div className="phone-filter-container">
+            <div className="phone filter-box">
               <input
                 type="text"
                 className="small-search byPhone"
@@ -260,7 +260,7 @@ const OrderList = () => {
 
             </div>
             {/* date search */}
-            <div className="date-filter-container">
+            <div className="date filter-box">
 
               <label className="date-label">Order Fullfilement Date</label>
               <input
