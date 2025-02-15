@@ -80,7 +80,7 @@ const CheckCustomer = ({ onCustomerIdChange }) => {
     };
 
     return (
-        <div className="container">
+        <div className="container checkcustoer">
             <div className="orderCreation form">
                 <input
                     type="text"
@@ -227,7 +227,8 @@ const style = {
     cancelButtonHover: {
       background: "#d6d6d6",
     },
-  
+
+ 
     "@media (max-width: 480px)": {
       popup: {
         width: "90%",
