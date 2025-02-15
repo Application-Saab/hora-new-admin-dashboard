@@ -1,7 +1,11 @@
 .createPhotoFolder {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+  display: flex
+  ;
+      flex-direction: column;
+      gap: 5px;
+      width: 59%;
+      justify-content: flex-start;
+      align-items: flex-start;
 }
 
 .buttonSecondary {

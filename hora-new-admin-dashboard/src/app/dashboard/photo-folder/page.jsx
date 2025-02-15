@@ -78,7 +78,7 @@ const PhotoCreateProject = () => {
 
           />
         </div>
-        <button type="submit" className="buttonPrimary" disabled={!customerId}>Create Folder</button>
+        <button type="submit" className="buttonPrimary create-order" disabled={!customerId} >Create Folder</button>
       </form>
       <div className='checkFolder'>
         <h2>Check already existing folder</h2>

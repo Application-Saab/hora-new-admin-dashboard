@@ -374,8 +374,12 @@ th.order-type-header span {
 }
 
 .not-assigned-btn {
-  background-color: #FF0000  ;
-  color: white;
+  background-color: #FF0000;
+    color: white;
+    font-size: 9px;
+    display: flex;
+    width: auto;
+    padding: 4px 2px;
 }
 
 .order-check-btn {
