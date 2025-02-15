@@ -8,7 +8,6 @@ const CheckCustomer = ({ onCustomerIdChange }) => {
     const [message, setMessage] = useState("");
     const [messageColor, setMessageColor] = useState("");
     const [customerNumber, setCustomerNumber] = useState("");
-    const [customerId, setCustomerId] = useState(null);
     const [showPopup, setShowPopup] = useState(false);
     const [newCustomerName, setNewCustomerName] = useState("");
     const [newCustomerPhone, setNewCustomerPhone] = useState("");
@@ -32,7 +31,7 @@ const CheckCustomer = ({ onCustomerIdChange }) => {
                 const foundCustomerId = users[0]._id;
                 setMessage("Customer exists.");
                 setMessageColor("green");
-                setCustomerId(foundCustomerId);
+               
                 onCustomerIdChange(foundCustomerId); // Pass customerId to parent
                 setShowPopup(false);
             } else {
@@ -67,7 +66,7 @@ const CheckCustomer = ({ onCustomerIdChange }) => {
             );
 
             const newCustomerId = response.data.dataToSave._id;
-            setCustomerId(newCustomerId);
+        
             onCustomerIdChange(newCustomerId); // Pass new customerId to parent
             setMessage("Customer successfully added.");
             setMessageColor("green");

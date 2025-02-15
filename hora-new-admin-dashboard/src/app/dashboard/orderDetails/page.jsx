@@ -216,9 +216,9 @@ const OrderList = () => {
     setIsModalOpen(true);
   };
 
-  const CloseSupplierAssignPopup = () => {
-    setIsModalOpen(false);
-  };
+  // const CloseSupplierAssignPopup = () => {
+  //   setIsModalOpen(false);
+  // };
 
   return (
     <div className="orderDetailsList">

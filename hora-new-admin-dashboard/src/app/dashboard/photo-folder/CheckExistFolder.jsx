@@ -68,6 +68,7 @@ const CheckExistFolder = () => {
         setError(data.message || "An error occurred while deleting the folder.");
       }
     } catch (error) {
+      console.log(error)
       setError("Failed to delete folder.");
     } finally {
       setLoading(false);

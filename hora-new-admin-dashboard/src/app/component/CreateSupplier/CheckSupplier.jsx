@@ -14,7 +14,7 @@ const CheckSupplier = ({ SelectedOrder, setShowModal ,setIsSupplierAssigned}) =>
   const handleClosePopup = () => {
     setShowModal(false); // Directly call setShowModal to close the modal
   };
-console.log(SelectedOrder ,"hio")
+
   const handleCreateSupplier = () => {
     setShowCreatePopup(true);
   };
@@ -104,7 +104,7 @@ console.log(SelectedOrder ,"hio")
     } catch (err) {
       setMessage("An error occurred while checking the supplier.");
       setMessageColor("red");
-      console.error("Error:", err);
+      console.error("Error:", err ,showPopup);
       setSupplierData(null);
     } finally {
       setLoading(false);
