@@ -1,53 +1,20 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import ThumbnailGallery from "./ThumbnailGallery";
 
-const ImageUpload = () => {
+const ImageUpload = ({ folderTitle, customerId }) => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [allImages, setAllImages] = useState([]);
   const [updatedImg, setUpdatedImg] = useState(true);
   const [showLink, setShowLink] = useState(true);
-  const [folderTitle, setFolderTitle] = useState("");
-  const [customerId, setCustomerId] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
 
-  // Fetch user details from localStorage safely (only on the client side)
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedUser = JSON.parse(localStorage.getItem("userDetails")) || {};
-      setFolderTitle(storedUser.folderTitle || "");
-      setCustomerId(storedUser.customerId || "");
-    }
-  }, []);
-  // resizer Handle Local File Selection
-  // const handleImageChange = (e) => {
-  //   const files = Array.from(e.target.files);
-  //   const resizedImages = [];
-
-  //   files.forEach((file) => {
-  //     Resizer.imageFileResizer(
-  //       file,
-  //       800,
-  //       800,
-  //       "JPEG",
-  //       80,
-  //       0,
-  //       (uri) => {
-  //         resizedImages.push({ file: uri, name: file.name });
-  //         if (resizedImages.length === files.length) {
-  //           setSelectedImages((prev) => [...prev, ...resizedImages]);
-  //         }
-  //       },
-  //       "file"
-  //     );
-  //   });
-  // };
-  
   // Handle file selection
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     const selectedImages = files.map((file) => ({
       file,
-      name: file.name
+      name: file.name,
     }));
 
     setSelectedImages((prev) => [...prev, ...selectedImages]);
@@ -56,16 +23,16 @@ const ImageUpload = () => {
   // Upload images
   const handleUpload = async () => {
     if (!folderTitle || !customerId) {
-      alert("Missing user details in local storage.");
+      alert("Missing user details.");
       return;
     }
 
     if (selectedImages.length === 0) {
-      console.log(allImages)
       alert("No images selected for upload.");
       return;
     }
 
+    setIsUploading(true);
     const formData = new FormData();
     formData.append("folderName", folderTitle);
     formData.append("customerId", customerId);
@@ -87,15 +54,14 @@ const ImageUpload = () => {
       setAllImages((prev) => [...prev, ...selectedImages]);
       setSelectedImages([]);
       setShowLink(true);
-
-      // Force a re-render of the gallery
       setUpdatedImg(false);
       setTimeout(() => setUpdatedImg(true), 100);
     } catch (error) {
       console.error("Upload failed", error);
       alert("Upload failed");
-      setUpdatedImg(false);
       setShowLink(false);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -128,17 +94,20 @@ const ImageUpload = () => {
             <button
               onClick={handleUpload}
               className="mt-4"
+              disabled={isUploading}
               style={{
                 padding: "10px 20px",
-                backgroundColor: "#007BFF",
+                backgroundColor: isUploading ? "#ccc" : "#007BFF",
                 color: "#fff",
                 border: "none",
                 borderRadius: "5px",
-                cursor: "pointer",
+                cursor: isUploading ? "not-allowed" : "pointer",
+                position: "relative",
               }}
             >
-              Upload All Images
+              {isUploading ? "Uploading..." : "Upload All Images"}
             </button>
+            {isUploading && <p>Uploading, please wait...</p>}
           </div>
         )}
       </div>
@@ -160,3 +129,40 @@ const ImageUpload = () => {
 };
 
 export default ImageUpload;
+
+
+
+
+
+// dnt delete
+// Fetch user details from localStorage safely (only on the client side)
+  // useEffect(() => {
+  //   if (typeof window !== "undefined") {
+  //     const storedUser = JSON.parse(localStorage.getItem("userDetails")) || {};
+  //     setFolderTitle(storedUser.folderTitle || "");
+  //     setCustomerId(storedUser.customerId || "");
+  //   }
+  // }, []);
+  // resizer Handle Local File Selection
+  // const handleImageChange = (e) => {
+  //   const files = Array.from(e.target.files);
+  //   const resizedImages = [];
+
+  //   files.forEach((file) => {
+  //     Resizer.imageFileResizer(
+  //       file,
+  //       800,
+  //       800,
+  //       "JPEG",
+  //       80,
+  //       0,
+  //       (uri) => {
+  //         resizedImages.push({ file: uri, name: file.name });
+  //         if (resizedImages.length === files.length) {
+  //           setSelectedImages((prev) => [...prev, ...resizedImages]);
+  //         }
+  //       },
+  //       "file"
+  //     );
+  //   });
+  // };

@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from "react";
 import CheckCustomer from "./CheckCustomer"; // Import the CheckCustomer component
-
+import ImageUpload from "./uploadInfolder/ImageUpload"; // Import the ImageUpload component
 const CheckExistFolder = () => {
   const [customerId, setCustomerId] = useState("");
   const [folders, setFolders] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
+  const [enteredNum, setEnteredNum] = useState(null);
+const [error, setError] = useState(null);
   // Fetch folder details based on customerId
   useEffect(() => {
     if (customerId) {
       const fetchFolders = async () => {
         setLoading(true);
-        setError(null); // Reset previous errors
+        // Reset previous folders
+        // setCustomerId(''); // Reset previous errors
         try {
           const response = await fetch(
             `https://horaservices.com:3000/api/photo/GetFoldersByCustomerId/${customerId}`
@@ -22,14 +23,15 @@ const CheckExistFolder = () => {
           }
           const data = await response.json();
           setFolders(data.folders); // Store the folder details
-
+         
           // Store the first folder's name and customerId in localStorage
-          if (data.folders.length > 0) {
-            localStorage.setItem(
-              'userDetails',
-              JSON.stringify({ folderTitle: data.folders[0].folderName, customerId })
-            );
-          }
+          // if (data.folders.length > 0) {
+          //   localStorage.setItem(
+          //     'userDetails',
+          //     JSON.stringify({ folderTitle: data.folders[0].folderName, customerId })
+          //   );
+          // }
+          setLoading(false);
         } catch (err) {
           setError(err.message);
         } finally {
@@ -74,34 +76,28 @@ const CheckExistFolder = () => {
       setLoading(false);
     }
   };
+useEffect(() => {
 
+setFolders(null);
+
+}, [customerId]);
   return (
     <div>
       {/* CheckCustomer component to get customer ID */}
-      <CheckCustomer onCustomerIdChange={setCustomerId} />
+      <CheckCustomer onCustomerIdChange={setCustomerId} setEnteredNum={setEnteredNum} />
 
-      {loading && <div>Loading...</div>}
-      {error && <div style={{ color: "red" }}>Error: {error}</div>}
-
-      {folders ? (
+      {loading ? (
+        <div>Loading...</div>
+      ) : folders && folders.length > 0  ? (
         <div>
-          <h3>Customer {customerId} has the following folders:</h3>
+          <h3>Customer {enteredNum} has the following folders:</h3>
           <ul>
             {folders.map((folder) => (
               <li key={folder._id}>
+         
                 <h4>Folder Name: {folder.folderName}</h4>
                 <p>Customer ID: {folder.customerId}</p>
-                {/* <p>Vendor ID: {folder.vendorId}</p>
-                <p>Created At: {new Date(folder.createdAt).toLocaleString()}</p> */}
-                <a
-                  href={`/dashboard/photo-folder/${encodeURIComponent(folder.folderName)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="buttonPrimary deletFolder"
-                >
-                  Folder Link
-                </a>
-                <button
+                {/* <button
                   onClick={() => deleteFolder(folder.folderName)}
                   disabled={loading}
                   style={{
@@ -116,14 +112,19 @@ const CheckExistFolder = () => {
                   className="buttonSecondary"
                 >
                   Delete Folder
-                </button>
+                </button> */}
+                <ImageUpload customerId={folder.customerId} folderTitle={folder.folderName} />
               </li>
+            
+              
             ))}
           </ul>
         </div>
       ) : (
-        customerId && <div>Customer {customerId} has no folders.</div>
+        customerId && <div>Customer {enteredNum} has no folders.</div>
       )}
+
+
     </div>
   );
 };

@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { BASE_URL, ADMIN_USER_LIST } from "../../../utils/apiconstant";
 
-const CheckCustomer = ({ onCustomerIdChange }) => {
+const CheckCustomer = ({ onCustomerIdChange , setEnteredNum }) => {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
     const [messageColor, setMessageColor] = useState("");
@@ -31,7 +31,7 @@ const CheckCustomer = ({ onCustomerIdChange }) => {
                 const foundCustomerId = users[0]._id;
                 setMessage("Customer exists.");
                 setMessageColor("green");
-               
+                setEnteredNum(customerNumber);
                 onCustomerIdChange(foundCustomerId); // Pass customerId to parent
                 setShowPopup(false);
             } else {
@@ -79,7 +79,7 @@ const CheckCustomer = ({ onCustomerIdChange }) => {
     };
 
     return (
-        <div className="container checkcustoer">
+        <div className="container checkcustomer">
             <div className="orderCreation form">
                 <input
                     type="text"
