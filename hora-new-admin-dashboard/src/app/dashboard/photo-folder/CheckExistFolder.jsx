@@ -1,49 +1,47 @@
 import React, { useState, useEffect } from "react";
-import CheckCustomer from "./CheckCustomer"; // Import the CheckCustomer component
+import CheckCustomer from "./CheckCustomer";
+import ImageUpload from "./uploadInfolder/ImageUpload";
 
 const CheckExistFolder = () => {
   const [customerId, setCustomerId] = useState("");
-  const [folders, setFolders] = useState(null);
+  const [folders, setFolders] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [enteredNum, setEnteredNum] = useState(null);
+  const [isCustomer, setIsCustomer] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch folder details based on customerId
   useEffect(() => {
-    if (customerId) {
-      const fetchFolders = async () => {
-        setLoading(true);
-        setError(null); // Reset previous errors
-        try {
-          const response = await fetch(
-            `https://horaservices.com:3000/api/photo/GetFoldersByCustomerId/${customerId}`
-          );
-          if (!response.ok) {
-            throw new Error(`Failed to fetch: ${response.statusText}`);
-          }
-          const data = await response.json();
-          setFolders(data.folders); // Store the folder details
+    if (!customerId || !isCustomer) return;
 
-          // Store the first folder's name and customerId in localStorage
-          if (data.folders.length > 0) {
-            localStorage.setItem(
-              'userDetails',
-              JSON.stringify({ folderTitle: data.folders[0].folderName, customerId })
-            );
-          }
-        } catch (err) {
-          setError(err.message);
-        } finally {
-          setLoading(false);
+    const fetchFolders = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch(
+          `https://horaservices.com:3000/api/photo/GetFoldersByCustomerId/${customerId}`
+        );
+
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
-      };
 
-      fetchFolders();
-    }
-  }, [customerId]);
+        const data = await response.json();
+        setFolders(data.folders || []);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Function to delete the folder
+    fetchFolders();
+  }, [customerId, isCustomer]);
+
   const deleteFolder = async (folderName) => {
     setLoading(true);
+    setError(null);
+
     try {
       const response = await fetch(
         "https://horaservices.com:3000/api/photo/DeleteFolder",
@@ -52,23 +50,21 @@ const CheckExistFolder = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            folderName: folderName,
-            customerId: customerId,
-          }),
+          body: JSON.stringify({ folderName, customerId }),
         }
       );
 
-      if (response.ok) {
-        // Remove the folder from the state without making a new fetch request
-        setFolders(folders.filter((folder) => folder.folderName !== folderName));
-        alert(`Folder "${folderName}" deleted successfully.`);
-      } else {
-        const data = await response.json();
-        setError(data.message || "An error occurred while deleting the folder.");
+      if (!response.ok) {
+        throw new Error("Failed to delete folder.");
       }
+
+      setFolders((prevFolders) =>
+        prevFolders.filter((folder) => folder.folderName !== folderName)
+      );
+
+      alert(`Folder "${folderName}" deleted successfully.`);
     } catch (error) {
-      setError("Failed to delete folder.");
+      setError(error.message);
     } finally {
       setLoading(false);
     }
@@ -76,30 +72,24 @@ const CheckExistFolder = () => {
 
   return (
     <div>
-      {/* CheckCustomer component to get customer ID */}
-      <CheckCustomer onCustomerIdChange={setCustomerId} />
+      <CheckCustomer
+        onCustomerIdChange={setCustomerId}
+        setEnteredNum={setEnteredNum}
+        setIsCustomer={setIsCustomer}
+      />
+
+      {/* {error && <div style={{ color: "red", marginTop: "10px" }}>{error}</div>} */}
 
       {loading && <div>Loading...</div>}
-      {error && <div style={{ color: "red" }}>Error: {error}</div>}
 
-      {folders ? (
+      {!loading && folders.length > 0 ? (
         <div>
-          <h3>Customer {customerId} has the following folders:</h3>
+          <h3>Customer {enteredNum} has the following folders:</h3>
           <ul>
             {folders.map((folder) => (
-              <li key={folder._id}>
+              <li key={folder._id} style={{ marginBottom: "15px" }}>
                 <h4>Folder Name: {folder.folderName}</h4>
                 <p>Customer ID: {folder.customerId}</p>
-                {/* <p>Vendor ID: {folder.vendorId}</p>
-                <p>Created At: {new Date(folder.createdAt).toLocaleString()}</p> */}
-                <a
-                  href={`/dashboard/photography-upload/${encodeURIComponent(folder.folderName)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="buttonPrimary deletFolder"
-                >
-                  Folder Link
-                </a>
                 <button
                   onClick={() => deleteFolder(folder.folderName)}
                   disabled={loading}
@@ -112,16 +102,19 @@ const CheckExistFolder = () => {
                     cursor: loading ? "not-allowed" : "pointer",
                     margin: "10px",
                   }}
-                  className="buttonSecondary"
                 >
                   Delete Folder
                 </button>
+                <ImageUpload
+                  customerId={folder.customerId}
+                  folderTitle={folder.folderName}
+                />
               </li>
             ))}
           </ul>
         </div>
       ) : (
-        customerId && <div>Customer {customerId} has no folders.</div>
+        customerId && !loading && <div>Customer {enteredNum} has no folders.</div>
       )}
     </div>
   );

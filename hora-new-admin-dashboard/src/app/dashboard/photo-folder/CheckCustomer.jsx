@@ -3,12 +3,11 @@ import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { BASE_URL, ADMIN_USER_LIST } from "../../../utils/apiconstant";
 
-const CheckCustomer = ({ onCustomerIdChange }) => {
+const CheckCustomer = ({ onCustomerIdChange , setEnteredNum ,setIsCustomer}) => {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
     const [messageColor, setMessageColor] = useState("");
     const [customerNumber, setCustomerNumber] = useState("");
-    const [customerId, setCustomerId] = useState(null);
     const [showPopup, setShowPopup] = useState(false);
     const [newCustomerName, setNewCustomerName] = useState("");
     const [newCustomerPhone, setNewCustomerPhone] = useState("");
@@ -32,13 +31,15 @@ const CheckCustomer = ({ onCustomerIdChange }) => {
                 const foundCustomerId = users[0]._id;
                 setMessage("Customer exists.");
                 setMessageColor("green");
-                setCustomerId(foundCustomerId);
-                onCustomerIdChange(foundCustomerId); // Pass customerId to parent
+                onCustomerIdChange(foundCustomerId); // from craete folder
                 setShowPopup(false);
+                setIsCustomer(true);
+                setEnteredNum(customerNumber); // from chek folder
             } else {
                 setMessage("Customer does not exist.");
                 setMessageColor("red");
                 setShowPopup(true);
+                setIsCustomer(false);
             }
         } catch (err) {
             setMessage("An error occurred while checking the customer.");
@@ -67,7 +68,7 @@ const CheckCustomer = ({ onCustomerIdChange }) => {
             );
 
             const newCustomerId = response.data.dataToSave._id;
-            setCustomerId(newCustomerId);
+        
             onCustomerIdChange(newCustomerId); // Pass new customerId to parent
             setMessage("Customer successfully added.");
             setMessageColor("green");
@@ -80,7 +81,7 @@ const CheckCustomer = ({ onCustomerIdChange }) => {
     };
 
     return (
-        <div className="container">
+        <div className="container checkcustomer">
             <div className="orderCreation form">
                 <input
                     type="text"
@@ -227,7 +228,8 @@ const style = {
     cancelButtonHover: {
       background: "#d6d6d6",
     },
-  
+
+ 
     "@media (max-width: 480px)": {
       popup: {
         width: "90%",

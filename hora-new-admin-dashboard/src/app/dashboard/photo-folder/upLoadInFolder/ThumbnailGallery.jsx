@@ -92,32 +92,47 @@ const ThumbnailGallery = ({ folderName, customerId }) => {
         )}
       </div>
       {selectedIndex !== null && (
-        <div className="popupOverlay" onClick={closePopup}>
-          <div className="popupContent" onClick={(e) => e.stopPropagation()}>
-            <button className="closeButton" onClick={closePopup}>X</button>
-            <Slider {...sliderSettings} initialSlide={selectedIndex}>
-              {thumbnails.map((thumbnail, index) => (
-                <div key={index}>
-                  <img
-                    src={originalImages[thumbnail.key] || thumbnail.url}
-                    alt="Original"
-                    className="popupImage"
-                  />
-                  <a
-                    href={originalImages[thumbnail.key] || thumbnail.url}
-                    download
-                    className="downloadButton"
-                  >
-                    Download Original Image
-                  </a>
-                </div>
-              ))}
-            </Slider>
-          </div>
-        </div>
-      )}
+  <div className="popupOverlay" onClick={closePopup}>
+    <div className="popupContent" onClick={(e) => e.stopPropagation()}>
+      <button className="closeButton" onClick={closePopup}>X</button>
+      <Slider {...sliderSettings} initialSlide={selectedIndex}>
+        {thumbnails.map((thumbnail, index) => {
+          const imageUrl = originalImages[thumbnail.key] || thumbnail.url;
+          
+          const copyToClipboard = () => {
+            navigator.clipboard.writeText(imageUrl).then(() => {
+              alert("Link copied to clipboard!");
+            }).catch((err) => {
+              console.error("Failed to copy:", err);
+            });
+          };
+
+          return (
+            <div key={index}>
+              <img src={imageUrl} alt="Original" className="popupImage" />
+              
+              <div className="buttonContainer">
+                {/* Download Button */}
+                <a href={imageUrl} download={`image-${index}.jpg`} className="downloadButton">
+                  Download Original Image
+                </a>
+
+                {/* Copy Link Button */}
+                <button onClick={copyToClipboard} className="buttonSecondary">
+                  Copy Link
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </Slider>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };
 
 export default ThumbnailGallery;
+
