@@ -17,7 +17,7 @@ const nextConfig = {
   images:{
       unoptimized:true
     },
-//   output: "export",
+  output: "export",
   // trailingSlash: true,
   webpack(config) {
       config.module.rules.push({
