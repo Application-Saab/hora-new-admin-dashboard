@@ -25,7 +25,7 @@ function AddFoodOrder() {
 	const [includeDisposable, setIncludeDisposable] = useState(false);
 	const [includeTables, setIncludeTables] = useState(false);
 	const [itemDataId, setItemDataId] = useState({ items: [] });
-	const deliveryCharges = 300;
+	const deliveryCharges = 350;
 	const packingCost = 200;
 	
 	const handleChange = (event) => {
@@ -260,7 +260,7 @@ function AddFoodOrder() {
 			  if (selectedDeliveryOption === 'food-delivery') {
 				  {
 				  finalTotal = parseFloat(discountedPrice) > 4000
-				  ? parseFloat(discountedPrice)
+				  ? parseFloat(discountedPrice) + deliveryCharges
 				  : parseFloat(discountedPrice) + deliveryCharges;
 	  
 				  }
@@ -627,15 +627,15 @@ function AddFoodOrder() {
                                                 <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', marginTop: 3  , borderBottom:"1px solid rgb(215, 215, 215)" }}>
                                                     <p style={{ color: "#9252AA", fontWeight: '600', fontSize: 14, lineHeight: '20px' }}>Delivery Charges</p>
                                                     <div style={{ color: "#9252AA", fontWeight: '600', fontSize: 14, lineHeight: '20px', display: 'flex', flexDirection: "row" }}>
-                                                        {discountedPrice > 4000 ? (
+                                                        {/* {discountedPrice > 4000 ? (
                                                             <>
                                                                 <p style={{ color: "#008631", fontWeight: '600', marginRight: 5 }}>FREE</p>
                                                                 <p style={{ textDecoration: "line-through", color: "#9252AA", fontWeight: '600' }}>₹ {deliveryCharges}</p>
                                                             </>
                                                         ) :
-                                                         (
+                                                         ( */}
                                                             <p style={{ color: "#9252AA", fontWeight: '600' }}>₹ {deliveryCharges}</p>
-                                                        )}
+                                                        {/* )} */}
                                                     </div>
                                                 </div>
                                             </div>

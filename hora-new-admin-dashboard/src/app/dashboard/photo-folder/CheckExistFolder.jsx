@@ -6,7 +6,7 @@ const CheckExistFolder = () => {
   const [folders, setFolders] = useState(null);
   const [loading, setLoading] = useState(false);
   const [enteredNum, setEnteredNum] = useState(null);
-const [error, setError] = useState(null);
+const [ setError] = useState(null);
   // Fetch folder details based on customerId
   useEffect(() => {
     if (customerId) {
@@ -44,38 +44,38 @@ const [error, setError] = useState(null);
   }, [customerId]);
 
   // Function to delete the folder
-  const deleteFolder = async (folderName) => {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        "https://horaservices.com:3000/api/photo/DeleteFolder",
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            folderName: folderName,
-            customerId: customerId,
-          }),
-        }
-      );
+  // const deleteFolder = async (folderName) => {
+  //   setLoading(true);
+  //   try {
+  //     const response = await fetch(
+  //       "https://horaservices.com:3000/api/photo/DeleteFolder",
+  //       {
+  //         method: "DELETE",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({
+  //           folderName: folderName,
+  //           customerId: customerId,
+  //         }),
+  //       }
+  //     );
 
-      if (response.ok) {
-        // Remove the folder from the state without making a new fetch request
-        setFolders(folders.filter((folder) => folder.folderName !== folderName));
-        alert(`Folder "${folderName}" deleted successfully.`);
-      } else {
-        const data = await response.json();
-        setError(data.message || "An error occurred while deleting the folder.");
-      }
-    } catch (error) {
-      console.log(error)
-      setError("Failed to delete folder.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     if (response.ok) {
+  //       // Remove the folder from the state without making a new fetch request
+  //       setFolders(folders.filter((folder) => folder.folderName !== folderName));
+  //       alert(`Folder "${folderName}" deleted successfully.`);
+  //     } else {
+  //       const data = await response.json();
+  //       setError(data.message || "An error occurred while deleting the folder.");
+  //     }
+  //   } catch (error) {
+  //     console.log(error)
+  //     setError("Failed to delete folder.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 useEffect(() => {
 
 setFolders(null);

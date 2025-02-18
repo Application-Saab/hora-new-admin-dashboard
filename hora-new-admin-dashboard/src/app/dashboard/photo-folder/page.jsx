@@ -48,6 +48,7 @@ const PhotoCreateProject = () => {
   };
 
   const handleCustomerId = (id) => {
+    console.log(isCustomer ,'is custoimer')
     setCustomerId(id); // Update parent state when customer is found/added
   };
 

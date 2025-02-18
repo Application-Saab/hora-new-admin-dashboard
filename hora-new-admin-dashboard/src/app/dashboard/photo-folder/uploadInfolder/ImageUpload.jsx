@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import ThumbnailGallery from "./ThumbnailGallery";
 const ImageUpload = ({ folderTitle, customerId }) => {
   const [selectedImages, setSelectedImages] = useState([]);
-  const [allImages, setAllImages] = useState([]);
+  const [setAllImages] = useState([]);
   const [updatedImg, setUpdatedImg] = useState(true);
   const [showLink, setShowLink] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
@@ -114,8 +114,8 @@ const ImageUpload = ({ folderTitle, customerId }) => {
       {showLink && folderTitle && customerId && (
         <>
           <h3>Folder link to share:</h3>
-          <a href={`http://localhost:3001/photo-gallery?folderName=${folderTitle}&customerId=${customerId}`}>
-            {`http://localhost:3001/photo-gallery?folderName=${folderTitle}&customerId=${customerId}`}
+          <a href={`https://horaservices.com/photo-gallery?folderName=${folderTitle}&customerId=${customerId}`}>
+            {`https://horaservices.com/photo-gallery?folderName=${folderTitle}&customerId=${customerId}`}
           </a>
         </>
       )}
