@@ -1,24 +1,46 @@
 "use client";
 import React, { useState } from "react";
 import ThumbnailGallery from "./ThumbnailGallery";
-
+import Resizer from "react-image-file-resizer";
 const ImageUpload = ({ folderTitle, customerId }) => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [allImages, setAllImages] = useState([]);
   const [updatedImg, setUpdatedImg] = useState(true);
   const [showLink, setShowLink] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
-
-  // Handle file selection
+  // resizer Handle Local File Selection
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    const selectedImages = files.map((file) => ({
-      file,
-      name: file.name,
-    }));
+    const resizedImages = [];
 
-    setSelectedImages((prev) => [...prev, ...selectedImages]);
+    files.forEach((file) => {
+      Resizer.imageFileResizer(
+        file,
+        800,
+        800,
+        "JPEG",
+        80,
+        0,
+        (uri) => {
+          resizedImages.push({ file: uri, name: file.name });
+          if (resizedImages.length === files.length) {
+            setSelectedImages((prev) => [...prev, ...resizedImages]);
+          }
+        },
+        "file"
+      );
+    });
   };
+  // Handle file selection
+  // const handleImageChange = (e) => {
+  //   const files = Array.from(e.target.files);
+  //   const selectedImages = files.map((file) => ({
+  //     file,
+  //     name: file.name,
+  //   }));
+
+  //   setSelectedImages((prev) => [...prev, ...selectedImages]);
+  // };
 
   // Upload images
   const handleUpload = async () => {
@@ -67,7 +89,7 @@ const ImageUpload = ({ folderTitle, customerId }) => {
 
   return (
     <>
-      <div className="p-4">
+      <div className="imageupload-container">
         <input
           type="file"
           multiple
