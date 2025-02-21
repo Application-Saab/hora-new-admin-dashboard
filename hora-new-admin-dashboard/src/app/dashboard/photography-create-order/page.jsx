@@ -268,6 +268,7 @@ const AddPhotoOrder = () => {
 
     const requestData = {
       add_on: inclusion,
+      selecteditems: dishName,
       phone_no: customerNumber,
       toId: "",
       order_time: timeSlot.value,
@@ -550,7 +551,7 @@ const AddPhotoOrder = () => {
                   <option value="Bangalore">Bangalore</option>
                   <option value="Delhi">Delhi</option>
                   <option value="Mumbai">Mumbai</option>
-                  <option value="Hyderbad">Hyderbad</option>
+                  <option value="Hyderabad">Hyderabad</option>
                 </select>
 
               </div>
@@ -623,7 +624,7 @@ const AddPhotoOrder = () => {
       </form>
 
             { message === "Customer exists." && <button onClick={copyOrderSummary} style={style.buttonPrimary}>
-                            Copy Order Summary
+            Copy Order Summary(For Customer)
                         </button>
                         }
     </div>

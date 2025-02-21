@@ -10,7 +10,7 @@ import {
 	GET_MEAL_DISH_ENDPOINT,
 } from "../../../utils/apiconstant"
 import checkImage from '../../../assets/check.png';
-import CreateOrderForm from "../../component/CreateOrderForm"
+import CreateFoodOrderForm from "../../component/CreateFoodOrderForm"
 
 function AddFoodOrder() {
 	const [loading, setLoading] = useState(false);
@@ -25,7 +25,7 @@ function AddFoodOrder() {
 	const [includeDisposable, setIncludeDisposable] = useState(false);
 	const [includeTables, setIncludeTables] = useState(false);
 	const [itemDataId, setItemDataId] = useState({ items: [] });
-	const deliveryCharges = 300;
+	const deliveryCharges = 350;
 	const packingCost = 200;
 	
 	const handleChange = (event) => {
@@ -34,13 +34,13 @@ function AddFoodOrder() {
 	// Dynamically update `peopleCount` based on `selectedOption`
 	useEffect(() => {
 		if (  selectedDeliveryOption   === "live-catering") {
-			setPeopleCount(35);
+			setPeopleCount(20);
 		} else {
 			setPeopleCount(10);
 		}
 	}, [selectedDeliveryOption]);
 	const handlePeopleChange = (e) => {
-		const minNum = selectedDeliveryOption === "live-catering" ? 35 : 10;
+		const minNum = selectedDeliveryOption === "live-catering" ? 20 : 10;
 
 		const value = Math.max(minNum, Number(e.target.value)); // Use minNum dynamically
 		setPeopleCount(value);
@@ -260,7 +260,7 @@ function AddFoodOrder() {
 			  if (selectedDeliveryOption === 'food-delivery') {
 				  {
 				  finalTotal = parseFloat(discountedPrice) > 4000
-				  ? parseFloat(discountedPrice)
+				  ? parseFloat(discountedPrice) + deliveryCharges
 				  : parseFloat(discountedPrice) + deliveryCharges;
 	  
 				  }
@@ -314,17 +314,20 @@ function AddFoodOrder() {
 				  x.name !== "Rumali Rotis"
 			  )
 	  
-			  const itemCount = dishObject.filter(meal => meal.id[0] === "63f1b6b7ed240f7a09f7e2de" || meal.id[0] === "63f1b39a4082ee76673a0a9f" || meal.id[0] === "63edc4757e1b370928b149b3").length
+			  
+			  const itemCount = dishObject.filter(meal => meal.mealId[0] === "63f1b6b7ed240f7a09f7e2de" || meal.mealId[0] === "63f1b39a4082ee76673a0a9f" || meal.mealId[0] === "63edc4757e1b370928b149b3").length
 			//   const mainCourseItemCount = dishObject.filter(meal => meal.id[0] === "63f1b6b7ed240f7a09f7e2de").length
 			//   const appetizerItemCount = dishObject.filter(meal => meal.id[0] === "63f1b39a4082ee76673a0a9f").length
 			//   const breadItemCount = dishObject.filter(meal => meal.id[0] === "63edc4757e1b370928b149b3").length
-			  console.log('item.quantity', item.quantity)
+			  
 			  
 			  let quantity = item.quantity * peopleCount;
 	  
 			  
-			  if (item.name !== "Tawa Rotis" && item.name !== "Rumali Rotis" && (item.id[0] === "63f1b6b7ed240f7a09f7e2de"  || item.id[0] === "63f1b39a4082ee76673a0a9f" || item.id[0] === "63edc4757e1b370928b149b3")) {
-				  if (itemCount == 4) {
+			  if (item.name !== "Tawa Rotis" && item.name !== "Rumali Rotis" && (item.mealId[0] == "63f1b6b7ed240f7a09f7e2de"  || item.mealId[0] == "63f1b39a4082ee76673a0a9f" || item.mealId[0] == "63edc4757e1b370928b149b3")) {
+				
+				
+				if (itemCount == 4) {
 					  quantity = quantity * (1 + 0.15)
 				  }
 				  else if (itemCount == 6) {
@@ -354,6 +357,10 @@ function AddFoodOrder() {
 				  }
 			  }
 			  quantity = Math.round(quantity)
+
+			  if (selectedDeliveryOption === "live-catering"){
+				quantity = quantity * 1.1
+			  }
 			  let unit = item.unit;
 			  if (quantity >= 1000) {
 				  quantity = quantity / 1000;
@@ -366,7 +373,7 @@ function AddFoodOrder() {
 					unit = 'PCS';
 				  }
 				}
-			console.log(quantity)
+			
 			  return (
 				  <div className='ordersummaryproduct'>
 					  <div className='ordersummary-sec1'>
@@ -380,10 +387,9 @@ function AddFoodOrder() {
 					  <div style={{ color: "rgb(146, 82, 170)", fontWeight: "600" }} className='ordersummary-sec2'>
 						  <p className='ordersummeryname'>{item.name}</p>
 						  {
-				  selectedDeliveryOption === 'food-delivery' ? 
-				  <div style={{ fontSize: "90%", fontWeight: '700', color: '#9252AA' , textTransform:"uppercase"}} className='ingredientrightsecsibheading'>{quantity + ' ' + unit}</div>
-				  :
-				  null
+				  
+				  <div style={{ fontSize: "90%", fontWeight: '700', color: '#9252AA' , textTransform:"uppercase"}} className='ingredientrightsecsibheading'>{parseFloat(quantity).toFixed(2) + ' ' + unit}</div>
+				  
 				}
 					  </div>
 				  </div>
@@ -395,7 +401,7 @@ function AddFoodOrder() {
 
 	return (<>
 		<div className="container">
-			<h1>Create Food Order</h1>
+		<h1 className="createOrder pageHeading">Create Food Order</h1>
 			<div className="selectServiceType" style={style.selectServiceType}>
 				<div style={style.selectDiv}>
 					<label htmlFor="peopleInput" className="people-label" style={style.label}>
@@ -418,7 +424,7 @@ function AddFoodOrder() {
 						Number of People:
 					</label>
 					<div className="input-wrapper" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-						<button
+						{/* <button
 							type="button"
 							className="btn decrement-btn"
 							onClick={() =>
@@ -428,17 +434,17 @@ function AddFoodOrder() {
 							style={style.PlusMinusBtn}
 						>
 							-
-						</button>
+						</button> */}
 						<input
 							id="peopleInput"
 							type="number"
 							value={peopleCount}
 							onChange={handlePeopleChange}
-							min={selectedDeliveryOption === "live-catering" ? 35 : 10}
+							min={selectedDeliveryOption === "live-catering" ? 20 : 10}
 							className="people-input"
 							style={style.noOfPeopleValue}
 						/>
-						<button
+						{/* <button
 							type="button"
 							className="btn increment-btn"
 							onClick={() =>
@@ -447,8 +453,20 @@ function AddFoodOrder() {
 							style={style.PlusMinusBtn}
 						>
 							+
-						</button>
+						</button> */}
+						
 					</div>
+					{/* Range Slider by aarti   */}
+					<input
+							type="range"
+							min={selectedDeliveryOption === "live-catering" ? 20 : 10}
+							max="100" // Adjust max limit as needed
+							value={peopleCount}
+							onChange={(e) => handlePeopleChange(e, 'range')}
+							step={1} // Smoother increments
+							className="people-range"
+							style={{ width: "100%", marginTop: "10px", accentColor: "#007bff", cursor: "pointer" }}
+						/>
 				</div>
 			</div>
 			<div style={style.selectionMsg}>
@@ -494,7 +512,13 @@ function AddFoodOrder() {
 											const unit = dish.per_plate_qty.unit;
 
 											return (
-												<li key={dish._id} className="popup-dish-item" style={style.foodListinPopup}>
+												// by aarti onClick={() => handleDishSelect(dish)} // Clicking anywhere on the <li> selects the dish
+												<li
+													key={dish._id}
+													className="popup-dish-item"
+													style={style.foodListinPopup}
+													onClick={() => handleDishSelect(dish)} // Clicking anywhere on the <li> selects the dish
+												>
 													<div className="dishImgname" style={style.dishImgname}>
 														<Image
 															src={`https://horaservices.com/api/uploads/${dish.image}`}
@@ -514,8 +538,10 @@ function AddFoodOrder() {
 														checked={selectedDishes.some((item) => item.name === dish.name)}
 														onChange={() => handleDishSelect(dish)}
 														className="dish-checkbox"
+														onClick={(e) => e.stopPropagation()} // Prevents <li> click event from firing twice
 													/>
 												</li>
+
 											);
 										})
 									) : (
@@ -555,10 +581,10 @@ function AddFoodOrder() {
 								<div style={{ paddingTop: "5px" }}>
                                     <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', marginTop: 3  }}>
                                         <p style={{ color: "#9252AA", fontWeight: '600', fontSize: 14, lineHeight: '20px' }}>Item Total</p>
-                                        <p style={{ color: "#9252AA", fontWeight: '600', fontSize: 14, lineHeight: '20px' }}>₹ {totalPrice}</p>
+                                        <p style={{ color: "#9252AA", fontWeight: '600', fontSize: 14, lineHeight: '20px' }}>₹ {(totalPrice - discountedPrice) < 0 ? discountedPrice : totalPrice}</p>
                                     </div>
                                     {/* <img style={{ width: 290, height: 1, marginTop: 5, marginBottom: 5 }} src="../../assets/Rectangleline.png" alt="line" /> */}
-                                    {discountedPrice > 0 && (
+                                    {totalPrice - discountedPrice> 0 && (
                                         <div>
                                             <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', marginTop: 3, alignItems: "center"  , borderBottom:"1px solid rgb(215, 215, 215)" }}>
                                                 <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: "center", flexDirection: 'row' }}>
@@ -601,15 +627,15 @@ function AddFoodOrder() {
                                                 <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', marginTop: 3  , borderBottom:"1px solid rgb(215, 215, 215)" }}>
                                                     <p style={{ color: "#9252AA", fontWeight: '600', fontSize: 14, lineHeight: '20px' }}>Delivery Charges</p>
                                                     <div style={{ color: "#9252AA", fontWeight: '600', fontSize: 14, lineHeight: '20px', display: 'flex', flexDirection: "row" }}>
-                                                        {discountedPrice > 4000 ? (
+                                                        {/* {discountedPrice > 4000 ? (
                                                             <>
                                                                 <p style={{ color: "#008631", fontWeight: '600', marginRight: 5 }}>FREE</p>
                                                                 <p style={{ textDecoration: "line-through", color: "#9252AA", fontWeight: '600' }}>₹ {deliveryCharges}</p>
                                                             </>
                                                         ) :
-                                                         (
+                                                         ( */}
                                                             <p style={{ color: "#9252AA", fontWeight: '600' }}>₹ {deliveryCharges}</p>
-                                                        )}
+                                                        {/* )} */}
                                                     </div>
                                                 </div>
                                             </div>
@@ -650,7 +676,7 @@ function AddFoodOrder() {
                                 </div>
 			</div>
 			
-			<CreateOrderForm itemDataId={itemDataId} selectedMealList={selectedMealList} deliveryCharges={deliveryCharges} totalPrice={totalPrice} discountedPrice={discountedPrice} calculateFinalTotal={calculateFinalTotal} calculateAdvancePayment={calculateAdvancePayment} peopleCount={peopleCount} selectedOption={selectedDeliveryOption}  includeTables={includeTables} />
+			<CreateFoodOrderForm itemDataId={itemDataId} selectedMealList={selectedMealList} deliveryCharges={deliveryCharges} totalPrice={totalPrice} discountedPrice={discountedPrice} calculateFinalTotal={calculateFinalTotal} calculateAdvancePayment={calculateAdvancePayment} peopleCount={peopleCount} selectedOption={selectedDeliveryOption}  includeTables={includeTables} includeDisposable={includeDisposable}/>
 
 		</div>
 	</>);

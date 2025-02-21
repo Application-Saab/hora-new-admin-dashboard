@@ -17,7 +17,7 @@ body {
 }
 
 .pageHeading {
-  font-size: calc(12px + 14 * ((100vw - 360px) / (768 - 360)));
+  font-size: calc(12px + 8 * ((100vw - 360px) / (768 - 360)));
   text-align: center;
 }
 
@@ -286,6 +286,26 @@ input[type="comment"] {
 .popup button.cancel:hover {
   background: #d6d6d6;
   /* Darker grey on hover */
+}
+
+.buttonSecondary {
+  padding: 10px 20px;
+  background-color: #9252AA;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.buttonPrimary {
+  padding: 10px 20px;
+  background-color: #9252AA;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+  width: 100%;
 }
 
 /* Responsive Design for Mobile */

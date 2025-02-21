@@ -10,6 +10,23 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
   const [error, setError] = useState(null);
   let apiUrl = "";
 
+  let foodDeliveryInclusions = [
+    "Complementary - Green salad, Mint Chutney, Achar",
+    "Doorstep Delivery",
+    "Freshly cooked food",
+    "Fork, Spoon, Tissue papers",
+  ]
+  let liveCateringInclusions = [
+    "Well Groomed Waiters (2 Nos)",
+    "Bone-china Crockery & Quality disposal for loose items",
+    "Transport (to & fro)",
+    "Dustbin with Garbage bag",
+    "Head Mask for waiters & chefs",
+    "Chafing Dish",
+    "Cocktail Napkins",
+    "2 Chefs"
+  ]
+
   useEffect(() => {
     setLoading(true);
     setError(null);
@@ -26,15 +43,16 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
       // alert(actionPopupOrderType)
       apiUrl = `https://horaservices.com:3000/api/order/order_details_food_delivery/${actionPopupOrderId}`;
       setPopupType("foodDelivery");
-    }  
-    // else if (actionPopupOrderType === 8 ) {
-    //   // Need new api for photograpgy
-    //   const photographyOrderId = actionPopupChefOrderId.toString();
-    //   apiUrl = `https://horaservices.com:3000/api/order/order_details/v1/${photographyOrderId}`;
-    //   setPopupType("Photography");
-    // } 
+    }
+    else if (actionPopupOrderType === 8) {
+      // Need new api for photograpgy
+      const photographyOrderId = actionPopupChefOrderId.toString();
+      apiUrl = `https://horaservices.com:3000/api/order/order_details/v1/${photographyOrderId}`;
+      setPopupType("Photography");
+    }
     else {
       setError("Currently, data is not available");
+      setPopupType("");
       setLoading(false);
       return;
     }
@@ -62,14 +80,12 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
     fetchOrderapi();
 
   }, [actionPopupOrderId, actionPopupChefOrderId, actionPopupOrderType]);
-  console.log(JSON.stringify(orderDetails))
 
   const getOrderId = (e) => {
     const orderId1 = 10800 + e;
     const updateOrderId = "#" + orderId1;
     return updateOrderId;
   };
-
 
   const getOrderType = (orderTypeValue) => {
     const orderTypes = {
@@ -112,182 +128,12 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
         {item.trim()}
       </li>
     ));
-    return (
-      <div>
-        <div style={{ fontSize: "21px", borderBottom: "1px solid #e7eff9", marginBottom: "10px" }}>Inclusions</div>
-        <ul>
-          {inclusionList}
-        </ul>
-      </div>
-
-    );
-  };
-  // share on whatsapp========================
-  const sendOrderDetailsToWhatsAppDoc = () => {
-    console.log(JSON.stringify(orderDetails.items));
-
-    // Extract order details
-    const orderId = getOrderId(orderDetails._doc.order_id) || "N/A";
-    const orderDate = new Date(orderDetails._doc.order_date).toLocaleDateString() || "N/A";
-    // const orderType = getOrderType(orderDetails._doc.type) || "N/A";
-    const address = orderDetails._doc.addressId?.address1 || "N/A";
-    const googleMapLocation = orderDetails._doc.addressId?.address2 || "N/A";
-    const orderTime = orderDetails._doc.order_time || "N/A";
-    const decorationComments = orderDetails._doc.decoration_comments || "N/A";
-    const addOnItems = orderDetails._doc.add_on || [];
-    // Create a Google Maps link
-    const googleMapUrl = `https://www.google.com/maps/search/?q=${encodeURIComponent(googleMapLocation)}`;
-    // Calculate balance amount
-    let balanceAmount = 0;
-    if (orderDetails._doc.phone_no) {
-      balanceAmount = orderDetails._doc.total_amount - orderDetails._doc.advance_amount;
-    } else {
-      if ([2, 3, 4, 5].includes(orderDetails._doc?.type)) {
-        balanceAmount = Math.round((orderDetails._doc?.payable_amount * 4) / 5);
-      } else if ([6, 7].includes(orderDetails._doc?.type)) {
-        balanceAmount = Math.round(orderDetails._doc?.payable_amount * 0.35);
-      } else {
-        balanceAmount = Math.round(orderDetails._doc?.payable_amount * 0.65);
-      }
-    }
-
-    // Construct the message
-    // Order Type: ${orderType}\n
-    let message = `Order Details:\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\nAddress: ${address}\nGoogleMapLocation: ${googleMapUrl}\nArrival Time: ${orderTime}\n\n*Amount:₹${balanceAmount}*\n\n*Comments*:\n ${decorationComments}\n`;
-
-    // Add Add-On Items
-    message += `\n*Add-On Items:*\n`;
-
-    if (addOnItems && addOnItems.length > 0) {
-      addOnItems.forEach((item, index) => {
-        message += `\n${index + 1}. ${item.name}: ₹${item.price}`;
-      });
-    } else {
-      message += ` None`;  // Show "None" if there are no add-ons
-    }
-
-    // Add Decoration Items
-    orderDetails.items.forEach((item) => {
-      // \n*Product Price:* ₹${dec.price}
-      item.decoration.forEach((dec) => {
-        message += `\n\n*Product Name:* ${dec.name}\n*Image URL:* https://horaservices.com/api/uploads/${dec.featured_image}\n`;
-        const inclusionText = getCleanInclusionText(dec.inclusion); // Assuming this function formats the inclusion text
-        message += `\n*Inclusion:* \n${inclusionText}`;
-      });
-    });
-
-    // Open WhatsApp with the pre-filled message
-    // const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-    // window.open(whatsappUrl, "_blank");
-    navigator.clipboard.writeText(message)
-      .then(() => {
-        alert("Order details have been copied to the clipboard!");
-      })
-      .catch((err) => {
-        console.error("Failed to copy order details to clipboard: ", err);
-      });
-  };
-
-  const sendOrderDetailsToWhatsAppchef = (orderDetails) => {
-    console.log(orderDetails);
-
-    // Extract details
-    const orderId = getOrderId(orderDetails?.order_id) || "N/A";
-    const orderDate = new Date(orderDetails?.order_date).toLocaleDateString() || "N/A";
-    const address = orderDetails?.addressId?.address1 || "N/A";
-    const googleMapLocation = orderDetails?.addressId?.address2 || "N/A";
-    const orderTime = orderDetails?.order_time || "N/A";
-    const decorationComments = orderDetails?.decoration_comments || "N/A";
-    // Create a Google Maps link
-    const googleMapUrl = `https://www.google.com/maps/search/?q=${encodeURIComponent(googleMapLocation)}`;
-    // Calculate balance amount
-    const balanceAmount =
-      orderDetails?.total_amount && orderDetails?.advance_amount
-        ? orderDetails.total_amount - orderDetails.advance_amount
-        : "N/A";
-
-    // Start building the message
-    let message = `Order Details:\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\n\nAddress: ${address}\nGoogleMapLocation: ${googleMapUrl}\n\nArrival Time: ${orderTime}\n\n*Amount: ₹${balanceAmount}*\nComments: ${decorationComments}\n\n*Dishes*\n`;
-
-    // Append each dish to the message
-    if (orderDetails?.selecteditems?.length) {
-      message += orderDetails.selecteditems
-        .map((item) => item.name)
-        .join("\n");
-    } else {
-      message += "No dishes selected";
-    }
-    navigator.clipboard.writeText(message)
-      .then(() => {
-        alert("Order details have been copied to the clipboard!");
-      })
-      .catch((err) => {
-        console.error("Failed to copy order details to clipboard: ", err);
-      });
-    // Open WhatsApp with the pre-filled message
-    // const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-    // window.open(whatsappUrl, "_blank");
-  };
-  const sendOrderDetailsToWhatsAppFood = (orderDetails) => {
-    console.log(orderDetails);
-
-    // Extract details
-    const orderId = getOrderId(orderDetails?.order_id) || "N/A";
-    const orderDate = new Date(orderDetails?.order_date).toLocaleDateString() || "N/A";
-    const address = orderDetails?.addressId?.address1;
-    const googleMapLocation = orderDetails?.addressId?.address2 || "N/A";
-    const orderTime = orderDetails?.order_time || "N/A";
-    const orderCity = orderDetails?.order_locality || "NA"
-    const peopleCount = orderDetails?.no_of_people || "NA"
-    // const ItemQuantity = orderDetails?.userOrderDishImageArray || "NA"
-    // Create a Google Maps link
-    const googleMapUrl = orderDetails?.addressId?.address2 ? (`https://www.google.com/maps/search/?q=${encodeURIComponent(googleMapLocation)}`) : 'NA';
-    // Calculate balance amount
-    const balanceAmount =
-      orderDetails?.total_amount && orderDetails?.advance_amount
-        ? orderDetails?.total_amount - orderDetails?.advance_amount
-        : "N/A";
-    const inclusions = [
-      "Complementary - Green salad, Mint Chutney, Achar",
-      "Doorstep Delivery",
-      "Disposable plates, Fork, Spoon, Tissue papers, Bisleri Water bottles",
-      "Freshly cooked food"
-    ];
-    // Start building the message
-    let message = `*Food Delivery Order Summary:*\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\n\nCity: ${orderCity}\nGuest Count: ${peopleCount}\nTime of Delivery: ${orderTime}\n\nAddress: ${address}\n\nGoogleMapLocation: ${googleMapUrl}\n*Amount: ₹${balanceAmount}*\n\n*Dishes*\n`;
-
-    // Append each dish to the message
-    if (orderDetails?.userOrderDishImageArray?.length) {
-      const dishesObject = orderDetails.userOrderDishImageArray[0]; // Access the first object in the array
-      message += Object.entries(dishesObject)
-        .map(([dishName, details]) => {
-          if (details.quantity && details.unit) {
-            return `${dishName}: ${details.quantity} ${details.unit}`;
-          } else if (details.quantity) {
-            return `${dishName}: ${details.quantity}`;
-          }
-          return null; // Handle cases where details are incomplete
-        })
-        .filter(Boolean) // Remove any null or invalid entries
-        .join("\n");
-
-
-    } else {
-      message += "No dishes selected";
-    }
-
-
-    message += "\n\n*Inclusions:*\n" + inclusions.join("\n");
-    navigator.clipboard.writeText(message)
-      .then(() => {
-        alert("Order details have been copied to the clipboard!");
-      })
-      .catch((err) => {
-        console.error("Failed to copy order details to clipboard: ", err);
-      });
-    // Open WhatsApp with the pre-filled message
-    // const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-    // window.open(whatsappUrl, "_blank");
+    return (<>
+      <div style={{ fontSize: "21px", borderBottom: "1px solid #e7eff9", marginBottom: "10px" }}>Inclusions</div>
+      <ul>
+        <li>{inclusionList}</li>
+      </ul>
+    </>);
   };
   // fetch orderdetails
   const FetchOrderDetails = ({ orderDetails }) => {
@@ -377,24 +223,40 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                   </ul>)
                 }
               </div>
+              {orderDetails?.type === 6 ? (<>
+              <h3>Inclusions</h3>
+                <ul>
+                  {foodDeliveryInclusions.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                  {orderDetails?.userOrderDishImageArray[0].hasOwnProperty("water/disposal") && (
+                    <li>Disposable plates,Bisleri Water bottles</li>
+                  )}
+                </ul>
+              </>) : orderDetails?.type === 7 ? (<>
+              <h3>Inclusions</h3>
+                <ul>
+                  {liveCateringInclusions.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                </ul>
+              </>): (null)
+             }
+
             </div>
             <div className="order-summary-box">
               <h3 style={{ color: "white" }}>Order Summary</h3>
               <ul style={{ listStyleType: "none", padding: 0 }}>
-                <li
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
+                <li className="priceList">
                   <strong>Total Amount:</strong>{" "}
                   <span>₹{orderDetails.total_amount}</span>
                 </li>
-                <li
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
+                <li className="priceList">
                   <strong>Advance Amount:</strong>{" "}
                   <span>₹{orderDetails.advance_amount || 0}</span>
                 </li>
 
-                <li style={{ display: "flex", justifyContent: "space-between" }}>
+                <li className="priceList">
 
                   <span>Balance Amount</span>
                   <span>
@@ -404,21 +266,15 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                   </span>
                 </li>
 
-                <li
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
+                <li className="priceList">
                   <strong>Discount:</strong>{" "}
                   <span>₹{orderDetails.discount || 0}</span>
                 </li>
-                <li
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
+                <li className="priceList">
                   <strong>GST:</strong>{" "}
                   <span>₹{orderDetails.gst || 0}</span>
                 </li>
-                <li
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
+                <li className="priceList">
                   <strong>Per person cost:</strong>{" "}
                   <span>₹{orderDetails.per_person_cost || 0}</span>
                 </li>
@@ -434,7 +290,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                   }
                 }}
               >
-                Copy Order Summary
+                Copy Order Summary(For Vendor)
               </button>
 
             </div>
@@ -444,9 +300,232 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
     );
   };
 
+  // share on whatsapp========================
+  const sendOrderDetailsToWhatsAppDoc = () => {
+    console.log(JSON.stringify(orderDetails.items));
 
-  return (
-    isOpen ?
+    // Extract order details
+    const orderId = getOrderId(orderDetails._doc.order_id) || "N/A";
+    const orderDate = new Date(orderDetails._doc.order_date).toLocaleDateString() || "N/A";
+    // const orderType = getOrderType(orderDetails._doc.type) || "N/A";
+    const address = orderDetails._doc.addressId?.address1 || "N/A";
+    const googleMapLocation = orderDetails._doc.addressId?.address2 || "N/A";
+    const orderTime = orderDetails._doc.order_time || "N/A";
+    const decorationComments = orderDetails._doc.decoration_comments || "N/A";
+    const addOnItems = orderDetails._doc.add_on || [];
+    // Create a Google Maps link
+    const googleMapUrl = `https://www.google.com/maps/search/?q=${encodeURIComponent(googleMapLocation)}`;
+    // Calculate balance amount
+    let balanceAmount = 0;
+    if (orderDetails._doc.phone_no) {
+      balanceAmount = orderDetails._doc.total_amount - orderDetails._doc.advance_amount;
+    } else {
+      if ([2, 3, 4, 5].includes(orderDetails._doc?.type)) {
+        balanceAmount = Math.round((orderDetails._doc?.payable_amount * 4) / 5);
+      } else if ([6, 7].includes(orderDetails._doc?.type)) {
+        balanceAmount = Math.round(orderDetails._doc?.payable_amount * 0.35);
+      } else {
+        balanceAmount = Math.round(orderDetails._doc?.payable_amount * 0.65);
+      }
+    }
+
+    // Construct the message
+    // Order Type: ${orderType}\n
+    let message = `Order Details:\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\nAddress: ${address}\nGoogleMapLocation: ${googleMapUrl}\nArrival Time: ${orderTime}\n\n*Amount:₹${balanceAmount}*\n\n*Comments*:\n ${decorationComments}\n`;
+
+    // Add Add-On Items
+    message += `\n*Add-On Items:*\n`;
+
+    if (addOnItems && addOnItems.length > 0) {
+      addOnItems.forEach((item, index) => {
+        message += `\n${index + 1}. ${item.name}: ₹${item.price}`;
+      });
+    } else {
+      message += ` None`;  // Show "None" if there are no add-ons
+    }
+
+    // Add Decoration Items
+    orderDetails.items.forEach((item) => {
+      // \n*Product Price:* ₹${dec.price}
+      item.decoration.forEach((dec) => {
+        message += `\n\n*Product Name:* ${dec.name}\n*Image URL:* https://horaservices.com/api/uploads/${dec.featured_image}\n`;
+        const inclusionText = getCleanInclusionText(dec.inclusion); // Assuming this function formats the inclusion text
+        message += `\n*Inclusion:* \n${inclusionText}`;
+      });
+    });
+
+    // Open WhatsApp with the pre-filled message
+    // const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    // window.open(whatsappUrl, "_blank");
+    navigator.clipboard.writeText(message)
+      .then(() => {
+        alert("Order details have been copied to the clipboard!");
+      })
+      .catch((err) => {
+        console.error("Failed to copy order details to clipboard: ", err);
+      });
+  };
+  const sendOrderDetailsToWhatsAppPhoto = () => {
+    console.log(JSON.stringify(orderDetails.items));
+
+    // Extract order details
+    const orderId = getOrderId(orderDetails.order_id) || "N/A";
+    const orderDate = new Date(orderDetails.order_date).toLocaleDateString() || "N/A";
+    // const orderType = getOrderType(orderDetails._doc.type) || "N/A";
+    const address = orderDetails.addressId?.address1 || "N/A";
+    const googleMapLocation = orderDetails.addressId?.address2 || "N/A";
+    const orderTime = orderDetails.order_time || "N/A";
+    const decorationComments = orderDetails.decoration_comments || "N/A";
+    const addOnItems = orderDetails.add_on || [];
+    // Create a Google Maps link
+    const googleMapUrl = `https://www.google.com/maps/search/?q=${encodeURIComponent(googleMapLocation)}`;
+    // Calculate balance amount
+    let balanceAmount = 0;
+    if (orderDetails.phone_no) {
+      balanceAmount = orderDetails.total_amount - orderDetails.advance_amount;
+    } else {
+      if ([2, 3, 4, 5].includes(orderDetails?.type)) {
+        balanceAmount = Math.round((orderDetails?.payable_amount * 4) / 5);
+      } else if ([6, 7].includes(orderDetails?.type)) {
+        balanceAmount = Math.round(orderDetails?.payable_amount * 0.35);
+      } else {
+        balanceAmount = Math.round(orderDetails?.payable_amount * 0.65);
+      }
+    }
+
+    // Construct the message
+    // Order Type: ${orderType}\n
+    let message = `Photography Order Details:\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\nAddress: ${address}\nGoogleMapLocation: ${googleMapUrl}\nArrival Time: ${orderTime}\n\n*Amount:₹${balanceAmount}*\n\n*Comments*:\n ${decorationComments}\n`;
+
+    // Add Inclusion Items
+    message += `\n*Inclusion:*\n`;
+    if (addOnItems && addOnItems.length > 0) {
+      addOnItems.forEach((item, index) => {
+        message += `\n${index + 1}. ${item}`;
+      });
+    } else {
+      message += ` None`;  // Show "None" if there are no add-ons
+    }
+
+    navigator.clipboard.writeText(message)
+      .then(() => {
+        alert("Order details have been copied to the clipboard!");
+      })
+      .catch((err) => {
+        console.error("Failed to copy order details to clipboard: ", err);
+      });
+  };
+
+  const sendOrderDetailsToWhatsAppchef = (orderDetails) => {
+    console.log(orderDetails);
+
+    // Extract details
+    const orderId = getOrderId(orderDetails?.order_id) || "N/A";
+    const orderDate = new Date(orderDetails?.order_date).toLocaleDateString() || "N/A";
+    const address = orderDetails?.addressId?.address1 || "N/A";
+    const googleMapLocation = orderDetails?.addressId?.address2 || "N/A";
+    const orderTime = orderDetails?.order_time || "N/A";
+    const decorationComments = orderDetails?.decoration_comments || "N/A";
+    // Create a Google Maps link
+    const googleMapUrl = `https://www.google.com/maps/search/?q=${encodeURIComponent(googleMapLocation)}`;
+    // Calculate balance amount
+    const balanceAmount =
+      orderDetails?.total_amount && orderDetails?.advance_amount
+        ? orderDetails.total_amount - orderDetails.advance_amount
+        : "N/A";
+
+    // Start building the message
+    let message = `Chef Order Summary::\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\n\nAddress: ${address}\nGoogleMapLocation: ${googleMapUrl}\n\nArrival Time: ${orderTime}\n\n*Amount: ₹${balanceAmount}*\nComments: ${decorationComments}\n\n*Dishes*\n`;
+
+    // Append each dish to the message
+    if (orderDetails?.selecteditems?.length) {
+      message += orderDetails.selecteditems
+        .map((item) => item.name)
+        .join("\n");
+    } else {
+      message += "No dishes selected";
+    }
+    navigator.clipboard.writeText(message)
+      .then(() => {
+        alert("Order details have been copied to the clipboard!");
+      })
+      .catch((err) => {
+        console.error("Failed to copy order details to clipboard: ", err);
+      });
+    // Open WhatsApp with the pre-filled message
+    // const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    // window.open(whatsappUrl, "_blank");
+  };
+  const sendOrderDetailsToWhatsAppFood = (orderDetails) => {
+    console.log(orderDetails);
+
+    // Extract details
+    const orderId = getOrderId(orderDetails?.order_id) || "N/A";
+    const orderDate = new Date(orderDetails?.order_date).toLocaleDateString() || "N/A";
+    const address = orderDetails?.addressId?.address1;
+    const googleMapLocation = orderDetails?.addressId?.address2 || "N/A";
+    const orderTime = orderDetails?.order_time || "N/A";
+    const orderCity = orderDetails?.order_locality || "NA";
+    const peopleCount = orderDetails?.no_of_people || "NA";
+    const orderType = getOrderType(orderDetails?.type) || "NA";
+    let disposalInclusion = orderDetails?.userOrderDishImageArray[0].hasOwnProperty("water/disposal");
+    let inclusions = [];
+    // const ItemQuantity = orderDetails?.userOrderDishImageArray || "NA"
+    // Create a Google Maps link
+    const googleMapUrl = orderDetails?.addressId?.address2 ? (`https://www.google.com/maps/search/?q=${encodeURIComponent(googleMapLocation)}`) : 'NA';
+    // Calculate balance amount
+    const balanceAmount =
+      orderDetails?.total_amount && orderDetails?.advance_amount
+        ? orderDetails?.total_amount - orderDetails?.advance_amount
+        : "N/A";
+    if (orderType === "Food Delivery") {
+      inclusions = [...foodDeliveryInclusions]; // Copy the food delivery inclusions
+
+      if (disposalInclusion) {
+        inclusions.push("Disposable plates, Fork, Spoon, Tissue papers, Bisleri Water bottles");
+      }
+    } else if (orderType === "Live Catering") {
+      inclusions = [...liveCateringInclusions]; // Copy the live catering inclusions
+    } else {
+      inclusions = ["No specific inclusions for this order type"];
+    }
+    // Start building the message
+    let message = `*${orderType} Order Summary:*\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\n\nCity: ${orderCity}\nGuest Count: ${peopleCount}\nTime of Delivery: ${orderTime}\n\nAddress: ${address}\n\nGoogleMapLocation: ${googleMapUrl}\n*Amount: ₹${balanceAmount}*\n\n*Dishes*\n`;
+    // Append each dish to the message
+    if (orderDetails?.userOrderDishImageArray?.length) {
+      const dishesObject = orderDetails.userOrderDishImageArray[0]; // Access the first object in the array
+      message += Object.entries(dishesObject)
+        .map(([dishName, details]) => {
+          if (details.quantity && details.unit) {
+            return `${dishName}: ${details.quantity} ${details.unit}`;
+          } else if (details.quantity) {
+            return `${dishName}: ${details.quantity}`;
+          }
+          return null; // Handle cases where details are incomplete
+        })
+        .filter(Boolean) // Remove any null or invalid entries
+        .join("\n");
+
+
+    } else {
+      message += "No dishes selected";
+    }
+
+
+    message += "\n\n*Inclusions:*\n-" + inclusions.join("\n-");
+    navigator.clipboard.writeText(message)
+      .then(() => {
+        alert("Order details have been copied to the clipboard!");
+      })
+      .catch((err) => {
+        console.error("Failed to copy order details to clipboard: ", err);
+      });
+    // Open WhatsApp with the pre-filled message
+    // const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    // window.open(whatsappUrl, "_blank");
+  };
+  return (<>
+    {isOpen &&
       (
         <div className="popup-overlay">
           <div className="popup-content">
@@ -527,7 +606,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                                     <p>
                                       <Image src={`https://horaservices.com/api/uploads/${dec.featured_image}`} width={200} height={200} alt={`${dec.featured_image}-name`} />
                                     </p>
-                                    <p>{getItemInclusion(dec.inclusion)}</p>
+                                    <div>{getItemInclusion(dec.inclusion)}</div>
                                   </div>
                                 ))
                               )
@@ -541,20 +620,16 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                       <div className="order-summary-box">
                         <h3 style={{ color: "white" }}>Order Summary</h3>
                         <ul style={{ listStyleType: "none", padding: 0 }}>
-                          <li
-                            style={{ display: "flex", justifyContent: "space-between" }}
-                          >
+                          <li className="priceList">
                             <strong>Total Amount:</strong>{" "}
                             <span>₹{orderDetails._doc.total_amount}</span>
                           </li>
-                          <li
-                            style={{ display: "flex", justifyContent: "space-between" }}
-                          >
+                          <li className="priceList">
                             <strong>Advance Amount:</strong>{" "}
                             <span>₹{orderDetails._doc.advance_amount || 0}</span>
                           </li>
 
-                          <li style={{ display: "flex", justifyContent: "space-between" }}>
+                          <li className="priceList">
 
                             <span>Balance Amount</span>
                             <span>
@@ -564,21 +639,15 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                             </span>
                           </li>
 
-                          <li
-                            style={{ display: "flex", justifyContent: "space-between" }}
-                          >
+                          <li className="priceList">
                             <strong>Discount:</strong>{" "}
                             <span>₹{orderDetails._doc.discount || 0}</span>
                           </li>
-                          <li
-                            style={{ display: "flex", justifyContent: "space-between" }}
-                          >
+                          <li className="priceList">
                             <strong>GST:</strong>{" "}
                             <span>₹{orderDetails._doc.gst || 0}</span>
                           </li>
-                          <li
-                            style={{ display: "flex", justifyContent: "space-between" }}
-                          >
+                          <li className="priceList">
                             <strong>Per person cost:</strong>{" "}
                             <span>₹{orderDetails._doc.per_person_cost || 0}</span>
                           </li>
@@ -588,7 +657,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                           className="startbutton"
                           onClick={sendOrderDetailsToWhatsAppDoc}
                         >
-                          Copy Order Summary
+                          Copy Order Summary(For Vendor)
                         </button>
                       </div>
                     </div>
@@ -603,6 +672,7 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                 <FetchOrderDetails orderDetails={orderDetails} />
               )
             ) : null}
+
             {popupType === "foodDelivery" && orderDetails ? (
               loading ? (
                 <div className="loader">Loading...</div> // Replace with a styled loader if needed
@@ -610,16 +680,103 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                 <FetchOrderDetails orderDetails={orderDetails} />
               )
             ) : null}
+            {popupType === "Photography" && orderDetails ? (
+              loading ? (
+                <div className="loader">Loading...</div> // Replace with a styled loader if needed
+              ) : (
+                <div className="order-details-container">
+                  <h2 className="popup-title">Order Details</h2>
+                  <div className="order-grid">
+                    <div className="order-details-box">
+                      <div className="order-detail-row">
+                        <p>
+                          <strong>Order Id:</strong> {getOrderId(orderDetails.order_id)}
+                        </p>
+                        <p>
+                          <strong>Order Date:</strong> {new Date(orderDetails.order_date).toLocaleDateString()}
+                        </p>
+                        <p>
+                          <strong>Order Type:</strong> {getOrderType(orderDetails.type)}
+                        </p>
+                        <p>
+                          <strong>Order City:</strong> {orderDetails.order_locality || "N/A"}
+                        </p>
+                        <p>
+                          <strong>Order Address:</strong> {orderDetails.addressId?.address1 || "N/A"}
+                        </p>
+                        <p>
+                          <strong>Order Google Map Location:</strong> {orderDetails.addressId?.address2 || "N/A"}
+                        </p>
+                        <p>
+                          <strong>Order Time:</strong> {orderDetails.order_time || "N/A"}
+                        </p>
+                        <p>
+                          <strong>Order Comments:</strong> {orderDetails.decoration_comments || "N/A"}
+                        </p>
+                        <p>
+                          <strong>Order Included:</strong>
+                          {orderDetails.add_on.length > 0 ? (
+                            <ul>
+                              {orderDetails.add_on.map((item, index) => (
+                                <li key={index}>
+                                  - {item}
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            "N/A"
+                          )}
+                        </p>
 
+
+
+                      </div>
+                    </div>
+
+                    <div className="order-summary-box">
+                      <h3 style={{ color: "white" }}>Order Summary</h3>
+                      <ul style={{ listStyleType: "none", padding: 0 }}>
+                        <li className="priceList">
+                          <strong>Total Amount:</strong> <span>₹{orderDetails.total_amount}</span>
+                        </li>
+                        <li className="priceList">
+                          <strong>Advance Amount:</strong> <span>₹{orderDetails.advance_amount || 0}</span>
+                        </li>
+                        <li className="priceList">
+                          <span>Balance Amount</span>
+                          <span>
+                            {orderDetails.total_amount && orderDetails.advance_amount
+                              ? `₹ ${(orderDetails.total_amount - orderDetails.advance_amount)}`
+                              : "N/A"}
+                          </span>
+                        </li>
+                        <li className="priceList">
+                          <strong>Discount:</strong> <span>₹{orderDetails.discount || 0}</span>
+                        </li>
+                        <li className="priceList">
+                          <strong>GST:</strong> <span>₹{orderDetails.gst || 0}</span>
+                        </li>
+                        <li className="priceList">
+                          <strong>Per person cost:</strong> <span>₹{orderDetails.per_person_cost || 0}</span>
+                        </li>
+                      </ul>
+                      <button className="startbutton" onClick={sendOrderDetailsToWhatsAppPhoto}>
+                        Copy Order Summary<br/>(For Vendor)
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )
+            ) : null}
 
 
           </div>
         </div>
       )
-      :
-      null
+      
 
-  );
+}
+</>);
 };
 
 export default ActionPopup;

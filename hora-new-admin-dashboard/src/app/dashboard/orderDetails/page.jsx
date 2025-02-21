@@ -8,11 +8,12 @@ import {
   ADMIN_ORDER_LIST,
 } from "../../../utils/apiconstant";
 // import * as XLSX from "xlsx";
+import CheckSupplier from "../../component/createsupplier/CheckSupplier";
 
 const OrderList = () => {
   const [orders, setOrders] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPage, setTotalPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(0);
   // const [setTotalItems] = useState(0);
   const itemsPerPage = 15;
   const [searchTerm, setSearchTerm] = useState("");
@@ -25,12 +26,14 @@ const OrderList = () => {
   const [actionPopupChefOrderId, setActionPopupChefOrderId] = useState("");
   const [actionPopupOrderType, setActionPopupOrderType] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
-  // const [supplierDetails, setSupplierDetails] = useState(null);
-
+  // supplier
+  const [isSupplierAssigned, setIsSupplierAssigned] = useState(false);
   const [selectedDate, setSelectedDate] = useState("");
-
-  const fetchOrders = async (page, orderId = '', orderstatus = '', activeStatus = '', orderType = '', orderCity = '', selectedDate = '', selectedOfflineNum = '') => {
-    console.log("Selected Date in fetchOrders:", selectedOfflineNum);  // Log the selected date for debugging
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedSupplierOrder, setSelectedSupplierOrder] = useState(null);
+  const [supplierDetails, setSupplierDetails] = useState(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const fetchOrders = async (page, orderId = '', orderstatus = '', activeStatus = '', orderType = '', orderCity = '', selectedDate = '', selectedOfflineNum = '') => { 
     // Handle orderType mapping
     let typeId;
     switch (orderType) {
@@ -89,7 +92,9 @@ const OrderList = () => {
 
         if (data && data.data && data.data.order) {
           setOrders(data.data.order);
-          setTotalPage(data.data.paginate.last_page);
+          // setTotalPage(data.data.paginate.last_page);
+          let totalPages = Math.ceil(data.data.paginate.total_item / itemsPerPage) ;
+          setTotalPage(totalPages);
         } else {
           // No orders found, show an alert with a message
           setOrders('');
@@ -184,10 +189,7 @@ const OrderList = () => {
     setActionPopupOrderType(orderType)
     setPopupOpen(true); // Open the popup
   };
-  const [supplierDetails, setSupplierDetails] = useState(null);
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-
-  const openSupplierPopup = async (orderId) => {
+  const openSupplierDeatilsPopup = async (orderId) => {
     try {
       const response = await fetch(
         `https://horaservices.com:3000/api/admin/getUserDetails/${orderId}`
@@ -203,23 +205,31 @@ const OrderList = () => {
     }
   };
 
-
   const closePopup = () => {
-    setPopupOpen(false); // Close the popup
+    setPopupOpen(false);
     setIsPopupOpen(false);
     setSupplierDetails(null);
   };
+
+  const openSupplierAssignPopup = (order) => {
+    setSelectedSupplierOrder(order);
+    setIsModalOpen(true);
+  };
+
+  // const CloseSupplierAssignPopup = () => {
+  //   setIsModalOpen(false);
+  // };
 
   return (
     <div className="orderDetailsList">
       <div className="order-list-container">
         <div className="order-header">
-          <h2>Order Details</h2>
+          <h1>Order Details</h1>
         </div>
         <div className="filter-container">
           <div className="left part">
-            <div className="search-filter-box">
-              <div className="search-box">
+          
+              <div className="search filter-box">
                 <input
                   type="text"
                   className="small-search byId"
@@ -233,9 +243,9 @@ const OrderList = () => {
 
 
               </div>
-            </div>
+         
             {/* Phone Number Search */}
-            <div className="phone-filter-container">
+            <div className="phone filter-box">
               <input
                 type="text"
                 className="small-search byPhone"
@@ -250,7 +260,7 @@ const OrderList = () => {
 
             </div>
             {/* date search */}
-            <div className="date-filter-container">
+            <div className="date filter-box">
 
               <label className="date-label">Order Fullfilement Date</label>
               <input
@@ -398,31 +408,23 @@ const OrderList = () => {
                     <td>{order.phone_no || "N/A"}</td>
                     {/* <td>{order.online_phone_no || "N/A"}</td> */}
                     <td>
-                      {order.toId ? (
-                        <FaEye
-                          onClick={() => openSupplierPopup(order.toId)}
-                        />
-                      ) : (
-                        <p>NA</p>
-                      )}
-
-                      {isPopupOpen && supplierDetails && (
-                        <div className="popup-overlay" onClick={closePopup}>
-                          <div
-                            className="popup"
-                            onClick={(e) => e.stopPropagation()}
+                      {order.toId ? (<>
+                        <FaEye onClick={() => openSupplierDeatilsPopup(order.toId)} /><span>Assigned</span>
+                        </>) : (
+                          <>
+                          <button
+                            className="not-assigned-btn"
+                            onClick={() => openSupplierAssignPopup(order)}
                           >
-                            <button
-                              className="close-button"
-                              onClick={closePopup}
-                            >
-                              ×
-                            </button>
-                            <h3>Supplier Details</h3>
-                            <p>Name: {supplierDetails.data?.name || "NA"}</p>
-                            <p>Phone: {supplierDetails.data?.phone || "NA"}</p>
-                          </div>
-                        </div>
+                            Not Assigned
+                          </button>                    
+                            {/* supplier assign popup */}
+                          {isModalOpen && selectedSupplierOrder && (<>
+                            {console.log(isSupplierAssigned)}
+                            <CheckSupplier SelectedOrder={selectedSupplierOrder} setShowModal={setIsModalOpen} setIsSupplierAssigned={setIsSupplierAssigned}/>
+                            </>)
+                          }
+                        </>
                       )}
                     </td>
 
@@ -514,6 +516,25 @@ const OrderList = () => {
         />
 
       </div>
+          {/* supplier details popup */}
+          {isPopupOpen && supplierDetails && (
+                        <div className="popup-overlay" onClick={closePopup}>
+                          <div
+                            className="popup"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <button
+                              className="close-button"
+                              onClick={closePopup}
+                            >
+                              ×
+                            </button>
+                            <h3>Supplier Details</h3>
+                            <p>Name: {supplierDetails.data?.name || "NA"}</p>
+                            <p>Phone: {supplierDetails.data?.phone || "NA"}</p>
+                          </div>
+                        </div>
+                      )}
       {/* pagination */}
       <div className="orderDetails_pagination">
         <button

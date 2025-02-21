@@ -1,21 +1,22 @@
 import React from "react";
 import Link from "next/link";
 import "./globals.css";
-import { FaTachometerAlt, FaPlusCircle , FaCamera} from "react-icons/fa";
+import { FaTachometerAlt, FaPlusCircle , FaCamera, faHandSpock} from "react-icons/fa";
+
 const menuItems = [
   { label: "Dashboard",
      icon: <FaTachometerAlt />,
       url: "/dashboard" 
     },
+    {
+      label: "Order Details",
+      icon: <FaTachometerAlt />,
+      url: "/dashboard/orderDetails",
+    },
   {
     label: "Decoration Create Order",
     icon: <FaPlusCircle />,
     url: "/dashboard/decoration-createorder",
-  },
-  {
-    label: "Order Details",
-    icon: <FaTachometerAlt />,
-    url: "/dashboard/orderDetails",
   },
   {
     label: "Food Create Order",
@@ -26,6 +27,17 @@ const menuItems = [
     label: "PhotoGraphy Create Order",
     icon: < FaCamera />,
     url: "/dashboard/photography-create-order",
+  },
+  {
+    label: "PhotoGraphy Create Folder",
+    icon: < FaCamera />,
+    url: "/dashboard/photo-folder",
+  },
+
+  {
+    label: "Vendor",
+    icon: < FaPlusCircle />,
+    url: "/dashboard/vendor",
   },
 ];
 const Sidebar = () => {

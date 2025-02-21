@@ -10,11 +10,12 @@ import {
     CONFIRM_ORDER_ENDPOINT,
     SAVE_LOCATION_ENDPOINT,
     API_SUCCESS_CODE,
+    ADMIN_USER_LIST,
 } from "../../utils/apiconstant";
 // import { json } from 'stream/consumers';
 
 
-const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, calculateAdvancePayment, peopleCount, selectedOption, selectedMealList }) => {
+const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, calculateAdvancePayment, peopleCount, selectedOption, selectedMealList ,includeDisposable}) => {
     const [newCustomerName, setNewCustomerName] = useState("");
     const [newCustomerPhone, setNewCustomerPhone] = useState("");
     const [date, setDate] = useState("");
@@ -74,50 +75,38 @@ const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, cal
         setBalanceAmount(ReminingAmount);
         // setTotalDiscount(Number(deliveryCharges) + Number(totalPrice - discountedPrice));
     }, [calculateFinalTotal, calculateAdvancePayment, deliveryCharges]);
-
+// by arti=======================================
     const handleCheckCustomer = async (e) => {
         e.preventDefault();
         setMessage("");
         setLoading(true);
-
+    
         try {
-            const response = await axios.post(
-                "https://horaservices.com:3000/api/admin/admin_user_list",
-                {
-                    email: "",
-                    page: "",
-                    per_page: 2000,
-                    phone: "",
-                    role: "customer",
-                }
-            );
-
-            const users = response?.data?.data?.users;
-
-            if (users.length > 0) {
-                console.log(users.length)
-                const customer = users.find((user) => user.phone === customerNumber);
-
-                setCustomerId(customer);
-                if (customer) {
-                    setMessage("Customer exists.");
-                    setMessageColor("green");
-                } else {
-                    setMessage("Customer does not exist.");
-                    setMessageColor("red");
-                    setShowPopup(true);
-                }
-            } else {
-                setMessage("No users found in the response.");
+          const response = await axios.post(`${BASE_URL}${ADMIN_USER_LIST}`, {
+              phone: customerNumber,  // Filter by phone directly
+              per_page: 1,            // Fetch only 1 result
+              role: "customer",
             }
+          );
+    
+          const users = response?.data?.data?.users || [];
+    
+          if (users.length > 0) {
+            setMessage("Customer exists.");
+            setMessageColor("green");
+            setCustomerId(users[0]);  // Store the first matching user
+          } else {
+            setMessage("Customer does not exist.");
+            setMessageColor("red");
+            setShowPopup(true);
+          }
         } catch (err) {
-            setMessage("An error occurred while checking the customer.");
-            console.error(err);
+          setMessage("An error occurred while checking the customer.");
+          console.error(err);
         } finally {
-            setLoading(false);
+          setLoading(false);
         }
     };
-
 
     const handleAddCustomer = async () => {
         const requestData = {
@@ -221,6 +210,8 @@ const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, cal
             type = 7;
         }
 
+     
+
         const requestData = {
             add_on: inclusion,
             phone_no: customerNumber,
@@ -236,7 +227,7 @@ const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, cal
             order_locality: city,
             total_amount: totalamount,
             orderApplianceIds: [],
-            payable_amount: balanceamount,
+            payable_amount: totalamount,
             advance_amount: advanceamount,
             is_gst: "0",
             order_type: true,
@@ -263,7 +254,8 @@ const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, cal
         }
     };
     const copyOrderSummary = () => {
-
+       
+        let inclusions;
         const formatDate = (inputDate) => {
             const dateObj = new Date(inputDate);
             const day = String(dateObj.getDate()).padStart(2, "0"); // Ensures 2-digit day
@@ -272,15 +264,40 @@ const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, cal
             return `${day}-${month}-${year}`;
         };
 
-        const formattedDate = formatDate(date); // Format the date
+        const formattedDate = date ? formatDate(date) : "To be shared by customer"; // Format the date
+        if (selectedOption === "food-delivery") {
 
+            inclusions = [
+              "Complementary - Green salad, Mint Chutney, Achar",
+              "Doorstep Delivery",
+              "Freshly cooked food",
+              "Fork, Spoon, Tissue papers",
+            ];
+            if (includeDisposable) {
+                inclusions.push("Disposable plates,  Bisleri Water bottles")
+            }
+          } else if (selectedOption === "live-catering") {
+            inclusions = [  
+              "Well Groomed Waiters (2 Nos)",
+              "Bone-china Crockery & Quality disposal for loose items",
+              "Transport (to & fro)",
+              "Dustbin with Garbage bag",
+              "Head Mask for waiters & chefs",
+              "Chafing Dish",
+              "Cocktail Napkins",
+              "2 Chefs"
+            ];               
+                
+          } else {
+            inclusions = ["No specific inclusions for this order type"];
+          }
         let orderData = `
-              *Food Delivery Order Summary:*
-          
+         *${selectedOption.charAt(0).toUpperCase() + selectedOption.slice(1)} Order Summary:*
+         
         City: ${city}
         Date: ${formattedDate}
         Guest Count: ${peopleCount}
-        Time of Delivery: ${timeSlot.value}
+        Time of Delivery: ${timeSlot ? timeSlot.value : "To be shared by customer"}
         Address: ${address}
         Google Map Location: ${googleLocation}
             `;
@@ -288,7 +305,7 @@ const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, cal
         if (selectedOption === "live-catering") {
             orderData += `
         Dishes:
-        ${selectedMealList.map((item) => item.name).join("\n -")}`;
+        ${selectedMealList.map((item) => item.name).join("\n -")}`
 
             //     orderData += `           
             // Total Amount: ₹ ${totalPrice}
@@ -364,16 +381,15 @@ const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, cal
 
         // Advance Amount: ₹${advanceamount}
         orderData += `
+
+        *Total amount: ₹${totalamount}*
+         *Advance Amount: ₹${advanceamount}*
         *Balance Amount: ₹${balanceamount}*
             `;
 
         orderData += `
         *Inclusions:*
-          - Complementary - Green salad, Mint Chutney, Achar
-          - Doorstep Delivery
-          - Disposable plates, Fork, Spoon, Tissue papers, Bisleri Water bottles
-          - Freshly cooked food.
-            `;
+          -${inclusions.join("\n-")}`;
 
         navigator.clipboard
             .writeText(orderData)
@@ -575,7 +591,7 @@ const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, cal
             </>
         </form>
         {message === "Customer exists." && <button onClick={copyOrderSummary} style={style.buttonPrimary}>
-            Copy Order Summary
+            Copy Order Summary(For Customer)
         </button>
         }
 
