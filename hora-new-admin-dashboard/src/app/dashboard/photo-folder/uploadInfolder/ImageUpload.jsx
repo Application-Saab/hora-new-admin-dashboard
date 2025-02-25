@@ -3,9 +3,9 @@ import React, { useState } from "react";
 import ThumbnailGallery from "./ThumbnailGallery";
 const ImageUpload = ({ folderTitle, customerId }) => {
   const [selectedImages, setSelectedImages] = useState([]);
-  const [setAllImages] = useState([]);
+  const [showThumbnailComp, setShowThumbnailComp] = useState(false);
   const [updatedImg, setUpdatedImg] = useState(true);
-  const [showLink, setShowLink] = useState(true);
+  const [showLink, setShowLink] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
   // Handle file selection
@@ -46,26 +46,39 @@ const ImageUpload = ({ folderTitle, customerId }) => {
         body: formData,
       });
 
-      if (!response.ok) {
-        throw new Error("Upload failed");
-      }
-
-      setAllImages((prev) => [...prev, ...selectedImages]);
+      // if (!response.ok) {
+      //   throw new Error("Upload failed");
+      // }
+      if (response.status === 201) {
+      // setAllImages((prev) => [...prev, ...selectedImages]);
       setSelectedImages([]);
       setShowLink(true);
       setUpdatedImg(false);
+      
       setTimeout(() => setUpdatedImg(true), 100);
-    } catch (error) {
+    }
+   } catch (error) {
       console.error("Upload failed", error);
       alert("Upload failed");
       setShowLink(false);
+      setShowThumbnailComp(false);
     } finally {
       setIsUploading(false);
+      setShowThumbnailComp(true);
     }
   };
 
   return (
     <>
+      {showLink && folderTitle && customerId && (
+        <>
+       
+          <h4>Folder link to share:</h4>
+          <p><a href={`https://horaservices.com/photo-gallery?folderName=${folderTitle}&customerId=${customerId}`} target="_blank" rel="noreferrer">
+            {`https://horaservices.com/photo-gallery?folderName=${folderTitle}&customerId=${customerId}`}
+          </a></p>
+        </>
+      )}
       <div className="imageupload-container">
         <input
           type="file"
@@ -111,16 +124,9 @@ const ImageUpload = ({ folderTitle, customerId }) => {
         )}
       </div>
 
-      {showLink && folderTitle && customerId && (
-        <>
-          <h3>Folder link to share:</h3>
-          <a href={`https://horaservices.com/photo-gallery?folderName=${folderTitle}&customerId=${customerId}`}>
-            {`https://horaservices.com/photo-gallery?folderName=${folderTitle}&customerId=${customerId}`}
-          </a>
-        </>
-      )}
+    
 
-      {updatedImg && folderTitle && customerId && (
+      {updatedImg  && folderTitle && customerId && showThumbnailComp &&(
         <ThumbnailGallery folderName={folderTitle} customerId={customerId} />
       )}
     </>

@@ -73,7 +73,7 @@ const ThumbnailGallery = ({ folderName, customerId }) => {
 
   return (
     <div className="container">
-      <h2 className="title">Project Thumbnails</h2>
+      <h2 className="title">Uploaded Images in your Folder</h2>
       {loading && <p>Loading thumbnails...</p>}
       {error && <p className="text-red-500">Error: {error}</p>}
       <div className="masonryGrid">
