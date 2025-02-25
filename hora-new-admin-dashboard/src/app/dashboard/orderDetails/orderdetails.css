@@ -126,21 +126,22 @@ th.order-type-header span {
   background-color: #45a049;
 }
 
-.status-button {
-  padding: 8px 16px;
+.status-button ,.assigningBtn{
+  padding: 8px;
   border: none;
   border-radius: 4px;
   color: white;
   font-weight: bold;
   cursor: pointer;
+  width: 80px;
 }
 
-.status-button.active {
+.status-button.active , .assigningBtn.assigned {
   background-color: red;
 }
 
-.status-button.inactive {
-  background-color: green;
+.status-button.inactive ,.assigningBtn.not-assigned {
+  background-color: #5cb85c;
 }
 
 
@@ -208,7 +209,6 @@ th.order-type-header span {
 
 .order-type-header {
   font-size: 20px;
-  color: #333;
   font-weight: bold;
   text-align: left;
   align-items: center;
@@ -221,10 +221,9 @@ th.order-type-header span {
   appearance: none;
   padding: 4px 8px;
   background-color: #fff;
-  border: 2px solid #0f0e0e;
   border-radius: 4px;
   font-size: 16px;
-  color: #555;
+  /* color: #555; */
   transition: all 0.3s ease;
   cursor: pointer;
   outline: none;

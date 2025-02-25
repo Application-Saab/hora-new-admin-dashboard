@@ -286,7 +286,7 @@ const OrderList = () => {
 
           <table className="order-table">
             <thead>
-              <tr>
+              <tr style={styles.tableHeading}>
                 <th>Order Id</th>
                 <th className="order-type-header">
                   <span> Order Type</span>
@@ -409,11 +409,11 @@ const OrderList = () => {
                     {/* <td>{order.online_phone_no || "N/A"}</td> */}
                     <td>
                       {order.toId ? (<>
-                        <FaEye onClick={() => openSupplierDeatilsPopup(order.toId)} /><span>Assigned</span>
+                        <button onClick={() => openSupplierDeatilsPopup(order.toId)}  className="assigningBtn assigned"><FaEye /><span>Assigned</span></button>
                         </>) : (
                           <>
                           <button
-                            className="not-assigned-btn"
+                            className="assigningBtn not-assigned"
                             onClick={() => openSupplierAssignPopup(order)}
                           >
                             Not Assigned
@@ -596,4 +596,8 @@ const styles = {
     backgroundColor: "#dc3545",
     color: "white",
   },
+  tableHeading: {
+    background: "linear-gradient(90deg, rgba(221, 94, 137, 0.8), rgb(151, 83, 140))",
+    color: "rgb(255, 255, 255)"
+  }
 };
