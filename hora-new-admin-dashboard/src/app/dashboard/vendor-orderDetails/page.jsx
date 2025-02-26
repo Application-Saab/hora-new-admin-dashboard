@@ -1,5 +1,5 @@
 "use client";
-import React, { useState ,useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { BASE_URL, ADMIN_ORDER_LIST, ADMIN_USER_LIST } from "../../../utils/apiconstant";
 
@@ -13,9 +13,9 @@ const CheckVendorOrders = () => {
     // pagination
     const [totalOrders, setTotalOrders] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPage, setTotalPage] = useState(0);
+    // const [totalPage, setTotalPage] = useState(0);
     const itemsPerPage = 10;
-    const fetchOrdersBySupplierId = async (supplierId, page = 1 ,ratingFilter = '') => {
+    const fetchOrdersBySupplierId = async (supplierId, page = 1, ratingFilter = '') => {
         if (!supplierId) return;
         try {
             const response = await fetch(BASE_URL + ADMIN_ORDER_LIST, {
@@ -23,61 +23,62 @@ const CheckVendorOrders = () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     order_status: 0,
-                    page: page, // Use dynamic page
-                    per_page: itemsPerPage,
+
+                    per_page: 5000,
                     status: 0,
                     toId: supplierId,
                     userReviewRatingArray: ratingFilter ? [ratingFilter] : undefined,
                 }),
             });
-    
+
             if (!response.ok) throw new Error("Failed to fetch orders");
             if (response.status === 200) {
-            const { data } = await response.json();
-            setMatchingOrders(data?.order);
-            setTotalOrders(data?.paginate?.total_item);
-            let totalPages = Math.ceil(data?.paginate?.total_item / itemsPerPage);
-            setTotalPage(totalPages);}
-            else{
-            setMatchingOrders([]);
-            setTotalPage('');
-            console.warn("No orders found");
+                const { data } = await response.json();
+                setMatchingOrders(data?.order);
+                setTotalOrders(data?.paginate?.total_item);
+
+                // setTotalPage(totalPages);
+            }
+            else {
+                setMatchingOrders([]);
+                setTotalPage('');
+                console.warn("No orders found");
             }
         } catch (error) {
             console.error("Error fetching orders:", error);
         }
     };
     useEffect(() => {
-          
-        fetchOrdersBySupplierId(supplierId, currentPage,ratingFilter); // Fetch for new page
+
+        fetchOrdersBySupplierId(supplierId, currentPage, ratingFilter); // Fetch for new page
         // if (result && result.includes("Supplier ID:")) {
         //     fetchOrdersBySupplierId(supplierId, currentPage,ratingFilter); // Fetch for new page
         // }
     }, [currentPage, ratingFilter]);
-    
-    
+
+
     const handleCheckSupplier = async (e) => {
         e.preventDefault();
         const trimmedNumber = number.trim();
         if (!trimmedNumber) return;
-    
+
         setLoading(true);
         setResult(null);
         setMatchingOrders([]);
         setCurrentPage(1); // Reset to first page
-    
+
         try {
             const response = await axios.post(BASE_URL + ADMIN_USER_LIST, {
                 per_page: 4000,
                 role: "supplier",
             });
-    
+
             if (!response?.data?.data?.users) throw new Error("Invalid response data");
-    
+
             const supplier = response.data.data.users.find(
                 (user) => user.phone?.trim() === trimmedNumber
             );
-    
+
             if (supplier) {
                 await fetchOrdersBySupplierId(supplier._id, 1);
                 setSupplierId(supplier._id);
@@ -93,22 +94,18 @@ const CheckVendorOrders = () => {
             setLoading(false);
         }
     };
-    
+
     const getOrderId = (e) => {
         const orderId1 = 10800 + e;
         const updateOrderId = "#" + orderId1;
         return updateOrderId;
     };
 
-    const totalBalanceAmount = matchingOrders.reduce((acc, order) => acc + (parseFloat(order.balance_amount) || 0), 0);
+    const totalBalanceAmount = (matchingOrders || []).reduce(
+        (acc, order) => acc + (parseFloat(order.balance_amount) || 0),
+        0
+    );
 
-    // const filteredOrders = matchingOrders.filter(order => {
-    //     const rating = order.userReviewRatingArray?.[0] || "";
-    //     if (ratingFilter === "9-10") return rating === "9-10";
-    //     if (ratingFilter === "6-8") return rating === "6-8";
-    //     if (ratingFilter === "0-6") return rating === "0-6";
-    //     return true;
-    // });
 
     const ratingSummary = {
         "9-10": { count: 0, total: 0 },
@@ -116,18 +113,22 @@ const CheckVendorOrders = () => {
         "0-6": { count: 0, total: 0 }
     };
 
-    // filteredOrders.forEach(order => {
-    //     const rawRating = order.userReviewRatingArray?.[0];
-    //     const amount = Number(order.balance_amount) || 0;
-
-    //     if (!rawRating || !["9-10", "6-8", "0-6"].includes(rawRating)) {
-    //         console.warn("Invalid rating found, skipping order:", order);
-    //         return; // Ignore orders with invalid ratings
-    //     }
-
-    //     ratingSummary[rawRating].count++;
-    //     ratingSummary[rawRating].total += amount;
-    // });
+    matchingOrders.forEach(order => {
+        let rating = order.userReviewRatingArray.length > 0 ? order.userReviewRatingArray[0] : 0;
+        if (rating === "9-10") {
+            ratingSummary["9-10"].count += 1;
+            ratingSummary["9-10"].total += (parseFloat(order.balance_amount));
+        } else if (rating === "6-8") {
+            ratingSummary["6-8"].count += 1;
+            ratingSummary["6-8"].total += (parseFloat(order.balance_amount));
+        } else {
+            ratingSummary["0-6"].count += 1;
+            ratingSummary["0-6"].total += (parseFloat(order.balance_amount));
+        }
+    });
+    // pagination logic
+    let totalPage = Math.ceil(matchingOrders.length / itemsPerPage);
+    const displayedOrders = matchingOrders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
     return (
         <div style={{ padding: "20px", maxWidth: "600px", margin: "auto", fontFamily: "Arial, sans-serif" }}>
@@ -159,7 +160,7 @@ const CheckVendorOrders = () => {
                 <p style={{ marginTop: "20px", padding: "10px", backgroundColor: result.includes("present") ? "#f8d7da" : "#d4edda", color: result.includes("present") ? "#155724" : "#721c24", borderRadius: "5px" }}>{result}</p>
             )}
 
-            {matchingOrders.length > 0 && (
+            {result && (
                 <div style={{ marginTop: "20px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "linear-gradient(90deg, rgba(221, 94, 137, 0.8), #97538c)", color: "white", padding: "10px", borderRadius: "8px", fontSize: "18px", fontWeight: "bold", maxWidth: "900px", margin: "20px auto", boxShadow: "0 4px 8px rgba(0,0,0,0.1)", }}>
                         <span className="aarti">📦 Total Orders: {totalOrders}</span>
@@ -209,9 +210,9 @@ const CheckVendorOrders = () => {
                                 <th style={{ padding: "10px", border: "1px solid #ccc" }}>Fulfillment Date</th>
                                 <th style={{ padding: "10px", border: "1px solid #ccc" }}>Order Rating
                                     <select
-                                     onChange={(e) => setRatingFilter(e.target.value)} value={ratingFilter}
-                                      style={{ marginLeft: "10px", borderRadius: "5px", fontSize: "12px" }}>
-                                        <option value="" selected>All</option>
+                                        onChange={(e) => setRatingFilter(e.target.value)} value={ratingFilter}
+                                        style={{ marginLeft: "10px", borderRadius: "5px", fontSize: "12px" }}>
+                                        <option value="">All</option>
                                         <option value="9-10">9-10</option>
                                         <option value="6-8">6-8</option>
                                         <option value="0-6">0-6</option>
@@ -222,34 +223,35 @@ const CheckVendorOrders = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {matchingOrders.map((order, index) => (
-                                <tr key={index} style={{ backgroundColor: index % 2 === 0 ? "#f9f9f9" : "#fff" }}>
-                                    <td style={{ padding: "10px", border: "1px solid #ccc" }}>{getOrderId(order.order_id)}</td>
-                                    <td style={{ padding: "10px", border: "1px solid #ccc" }}>{new Date(order.order_date).toLocaleDateString("en-GB")}</td>
-                                    <td style={{ padding: "10px", border: "1px solid #ccc" }}>{order.userReviewRatingArray?.[0] || "N/A"}</td>
-                                    <td style={{ padding: "10px", border: "1px solid #ccc" }}>{new Date(order.createdAt).toLocaleDateString("en-GB")}</td>
+                            {displayedOrders?.length > 0 ? (
+                                displayedOrders.map((order, index) => (
+                                    <tr key={index} style={{ backgroundColor: index % 2 === 0 ? "#f9f9f9" : "#fff" }}>
+                                        <td style={{ padding: "10px", border: "1px solid #ccc" }}>{getOrderId(order.order_id)}</td>
+                                        <td style={{ padding: "10px", border: "1px solid #ccc" }}>{new Date(order.order_date).toLocaleDateString("en-GB")}</td>
+                                        <td style={{ padding: "10px", border: "1px solid #ccc" }}>{order.userReviewRatingArray?.[0] || "N/A"}</td>
+                                        <td style={{ padding: "10px", border: "1px solid #ccc" }}>{new Date(order.createdAt).toLocaleDateString("en-GB")}</td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="4" style={{ textAlign: "center", padding: "10px", border: "1px solid #ccc" }}>No orders found</td>
                                 </tr>
-                            ))}
-                            
+                            )}
                         </tbody>
+
 
                     </table>
                     {/* pagination */}
-                    <div className="orderDetails_pagination" style={style.orderDetails_pagination}>
-                                <button
-                                    onClick={() => setCurrentPage((prevPage) => Math.max(prevPage - 1, 1))}
-                                    disabled={currentPage === 1} // Disable Previous button on first page
-                                >
-                                    {"<"}
-                                </button>
-                                <span> Page {currentPage} of {totalPage} </span>
-                                <button
-                                    onClick={() => setCurrentPage((prevPage) => prevPage + 1)}
-                                    disabled={currentPage === totalPage} // Disable Next button on last page
-                                >
-                                    {">"}
-                                </button>
-                            </div>
+                 
+                    <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
+                        <button onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1}>
+                            {"<"}
+                        </button>
+                        <span style={{ margin: "0 10px" }}>Page {currentPage} of {totalPage}</span>
+                        <button onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPage))} disabled={currentPage === totalPage}>
+                            {">"}
+                        </button>
+                    </div>
                 </div>
             )}
         </div>
