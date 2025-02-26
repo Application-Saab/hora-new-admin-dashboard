@@ -15,7 +15,7 @@ const CheckVendorOrders = () => {
     const [currentPage, setCurrentPage] = useState(1);
     // const [totalPage, setTotalPage] = useState(0);
     const itemsPerPage = 10;
-    const fetchOrdersBySupplierId = async (supplierId, page = 1, ratingFilter = '') => {
+    const fetchOrdersBySupplierId = async (supplierId , ratingFilter = '') => {
         if (!supplierId) return;
         try {
             const response = await fetch(BASE_URL + ADMIN_ORDER_LIST, {
@@ -257,13 +257,6 @@ const CheckVendorOrders = () => {
         </div>
     );
 };
-const style = {
-    orderDetails_pagination: {
-        alignItems: 'center',
-        display: 'flex',
-        justifyContent: 'center',
-        padding: '8px'
-    }
-}
+
 export default CheckVendorOrders;
 
