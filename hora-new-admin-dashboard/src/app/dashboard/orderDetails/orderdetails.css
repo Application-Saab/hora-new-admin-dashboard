@@ -136,11 +136,11 @@ th.order-type-header span {
   width: 80px;
 }
 
-.status-button.active , .assigningBtn.assigned {
+.status-button.active ,.assigningBtn.not-assigned  {
   background-color: red;
 }
 
-.status-button.inactive ,.assigningBtn.not-assigned {
+.status-button.inactive ,.assigningBtn.assigned {
   background-color: #5cb85c;
 }
 

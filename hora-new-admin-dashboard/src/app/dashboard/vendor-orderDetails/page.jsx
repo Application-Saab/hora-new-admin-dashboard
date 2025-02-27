@@ -10,24 +10,26 @@ const CheckVendorOrders = () => {
     const [matchingOrders, setMatchingOrders] = useState([]);
     const [ratingFilter, setRatingFilter] = useState("");
     const [supplierId, setSupplierId] = useState("");
+    const [allOrders , setAllOrders] = useState([]);
     // pagination
     const [totalOrders, setTotalOrders] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     // const [totalPage, setTotalPage] = useState(0);
     const itemsPerPage = 10;
-    const fetchOrdersBySupplierId = async (supplierId , ratingFilter = '') => {
+    const fetchOrdersByRating = async (supplierId , ratingFilter) => {
+       
         if (!supplierId) return;
+        
         try {
             const response = await fetch(BASE_URL + ADMIN_ORDER_LIST, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     order_status: 0,
-
-                    per_page: 5000,
+                    per_page: 1000,
                     status: 0,
                     toId: supplierId,
-                    userReviewRatingArray: ratingFilter ? [ratingFilter] : undefined,
+                    userReviewRatingArray: ratingFilter ? [ratingFilter] : undefined, 
                 }),
             });
 
@@ -35,13 +37,13 @@ const CheckVendorOrders = () => {
             if (response.status === 200) {
                 const { data } = await response.json();
                 setMatchingOrders(data?.order);
-                setTotalOrders(data?.paginate?.total_item);
+                
 
                 // setTotalPage(totalPages);
             }
             else {
                 setMatchingOrders([]);
-                setTotalPage('');
+                // setTotalPage('');
                 console.warn("No orders found");
             }
         } catch (error) {
@@ -50,23 +52,22 @@ const CheckVendorOrders = () => {
     };
     useEffect(() => {
 
-        fetchOrdersBySupplierId(supplierId, currentPage, ratingFilter); // Fetch for new page
-        // if (result && result.includes("Supplier ID:")) {
-        //     fetchOrdersBySupplierId(supplierId, currentPage,ratingFilter); // Fetch for new page
-        // }
-    }, [currentPage, ratingFilter]);
+       
+    fetchOrdersByRating(supplierId ,ratingFilter ); // Fetch for new page
+   
+    }, [supplierId , ratingFilter]);
 
 
     const handleCheckSupplier = async (e) => {
         e.preventDefault();
         const trimmedNumber = number.trim();
         if (!trimmedNumber) return;
-
+        setRatingFilter('');
         setLoading(true);
         setResult(null);
         setMatchingOrders([]);
         setCurrentPage(1); // Reset to first page
-
+            setAllOrders([]);
         try {
             const response = await axios.post(BASE_URL + ADMIN_USER_LIST, {
                 per_page: 4000,
@@ -80,7 +81,9 @@ const CheckVendorOrders = () => {
             );
 
             if (supplier) {
-                await fetchOrdersBySupplierId(supplier._id, 1);
+                
+                await fetchOrdersByRating(supplier._id);
+                fetchAllOrders(supplier._id);
                 setSupplierId(supplier._id);
                 setResult(`Supplier ID: ${supplier._id}`);
             } else {
@@ -101,19 +104,49 @@ const CheckVendorOrders = () => {
         return updateOrderId;
     };
 
-    const totalBalanceAmount = (matchingOrders || []).reduce(
+    const totalBalanceAmount = (allOrders || []).reduce(
         (acc, order) => acc + (parseFloat(order.balance_amount) || 0),
         0
     );
+    const fetchAllOrders = async (supplierId) => {
+       
+        if (!supplierId) return;
+        
+        try {
+            const response = await fetch(BASE_URL + ADMIN_ORDER_LIST, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    order_status: 0,
+                    per_page: 1000,
+                    status: 0,
+                    toId: supplierId, 
+                }),
+            });
 
+            if (!response.ok) throw new Error("Failed to fetch orders");
+            if (response.status === 200) {
+                const { data } = await response.json();
+                setAllOrders(data?.order);
+                setTotalOrders(data?.paginate?.total_item);
+            }
+            else {
+                setAllOrders([]);
+                // setTotalPage('');
+                console.warn("No orders found");
+            }
+        } catch (error) {
+            console.error("Error fetching orders:", error);
+        }
+    };
 
     const ratingSummary = {
         "9-10": { count: 0, total: 0 },
         "6-8": { count: 0, total: 0 },
-        "0-6": { count: 0, total: 0 }
+        "0-6": { count: 0, total: 0 },
+        "No Rating": { count: 0, total: 0 }
     };
-
-    matchingOrders.forEach(order => {
+    allOrders?.forEach(order => {
         let rating = order.userReviewRatingArray.length > 0 ? order.userReviewRatingArray[0] : 0;
         if (rating === "9-10") {
             ratingSummary["9-10"].count += 1;
@@ -121,14 +154,23 @@ const CheckVendorOrders = () => {
         } else if (rating === "6-8") {
             ratingSummary["6-8"].count += 1;
             ratingSummary["6-8"].total += (parseFloat(order.balance_amount));
-        } else {
+        } else if  (rating === "0-6") {
             ratingSummary["0-6"].count += 1;
             ratingSummary["0-6"].total += (parseFloat(order.balance_amount));
+        }else {
+            ratingSummary["No Rating"].count += 1; // New category for missing ratings
+            ratingSummary["No Rating"].total += parseFloat(order.balance_amount) || 0;
         }
     });
+    
+  
     // pagination logic
-    let totalPage = Math.ceil(matchingOrders.length / itemsPerPage);
-    const displayedOrders = matchingOrders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+    let totalPage = Math.ceil(matchingOrders?.length / itemsPerPage);
+    const displayedOrders = (matchingOrders || []).slice(
+        (currentPage - 1) * itemsPerPage, 
+        currentPage * itemsPerPage
+    );
+    
 
     return (
         <div style={{ padding: "20px", maxWidth: "600px", margin: "auto", fontFamily: "Arial, sans-serif" }}>
@@ -196,6 +238,11 @@ const CheckVendorOrders = () => {
                                         <td style={{ padding: "12px", border: "1px solid #ddd" }}>⚠️ 0-6 Rated Orders</td>
                                         <td style={{ padding: "12px", border: "1px solid #ddd" }}>{ratingSummary["0-6"].count}</td>
                                         <td style={{ padding: "12px", border: "1px solid #ddd" }}>₹{ratingSummary["0-6"].total}</td>
+                                    </tr>
+                                    <tr style={{ backgroundColor: "#f2f2f2" }}>
+                                        <td style={{ padding: "12px", border: "1px solid #ddd" }}>★ No Rating</td>
+                                        <td style={{ padding: "12px", border: "1px solid #ddd" }}>{ratingSummary["No Rating"].count}</td>
+                                        <td style={{ padding: "12px", border: "1px solid #ddd" }}>₹{ratingSummary["No Rating"].total}</td>
                                     </tr>
                                 </tbody>
                             </table>
