@@ -27,7 +27,7 @@ const ImageUpload = ({ folderTitle, customerId }) => {
     const formData = new FormData();
     formData.append("folderName", folderTitle);
     formData.append("customerId", customerId);
-    formData.append("file", image.file, image.name);
+    formData.append("files", image.file, image.name);
 
     try {
       const response = await fetch("https://horaservices.com:3000/api/photo/upload", {
