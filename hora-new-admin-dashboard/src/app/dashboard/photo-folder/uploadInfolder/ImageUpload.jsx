@@ -20,7 +20,7 @@ const ImageUpload = ({ folderTitle, customerId }) => {
 
     setSelectedImages((prev) => [...prev, ...selectedImages]);
   };
-
+  let uploadCount = 0; 
   // Upload single image
   const uploadImage = async (image) => {
     console.log("upload button hit")
@@ -36,8 +36,10 @@ const ImageUpload = ({ folderTitle, customerId }) => {
       });
 
       if (response.status === 201) {
-        console.log("complet upload")
+        console.log("completd upload")
         console.log(`${image.name} uploaded successfully.`);
+        uploadCount++;  // Increment the upload count
+        console.log(`Total images uploaded: ${uploadCount}`); // Log the count
         return true; // Image uploaded successfully
       } else {
         console.error(`${image.name} upload failed.`);
@@ -66,7 +68,6 @@ const ImageUpload = ({ folderTitle, customerId }) => {
 
     // Start uploading images one by one
     for (let i = currentImageIndex; i < selectedImages.length; i++) {
-      console.log("one by one");
       setCurrentImageIndex(i + 1); // Move to the next image
       const success = await uploadImage(selectedImages[i]);
       if (!success) {
