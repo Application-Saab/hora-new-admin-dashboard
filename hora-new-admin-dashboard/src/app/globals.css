@@ -10,8 +10,10 @@ ul{
 .main-content{
   width:84%;
 }
+
+
 .sidebar {
-  width: 15%;
+  width: 12%;
   height: 100vh;
   background: linear-gradient(90deg, rgba(221, 94, 137, 0.8), #97538c);
   /* padding: 20px; */
@@ -20,6 +22,24 @@ ul{
   top: 0; 
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
+  /* overflow: hidden;
+  position: relative; */
+}
+
+.sidebar.open {
+  width: 250px;
+}
+
+.sidebar.closed {
+  width: 60px;
+}
+
+.toggle-button {
+  padding: 15px;
+  cursor: pointer;
+  display: flex;
+  justify-content: flex-end;
+  color: wheat;
 }
 
 .sidebar a {
@@ -141,3 +161,13 @@ h3 {
   border: 1px solid grey;
 }
 
+
+/* Hide the scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* For Firefox (hides scrollbar but keeps scrolling) */
+.custom-scrollbar {
+  scrollbar-width: none;
+}
