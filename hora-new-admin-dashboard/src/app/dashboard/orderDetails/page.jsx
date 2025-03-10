@@ -322,61 +322,58 @@ const OrderList = () => {
         <div className="order-header">
           <h1>Order Details</h1>
         </div>
-        <div className="filter-container">
-          <div className="left part">
+        <div className="filter-wrapper">
+          <div className="filter-container">
             <div className="search filter-box">
               <input
                 type="text"
                 className="small-search byId"
                 placeholder="Search by Order ID"
                 value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                }}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
 
-            {/* Phone Number Search */}
             <div className="phone filter-box">
               <input
                 type="text"
                 className="small-search byPhone"
-                placeholder="Search by customer Number"
+                placeholder="Search by Customer Number"
                 value={selectedPhoneNumber}
                 onChange={(e) => setSelectedPhoneNumber(e.target.value)}
               />
             </div>
-            {/* date search */}
+
             <div className="date filter-box">
-              <label className="date-label">Order Fullfilement Date</label>
+              <label className="date-label">Order Fulfillment Date</label>
               <input
                 type="date"
                 value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)} // Update the selectedDate state
-                placeholder="Select Date"
+                onChange={(e) => setSelectedDate(e.target.value)}
                 className="date-input"
               />
             </div>
-          </div>
-          <div className="right-part">
-            <button
-              className="filter-btn"
-              onClick={() => window.location.reload()}
-            >
-              Reset all filters
-            </button>
-          </div>
-        </div>
 
-        <div className="status-dropdown-container">
-          <label htmlFor="statusDropdown" className="status-label">
-            Status
-          </label>
-          <StatusDropdown
-            id="statusDropdown"
-            selectedActiveStatus={selectedActiveStatus}
-            setSelectedActiveStatus={setSelectedActiveStatus}
-          />
+            <div className="right-part">
+              <button
+                className="filter-btn"
+                onClick={() => window.location.reload()}
+              >
+                Reset All Filters
+              </button>
+            </div>
+
+            <div className="status-dropdown-container">
+              <label htmlFor="statusDropdown" className="status-label">
+                Status
+              </label>
+              <StatusDropdown
+                id="statusDropdown"
+                selectedActiveStatus={selectedActiveStatus}
+                setSelectedActiveStatus={setSelectedActiveStatus}
+              />
+            </div>
+          </div>
         </div>
 
         <div className="orders-box">
@@ -474,7 +471,7 @@ const OrderList = () => {
                 </th>
                 <th>Action</th>
                 <th>Rating</th>
-                <th>Vendor Amount</th>
+                <th>Extra Pay</th>
               </tr>
             </thead>
             <tbody>
@@ -610,9 +607,25 @@ const OrderList = () => {
                         <span>₹{order.vendor_amount}</span>
                       ) : (
                         <button
-                          className="assigningBtn not-assigned"
-                          // onClick={handleOpenPopup}
                           onClick={() => handleOpenPopup(order._id)}
+                          style={{
+                            width: "85px",
+                            height: "40px",
+                            backgroundColor: "transparent",
+                            backgroundImage: "linear-gradient(135deg, #ff6b6b, #ffa500)",
+                            border: "none",
+                            borderRadius: "10px",
+                            cursor: "pointer",
+                            transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                            color: "white",
+                            fontSize: "10px",
+                            fontWeight: "bold",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                          
                         >
                           Set Vendor Amount
                         </button>
