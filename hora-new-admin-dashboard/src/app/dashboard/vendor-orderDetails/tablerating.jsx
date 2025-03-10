@@ -22,24 +22,24 @@ const AdminRatingsTable = () => {
         "https://horaservices.com:3000/api/admin/admin_user_list",
         {
           email: "",
-          page: newPage, // Use the new page value
+          page: newPage,
           per_page: usersPerPage,
           phone: "",
           role: "supplier",
         }
       );
-
+  
       let adminUsers = adminUsersRes.data.data?.users || [];
       if (selectedCity) {
         adminUsers = adminUsers.filter((user) => user.city === selectedCity);
       }
-
+  
       if (adminUsers.length === 0) {
         setHasMore(false);
         setLoading(false);
         return;
       }
-
+  
       const adminRatingsPromises = adminUsers.map(async (admin) => {
         const ordersRes = await axios.post(
           "https://horaservices.com:3000/api/admin/adminOrderList",
@@ -51,11 +51,9 @@ const AdminRatingsTable = () => {
             status: 0,
             type: "",
             toId: admin._id,
-            startDate,
-            endDate,
           }
         );
-
+  
         const orders = ordersRes.data.data?.order || [];
         const adminRatings = {
           ...admin,
@@ -63,32 +61,48 @@ const AdminRatingsTable = () => {
           "6-8": 0,
           "9-10": 0,
           "No-Rating": 0,
-          totalOrders: orders.length,
+          totalOrders: 0, // Initialize count
         };
-
+  
         orders.forEach((order) => {
-          if (
-            Array.isArray(order.userReviewRatingArray) &&
-            order.userReviewRatingArray.length > 0
-          ) {
-            let validRatingFound = false;
-            order.userReviewRatingArray.forEach((rating) => {
-              let numericRating = parseFloat(rating);
-              if (!isNaN(numericRating)) {
-                validRatingFound = true;
-                if (numericRating <= 6) adminRatings["0-6"]++;
-                else if (numericRating <= 8) adminRatings["6-8"]++;
-                else adminRatings["9-10"]++;
-              }
-            });
-            if (!validRatingFound) adminRatings["No-Rating"]++;
-          } else {
-            adminRatings["No-Rating"]++;
+          if (order.order_date) {
+            const orderDate = new Date(order.order_date);
+            const start = startDate ? new Date(startDate) : null;
+            const end = endDate ? new Date(endDate) : null;
+  
+            if (
+              (start && orderDate < start) || // Exclude orders before startDate
+              (end && orderDate > end) // Exclude orders after endDate
+            ) {
+              return;
+            }
+  
+            adminRatings.totalOrders++; // Count only filtered orders
+  
+            if (
+              Array.isArray(order.userReviewRatingArray) &&
+              order.userReviewRatingArray.length > 0
+            ) {
+              let validRatingFound = false;
+              order.userReviewRatingArray.forEach((rating) => {
+                let numericRating = parseFloat(rating);
+                if (!isNaN(numericRating)) {
+                  validRatingFound = true;
+                  if (numericRating <= 6) adminRatings["0-6"]++;
+                  else if (numericRating <= 8) adminRatings["6-8"]++;
+                  else adminRatings["9-10"]++;
+                }
+              });
+              if (!validRatingFound) adminRatings["No-Rating"]++;
+            } else {
+              adminRatings["No-Rating"]++;
+            }
           }
         });
+  
         return adminRatings;
       });
-
+  
       const newAdminData = await Promise.all(adminRatingsPromises);
       setAdminData((prevData) =>
         newPage === 1 ? newAdminData : [...prevData, ...newAdminData]
@@ -99,6 +113,7 @@ const AdminRatingsTable = () => {
     }
     setLoading(false);
   };
+  
 
   const handleSubmit = () => {
     setSearchTriggered(true);

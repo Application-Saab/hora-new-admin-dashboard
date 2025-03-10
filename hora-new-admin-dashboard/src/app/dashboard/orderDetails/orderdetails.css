@@ -134,6 +134,7 @@ th.order-type-header span {
   font-weight: bold;
   cursor: pointer;
   width: 80px;
+  font-size: 10px;
 }
 
 .status-button.active ,.assigningBtn.not-assigned  {
@@ -453,4 +454,40 @@ th.order-type-header span {
 /* Generic spacing for elements */
 h3 {
   margin-bottom: 10px;
+}
+
+
+/* sadsa */
+.status-dropdown-container {
+  display: flex;
+  align-items: center;  
+  padding: 10px;
+  background-color: #fff;
+  border: 1px solid black;
+  border-radius: 10px;
+  width: fit-content;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
+}
+
+.status-label {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  margin-right: 15px;  
+}
+
+.status-dropdown-container select {
+  padding: 8px;
+  font-size: 14px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  outline: none;
+  transition: all 0.3s ease;
+  min-width: 150px;  
+}
+
+.status-dropdown-container select:focus {
+  border-color: black;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 }

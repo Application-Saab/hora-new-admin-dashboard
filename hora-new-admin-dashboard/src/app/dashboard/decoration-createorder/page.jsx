@@ -272,6 +272,7 @@ const AddDecOrder = () => {
       status: 1,
       balance_amount: balanceamount,
       order_taken_by: orderTakenBy,
+      order_pincode: pincode,
     };
 
     console.log(requestData, "requestData decoration");
