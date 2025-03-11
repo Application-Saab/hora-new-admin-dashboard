@@ -1,17 +1,26 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import AuthGuard from "../app/component/AuthGuard";
 import "./globals.css";
-import { FaTachometerAlt, FaPlusCircle , FaCamera, FaClipboardList} from "react-icons/fa";
+import {
+  FaTachometerAlt,
+  FaPlusCircle,
+  FaCamera,
+  FaClipboardList,
+  FaSignOutAlt,
+} from "react-icons/fa";
+import { useRouter } from "next/navigation";
+
 const menuItems = [
-  { label: "Dashboard",
-     icon: <FaTachometerAlt />,
-      url: "/dashboard" 
-    },
-    {
-      label: "Order Details",
-      icon: <FaClipboardList />,
-      url: "/dashboard/orderDetails",
-    },
+  { label: "Dashboard", icon: <FaTachometerAlt />, url: "/dashboard" },
+  {
+    label: "Order Details",
+    icon: <FaClipboardList />,
+    url: "/dashboard/orderDetails",
+  },
   {
     label: "Decoration Create Order",
     icon: <FaPlusCircle />,
@@ -23,35 +32,46 @@ const menuItems = [
     url: "/dashboard/food-create-order",
   },
   {
-    label: "PhotoGraphy Create Order",
-    icon: < FaCamera />,
+    label: "Photography Create Order",
+    icon: <FaCamera />,
     url: "/dashboard/photography-create-order",
   },
   {
-    label: "PhotoGraphy Create Folder",
-    icon: < FaCamera />,
+    label: "Photography Create Folder",
+    icon: <FaCamera />,
     url: "/dashboard/photo-folder",
   },
   {
-    label: "Vendor OrderDeatils",
+    label: "Vendor Order Details",
     icon: <FaClipboardList />,
     url: "/dashboard/vendor-orderDetails",
-  }
+  },
 ];
+
 const Sidebar = () => {
+  const router = useRouter();
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken"); // Remove token
+    router.push("/login");
+  };
+
   return (
-    <div className="sidebar">
+    <aside className="sidebar">
       <ul>
-      {menuItems.map((item, index) => (
-        <li key={index}>
-          <Link href={item.url} className="link-button">
-            {item.icon}
-            <span style={{ marginLeft: "8px" }}>{item.label}</span>
-          </Link>
-        </li>
-      ))}
-    </ul>
-    </div>
+        {menuItems.map((item, index) => (
+          <li key={index}>
+            <Link href={item.url} className="link-button">
+              {item.icon}
+              <span style={{ marginLeft: "8px" }}>{item.label}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+      <button onClick={handleLogout} className="logout-button">
+        <FaSignOutAlt className="logout-icon" /> Logout
+      </button>
+    </aside>
   );
 };
 
@@ -60,15 +80,18 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const hideSidebarRoutes = ["/login"];
+
   return (
     <html lang="en">
       <body>
-        <div className='dashBoard_page' style={{ display: "flex" }}>
-          <Sidebar />
-          <div className="main-content" >
-            {children}
+        <AuthGuard>
+          <div className="dashboard-container" style={{ display: "flex" }}>
+            {!hideSidebarRoutes.includes(pathname) && <Sidebar />}
+            <main className="main-content">{children}</main>
           </div>
-        </div>
+        </AuthGuard>
       </body>
     </html>
   );
