@@ -3,10 +3,7 @@ import React, { useState, useEffect } from "react";
 import { FaEye } from "react-icons/fa";
 import ActionPopup from "../../component/ActionPop";
 import "./orderdetails.css";
-import {
-  BASE_URL,
-  ADMIN_ORDER_LIST,
-} from "../../../utils/apiconstant";
+import { BASE_URL, ADMIN_ORDER_LIST } from "../../../utils/apiconstant";
 // import * as XLSX from "xlsx";
 import CheckSupplier from "../../component/createsupplier/CheckSupplier";
 
@@ -33,7 +30,16 @@ const OrderList = () => {
   const [selectedSupplierOrder, setSelectedSupplierOrder] = useState(null);
   const [supplierDetails, setSupplierDetails] = useState(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const fetchOrders = async (page, orderId = '', orderstatus = '', activeStatus = '', orderType = '', orderCity = '', selectedDate = '', selectedOfflineNum = '') => { 
+  const fetchOrders = async (
+    page,
+    orderId = "",
+    orderstatus = "",
+    activeStatus = "",
+    orderType = "",
+    orderCity = "",
+    selectedDate = "",
+    selectedOfflineNum = ""
+  ) => {
     // Handle orderType mapping
     let typeId;
     switch (orderType) {
@@ -59,15 +65,21 @@ const OrderList = () => {
     const url = `${BASE_URL}${ADMIN_ORDER_LIST}`;
 
     // `newId` calculation - update this based on actual use case, or use `orderId` directly if needed
-    let filteredId = Math.abs(orderId - 10800);  // Confirm if this is needed or if `orderId` should be used as is
+    let filteredId = Math.abs(orderId - 10800); // Confirm if this is needed or if `orderId` should be used as is
     // Prepare requestData
-    console.log(Number(orderstatus))
+    console.log(Number(orderstatus));
     let requestData = {
       page: page,
       per_page: itemsPerPage,
       order_id: orderId.length > 0 ? filteredId : "", // `match orderId`
-      order_status: (Number(orderstatus) === 0 || Number(orderstatus)) ? Number(orderstatus) : "", // 'match OrderStatus'
-      status: (Number(activeStatus) === 0 || Number(activeStatus) === 1) ? Number(activeStatus) : "",
+      order_status:
+        Number(orderstatus) === 0 || Number(orderstatus)
+          ? Number(orderstatus)
+          : "", // 'match OrderStatus'
+      status:
+        Number(activeStatus) === 0 || Number(activeStatus) === 1
+          ? Number(activeStatus)
+          : "",
       type: typeId || "", // match order type
       order_locality: orderCity || "",
       order_date: selectedDate || "",
@@ -93,12 +105,14 @@ const OrderList = () => {
         if (data && data.data && data.data.order) {
           setOrders(data.data.order);
           // setTotalPage(data.data.paginate.last_page);
-          let totalPages = Math.ceil(data.data.paginate.total_item / itemsPerPage) ;
+          let totalPages = Math.ceil(
+            data.data.paginate.total_item / itemsPerPage
+          );
           setTotalPage(totalPages);
         } else {
           // No orders found, show an alert with a message
-          setOrders('');
-          setTotalPage('');
+          setOrders("");
+          setTotalPage("");
           console.warn("No orders found");
         }
       }
@@ -107,16 +121,31 @@ const OrderList = () => {
       // Show an alert with the error message
       alert(`Error fetching orders: ${error.message}`);
     } finally {
-      console.log('filan');
+      console.log("filan");
     }
   };
 
-
   useEffect(() => {
-    fetchOrders(currentPage, searchTerm, selectedOrderStatus, selectedActiveStatus, selectedOrderType, selectedCity, selectedDate, selectedPhoneNumber);
-
-  }, [currentPage, searchTerm, selectedOrderStatus, selectedActiveStatus, selectedOrderType, selectedCity, selectedDate, selectedPhoneNumber]);
-
+    fetchOrders(
+      currentPage,
+      searchTerm,
+      selectedOrderStatus,
+      selectedActiveStatus,
+      selectedOrderType,
+      selectedCity,
+      selectedDate,
+      selectedPhoneNumber
+    );
+  }, [
+    currentPage,
+    searchTerm,
+    selectedOrderStatus,
+    selectedActiveStatus,
+    selectedOrderType,
+    selectedCity,
+    selectedDate,
+    selectedPhoneNumber,
+  ]);
 
   const getOrderStatus = (orderStatusValue) => {
     switch (orderStatusValue) {
@@ -139,15 +168,13 @@ const OrderList = () => {
     }
   };
 
-
-
   const getOrderType = (orderTypeValue) => {
     const orderTypes = {
       1: "Decoration",
       2: "Chef",
       6: "Food Delivery",
       7: "Live Catering",
-      8:"Photography",
+      8: "Photography",
     };
     return orderTypes[orderTypeValue] || "Unknown Order Type";
   };
@@ -185,8 +212,8 @@ const OrderList = () => {
 
   const openActionPopup = (orderId, order_id, orderType) => {
     setActionPopupOrderId(orderId);
-    setActionPopupChefOrderId(order_id)
-    setActionPopupOrderType(orderType)
+    setActionPopupChefOrderId(order_id);
+    setActionPopupOrderType(orderType);
     setPopupOpen(true); // Open the popup
   };
   const openSupplierDeatilsPopup = async (orderId) => {
@@ -228,22 +255,18 @@ const OrderList = () => {
         </div>
         <div className="filter-container">
           <div className="left part">
-          
-              <div className="search filter-box">
-                <input
-                  type="text"
-                  className="small-search byId"
-                  placeholder="Search by Order ID"
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                  }}
+            <div className="search filter-box">
+              <input
+                type="text"
+                className="small-search byId"
+                placeholder="Search by Order ID"
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                }}
+              />
+            </div>
 
-                />
-
-
-              </div>
-         
             {/* Phone Number Search */}
             <div className="phone filter-box">
               <input
@@ -251,39 +274,32 @@ const OrderList = () => {
                 className="small-search byPhone"
                 placeholder="Search by customer Number"
                 value={selectedPhoneNumber}
-
-                onChange={(e) =>
-                  setSelectedPhoneNumber(e.target.value)
-
-                }
+                onChange={(e) => setSelectedPhoneNumber(e.target.value)}
               />
-
             </div>
             {/* date search */}
             <div className="date filter-box">
-
               <label className="date-label">Order Fullfilement Date</label>
               <input
                 type="date"
                 value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}  // Update the selectedDate state
+                onChange={(e) => setSelectedDate(e.target.value)} // Update the selectedDate state
                 placeholder="Select Date"
                 className="date-input"
               />
-
             </div>
-
           </div>
           <div className="right-part">
-
-            <button className="filter-btn" onClick={() => window.location.reload()}>Reset all filters</button>
+            <button
+              className="filter-btn"
+              onClick={() => window.location.reload()}
+            >
+              Reset all filters
+            </button>
           </div>
-
         </div>
 
         <div className="orders-box">
-
-
           <table className="order-table">
             <thead>
               <tr style={styles.tableHeading}>
@@ -308,7 +324,6 @@ const OrderList = () => {
                       <option value="Live Catering">Live Catering</option>
                       <option value="Photography">Photography</option>
                     </select>
-
                   </span>
                 </th>
 
@@ -319,7 +334,7 @@ const OrderList = () => {
                       value={selectedCity}
                       onChange={(e) => {
                         const newOrderCity = e.target.value; // Get the updated value directly
-                        setSelectedCity(newOrderCity);  // Update state
+                        setSelectedCity(newOrderCity); // Update state
                         // FilterByCity(newOrderCity);          // Pass the updated value immediately
                       }}
                       className="order-type-dropdown"
@@ -348,7 +363,7 @@ const OrderList = () => {
                       value={selectedOrderStatus}
                       onChange={(e) => {
                         const filterdStatus = e.target.value; // Get the updated value directly
-                        setSelectedOrderStatus(filterdStatus);  // Update state
+                        setSelectedOrderStatus(filterdStatus); // Update state
                         // FilterByStatus(newStatus);          // Pass the updated value immediately
                       }}
                       className="order-type-dropdown"
@@ -382,54 +397,69 @@ const OrderList = () => {
               </tr>
             </thead>
             <tbody>
-
               {orders.length > 0 ? (
                 orders.map((order, index) => (
-
                   <tr key={index}>
                     <td>{getOrderId(order.order_id)}</td>
                     <td>{getOrderType(order.type)}</td>
                     <td>{order.order_locality || "N/A"}</td>
                     <td>
                       {order?.order_date
-                        ? new Date(order.order_date.split("T")[0]).toLocaleDateString()
+                        ? new Date(
+                            order.order_date.split("T")[0]
+                          ).toLocaleDateString()
                         : "N/A"}
-
                     </td>
                     <td>
                       {order?.order_time
                         ? `${order.order_time}` // If `order_time` is available, show it
                         : order?.order_date
-                          ? `${order.order_date.split("T")[1].slice(0, 8)}`
-                          : "N/A"}
+                        ? `${order.order_date.split("T")[1].slice(0, 8)}`
+                        : "N/A"}
                     </td>
                     <td>{order.otp}</td>
                     <td>{order.order_taken_by || "N/A"}</td>
                     <td>{order.phone_no || "N/A"}</td>
                     {/* <td>{order.online_phone_no || "N/A"}</td> */}
                     <td>
-                      {order.toId ? (<>
-                        <button onClick={() => openSupplierDeatilsPopup(order.toId)}  className="assigningBtn assigned"><FaEye /><span>Assigned</span></button>
-                        </>) : (
-                          <>
+                      {order.toId ? (
+                        <>
+                          <button
+                            onClick={() => openSupplierDeatilsPopup(order.toId)}
+                            className="assigningBtn assigned"
+                          >
+                            <FaEye />
+                            <span>Assigned</span>
+                          </button>
+                        </>
+                      ) : (
+                        <>
                           <button
                             className="assigningBtn not-assigned"
                             onClick={() => openSupplierAssignPopup(order)}
                           >
                             Not Assigned
-                          </button>                    
-                            {/* supplier assign popup */}
-                          {isModalOpen && selectedSupplierOrder && (<>
-                            {console.log(isSupplierAssigned)}
-                            <CheckSupplier SelectedOrder={selectedSupplierOrder} setShowModal={setIsModalOpen} setIsSupplierAssigned={setIsSupplierAssigned}/>
-                            </>)
-                          }
+                          </button>
+                          {/* supplier assign popup */}
+                          {isModalOpen && selectedSupplierOrder && (
+                            <>
+                              {console.log(isSupplierAssigned)}
+                              <CheckSupplier
+                                SelectedOrder={selectedSupplierOrder}
+                                setShowModal={setIsModalOpen}
+                                setIsSupplierAssigned={setIsSupplierAssigned}
+                              />
+                            </>
+                          )}
                         </>
                       )}
                     </td>
 
                     <td>
-                      {`${order.job_start_time.replace(/(\d{4})(\d{1,2}:\d{2}:\d{2} (AM|PM))/, '$1 $2')} - 
+                      {`${order.job_start_time.replace(
+                        /(\d{4})(\d{1,2}:\d{2}:\d{2} (AM|PM))/,
+                        "$1 $2"
+                      )} - 
                                ${order.job_end_time}`}
                     </td>
 
@@ -437,8 +467,9 @@ const OrderList = () => {
 
                     <td>
                       <span
-                        className={`status ${getOrderStatus(order.order_status).className
-                          }`}
+                        className={`status ${
+                          getOrderStatus(order.order_status).className
+                        }`}
                       >
                         {getOrderStatus(order.order_status).status}
                       </span>
@@ -448,21 +479,18 @@ const OrderList = () => {
                     <td>
                       <div style={styles.container}>
                         {/* Call Icon */}
-                        <div
-
-                          onClick={() => handleCallClick(order.phone_no)}
-                        >
+                        <div onClick={() => handleCallClick(order.phone_no)}>
                           N/A
                           {/* <FaPhone /> */}
                         </div>
-                        <div style={styles.btnGroup}>
-                        </div>
+                        <div style={styles.btnGroup}></div>
                       </div>
                     </td>
                     <td>
                       <button
-                        className={`status-button ${order.status === 0 ? "active" : "inactive"
-                          }`}
+                        className={`status-button ${
+                          order.status === 0 ? "active" : "inactive"
+                        }`}
                         onClick={() =>
                           updateOrderStatus(
                             order._id,
@@ -476,23 +504,26 @@ const OrderList = () => {
                     <td>
                       <FaEye
                         onClick={() => {
-                          openActionPopup(order.order_id, order._id, order.type)
+                          openActionPopup(
+                            order.order_id,
+                            order._id,
+                            order.type
+                          );
                         }}
                       />
                     </td>
-                    <td style={{width:"200px",paddingLeft:"16px"}}>
-                      {order.type === 2 ?(
-                        <ul style={{paddingLeft:"0" , }}>
-                      {  order.userReviewRatingArray.map((i , index) => 
-                        (
-                            <li key={index}>{i.name}-{i.rating}</li>                          
-                        ))}
-                      </ul>
-                      ): (
-                           order.userReviewRatingArray[0]
-                          )
-
-                      }
+                    <td style={{ width: "200px", paddingLeft: "16px" }}>
+                      {order.type === 2 ? (
+                        <ul style={{ paddingLeft: "0" }}>
+                          {order.userReviewRatingArray.map((i, index) => (
+                            <li key={index}>
+                              {i.name}-{i.rating}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        order.userReviewRatingArray[0]
+                      )}
                     </td>
                   </tr>
                 ))
@@ -501,8 +532,6 @@ const OrderList = () => {
                   <td colSpan="13">No orders found</td>
                 </tr>
               )}
-
-
             </tbody>
           </table>
         </div>
@@ -514,36 +543,34 @@ const OrderList = () => {
           actionPopupOrderType={actionPopupOrderType}
           onClose={closePopup}
         />
-
       </div>
-          {/* supplier details popup */}
-          {isPopupOpen && supplierDetails && (
-                        <div className="popup-overlay" onClick={closePopup}>
-                          <div
-                            className="popup"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <button
-                              className="close-button"
-                              onClick={closePopup}
-                            >
-                              ×
-                            </button>
-                            <h3>Supplier Details</h3>
-                            <p>Name: {supplierDetails.data?.name || "NA"}</p>
-                            <p>Phone: {supplierDetails.data?.phone || "NA"}</p>
-                          </div>
-                        </div>
-                      )}
+      {/* supplier details popup */}
+      {isPopupOpen && supplierDetails && (
+        <div className="popup-overlay" onClick={closePopup}>
+          <div className="popup" onClick={(e) => e.stopPropagation()}>
+            <button className="close-button" onClick={closePopup}>
+              ×
+            </button>
+            <h3>Supplier Details</h3>
+            <p>Name: {supplierDetails.data?.name || "NA"}</p>
+            <p>Phone: {supplierDetails.data?.phone || "NA"}</p>
+          </div>
+        </div>
+      )}
       {/* pagination */}
       <div className="orderDetails_pagination">
         <button
-          onClick={() => setCurrentPage((prevPage) => Math.max(prevPage - 1, 1))}
+          onClick={() =>
+            setCurrentPage((prevPage) => Math.max(prevPage - 1, 1))
+          }
           disabled={currentPage === 1} // Disable Previous button on first page
         >
           {"<"}
         </button>
-        <span> Page {currentPage} of {totalPage} </span>
+        <span>
+          {" "}
+          Page {currentPage} of {totalPage}{" "}
+        </span>
         <button
           onClick={() => setCurrentPage((prevPage) => prevPage + 1)}
           disabled={currentPage === totalPage} // Disable Next button on last page
@@ -597,7 +624,8 @@ const styles = {
     color: "white",
   },
   tableHeading: {
-    background: "linear-gradient(90deg, rgba(221, 94, 137, 0.8), rgb(151, 83, 140))",
-    color: "rgb(255, 255, 255)"
-  }
+    background:
+      "linear-gradient(90deg, rgba(221, 94, 137, 0.8), rgb(151, 83, 140))",
+    color: "rgb(255, 255, 255)",
+  },
 };

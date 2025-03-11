@@ -135,6 +135,22 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
       </ul>
     </>);
   };
+
+  const getDecorationComments = (comments) => {
+    if (!comments) return "N/A";
+  
+    const commentList = Array.isArray(comments) ? comments : comments.split("\n");
+  
+    return (
+      <ul>
+        {commentList.map((comment, index) => (
+          <li key={index}>{comment}</li>
+        ))}
+      </ul>
+    );
+  };
+  
+
   // fetch orderdetails
   const FetchOrderDetails = ({ orderDetails }) => {
     // console.log(getOrderType(orderDetails?.type), JSON.stringify(orderDetails))
@@ -592,10 +608,13 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                             )}
                           </p>
 
-                          <p>
+                          {/* <p>
                             <strong>Order decoration_comments:</strong>{" "}
                             {orderDetails._doc.decoration_comments || "N/A"}
-                          </p>
+                          </p> */}
+                          <p>
+  <strong>Order decoration comments:</strong> {getDecorationComments(orderDetails._doc.decoration_comments)}
+</p>
                           <p>
                             {
                               orderDetails.items.map((item) =>
