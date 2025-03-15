@@ -277,6 +277,7 @@ const AddPhotoOrder = () => {
       fromId: customerId,
       is_discount: "0",
       addressId: addressID,
+      order_pincode : pincode,
       order_date: formattedDate,
       no_of_burner: 0,
       order_locality: city,

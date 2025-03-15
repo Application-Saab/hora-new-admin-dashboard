@@ -222,6 +222,7 @@ const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, cal
             fromId: customerId,
             is_discount: "0",
             addressId: addressID,
+            order_pincode : pincode,
             order_date: formattedDate,
             no_of_burner: true,
             order_locality: city,
