@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import "./globals.css";
-import { FaTachometerAlt, FaPlusCircle, FaCamera, FaClipboardList, FaSignOutAlt } from "react-icons/fa";
+import { FaTachometerAlt, FaPlusCircle, FaCamera, FaClipboardList, FaSignOutAlt, FaCartPlus } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 const menuItems = [
@@ -13,6 +13,7 @@ const menuItems = [
   { label: "Photography Create Order", icon: <FaCamera />, url: "/dashboard/photography-create-order" },
   { label: "Photography Create Folder", icon: <FaCamera />, url: "/dashboard/photo-folder" },
   { label: "Vendor Order Details", icon: <FaClipboardList />, url: "/dashboard/vendor-orderDetails" },
+  { label: "Add Decoration Product", icon: <FaCartPlus />, url: "/dashboard/add-decoration-product" },
 ];
 
 const Sidebar = ({ onLogout }: { onLogout: () => void }) => {
