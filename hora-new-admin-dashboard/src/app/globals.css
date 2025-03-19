@@ -127,7 +127,13 @@ h3 {
   color: #fff;
   border-color: #007bff;
 }
-
+select{
+  color: black;
+}
+.pageHeading {
+  font-size: calc(12px + 8 * ((100vw - 360px) / (768 - 360)));
+  text-align: center;
+}
 
 .orderDetails_pagination button {
   background-color: green;

@@ -1,0 +1,120 @@
+/* VendorDetails.css */
+
+.container {
+    display: flex;
+    width: 100%;
+  }
+  
+  .leftContent {
+    width: 50%;
+    padding: 20px;
+    max-width: 600px;
+    margin:0  auto;
+    font-family: Arial, sans-serif;
+  }
+  
+  .title {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  
+  .inputContainer {
+    display: flex;
+    align-items: center;
+    justify-self: center
+    /* width: 65px;
+    margin-left: 83px; */
+  }
+  
+  .inputField {
+    width: 200px;
+    padding: 12px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    align-items: center;
+    margin-left: 10px;
+  }
+  
+  .checkButton {
+    padding: 10px 20px;
+    background: linear-gradient(90deg, rgba(221, 94, 137, 0.8), #97538c);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    margin-left: 10px;
+    white-space: nowrap;
+  }
+  
+  .resultMessage {
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 5px;
+  }
+  
+  .orderSummary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(90deg, rgba(221, 94, 137, 0.8), #97538c);
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    max-width: 900px;
+    margin: 20px auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .orderSummarTableContainer {
+text-align: center;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  .orderSummaryTable{
+    /* display: flex;
+    justify-content: center; */
+    width: 100%;
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    padding: 20px;
+
+    text-align: center;
+  }
+  .tableHeader {
+    background: linear-gradient(90deg, rgba(221, 94, 137, 0.8), #97538c);
+    color: white;
+    font-size: 14px;
+  }
+  
+  .tableCell {
+    padding: 12px;
+    border: 1px solid #ddd;
+  }
+  
+  .supplierTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 14px;
+    text-align: left;
+  }
+  
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .rightContent {
+    width: 55%;
+    margin-bottom: 100px;
+    padding-top: 20px;
+  }
+  
