@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import "./globals.css";
-import { FaTachometerAlt, FaPlusCircle, FaCamera, FaClipboardList, FaSignOutAlt } from "react-icons/fa";
-import { useRouter } from "next/navigation";
-import { usePathname } from "next/navigation";
+import { FaTachometerAlt, FaPlusCircle,FaCartPlus, FaCamera, FaClipboardList, FaSignOutAlt } from "react-icons/fa";
+ import { useRouter, usePathname } from "next/navigation";
+//  import Login from "./login/page";
 const menuItems = [
   { label: "Dashboard", icon: <FaTachometerAlt />, url: "/dashboard" },
   { label: "Order Details", icon: <FaClipboardList />, url: "/dashboard/orderDetails" },
@@ -13,6 +13,7 @@ const menuItems = [
   { label: "Photography Create Order", icon: <FaCamera />, url: "/dashboard/photography-create-order" },
   { label: "Photography Create Folder", icon: <FaCamera />, url: "/dashboard/photo-folder" },
   { label: "Vendor Order Details", icon: <FaClipboardList />, url: "/dashboard/vendor-orderDetails" },
+  { label: "Add Decoration Product", icon: <FaCartPlus />, url: "/dashboard/add-decoration-product" },
 ];
 
 const Sidebar = ({ onLogout }: { onLogout: () => void }) => {
@@ -37,17 +38,20 @@ const Sidebar = ({ onLogout }: { onLogout: () => void }) => {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   useEffect(() => {
     const token = localStorage.getItem("authToken");
 
     if (token) {
+      // setIsLoading(true);
       setIsLoggedIn(true);
       if (window.location.pathname === "/login") {
         router.replace("/dashboard"); // Redirect if already logged in
       }
     } else {
+      // setIsLoading(false);
       setIsLoggedIn(false);
       router.replace("/login");
     }

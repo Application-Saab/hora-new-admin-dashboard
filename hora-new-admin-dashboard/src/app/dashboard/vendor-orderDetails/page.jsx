@@ -2,7 +2,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { BASE_URL, ADMIN_ORDER_LIST, ADMIN_USER_LIST } from "../../../utils/apiconstant";
-
+// import CityChart from "./city";
+import TableRating from "./tablerating";
+import CityTable from "./citytable";
+import "./vendorOrderDetail.css";
 const CheckVendorOrders = () => {
     const [number, setNumber] = useState("");
     const [result, setResult] = useState(null);
@@ -10,16 +13,18 @@ const CheckVendorOrders = () => {
     const [matchingOrders, setMatchingOrders] = useState([]);
     const [ratingFilter, setRatingFilter] = useState("");
     const [supplierId, setSupplierId] = useState("");
-    const [allOrders , setAllOrders] = useState([]);
+    const [allOrders, setAllOrders] = useState([]);
     // pagination
     const [totalOrders, setTotalOrders] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     // const [totalPage, setTotalPage] = useState(0);
     const itemsPerPage = 10;
-    const fetchOrdersByRating = async (supplierId , ratingFilter) => {
-       
+    // block avtive supplier
+    const [status, setStatus] = useState(null);
+    const fetchOrdersByRating = async (supplierId, ratingFilter) => {
+
         if (!supplierId) return;
-        
+
         try {
             const response = await fetch(BASE_URL + ADMIN_ORDER_LIST, {
                 method: "POST",
@@ -29,7 +34,7 @@ const CheckVendorOrders = () => {
                     per_page: 1000,
                     status: 0,
                     toId: supplierId,
-                    userReviewRatingArray: ratingFilter ? [ratingFilter] : undefined, 
+                    userReviewRatingArray: ratingFilter ? [ratingFilter] : undefined,
                 }),
             });
 
@@ -37,7 +42,7 @@ const CheckVendorOrders = () => {
             if (response.status === 200) {
                 const { data } = await response.json();
                 setMatchingOrders(data?.order);
-                
+
 
                 // setTotalPage(totalPages);
             }
@@ -52,10 +57,10 @@ const CheckVendorOrders = () => {
     };
     useEffect(() => {
 
-       
-    fetchOrdersByRating(supplierId ,ratingFilter ); // Fetch for new page
-   
-    }, [supplierId , ratingFilter]);
+
+        fetchOrdersByRating(supplierId, ratingFilter); // Fetch for new page
+
+    }, [supplierId, ratingFilter]);
 
 
     const handleCheckSupplier = async (e) => {
@@ -67,7 +72,7 @@ const CheckVendorOrders = () => {
         setResult(null);
         setMatchingOrders([]);
         setCurrentPage(1); // Reset to first page
-            setAllOrders([]);
+        setAllOrders([]);
         try {
             const response = await axios.post(BASE_URL + ADMIN_USER_LIST, {
                 per_page: 4000,
@@ -81,11 +86,12 @@ const CheckVendorOrders = () => {
             );
 
             if (supplier) {
-                
+
                 await fetchOrdersByRating(supplier._id);
                 fetchAllOrders(supplier._id);
                 setSupplierId(supplier._id);
-                setResult(`Supplier ID: ${supplier._id}`);
+                setStatus(supplier.status);
+                setResult(supplier._id);
             } else {
                 setResult("Number not present.");
                 setSupplierId('');
@@ -109,9 +115,9 @@ const CheckVendorOrders = () => {
         0
     );
     const fetchAllOrders = async (supplierId) => {
-       
+
         if (!supplierId) return;
-        
+
         try {
             const response = await fetch(BASE_URL + ADMIN_ORDER_LIST, {
                 method: "POST",
@@ -120,7 +126,7 @@ const CheckVendorOrders = () => {
                     order_status: 0,
                     per_page: 1000,
                     status: 0,
-                    toId: supplierId, 
+                    toId: supplierId,
                 }),
             });
 
@@ -154,156 +160,219 @@ const CheckVendorOrders = () => {
         } else if (rating === "6-8") {
             ratingSummary["6-8"].count += 1;
             ratingSummary["6-8"].total += (parseFloat(order.balance_amount));
-        } else if  (rating === "0-6") {
+        } else if (rating === "0-6") {
             ratingSummary["0-6"].count += 1;
             ratingSummary["0-6"].total += (parseFloat(order.balance_amount));
-        }else {
+        } else {
             ratingSummary["No Rating"].count += 1; // New category for missing ratings
             ratingSummary["No Rating"].total += parseFloat(order.balance_amount) || 0;
         }
     });
-    
-  
+    const totalCount =
+        ratingSummary["9-10"].count +
+        ratingSummary["6-8"].count +
+        ratingSummary["0-6"].count +
+        ratingSummary["No Rating"].count;
+
+    // calculate the NPS
+    const nps =
+        (ratingSummary["9-10"].count - ratingSummary["0-6"].count) / totalCount;
+
     // pagination logic
     let totalPage = Math.ceil(matchingOrders?.length / itemsPerPage);
     const displayedOrders = (matchingOrders || []).slice(
-        (currentPage - 1) * itemsPerPage, 
+        (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
-    
-
+     // block or avtive supplier
+     const ButtonToActive_InActive = async (result, status) => {
+        console.log(status, "stattdd", result, "result");
+        try {
+          const response = await fetch(
+            "https://horaservices.com:3000/api/admin/update_user_status",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ _id: result, status: status }),
+            }
+          );
+          if (response.ok) {
+            alert("Trigger Sucessful");
+            window.location.reload();
+          } else {
+            console.error("Failed to update user status.");
+          }
+        } catch (error) {
+          console.error("Error updating user status:", error);
+        }
+      };
     return (
-        <div style={{ padding: "20px", maxWidth: "600px", margin: "auto", fontFamily: "Arial, sans-serif" }}>
-            <h2 style={{ textAlign: "center", fontSize: "24px", fontWeight: "bold", textTransform: "uppercase" }}>List of Vendor Orders</h2>
-            <div style={{ display: "flex", alignItems: "center", width: "65px", marginLeft: "143px" }}>
+        <>
+            <h2 className="title">Vendor Details</h2>
+            <div className="container">
+                {/* Left side content (50% width) */}
+                <div className="leftContent">
+                    <h2 className="title">List of Vendor Orders</h2>
 
-                <input type="number" placeholder="Enter a number" value={number}
-                    onChange={(e) => setNumber(e.target.value)}
-
-                    required
-                    maxLength={10}
-                    pattern="\d{10}"
-                    inputMode="numeric"
-                    style={{ flex: 1, padding: "12px", borderRadius: "5px", border: "1px solid #ccc", }} />
-                <button onClick={handleCheckSupplier} disabled={loading}
-                    style={{
-                        padding: "10px 20px",
-                        background: "linear-gradient(90deg, rgba(221, 94, 137, 0.8), #97538c)",
-                        color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer",
-                        fontSize: "16px", fontWeight: "bold", marginLeft: "10px", whiteSpace: "nowrap"
-                    }}>
-                    {loading ? "Checking..." : "Check"}
-                </button>
-
-            </div>
-
-
-            {result && (
-                <p style={{ marginTop: "20px", padding: "10px", backgroundColor: result.includes("present") ? "#f8d7da" : "#d4edda", color: result.includes("present") ? "#155724" : "#721c24", borderRadius: "5px" }}>{result}</p>
-            )}
-
-            {result && (
-                <div style={{ marginTop: "20px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "linear-gradient(90deg, rgba(221, 94, 137, 0.8), #97538c)", color: "white", padding: "10px", borderRadius: "8px", fontSize: "18px", fontWeight: "bold", maxWidth: "900px", margin: "20px auto", boxShadow: "0 4px 8px rgba(0,0,0,0.1)", }}>
-                        <span className="aarti">📦 Total Orders: {totalOrders}</span>
-                        <span>💰 Total Orders Value: ₹{totalBalanceAmount.toFixed(2)}</span>
+                    <div className="inputContainer">
+                        <input
+                            type="number"
+                            placeholder="Enter a number"
+                            value={number}
+                            onChange={(e) => setNumber(e.target.value)}
+                            required
+                            maxLength={10}
+                            pattern="\d{10}"
+                            inputMode="numeric"
+                            className="inputField"
+                        />
+                        <button onClick={handleCheckSupplier} disabled={loading} className="checkButton">
+                            {loading ? "Checking..." : "Check"}
+                        </button>
+                        {status !== null && (
+          <>
+            <button
+              className={`status-button ${
+                status === 0 ? "inactive" : "active"
+              }`}
+              onClick={() =>
+                ButtonToActive_InActive(result, status === 1 ? 0 : 1)
+              }
+              style={{
+                backgroundColor: status === 1 ? "green" : "red",
+                color: "white",
+                border: "none",
+                padding: "10px 20px",
+                borderRadius: "5px",
+                cursor: "pointer",
+                marginLeft: "10px",
+              }}
+            >
+              {status === 1 ? "Active" : "Inactive"}
+            </button>
+          </>
+        )}
                     </div>
 
-                    <div style={{ display: "flex", justifyContent: "center", padding: "20px", fontFamily: "Arial, sans-serif" }}>
-                        <div style={{ backgroundColor: "#f8f9fa", padding: "20px", borderRadius: "10px", boxShadow: "0 4px 8px rgba(0,0,0,0.1)", maxWidth: "1000px", width: "100%", textAlign: "center", }}>
-                            <h2 style={{ marginBottom: "20px", fontSize: "28px", fontWeight: "bold", color: "#333" }}>
-                                📊 Order Summary
-                            </h2>
+                    {result && (<div
+                        style={{
+                            textAlign: "center",
+                            backgroundColor: result.includes("present") ? "#f8d7da" : "#d4edda",
+                            color: result.includes("present") ? "#155724" : "#721c24",
+                        }}>
+                        <p className="resultMessage"> Supplier ID : {result}</p>
+                        <h3>Net Promoter Score (NPS): {nps}</h3>
+                    </div>)}
 
-                            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                                <thead>
-                                    <tr style={{ background: "linear-gradient(90deg, rgba(221, 94, 137, 0.8), #97538c)", color: "white", fontSize: "18px" }}>
-                                        <th style={{ padding: "12px", border: "1px solid #ddd" }}>Rating</th>
-                                        <th style={{ padding: "12px", border: "1px solid #ddd" }}>Order Count</th>
-                                        <th style={{ padding: "12px", border: "1px solid #ddd" }}>Total Value (₹)</th>
+                    {result && (<>
+                        <div>
+                            <div className="orderSummary">
+                                <span>📦 Total Orders: {totalOrders}</span>
+                                <span>💰 Total Orders Value: ₹{totalBalanceAmount}</span>
+                            </div>
+
+                            <div className="orderSummarTableContainer">
+
+                                <h2>📊 Order Summary</h2>
+                                <table className="orderSummaryTable">
+                                    <thead className="tableHeader">
+                                        <tr>
+                                            <th className="tableCell">Rating</th>
+                                            <th className="tableCell">Order Count</th>
+                                            <th className="tableCell">Total Value (₹)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {Object.entries(ratingSummary).map(([key, value], index) => (
+                                            <tr key={index} style={{ backgroundColor: index % 2 === 0 ? "#f2f2f2" : "#fff" }}>
+                                                <td className="tableCell">{key}</td>
+                                                <td className="tableCell">{value.count}</td>
+                                                <td className="tableCell">₹{value.total}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+
+                            </div>
+                             <div className="supplierOrderDetailTableContainer">           
+                                <h3 style={{ fontSize: "18px", color: "#333" }}>Suppliers Orders</h3>
+                            <table className="supplierOrderDetailTable">
+                                <thead className="tableHeader">
+                                    <tr>
+                                        <th className="tableCell">Order ID</th>
+                                        <th className="tableCell">Fulfillment Date</th>
+                                        <th className="tableCell">
+                                            Order Rating
+                                            <select onChange={(e) => setRatingFilter(e.target.value)} value={ratingFilter} style={{ color: 'black' }}>
+                                                <option value="">All</option>
+                                                <option value="9-10">9-10</option>
+                                                <option value="6-8">6-8</option>
+                                                <option value="0-6">0-6</option>
+                                            </select>
+                                        </th>
+                                        <th className="tableCell">Order Create</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr style={{ backgroundColor: "#f2f2f2" }}>
-                                        <td style={{ padding: "12px", border: "1px solid #ddd" }}>⭐ 9-10 Rated Orders</td>
-                                        <td style={{ padding: "12px", border: "1px solid #ddd" }}>{ratingSummary["9-10"].count}</td>
-                                        <td style={{ padding: "12px", border: "1px solid #ddd" }}>₹{ratingSummary["9-10"].total}</td>
-                                    </tr>
-                                    <tr>
-                                        <td style={{ padding: "12px", border: "1px solid #ddd" }}>🌟 6-8 Rated Orders</td>
-                                        <td style={{ padding: "12px", border: "1px solid #ddd" }}>{ratingSummary["6-8"].count}</td>
-                                        <td style={{ padding: "12px", border: "1px solid #ddd" }}>₹{ratingSummary["6-8"].total}</td>
-                                    </tr>
-                                    <tr style={{ backgroundColor: "#f2f2f2" }}>
-                                        <td style={{ padding: "12px", border: "1px solid #ddd" }}>⚠️ 0-6 Rated Orders</td>
-                                        <td style={{ padding: "12px", border: "1px solid #ddd" }}>{ratingSummary["0-6"].count}</td>
-                                        <td style={{ padding: "12px", border: "1px solid #ddd" }}>₹{ratingSummary["0-6"].total}</td>
-                                    </tr>
-                                    <tr style={{ backgroundColor: "#f2f2f2" }}>
-                                        <td style={{ padding: "12px", border: "1px solid #ddd" }}>★ No Rating</td>
-                                        <td style={{ padding: "12px", border: "1px solid #ddd" }}>{ratingSummary["No Rating"].count}</td>
-                                        <td style={{ padding: "12px", border: "1px solid #ddd" }}>₹{ratingSummary["No Rating"].total}</td>
-                                    </tr>
+                                    {displayedOrders.length > 0 ? (
+                                        displayedOrders.map((order, index) => (
+                                            <tr key={index}>
+                                                <td className="tableCell">{getOrderId(order.order_id)}</td>
+                                                <td className="tableCell">{new Date(order.order_date).toLocaleDateString("en-GB")}</td>
+                                                <td className="tableCell">{order.userReviewRatingArray?.[0] || "N/A"}</td>
+                                                <td className="tableCell">{new Date(order.createdAt).toLocaleDateString("en-GB")}</td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="4" style={{ textAlign: "center" }} className="tableCell">No orders found</td>
+                                        </tr>
+                                    )}
                                 </tbody>
                             </table>
+                            </div>
                         </div>
-                    </div>
 
-                    <h3 style={{ textAlign: "center", fontSize: "18px", color: "#333" }}>Suppliers Orders</h3>
-                    <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "10px", fontSize: "14px", textAlign: "left" }}>
-                        <thead>
-                            <tr style={{ background: "linear-gradient(90deg, rgba(221, 94, 137, 0.8), #97538c)", color: "#fff" }}>
-                                <th style={{ padding: "10px", border: "1px solid #ccc" }}>Order ID</th>
-                                <th style={{ padding: "10px", border: "1px solid #ccc" }}>Fulfillment Date</th>
-                                <th style={{ padding: "10px", border: "1px solid #ccc" }}>Order Rating
-                                    <select
-                                        onChange={(e) => setRatingFilter(e.target.value)} value={ratingFilter}
-                                        style={{ marginLeft: "10px", borderRadius: "5px", fontSize: "12px" }}>
-                                        <option value="">All</option>
-                                        <option value="9-10">9-10</option>
-                                        <option value="6-8">6-8</option>
-                                        <option value="0-6">0-6</option>
-                                    </select>
-                                </th>
+                        {/* pagination */}
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                marginTop: "20px",
+                            }}
+                        >
+                            <button
+                                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                disabled={currentPage === 1}
+                            >
+                                {"<"}
+                            </button>
+                            <span style={{ margin: "0 10px" }}>
+                                Page {currentPage} of {totalPage}
+                            </span>
+                            <button
+                                onClick={() =>
+                                    setCurrentPage((prev) => Math.min(prev + 1, totalPage))
+                                }
+                                disabled={currentPage === totalPage}
+                            >
+                                {">"}
+                            </button>
+                        </div>
 
-                                <th style={{ padding: "10px", border: "1px solid #ccc" }}>Order Create</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {displayedOrders?.length > 0 ? (
-                                displayedOrders.map((order, index) => (
-                                    <tr key={index} style={{ backgroundColor: index % 2 === 0 ? "#f9f9f9" : "#fff" }}>
-                                        <td style={{ padding: "10px", border: "1px solid #ccc" }}>{getOrderId(order.order_id)}</td>
-                                        <td style={{ padding: "10px", border: "1px solid #ccc" }}>{new Date(order.order_date).toLocaleDateString("en-GB")}</td>
-                                        <td style={{ padding: "10px", border: "1px solid #ccc" }}>{order.userReviewRatingArray?.[0] || "N/A"}</td>
-                                        <td style={{ padding: "10px", border: "1px solid #ccc" }}>{new Date(order.createdAt).toLocaleDateString("en-GB")}</td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan="4" style={{ textAlign: "center", padding: "10px", border: "1px solid #ccc" }}>No orders found</td>
-                                </tr>
-                            )}
-                        </tbody>
-
-
-                    </table>
-                    {/* pagination */}
-                 
-                    <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
-                        <button onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1}>
-                            {"<"}
-                        </button>
-                        <span style={{ margin: "0 10px" }}>Page {currentPage} of {totalPage}</span>
-                        <button onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPage))} disabled={currentPage === totalPage}>
-                            {">"}
-                        </button>
-                    </div>
+                    </>)}
                 </div>
-            )}
-        </div>
+
+                {/* Right side content */}
+                <div className="rightContent">
+                    <CityTable />
+                    <TableRating />
+                </div>
+            </div >
+        </>
     );
 };
 
 export default CheckVendorOrders;
-
