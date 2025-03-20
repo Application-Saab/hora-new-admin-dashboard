@@ -18,7 +18,6 @@ const menuItems = [
 ];
 
 const Sidebar = ({ onLogout }: { onLogout: () => void }) => {
-
   return (
     <div className="sidebar">
       <ul>
