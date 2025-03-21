@@ -9,7 +9,7 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (!token) {
-      router.push("/login");
+      router.push("/dashboard-login");
     }
   }, []);
 

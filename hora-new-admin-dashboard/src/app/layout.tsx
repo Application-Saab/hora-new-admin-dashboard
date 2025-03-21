@@ -53,14 +53,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     } else {
       // setIsLoading(false);
       setIsLoggedIn(false);
-      router.replace("/login");
+      router.replace("/dashboard-login");
     }
   }, [pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
     setIsLoggedIn(false);
-    router.replace("/login");
+    router.replace("/dashboard-login");
   };
 
   if (isLoggedIn === null) {
@@ -72,7 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <div className={`dashBoard_page ${isLoggedIn}`} style={{ display: "flex" }}>
           {isLoggedIn && <Sidebar onLogout={handleLogout} />}
-          <div className={`main-content ${pathname === '/login' ? 'loginPage' : ''}`}>
+          <div className={`main-content ${pathname === '/dashboard-login' ? 'loginPage' : ''}`}>
           {children}
           </div>
           
