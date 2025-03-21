@@ -1,7 +1,7 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background-color: #f0f0f0;
+  /* background-color: #f0f0f0; */
 }
 ul{
   padding-left: 16px;
@@ -9,6 +9,7 @@ ul{
 }
 .main-content{
   width:84%;
+  background-color: #f0f0f0; 
 }
 .sidebar {
   width: 15%;
@@ -42,6 +43,15 @@ ul{
   /* padding: 20px; */
   /* flex: 1; */
   transition: margin-left 0.3s ease;
+}
+
+.main-content.loginPage {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #efd8d8f5;
+  min-height: 100vh;
 }
 
 h1,

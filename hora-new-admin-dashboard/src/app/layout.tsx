@@ -72,7 +72,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <div className={`dashBoard_page ${isLoggedIn}`} style={{ display: "flex" }}>
           {isLoggedIn && <Sidebar onLogout={handleLogout} />}
-          <div className="main-content">{children}</div>
+          <div className={`main-content ${pathname === '/login' ? 'loginPage' : ''}`}>
+          {children}
+          </div>
+          
         </div>
       </body>
     </html>
