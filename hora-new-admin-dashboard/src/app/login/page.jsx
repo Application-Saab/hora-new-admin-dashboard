@@ -23,7 +23,7 @@ const Login = () => {
       });
 
       const data = await response.json();
-
+console.log(data,"data");
       if (response.ok && data.token) {
         localStorage.setItem("authToken", data.token);
         router.push("/dashboard/decoration-createorder");

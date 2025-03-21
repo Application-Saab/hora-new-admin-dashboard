@@ -1,6 +1,4 @@
-* ds */
- /* Login.css */
- 
+
  .login-container {
    display: flex;
    align-items: center;
@@ -68,7 +66,7 @@
    border: none;
    border-radius: 5px;
    cursor: pointer;
-   transition: background 0.3s ease;
+   /* transition: background 0.3s ease; */
  }
  
  .logout-button {
@@ -83,7 +81,7 @@
    display: flex;
    align-items: center;
    gap: 8px;
-   transition: background 0.3s ease;
+   /* transition: background 0.3s ease; */
    margin-top: 10px;
  }
  

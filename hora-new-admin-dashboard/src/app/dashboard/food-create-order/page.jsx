@@ -567,7 +567,7 @@ function AddFoodOrder() {
 				</div>
 			}
 
-			<div class="details">
+			<div className="details">
 			<div style={{ display: "flex", flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <div style={{ marginHorizontal: 16, flexDirection: 'column', width: 120, borderRadius: 6, border: "1px solid #E6E6E6", padding: 5 }}>
                                         <p style={{ color: '#A3A3A3', fontSize: 9, fontWeight: '400', margin: 0 }}>Total Dishes</p>

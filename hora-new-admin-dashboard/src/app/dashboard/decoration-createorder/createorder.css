@@ -68,24 +68,6 @@ button[disabled] {
   cursor: not-allowed;
 }
 
-/* 
-.form_css {
-    flex-direction: row;
-    flex-wrap: wrap;
-    display: flex;
-}
-
-
-input[type="text1"],
-input[type="number1"] {
-    width: 150px;
-    margin-right: 10px;
-}
-
-input[type="comment"] {
-    width: 500px;
-} */
-
 
 .form_css {
   padding: 20px;
@@ -114,9 +96,6 @@ input[type="comment"] {
   border-radius: 5px;
   cursor: pointer;
 }
-
-/*  */
-
 
 .amount-box {
 
@@ -149,15 +128,6 @@ input[type="comment"] {
   width: 200px;
   /* Adjust width as needed */
 }
-
-/* .name-input {
-    flex: 1;
-  }
-  
-  .price-input {
-    flex: 0.5;
-  } */
-
 .add-new-btn {
   padding: 8px 16px;
   background-color: #4CAF50;

@@ -1,20 +1,19 @@
 .createPhotoFolder {
-  display: flex
-  ;
-      flex-direction: column;
-      gap: 5px;
-      width: 59%;
-      justify-content: flex-start;
-      align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 59%;
+  justify-content: flex-start;
+  align-items: flex-start;
 }
 
 .buttonSecondary {
-padding: 10px 20px;
-background-color: #9252AA;
-color: #fff;
-border: none;
-border-radius: 5px;
-cursor: pointer;
+  padding: 10px 20px;
+  background-color: #9252aa;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 .buttonPrimary:disabled {
   cursor: not-allowed;
@@ -23,17 +22,17 @@ cursor: pointer;
 
 .buttonPrimary {
   padding: 10px 20px;
-  background-color: #9252AA;
+  background-color: #9252aa;
   color: #fff;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   margin-top: 10px;
   width: 100%;
-  padding: '5px 10px';
+  padding: "5px 10px";
 }
 
-.masonryGrid{
+.masonryGrid {
   /* display: flex; */
   /* grid-template-columns: repeat(4, 1fr); */
   /* gap: 1rem;
@@ -44,26 +43,25 @@ cursor: pointer;
   gap: 2px;
 }
 .masonryGrid img {
-/* object-fit: contain;
+  /* object-fit: contain;
 aspect-ratio: 1/1; */
-width: 100%;
-/* height: 50%; */
+  width: 100%;
+  /* height: 50%; */
 }
 
 @media (max-width: 468px) {
-.masonryGrid{
-  /* display: flex; */
-  /* grid-template-columns: repeat(4, 1fr); */
-  /* gap: 1rem;
+  .masonryGrid {
+    /* display: flex; */
+    /* grid-template-columns: repeat(4, 1fr); */
+    /* gap: 1rem;
   margin-top: 1rem;
   justify-content: center;
   flex-wrap: wrap; */
-  column-count: 3;
-  gap: 2px;
-}
+    column-count: 3;
+    gap: 2px;
+  }
 }
 /* ===popUp */
-
 
 .title {
   font-size: 1.25rem;
@@ -81,7 +79,6 @@ width: 100%;
   .grid {
     grid-template-columns: repeat(4, 1fr);
   }
-
 }
 
 .thumbnail {
@@ -118,7 +115,7 @@ width: 100%;
 }
 .slick-prev:before,
 .slick-next:before {
-color: black !important;
+  color: black !important;
 }
 .popupImage {
   width: 100%;
