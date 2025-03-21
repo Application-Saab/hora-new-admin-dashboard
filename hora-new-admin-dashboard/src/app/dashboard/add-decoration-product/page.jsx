@@ -38,6 +38,7 @@ const AddProductForm = () => {
         body: JSON.stringify(body),
       });
       const data = await response.json();
+      console.log(data, "data");
       if (data.error === false && data.data) {
         setter(
           url.includes("admin_meals_list")
