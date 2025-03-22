@@ -21,18 +21,33 @@ const AdminRatingsTable = () => {
       const adminUsersRes = await axios.post(
         "https://horaservices.com:3000/api/admin/admin_user_list",
         {
-          email: "",
           page: newPage,
           per_page: usersPerPage,
-          phone: "",
           role: "supplier",
+          status: 1,
         }
       );
   
+      // let adminUsers = adminUsersRes.data.data?.users || [];
+      // console.log(adminUsers, "adminuserss");
+      // if (selectedCity) {
+      //   console.log(selectedCity, "selectedcity");
+      //   adminUsers = adminUsers.filter((user) => user.city === selectedCity);
+      //   console.log(adminUsers,"lfjdslfjdslkjfld");
+      // }
       let adminUsers = adminUsersRes.data.data?.users || [];
+      console.log(adminUsers, "adminuserss");
+      
       if (selectedCity) {
-        adminUsers = adminUsers.filter((user) => user.city === selectedCity);
+          console.log(selectedCity, "selectedcity");
+          
+          adminUsers = adminUsers.filter((user) => 
+              user.city.toLowerCase() === selectedCity.toLowerCase()
+          );
+      
+          console.log(adminUsers, "filteredUsers");
       }
+      
   
       if (adminUsers.length === 0) {
         setHasMore(false);
@@ -44,12 +59,9 @@ const AdminRatingsTable = () => {
         const ordersRes = await axios.post(
           "https://horaservices.com:3000/api/admin/adminOrderList",
           {
-            page: "",
-            per_page: "",
-            order_id: "",
-            order_status: 0,
-            status: 0,
-            type: "",
+            page: 1,
+            per_page: 1000,
+            status: 1,
             toId: admin._id,
           }
         );

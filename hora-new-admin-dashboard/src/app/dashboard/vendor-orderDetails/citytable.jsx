@@ -18,8 +18,7 @@ const VendorCityTable = () => {
           {
             page: 1,
             per_page: 1000,
-            order_status: 0,
-            status: 0,
+            status: 1,
             type: "",
             order_locality: "",
           }
@@ -43,6 +42,7 @@ const VendorCityTable = () => {
         const orderDate = new Date(order.order_date);
         return orderDate >= new Date(startDate) && orderDate <= new Date(endDate);
       });
+      console.log(filtered,"filtered");
       setOrders(filtered);
     }
 
