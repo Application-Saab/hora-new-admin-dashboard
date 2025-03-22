@@ -12,8 +12,8 @@ import {
   SAVE_LOCATION_ENDPOINT,
   API_SUCCESS_CODE,
   ADMIN_USER_LIST,
-} from "../../../utils/apiconstant";
-import { pincodes } from '../../../utils/pincodes.js';
+} from "../../../../utils/apiconstant";
+import { pincodes } from '../../../../utils/pincodes.js';
 
 
 const AddDecOrder = () => {

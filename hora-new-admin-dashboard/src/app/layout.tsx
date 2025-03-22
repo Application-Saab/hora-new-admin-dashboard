@@ -8,7 +8,7 @@ import { FaTachometerAlt, FaPlusCircle,FaCartPlus, FaCamera, FaClipboardList, Fa
 const menuItems = [
   { label: "Dashboard", icon: <FaTachometerAlt />, url: "/dashboard" },
   { label: "Order Details", icon: <FaClipboardList />, url: "/dashboard/orderDetails" },
-  { label: "Decoration Create Order", icon: <FaPlusCircle />, url: "/dashboard/decoration-createorder" },
+  { label: "Decoration Create Order", icon: <FaPlusCircle />, url: "/dashboard-login/dashboard/decoration-createorder" },
   { label: "Food Create Order", icon: <FaPlusCircle />, url: "/dashboard/food-create-order" },
   { label: "Photography Create Order", icon: <FaCamera />, url: "/dashboard/photography-create-order" },
   { label: "Photography Create Folder", icon: <FaCamera />, url: "/dashboard/photo-folder" },
