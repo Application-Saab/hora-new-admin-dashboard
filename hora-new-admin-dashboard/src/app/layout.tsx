@@ -47,7 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     if (token) {
       // setIsLoading(true);
       setIsLoggedIn(true);
-      if (window.location.pathname === "/login") {
+      if (window.location.pathname === "/dashboard-login") {
         router.replace("/dashboard"); // Redirect if already logged in
       }
     } else {

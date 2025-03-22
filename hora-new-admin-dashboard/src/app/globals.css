@@ -25,12 +25,14 @@ ul{
 
 .sidebar a {
   text-decoration: none;
-  color: white;
-  font-weight: bold;
-  padding: 10px 15px;
-  border-radius: 5px;
-  display: block;
-  transition: background 0.3s ease;
+    color: white;
+    font-weight: bold;
+    padding: 10px 15px;
+    border-radius: 5px;
+    display: flex;
+    transition: background 0.3s ease;
+    justify-content: flex-start;
+    align-items: center;
 }
 
 .sidebar a:hover {
