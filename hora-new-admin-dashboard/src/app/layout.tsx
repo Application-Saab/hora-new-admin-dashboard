@@ -11,6 +11,7 @@ import {
   FaSignOutAlt,
   FaShippingFast,
   FaUsers,
+  FaPen,
 } from "react-icons/fa";
 import { useRouter, usePathname } from "next/navigation";
 //  import Login from "./login/page";
@@ -52,6 +53,11 @@ const menuItems = [
     url: "/dashboard/add-decoration-product",
   },
   {
+    label: "Edit Decoration Product",
+    icon: <FaPen />,
+    url: "/dashboard/edit-details",
+  },
+  {
     label: "Supplier Details",
     icon: <FaShippingFast />,
     url: "/dashboard/supplier-details",
@@ -61,6 +67,7 @@ const menuItems = [
     icon: <FaUsers />,
     url: "/dashboard/users-details",
   },
+ 
 ];
 
 const Sidebar = ({ onLogout }: { onLogout: () => void }) => {
