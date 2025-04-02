@@ -15,15 +15,17 @@ const AdminRatingsTable = () => {
     setAdminData([]);
   
     try {
-      console.log("Fetching orders...");
+      console.log("Fetching orders with date range from backend...");
       const ordersRes = await axios.post(
         "https://horaservices.com:3000/api/admin/adminOrderList",
         {
           page: 1,
-          per_page: 1000,
+          per_page: 5000,
           status: 1,
           type: 1,
           order_locality: selectedCity || undefined,
+          start_date: startDate || undefined,
+          end_date: endDate || undefined
         }
       );
   
@@ -36,17 +38,8 @@ const AdminRatingsTable = () => {
         return;
       }
   
-      const filteredOrders = orders.filter(order => {
-        if (!order.order_date) return true;
-        const orderDate = new Date(order.order_date);
-        return (!startDate || orderDate >= new Date(startDate)) &&
-               (!endDate || orderDate <= new Date(endDate));
-      });
-  
-      console.log("Filtered orders:", filteredOrders);
-  
       const vendorOrdersMap = {};
-      filteredOrders.forEach(order => {
+      orders.forEach(order => {
         console.log(`Processing order for vendor: ${order.toId}`);
         if (!order.toId) return;
         
@@ -139,8 +132,6 @@ const AdminRatingsTable = () => {
     console.log("handleSubmit completed");
     setLoading(false);
   };
-  
-  
   
   return (
     <div className="max-w-4xl mx-auto p-4 bg-white shadow-lg rounded-lg w-full">

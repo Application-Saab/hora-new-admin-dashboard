@@ -2,81 +2,68 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 const VendorCityTable = () => {
-  const [allOrders, setAllOrders] = useState([]); // Store all orders
-  const [orders, setOrders] = useState([]); // Store filtered orders
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [showTable, setShowTable] = useState(false); // Hide table initially
+  const [showTable, setShowTable] = useState(false);
 
-  useEffect(() => {
-    const fetchAllOrders = async () => {
-      setLoading(true);
-      try {
-        const { data } = await axios.post(
-          "https://horaservices.com:3000/api/admin/adminOrderList",
-          {
-            page: 1,
-            per_page: 1000,
-            status: 1,
-            type: 1,
-            order_locality: "",
-          }
-        );
+  const fetchFilteredOrders = async () => {
+    setLoading(true);
+    try {
+      const { data } = await axios.post(
+        "https://horaservices.com:3000/api/admin/adminOrderList",
+        {
+          page: 1,
+          per_page: 5000,
+          status: 1,
+          type: 1,
+          order_locality: "",
+          start_date: startDate || undefined,
+          end_date: endDate || undefined
+        }
+      );
 
-        setAllOrders(data.data?.order || []);
-      } catch (error) {
-        console.error("Error fetching orders:", error);
-      }
-      setLoading(false);
-    };
-
-    fetchAllOrders();
-  }, []);
-
-  const filterOrders = () => {
-    if (!startDate || !endDate) {
-      setOrders(allOrders);
-    } else {
-      const filtered = allOrders.filter((order) => {
-        const orderDate = new Date(order.order_date);
-        return (
-          orderDate >= new Date(startDate) && orderDate <= new Date(endDate)
-        );
-      });
-      console.log(filtered, "filtered");
-      setOrders(filtered);
+      setOrders(data.data?.order || []);
+      setShowTable(true);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
     }
-
-    setShowTable(true); // Show table after first submit
+    setLoading(false);
   };
 
   const ratingRanges = ["0-6", "6-8", "9-10", "No Rating"];
   const cities = ["Hyderabad", "Delhi", "Mumbai", "Bangalore"];
 
-  const cityRatings = {
-    Hyderabad: { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0 },
-    Delhi: { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0 },
-    Mumbai: { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0 },
-    Bangalore: { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0 },
-    // "Unknown City": { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0 },
+  // Calculate city ratings based on orders
+  const getCityRatings = () => {
+    const cityRatings = {
+      Hyderabad: { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0 },
+      Delhi: { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0 },
+      Mumbai: { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0 },
+      Bangalore: { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0 },
+    };
+
+    orders.forEach((order) => {
+      let city = order?.order_locality?.trim() || "Unknown City";
+      if (city.toLowerCase() === "hyderbad") city = "Hyderabad"; 
+      if (!cities.includes(city)) return; // Skip cities not in our list
+
+      const ratingArray = order?.userReviewRatingArray || [];
+      if (ratingArray.length === 0) {
+        cityRatings[city]["No Rating"] += 1;
+      } else {
+        const rating = ratingArray[0];
+        if (rating === "0-6") cityRatings[city]["0-6"] += 1;
+        else if (rating === "6-8") cityRatings[city]["6-8"] += 1;
+        else if (rating === "9-10") cityRatings[city]["9-10"] += 1;
+      }
+    });
+
+    return cityRatings;
   };
 
-  orders.forEach((order) => {
-    let city = order?.order_locality?.trim() || "Unknown City";
-    if (city.toLowerCase() === "hyderbad") city = "Hyderabad";
-    if (!cities.includes(city)) city = "Unknown City";
-
-    const ratingArray = order?.userReviewRatingArray || [];
-    if (ratingArray.length === 0) {
-      cityRatings[city]["No Rating"] += 1;
-    } else {
-      const rating = ratingArray[0];
-      if (rating === "0-6") cityRatings[city]["0-6"] += 1;
-      else if (rating === "6-8") cityRatings[city]["6-8"] += 1;
-      else if (rating === "9-10") cityRatings[city]["9-10"] += 1;
-    }
-  });
+  const cityRatings = getCityRatings();
 
   return (
     <div
@@ -134,10 +121,9 @@ const VendorCityTable = () => {
             onChange={(e) => setEndDate(e.target.value)}
           />
         </div>
-        {/* <button onClick={filterOrders} style={{ padding: "8px 16px", backgroundColor: "#007bff", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>Submit</button> */}
       </div>
       <button
-        onClick={filterOrders}
+        onClick={fetchFilteredOrders}
         style={{
           padding: "8px 16px",
           background:
@@ -154,7 +140,7 @@ const VendorCityTable = () => {
         <p style={{ textAlign: "center", fontSize: "18px", color: "#666" }}>
           Loading orders...
         </p>
-      ) : showTable ? ( // Show table only after Submit is clicked
+      ) : showTable ? (
         <div style={{ overflowX: "auto" }}>
           <table
             style={{
@@ -229,8 +215,7 @@ const VendorCityTable = () => {
             </tbody>
           </table>
         </div>
-      ) : null}{" "}
-      {/* Hide table initially */}
+      ) : null}
     </div>
   );
 };
