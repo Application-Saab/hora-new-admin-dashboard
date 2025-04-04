@@ -55,7 +55,7 @@ const menuItems = [
   {
     label: "Edit Decoration Product",
     icon: <FaPen />,
-    url: "/dashboard/edit-details",
+    url: "/dashboard/edit-decoration-product",
   },
   {
     label: "Supplier Details",

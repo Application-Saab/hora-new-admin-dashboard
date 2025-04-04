@@ -75,7 +75,13 @@ const AdminUsers = () => {
   };
 
   return (
-    <div style={{ fontFamily: "Arial, sans-serif", padding: "20px", textAlign: "center" }}>
+    <div
+      style={{
+        fontFamily: "Arial, sans-serif",
+        padding: "20px",
+        textAlign: "center",
+      }}
+    >
       <h2 style={{ marginBottom: "20px" }}>Customer Users</h2>
       <input
         type="text"
@@ -83,24 +89,54 @@ const AdminUsers = () => {
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-        style={{ padding: "10px", marginBottom: "20px", width: "300px", textAlign: "center" }}
+        style={{
+          padding: "10px",
+          marginBottom: "20px",
+          width: "300px",
+          textAlign: "center",
+        }}
       />
-      <table style={{ width: "100%", borderCollapse: "collapse", boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)" }}>
+      <table
+        style={{
+          width: "100%",
+          borderCollapse: "collapse",
+          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+        }}
+      >
         <thead>
-          <tr style={{ color: "white", background: "linear-gradient(90deg, rgba(221, 94, 137, 0.8), #97538c)" }}>
+          <tr
+            style={{
+              color: "white",
+              background:
+                "linear-gradient(90deg, rgba(221, 94, 137, 0.8), #97538c)",
+            }}
+          >
             <th style={{ padding: "10px", border: "1px solid #ddd" }}>ID</th>
             <th style={{ padding: "10px", border: "1px solid #ddd" }}>Name</th>
             <th style={{ padding: "10px", border: "1px solid #ddd" }}>Phone</th>
-            <th style={{ padding: "10px", border: "1px solid #ddd" }}>Created At</th>
+            <th style={{ padding: "10px", border: "1px solid #ddd" }}>
+              Created At
+            </th>
           </tr>
         </thead>
         <tbody>
           {users.map((user) => (
-            <tr key={user._id} style={{ backgroundColor: "#f9f9f9", textAlign: "center" }}>
-              <td style={{ padding: "10px", border: "1px solid #ddd" }}>{user._id}</td>
-              <td style={{ padding: "10px", border: "1px solid #ddd" }}>{user.name}</td>
-              <td style={{ padding: "10px", border: "1px solid #ddd" }}>{user.phone}</td>
-              <td style={{ padding: "10px", border: "1px solid #ddd" }}>{new Date(user.createdAt).toLocaleDateString()}</td>
+            <tr
+              key={user._id}
+              style={{ backgroundColor: "#f9f9f9", textAlign: "center" }}
+            >
+              <td style={{ padding: "10px", border: "1px solid #ddd" }}>
+                {user._id}
+              </td>
+              <td style={{ padding: "10px", border: "1px solid #ddd" }}>
+                {user.name}
+              </td>
+              <td style={{ padding: "10px", border: "1px solid #ddd" }}>
+                {user.phone}
+              </td>
+              <td style={{ padding: "10px", border: "1px solid #ddd" }}>
+                {new Date(user.createdAt).toLocaleDateString()}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -111,7 +147,8 @@ const AdminUsers = () => {
             padding: "10px 20px",
             marginRight: "10px",
             cursor: "pointer",
-            background: "linear-gradient(90deg, rgba(221, 94, 137, 0.8), #97538c)",
+            background:
+              "linear-gradient(90deg, rgba(221, 94, 137, 0.8), #97538c)",
             color: "white",
             border: "none",
             borderRadius: "5px",
@@ -121,13 +158,17 @@ const AdminUsers = () => {
         >
           Previous
         </button>
-        <span style={{ fontSize: "18px", fontWeight: "bold" }}> Page {currentPage} of {lastPage} </span>
+        <span style={{ fontSize: "18px", fontWeight: "bold" }}>
+          {" "}
+          Page {currentPage} of {lastPage}{" "}
+        </span>
         <button
           style={{
             padding: "10px 20px",
             marginLeft: "10px",
             cursor: "pointer",
-            background: "linear-gradient(90deg, rgba(221, 94, 137, 0.8), #97538c)",
+            background:
+              "linear-gradient(90deg, rgba(221, 94, 137, 0.8), #97538c)",
             color: "white",
             border: "none",
             borderRadius: "5px",
