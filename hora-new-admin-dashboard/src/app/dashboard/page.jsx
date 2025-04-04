@@ -18,7 +18,8 @@ import { Card, CardContent, CardMedia, Typography, Grid } from "@mui/material";
 const DashboardStats = () => {
   const [stats, setStats] = useState(null);
 
-  useEffect(() => {
+  useEffect(() => { 
+  
     axios
       .get("https://horaservices.com:3000/api/admin/getDashboardCount")
       .then((response) => {
