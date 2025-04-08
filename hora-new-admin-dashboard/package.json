@@ -10,8 +10,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
     "@mobiscroll/react-lite": "^4.10.9",
     "@mui/icons-material": "^7.0.1",
     "@mui/material": "^7.0.0",

@@ -19,8 +19,8 @@ const VendorCityTable = () => {
           status: 1,
           type: 1,
           order_locality: "",
-          start_date: startDate || undefined,
-          end_date: endDate || undefined
+          start_date: startDate || null,
+          end_date: endDate || null
         }
       );
 

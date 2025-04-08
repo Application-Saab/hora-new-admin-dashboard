@@ -1,43 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  TextField,
-  Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Typography,
-  Box,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-  Grid,
-  Card,
-  CardMedia,
-  IconButton,
-  Chip,
-  Divider,
-  Container,
-  CircularProgress,
-} from "@mui/material";
-import { styled } from "@mui/material/styles";
-import {
-  Visibility as VisibilityIcon,
-  CloudUpload as CloudUploadIcon,
-} from "@mui/icons-material";
+import "./DecorationEditor.css";
 
 const decCat = [
   { id: "2", subCategory: "Birthday" },
@@ -67,33 +31,7 @@ const tagMapping = {
   "66c9df0922ed47b721180334": "Proposal-Decoration",
 };
 
-// Styled components
-const VisuallyHiddenInput = styled("input")({
-  clip: "rect(0 0 0 0)",
-  clipPath: "inset(50%)",
-  height: 1,
-  overflow: "hidden",
-  position: "absolute",
-  bottom: 0,
-  left: 0,
-  whiteSpace: "nowrap",
-  width: 1,
-});
-
-const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
-  marginTop: theme.spacing(3),
-  maxHeight: 600,
-}));
-
-const ImagePreview = styled(CardMedia)(({ theme }) => ({
-  width: 100,
-  height: 100,
-  objectFit: "cover",
-  border: `1px solid ${theme.palette.divider}`,
-  borderRadius: theme.shape.borderRadius,
-}));
-
-const Dropdown = () => {
+const DecorationEditor = () => {
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
   const [responseData, setResponseData] = useState([]);
   const [popupData, setPopupData] = useState(null);
@@ -104,7 +42,6 @@ const Dropdown = () => {
   const [inclusion, setInclusion] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
-
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSelectChange = async (event) => {
@@ -258,7 +195,6 @@ const Dropdown = () => {
       console.log("API response:", result);
 
       if (response.ok) {
-        // Optionally show success message or refresh data
         if (selectedSubCategory) {
           handleSelectChange({ target: { value: selectedSubCategory } });
         }
@@ -285,290 +221,230 @@ const Dropdown = () => {
   );
 
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ my: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom align="center">
-          Decoration Editing
-        </Typography>
+    <div className="container">
+      <div className="content-wrapper">
+        <h1 className="page-title">Decoration Editing</h1>
 
-        <FormControl fullWidth variant="outlined" sx={{ mb: 3 }}>
-          <InputLabel id="subcategory-select-label">
+        <div className="form-control full-width">
+          <label htmlFor="subcategory-select" className="select-label">
             Select Subcategory
-          </InputLabel>
-          <Select
-            labelId="subcategory-select-label"
+          </label>
+          <select
+            id="subcategory-select"
             value={selectedSubCategory}
             onChange={handleSelectChange}
-            label="Select Subcategory"
+            className="select-dropdown"
           >
-            <MenuItem value="">
-              <em>Select SubCategory</em>
-            </MenuItem>
+            <option value="">Select SubCategory</option>
             {decCat.map((item) => (
-              <MenuItem key={item.id} value={item.subCategory}>
+              <option key={item.id} value={item.subCategory}>
                 {item.subCategory}
-              </MenuItem>
+              </option>
             ))}
-          </Select>
-        </FormControl>
-        <TextField
-          fullWidth
-          label="Search designs"
-          variant="outlined"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search by name, ID or tag"
-        />
+          </select>
+        </div>
+
+        <div className="form-control full-width">
+          <input
+            type="text"
+            className="search-input"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by name, ID or tag"
+          />
+        </div>
+
         {loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
-            <CircularProgress />
-          </Box>
-        ) : // ) : responseData.length > 0 ? (
-        filteredData.length > 0 ? (
-          <StyledTableContainer component={Paper}>
-            <Table stickyHeader aria-label="decoration items table">
-              <TableHead>
-                <TableRow>
-                  {/* <TableCell>ID</TableCell> */}
-                  <TableCell>Name</TableCell>
-                  <TableCell>Featured Image</TableCell>
-                  <TableCell>Price</TableCell>
-                  {/* <TableCell>Inclusion</TableCell> */}
-                  <TableCell>Tags</TableCell>
-                  <TableCell align="center">Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+          </div>
+        ) : filteredData.length > 0 ? (
+          <div className="table-container">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Featured Image</th>
+                  <th>Price</th>
+                  <th>Tags</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
                 {filteredData.map((item) => (
-                  <TableRow key={item._id} hover>
-                    <TableCell>{item.name}</TableCell>
-                    <TableCell>
+                  <tr key={item._id} className="table-row">
+                    <td>{item.name}</td>
+                    <td>
                       {item.featured_image ? (
-                        <Box
-                          component="img"
-                          src={`https://horaservices.com/api/uploads/${item.featured_image}`}
+                        <img
+                          src={`https://horaservices.com/api/uploads/compressed_webp/${item.featured_image}`}
                           alt={item.name}
-                          sx={{ width: 100, height: "auto", borderRadius: 1 }}
+                          className="thumbnail"
                         />
                       ) : (
                         "No Image"
                       )}
-                    </TableCell>
-                    <TableCell>₹{item.price}</TableCell>
-
-                    <TableCell>
-                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                    </td>
+                    <td>₹{item.price}</td>
+                    <td>
+                      <div className="chip-container">
                         {item.tag.map((tagId) => (
-                          <Chip
-                            key={tagId}
-                            label={tagMapping[tagId] || "Unknown"}
-                            size="small"
-                            variant="outlined"
-                          />
+                          <span key={tagId} className="chip">
+                            {tagMapping[tagId] || "Unknown"}
+                          </span>
                         ))}
-                      </Box>
-                    </TableCell>
-                    <TableCell align="center">
-                      {/* <IconButton 
-                        color="primary"
+                      </div>
+                    </td>
+                    <td className="actions-cell">
+                      <button
+                        className="action-button"
                         onClick={() => handlePopupOpen(item)}
-                        aria-label="view details"
                       >
-                        <VisibilityIcon />
-                      </IconButton> */}
-                      <Button
-                        color="primary"
-                        onClick={() => handlePopupOpen(item)}
-                        aria-label="view details"
-                        startIcon={<VisibilityIcon />}
-                      >
+                        <i className="icon-visibility"></i>
                         Update
-                      </Button>
-                    </TableCell>
-                  </TableRow>
+                      </button>
+                    </td>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
-          </StyledTableContainer>
+              </tbody>
+            </table>
+          </div>
         ) : (
           selectedSubCategory && (
-            <Box sx={{ my: 4, textAlign: "center" }}>
-              <Typography variant="body1">
-                No items found for this subcategory.
-              </Typography>
-            </Box>
+            <div className="no-data-message">
+              <p>No items found for this subcategory.</p>
+            </div>
           )
         )}
 
-        <Dialog
-          open={popupData !== null}
-          onClose={handlePopupClose}
-          fullWidth
-          maxWidth="md"
-        >
-          {popupData && (
-            <>
-              <DialogTitle>
-                <Typography variant="h6">
+        {popupData && (
+          <div className="modal-overlay">
+            <div className="modal-dialog">
+              <div className="modal-header">
+                <h2 className="modal-title">
                   Editing Details for: {popupData.name}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  display="block"
-                  color="text.secondary"
-                >
-                  ID: {popupData._id}
-                </Typography>
-              </DialogTitle>
-              <DialogContent dividers>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      label="Name"
-                      fullWidth
-                      margin="normal"
-                      variant="outlined"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                    />
+                </h2>
+                <span className="modal-subtitle">ID: {popupData._id}</span>
+              </div>
+              <div className="modal-content">
+                <div className="modal-grid">
+                  <div className="modal-column">
+                    <div className="form-group">
+                      <label htmlFor="name-input">Name</label>
+                      <input
+                        id="name-input"
+                        type="text"
+                        className="form-input"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                      />
+                    </div>
 
-                    <TextField
-                      label="Price"
-                      type="number"
-                      fullWidth
-                      margin="normal"
-                      variant="outlined"
-                      value={price}
-                      onChange={(e) => setPrice(e.target.value)}
-                      InputProps={{ startAdornment: "₹" }}
-                    />
+                    <div className="form-group">
+                      <label htmlFor="price-input">Price</label>
+                      <div className="price-input-container">
+                        <span className="price-symbol">₹</span>
+                        <input
+                          id="price-input"
+                          type="number"
+                          className="form-input price-input"
+                          value={price}
+                          onChange={(e) => setPrice(e.target.value)}
+                        />
+                      </div>
+                    </div>
 
-                    <Box sx={{ mt: 3, mb: 2 }}>
-                      <Typography variant="subtitle1" gutterBottom>
-                        Image Upload
-                      </Typography>
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 2 }}
-                      >
-                        <Button
-                          component="label"
-                          variant="contained"
-                          startIcon={<CloudUploadIcon />}
-                          disabled={uploadingImage}
-                        >
+                    <div className="form-group">
+                      <h3 className="section-title">Image Upload</h3>
+                      <div className="upload-container">
+                        <label htmlFor="image-upload" className="upload-button">
                           {uploadingImage ? "Uploading..." : "Upload Image"}
-                          <VisuallyHiddenInput
+                          <input
+                            id="image-upload"
                             type="file"
+                            className="hidden-input"
                             onChange={handleImageChange}
                           />
-                        </Button>
-
-                        {uploadingImage && <CircularProgress size={24} />}
-                      </Box>
+                        </label>
+                        {uploadingImage && (
+                          <div className="upload-spinner"></div>
+                        )}
+                      </div>
 
                       {image ? (
-                        <Box sx={{ mt: 2 }}>
-                          <Typography
-                            variant="caption"
-                            display="block"
-                            gutterBottom
-                          >
-                            New Image:
-                          </Typography>
-                          <ImagePreview
-                            component="img"
-                            image={image}
+                        <div className="image-preview-container">
+                          <p className="image-label">New Image:</p>
+                          <img
+                            src={`https://horaservices.com/api/uploads/${image}`}
                             alt="New uploaded image"
+                            className="image-preview"
                           />
-                        </Box>
+                        </div>
                       ) : popupData.featured_image ? (
-                        <Box sx={{ mt: 2 }}>
-                          <Typography
-                            variant="caption"
-                            display="block"
-                            gutterBottom
-                          >
-                            Current Image:
-                          </Typography>
-                          <ImagePreview
-                            component="img"
-                            image={`https://horaservices.com/api/uploads/${popupData.featured_image}`}
+                        <div className="image-preview-container">
+                          <p className="image-label">Current Image:</p>
+                          <img
+                            src={`https://horaservices.com/api/uploads/compressed_webp/${popupData.featured_image}`}
                             alt={popupData.name}
+                            className="image-preview"
                           />
-                        </Box>
+                        </div>
                       ) : null}
-                    </Box>
-                  </Grid>
+                    </div>
+                  </div>
 
-                  <Grid item xs={12} md={6}>
-                    <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
-                      Tags
-                    </Typography>
-                    <Paper
-                      variant="outlined"
-                      sx={{
-                        p: 2,
-                        maxHeight: 300,
-                        width: "140%",
-                        overflow: "auto",
-                      }}
-                    >
-                      <FormGroup>
-                        {Object.entries(tagMapping).map(([tagId, tagName]) => (
-                          <FormControlLabel
-                            key={tagId}
-                            control={
-                              <Checkbox
-                                checked={selectedTags.includes(tagId)}
-                                onChange={() => handleTagChange(tagId)}
-                              />
-                            }
-                            label={tagName}
+                  <div className="modal-column">
+                    <h3 className="section-title">Tags</h3>
+                    <div className="tags-container">
+                      {Object.entries(tagMapping).map(([tagId, tagName]) => (
+                        <div key={tagId} className="checkbox-item">
+                          <input
+                            type="checkbox"
+                            id={`tag-${tagId}`}
+                            checked={selectedTags.includes(tagId)}
+                            onChange={() => handleTagChange(tagId)}
                           />
-                        ))}
-                      </FormGroup>
-                    </Paper>
-                  </Grid>
+                          <label htmlFor={`tag-${tagId}`}>{tagName}</label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
 
-                  <Grid item xs={12}>
-                    <Divider sx={{ my: 2 }} />
-                    <Typography variant="subtitle1" gutterBottom>
+                  <div className="modal-full-width">
+                    <div className="divider"></div>
+                    <h3 className="section-title">
                       Inclusion (one item per line)
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      multiline
-                      rows={8}
-                      variant="outlined"
+                    </h3>
+                    <textarea
+                      className="textarea-input"
+                      rows="8"
                       value={inclusion}
                       onChange={(e) => setInclusion(e.target.value)}
                       placeholder="Enter inclusion items, one per line"
-                      sx={{
-                        width: "100%",
-                        "& .MuiInputBase-root": { width: "400%" },
-                      }}
-                    />
-                  </Grid>
-                </Grid>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handlePopupClose} color="inherit">
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button
+                  className="button button-secondary"
+                  onClick={handlePopupClose}
+                >
                   Cancel
-                </Button>
-                <Button
+                </button>
+                <button
+                  className="button button-primary"
                   onClick={handleSaveChanges}
-                  variant="contained"
-                  color="primary"
                 >
                   Save Changes
-                </Button>
-              </DialogActions>
-            </>
-          )}
-        </Dialog>
-      </Box>
-    </Container>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 
-export default Dropdown;
+export default DecorationEditor;
