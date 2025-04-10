@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "tailwindcss/tailwind.css";
 
@@ -8,150 +8,136 @@ const AdminRatingsTable = () => {
   const [selectedCity, setSelectedCity] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const observer = useRef();
-  const usersPerPage = 50;
-  const [searchTriggered, setSearchTriggered] = useState(false);
 
-  const fetchData = async (newPage = page) => {
-    if (!searchTriggered || loading || !hasMore) return;
+  const handleSubmit = async () => {
+    console.log("handleSubmit started");
     setLoading(true);
+    setAdminData([]);
+  
     try {
-      const adminUsersRes = await axios.post(
-        "https://horaservices.com:3000/api/admin/admin_user_list",
+      console.log("Fetching orders with date range from backend...");
+      const ordersRes = await axios.post(
+        "https://horaservices.com:3000/api/admin/adminOrderList",
         {
-          email: "",
-          page: newPage,
-          per_page: usersPerPage,
-          phone: "",
-          role: "supplier",
+          page: 1,
+          per_page: 5000,
+          status: 1,
+          type: 1,
+          order_locality: selectedCity || undefined,
+          start_date: startDate || undefined,
+          end_date: endDate || undefined
         }
       );
   
-      let adminUsers = adminUsersRes.data.data?.users || [];
-      if (selectedCity) {
-        adminUsers = adminUsers.filter((user) => user.city === selectedCity);
-      }
+      const orders = ordersRes.data.data?.order || [];
+      console.log("Fetched orders:", orders);
   
-      if (adminUsers.length === 0) {
-        setHasMore(false);
+      if (orders.length === 0) {
+        console.log("No orders found. Stopping process.");
         setLoading(false);
         return;
       }
   
-      const adminRatingsPromises = adminUsers.map(async (admin) => {
-        const ordersRes = await axios.post(
-          "https://horaservices.com:3000/api/admin/adminOrderList",
+      const vendorOrdersMap = {};
+      orders.forEach(order => {
+        console.log(`Processing order for vendor: ${order.toId}`);
+        if (!order.toId) return;
+        
+        if (!vendorOrdersMap[order.toId]) {
+          vendorOrdersMap[order.toId] = {
+            _id: order.toId,
+            "0-6": 0,
+            "6-8": 0,
+            "9-10": 0,
+            "No-Rating": 0,
+            totalOrders: 0,
+            order_locality: order.order_locality || selectedCity || "Unknown",
+          };
+        }
+        vendorOrdersMap[order.toId].totalOrders++;
+  
+        if (Array.isArray(order.userReviewRatingArray) && order.userReviewRatingArray.length > 0) {
+          let validRatingFound = false;
+  
+          order.userReviewRatingArray.forEach(rating => {
+            if (rating === "0-6") {
+              vendorOrdersMap[order.toId]["0-6"]++;
+              validRatingFound = true;
+            } else if (rating === "6-8") {
+              vendorOrdersMap[order.toId]["6-8"]++;
+              validRatingFound = true;
+            } else if (rating === "9-10") {
+              vendorOrdersMap[order.toId]["9-10"]++;
+              validRatingFound = true;
+            }
+          });
+  
+          if (!validRatingFound) vendorOrdersMap[order.toId]["No-Rating"]++;
+        } else {
+          vendorOrdersMap[order.toId]["No-Rating"]++;
+        }
+      });
+  
+      const vendorIds = Object.keys(vendorOrdersMap);
+      console.log("Vendor IDs extracted:", vendorIds);
+  
+      if (vendorIds.length === 0) {
+        console.log("No vendors found in orders.");
+        setLoading(false);
+        return;
+      }
+  
+      console.log("Fetching all vendors at once...");
+      let vendorNamesMap = {};
+  
+      try {
+        const adminUserRes = await axios.post(
+          "https://horaservices.com:3000/api/admin/admin_user_list",
           {
-            page: "",
-            per_page: "",
-            order_id: "",
-            order_status: 0,
-            status: 0,
-            type: "",
-            toId: admin._id,
+            page: 1,
+            per_page: 2000,
+            role: "supplier",
           }
         );
   
-        const orders = ordersRes.data.data?.order || [];
-        const adminRatings = {
-          ...admin,
-          "0-6": 0,
-          "6-8": 0,
-          "9-10": 0,
-          "No-Rating": 0,
-          totalOrders: 0, // Initialize count
-        };
+        const users = adminUserRes.data.data?.users || [];
+        console.log("Fetched all supplier users:", users);
   
-        orders.forEach((order) => {
-          if (order.order_date) {
-            const orderDate = new Date(order.order_date);
-            const start = startDate ? new Date(startDate) : null;
-            const end = endDate ? new Date(endDate) : null;
+        // Create a map of vendorId -> vendor name
+        vendorNamesMap = users.reduce((acc, user) => {
+          acc[user._id] = user.name || "Unknown Vendor";
+          return acc;
+        }, {});
   
-            if (
-              (start && orderDate < start) || // Exclude orders before startDate
-              (end && orderDate > end) // Exclude orders after endDate
-            ) {
-              return;
-            }
+        console.log("Mapped Vendor Names:", vendorNamesMap);
+      } catch (error) {
+        console.error("Error fetching vendor list:", error);
+      }
   
-            adminRatings.totalOrders++; // Count only filtered orders
+      // After resolving all vendor names, map data to final structure
+      const vendorData = vendorIds.map((vendorId) => ({
+        ...vendorOrdersMap[vendorId],
+        name: vendorNamesMap[vendorId] || "Unknown Vendor",
+      }));
   
-            if (
-              Array.isArray(order.userReviewRatingArray) &&
-              order.userReviewRatingArray.length > 0
-            ) {
-              let validRatingFound = false;
-              order.userReviewRatingArray.forEach((rating) => {
-                let numericRating = parseFloat(rating);
-                if (!isNaN(numericRating)) {
-                  validRatingFound = true;
-                  if (numericRating <= 6) adminRatings["0-6"]++;
-                  else if (numericRating <= 8) adminRatings["6-8"]++;
-                  else adminRatings["9-10"]++;
-                }
-              });
-              if (!validRatingFound) adminRatings["No-Rating"]++;
-            } else {
-              adminRatings["No-Rating"]++;
-            }
-          }
-        });
+      console.log("Final Vendor Data:", vendorData);
   
-        return adminRatings;
-      });
+      // Updating state
+      setAdminData((prevData) => [...prevData, ...vendorData]);
   
-      const newAdminData = await Promise.all(adminRatingsPromises);
-      setAdminData((prevData) =>
-        newPage === 1 ? newAdminData : [...prevData, ...newAdminData]
-      ); // Reset data if new search
-      setPage(newPage + 1);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
+  
+    console.log("handleSubmit completed");
     setLoading(false);
   };
   
-
-  const handleSubmit = () => {
-    setSearchTriggered(true);
-    setAdminData([]);
-    setPage(1);
-    setHasMore(true);
-    fetchData(1);
-  };
-
-  const lastUserRef = useCallback(
-    (node) => {
-      if (loading) return;
-      if (observer.current) observer.current.disconnect();
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
-          fetchData();
-        }
-      });
-      if (node) observer.current.observe(node);
-    },
-    [loading, hasMore]
-  );
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   return (
-    <div className="max-w-4xl mx-auto p-4 bg-white shadow-lg rounded-lg w-full ">
-      <h2 className="text-xl font-semibold mb-4 text-center">
-        Vendor Ratings Table
-      </h2>
+    <div className="max-w-4xl mx-auto p-4 bg-white shadow-lg rounded-lg w-full">
+      <h2 className="text-xl font-semibold mb-4 text-center">Vendor Ratings Table</h2>
       <div className="mb-4">
-        <select
-          className="p-2 border rounded-md w-full mb-2"
-          value={selectedCity}
-          onChange={(e) => setSelectedCity(e.target.value)}
-        >
+        <select className="p-2 border rounded-md w-full mb-2" value={selectedCity} onChange={(e) => setSelectedCity(e.target.value)}>
           <option value="">All Cities</option>
           <option value="Bangalore">Bangalore</option>
           <option value="Hyderabad">Hyderabad</option>
@@ -160,53 +146,26 @@ const AdminRatingsTable = () => {
         </select>
         <div className="flex space-x-4">
           <div className="w-full">
-            <label
-              htmlFor="startDate"
-              className="block text-sm font-medium text-gray-700 ml-1"
-            >
-              Start Date
-            </label>
-            <input
-              type="date"
-              id="startDate"
-              className="p-2 border rounded-md w-full mb-2"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
+            <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 ml-1">Start Date</label>
+            <input type="date" id="startDate" className="p-2 border rounded-md w-full mb-2" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
           </div>
-
           <div className="w-full">
-            <label
-              htmlFor="endDate"
-              className="block text-sm font-medium text-gray-700 ml-1"
-            >
-              End Date
-            </label>
-            <input
-              type="date"
-              id="endDate"
-              className="p-2 border rounded-md w-full mb-2"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
+            <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 ml-1">End Date</label>
+            <input type="date" id="endDate" className="p-2 border rounded-md w-full mb-2" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
           </div>
         </div>
-
-        <button
-          style={{
-            background:
-              "linear-gradient(90deg, rgba(221, 94, 137, 0.8), #97538c)",
-          }}
-          className="p-2 bg-blue-600 text-white rounded-md w-full hover:bg-blue-700"
-          onClick={handleSubmit}
-          disabled={loading}
-        >
+        <button className="p-2 bg-blue-600 text-white rounded-md w-full hover:bg-blue-700" 
+        style={{
+          background:
+            "linear-gradient(90deg, rgba(221, 94, 137, 0.8), #97538c)",
+        }}
+        onClick={handleSubmit} disabled={loading}>
           {loading ? "Loading..." : "Submit"}
         </button>
       </div>
       <div className="overflow-y-auto max-h-96 border rounded-md custom-scrollbar">
         <table className="min-w-full border-collapse text-sm">
-          <thead
+        <thead
             style={{
               background:
                 "linear-gradient(90deg, rgba(221, 94, 137, 0.8), #97538c)",
@@ -220,32 +179,30 @@ const AdminRatingsTable = () => {
               <th className="border p-2 w-12">6-8</th>
               <th className="border p-2 w-14">9-10</th>
               <th className="border p-2 w-28">No-Rating</th>
-              <th className="border p-2">City</th>
+              <th className="border p-2">Order Locality</th>
             </tr>
           </thead>
           <tbody>
-            {adminData.map((admin, index) => (
-              <tr
-                key={admin._id}
-                ref={index === adminData.length - 1 ? lastUserRef : null}
-                className="hover:bg-gray-50"
-              >
-                <td className="border p-2">{admin.name}</td>
-                <td className="border p-2">{admin.totalOrders}</td>
-                <td className="border p-2">{admin["0-6"]}</td>
-                <td className="border p-2">{admin["6-8"]}</td>
-                <td className="border p-2">{admin["9-10"]}</td>
-                <td className="border p-2">{admin["No-Rating"]}</td>
-                <td className="border p-2">{admin.city}</td>
+            {adminData.length > 0 ? (
+              adminData.map(admin => (
+                <tr key={admin._id} className="hover:bg-gray-50">
+                  <td className="border p-2">{admin.name}</td>
+                  <td className="border p-2">{admin.totalOrders}</td>
+                  <td className="border p-2">{admin["0-6"]}</td>
+                  <td className="border p-2">{admin["6-8"]}</td>
+                  <td className="border p-2">{admin["9-10"]}</td>
+                  <td className="border p-2">{admin["No-Rating"]}</td>
+                  <td className="border p-2">{admin.order_locality}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="text-center p-4">{loading ? "Loading data..." : "No data available"}</td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
-      {loading && <p className="text-center mt-2">Loading...</p>}
-      {!hasMore && (
-        <p className="text-center mt-2 text-gray-500">No more data to load</p>
-      )}
     </div>
   );
 };

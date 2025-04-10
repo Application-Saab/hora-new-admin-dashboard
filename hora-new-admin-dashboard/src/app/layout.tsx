@@ -2,18 +2,72 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import "./globals.css";
-import { FaTachometerAlt, FaPlusCircle,FaCartPlus, FaCamera, FaClipboardList, FaSignOutAlt } from "react-icons/fa";
- import { useRouter, usePathname } from "next/navigation";
+import {
+  FaTachometerAlt,
+  FaPlusCircle,
+  FaCartPlus,
+  FaCamera,
+  FaClipboardList,
+  FaSignOutAlt,
+  FaShippingFast,
+  FaUsers,
+  FaPen,
+} from "react-icons/fa";
+import { useRouter, usePathname } from "next/navigation";
 //  import Login from "./login/page";
 const menuItems = [
   { label: "Dashboard", icon: <FaTachometerAlt />, url: "/dashboard" },
-  { label: "Order Details", icon: <FaClipboardList />, url: "/dashboard/orderDetails" },
-  { label: "Decoration Create Order", icon: <FaPlusCircle />, url: "/dashboard/decoration-createorder" },
-  { label: "Food Create Order", icon: <FaPlusCircle />, url: "/dashboard/food-create-order" },
-  { label: "Photography Create Order", icon: <FaCamera />, url: "/dashboard/photography-create-order" },
-  { label: "Photography Create Folder", icon: <FaCamera />, url: "/dashboard/photo-folder" },
-  { label: "Vendor Order Details", icon: <FaClipboardList />, url: "/dashboard/vendor-orderDetails" },
-  { label: "Add Decoration Product", icon: <FaCartPlus />, url: "/dashboard/add-decoration-product" },
+  {
+    label: "Order Details",
+    icon: <FaClipboardList />,
+    url: "/dashboard/orderDetails",
+  },
+  {
+    label: "Decoration Create Order",
+    icon: <FaPlusCircle />,
+    url: "/dashboard/decoration-createorder",
+  },
+  {
+    label: "Food Create Order",
+    icon: <FaPlusCircle />,
+    url: "/dashboard/food-create-order",
+  },
+  {
+    label: "Photography Create Order",
+    icon: <FaCamera />,
+    url: "/dashboard/photography-create-order",
+  },
+  {
+    label: "Photography Create Folder",
+    icon: <FaCamera />,
+    url: "/dashboard/photo-folder",
+  },
+  {
+    label: "Vendor Order Details",
+    icon: <FaClipboardList />,
+    url: "/dashboard/vendor-orderDetails",
+  },
+  {
+    label: "Add Decoration Product",
+    icon: <FaCartPlus />,
+    url: "/dashboard/add-decoration-product",
+  },
+  {
+    label: "Edit Decoration Product",
+    icon: <FaPen />,
+    url: "/dashboard/edit-decoration-product",
+  },
+  {
+    label: "Supplier Details",
+    icon: <FaShippingFast />,
+    url: "/dashboard/supplier-details",
+  },
+  {
+    label: "Users Details",
+    icon: <FaUsers />,
+    url: "/dashboard/users-details",
+  },
+ 
 ];
 
 const Sidebar = ({ onLogout }: { onLogout: () => void }) => {
@@ -36,7 +90,11 @@ const Sidebar = ({ onLogout }: { onLogout: () => void }) => {
   );
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   // const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -70,12 +128,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <div className={`dashBoard_page ${isLoggedIn}`} style={{ display: "flex" }}>
+        <div
+          className={`dashBoard_page ${isLoggedIn}`}
+          style={{ display: "flex" }}
+        >
           {isLoggedIn && <Sidebar onLogout={handleLogout} />}
-          <div className={`main-content ${pathname === '/dashboard-login' ? 'loginPage' : ''}`}>
-          {children}
+          <div
+            className={`main-content ${
+              pathname === "/dashboard-login" ? "loginPage" : ""
+            }`}
+          >
+            {children}
           </div>
-          
         </div>
       </body>
     </html>

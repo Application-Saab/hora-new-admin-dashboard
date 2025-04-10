@@ -52,7 +52,13 @@
 
 .resultMessage {
     margin-top: 20px;
-    padding: 10px;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.supplierName {
+    /* margin-top: 5px; */
+    padding: 2px;
     border-radius: 5px;
 }
 
