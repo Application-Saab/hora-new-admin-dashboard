@@ -35,7 +35,10 @@ const OrderList = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [vendorAmount, setVendorAmountInput] = useState("");
   const [orderId1, setOrderId] = useState("");
-  
+
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const [decorationComment, setDecorationComment] = useState("");
+
   const fetchOrders = async (
     page,
     orderId = "",
@@ -253,6 +256,49 @@ const OrderList = () => {
   //   setIsModalOpen(false);
   // };
 
+  const handleOpenEditOrderPopup = (orderId,decoration_comments) => {
+    console.log(orderId,"ordereditorder");
+    console.log(decoration_comments, "decoration_comments");
+    setSelectedOrderId(orderId);
+    setDecorationComment(decoration_comments || ""); 
+    setIsPopupOpen(true);
+  };
+
+  // const handleSave = () => {
+  //   console.log("Saved Comment:", decorationComment);
+  //   console.log("Order ID:", selectedOrderId);
+  //   setIsPopupOpen(false); // Close the popup after saving
+  // };
+  const handleSave = async () => {
+    const requestData = {
+      _id: selectedOrderId,
+      decoration_comments: decorationComment,
+    };
+
+    try {
+      const response = await fetch("https://horaservices.com:3000/api/order/edit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        console.log("Success:", result);
+        alert("Order updated successfully!"); 
+      } else {
+        console.error("Error:", result);
+        alert("Failed to update order.");
+      }
+    } catch (error) {
+      console.error("Request failed:", error);
+      alert("Network error, please try again.");
+    }
+
+    setIsPopupOpen(false); // Close the popup after saving
+  };
 
   const handleOpenVendorAmountPopup = (orderId) => {
     console.log(orderId, "orderId");
@@ -296,7 +342,7 @@ const OrderList = () => {
           )
         );
         handleCloseVendorAmountPopup();
-        setVendorAmountInput('')
+        setVendorAmountInput("");
       } else {
         alert("Failed to update vendor amount");
       }
@@ -482,6 +528,7 @@ const OrderList = () => {
                 <th>Action</th>
                 <th>Rating</th>
                 <th>Extra Pay</th>
+                <th>Edit Order</th>
               </tr>
             </thead>
             <tbody>
@@ -494,16 +541,16 @@ const OrderList = () => {
                     <td>
                       {order?.order_date
                         ? new Date(
-                          order.order_date.split("T")[0]
-                        ).toLocaleDateString()
+                            order.order_date.split("T")[0]
+                          ).toLocaleDateString()
                         : "N/A"}
                     </td>
                     <td>
                       {order?.order_time
                         ? `${order.order_time}` // If `order_time` is available, show it
                         : order?.order_date
-                          ? `${order.order_date.split("T")[1].slice(0, 8)}`
-                          : "N/A"}
+                        ? `${order.order_date.split("T")[1].slice(0, 8)}`
+                        : "N/A"}
                     </td>
                     <td>{order.otp}</td>
                     <td>{order.order_taken_by || "N/A"}</td>
@@ -554,8 +601,9 @@ const OrderList = () => {
 
                     <td>
                       <span
-                        className={`status ${getOrderStatus(order.order_status).className
-                          }`}
+                        className={`status ${
+                          getOrderStatus(order.order_status).className
+                        }`}
                       >
                         {getOrderStatus(order.order_status).status}
                       </span>
@@ -574,8 +622,9 @@ const OrderList = () => {
                     </td>
                     <td>
                       <button
-                        className={`status-button ${order.status === 0 ? "active" : "inactive"
-                          }`}
+                        className={`status-button ${
+                          order.status === 0 ? "active" : "inactive"
+                        }`}
                         onClick={() =>
                           updateOrderStatus(
                             order._id,
@@ -616,12 +665,44 @@ const OrderList = () => {
                       ) : (
                         <button
                           onClick={() => handleOpenVendorAmountPopup(order._id)}
-                          style={styles.amountPopupBtn}>
+                          style={styles.amountPopupBtn}
+                        >
                           Set Vendor Amount
                         </button>
                       )}
-
                     </td>
+                    {/* order._id */}
+                    {/* <td>
+              <button
+                style={styles.editOrderPopupBtn}
+                onClick={() => handleOpenEditOrderPopup(order._id, order.decoration_comments)}
+              >
+                Edit Order
+              </button>
+            </td> */}
+            <td>
+  {(() => {
+    const now = new Date();
+    const orderDate = new Date(order.order_date);
+
+    // Strip the time to compare only the date
+    now.setHours(0, 0, 0, 0);
+    orderDate.setHours(0, 0, 0, 0);
+
+    // Show button only if order date is in the future
+    return orderDate > now;
+  })() && (
+    <button
+      style={styles.editOrderPopupBtn}
+      onClick={() =>
+        handleOpenEditOrderPopup(order._id, order.decoration_comments)
+      }
+    >
+      Edit Order
+    </button>
+  )}
+</td>
+
                   </tr>
                 ))
               ) : (
@@ -631,6 +712,26 @@ const OrderList = () => {
               )}
             </tbody>
           </table>
+
+          {isPopupOpen && (
+        <div className="popup-overlay">
+      <div className="popup">
+        <h2>Edit Order</h2>
+        <p>Order ID: {selectedOrderId}</p>
+        <h3>Decoration Comments</h3>
+        <input
+            type="text"
+            value={decorationComment}
+            onChange={(e) => setDecorationComment(e.target.value)}
+            placeholder="Enter decoration comment"
+            className="input-field"
+          />
+          <button onClick={handleSave}>Save</button>
+        <button onClick={() => setIsPopupOpen(false)}>Close</button>
+      </div>
+      </div>
+    )}
+
         </div>
 
         <ActionPopup
@@ -641,8 +742,8 @@ const OrderList = () => {
           onClose={closePopup}
         />
       </div>
-      {/* vendor extra amount popup */}
 
+      {/* vendor extra amount popup */}
       {showPopup && (
         <div className="popup-overlay">
           <div className="popup">
@@ -650,9 +751,7 @@ const OrderList = () => {
             <input
               type="number"
               value={vendorAmount}
-              onChange={(e) =>
-                setVendorAmountInput(e.target.value)
-              }
+              onChange={(e) => setVendorAmountInput(e.target.value)}
               placeholder="Enter Amount"
               className="input-field"
             />
@@ -687,6 +786,8 @@ const OrderList = () => {
           </div>
         </div>
       )}
+
+
       {/* pagination */}
       <div className="orderDetails_pagination">
         <button
@@ -775,5 +876,22 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-  }
+  },
+  editOrderPopupBtn: {
+    width: "85px",
+    height: "40px",
+    backgroundColor: "transparent",
+    backgroundImage: "linear-gradient(135deg, #ff6b6b,rgb(148, 140, 124))",
+    border: "none",
+    borderRadius: "10px",
+    cursor: "pointer",
+    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    color: "white",
+    fontSize: "10px",
+    fontWeight: "bold",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 };
