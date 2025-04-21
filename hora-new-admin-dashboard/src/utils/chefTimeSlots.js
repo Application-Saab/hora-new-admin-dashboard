@@ -1,4 +1,4 @@
-export const timeSlotOptions = [
+export const chefTimeSlots = [
     { value: "7:00 AM - 8:00 AM", label: "7:00 AM - 8:00 AM" },
     { value: "8:00 AM - 9:00 AM", label: "8:00 AM - 9:00 AM" },
     { value: "9:00 AM - 10:00 AM", label: "9:00 AM - 10:00 AM" },
@@ -15,3 +15,5 @@ export const timeSlotOptions = [
     { value: "8:00 PM - 9:00 PM", label: "8:00 PM - 9:00 PM" },
     { value: "9:00 PM - 10:00 PM", label: "9:00 PM - 10:00 PM" },
   ];
+  
+  

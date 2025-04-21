@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import getOrderType from '../../../utils/getOrderType';
 
 const VendorCityTable = () => {
   const [orders, setOrders] = useState([]);
@@ -8,8 +9,21 @@ const VendorCityTable = () => {
   const [endDate, setEndDate] = useState("");
   const [showTable, setShowTable] = useState(false);
 
+      const [selectedKey, setSelectedKey] = useState('');
+
+      const handleDropdownChange = (e) => {
+        const key = parseInt(e.target.value);
+        console.log(key, "key");
+        setSelectedKey(key);
+      };
+
   const fetchFilteredOrders = async () => {
     setLoading(true);
+    console.log(selectedKey,"selectedkey");
+    if (!selectedKey) {
+      alert('Please select an order type first.');
+      return;
+    }
     try {
       const { data } = await axios.post(
         "https://horaservices.com:3000/api/admin/adminOrderList",
@@ -17,7 +31,7 @@ const VendorCityTable = () => {
           page: 1,
           per_page: 5000,
           status: 1,
-          type: 1,
+          type: selectedKey,
           order_locality: "",
           start_date: startDate || null,
           end_date: endDate || null
@@ -122,6 +136,40 @@ const VendorCityTable = () => {
           />
         </div>
       </div>
+<div
+  style={{
+    padding: '16px',
+    borderRadius: '8px',
+    maxWidth: '300px',
+    marginLeft: "88px",
+    marginBottom: '10px',
+  }}
+>
+  <label style={{ display: 'block', marginBottom: '8px' }}>Select Order Type:</label>
+  <select
+    onChange={handleDropdownChange}
+    defaultValue=""
+    style={{
+      width: '100%',
+      padding: '8px',
+      borderRadius: '4px',
+      border: '1px solid #ccc'
+    }}
+  >
+    <option value="" disabled>
+      -- Select --
+    </option>
+    {[...Array(8)].map((_, i) => {
+      const value = i + 1;
+      return (
+        <option key={value} value={value}>
+          {getOrderType(value)}
+        </option>
+      );
+    })}
+  </select>
+</div>
+
       <button
         onClick={fetchFilteredOrders}
         style={{
