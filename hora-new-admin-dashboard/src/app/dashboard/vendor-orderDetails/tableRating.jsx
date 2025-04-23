@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import "tailwindcss/tailwind.css";
 import getOrderType from '../../../utils/getOrderType';
+import { ADMIN_ORDER_LIST, ADMIN_USER_LIST, BASE_URL } from "../../../utils/apiconstant";
 
 const AdminRatingsTable = () => {
   const [adminData, setAdminData] = useState([]);
@@ -32,7 +33,7 @@ const AdminRatingsTable = () => {
     try {
       console.log("Fetching orders with date range from backend...");
       const ordersRes = await axios.post(
-        "https://horaservices.com:3000/api/admin/adminOrderList",
+        BASE_URL + ADMIN_ORDER_LIST,
         {
           page: 1,
           per_page: 5000,
@@ -108,7 +109,7 @@ const AdminRatingsTable = () => {
   
       try {
         const adminUserRes = await axios.post(
-          "https://horaservices.com:3000/api/admin/admin_user_list",
+          BASE_URL + ADMIN_USER_LIST,
           {
             page: 1,
             per_page: 2000,

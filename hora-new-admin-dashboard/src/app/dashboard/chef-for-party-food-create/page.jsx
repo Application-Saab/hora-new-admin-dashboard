@@ -8,6 +8,8 @@ import {
   SAVE_LOCATION_ENDPOINT,
   API_SUCCESS_CODE,
   ADMIN_USER_LIST,
+  GET_MEAL_DISH_ENDPOINT,
+  ADMIN_USER_SIGNUP,
 } from "../../../utils/apiconstant";
 import axios from "axios";
 import Select from "react-select";
@@ -15,7 +17,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { pincodes } from "../../../utils/pincodes.js";
 import { chefTimeSlots } from "../../../utils/chefTimeSlots";
 
-const FoodCreateOrderComponent = () => {
+const ChefForPartyCreateOrderComponent = () => {
   const [items, setItems] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
@@ -94,7 +96,7 @@ const FoodCreateOrderComponent = () => {
     const fetchItems = async () => {
       try {
         const response = await fetch(
-          "https://horaservices.com:3000/api/user/getMealDish",
+          BASE_URL + GET_MEAL_DISH_ENDPOINT,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -291,7 +293,7 @@ const FoodCreateOrderComponent = () => {
     console.log(requestData, "requestion data");
     try {
       const response = await axios.post(
-        "https://horaservices.com:3000/api/admin/user_signup",
+        BASE_URL + ADMIN_USER_SIGNUP,
         requestData
       );
 
@@ -368,11 +370,6 @@ const FoodCreateOrderComponent = () => {
     setlLoading(true);
     console.log("handlesubmit");
 
-    const addOnProduct = products.map((product) => ({
-      name: product.name,
-      price: product.price,
-    }));
-
     const formattedDate = date ? formatDate(date) : null;
 
     const addressID = await saveAddress();
@@ -385,7 +382,7 @@ const FoodCreateOrderComponent = () => {
     console.log("selectedItems", selectedItems);
 
     const requestData = {
-      add_on: addOnProduct,
+      add_on: [],
       phone_no: customerNumber,
       toId: "",
       order_time: timeSlot.value,
@@ -406,7 +403,7 @@ const FoodCreateOrderComponent = () => {
       order_type: true,
       items: selectedItems,
       decoration_comments: comment,
-      status: 0,
+      status: 1,
       balance_amount: balanceamount,
       order_taken_by: orderTakenBy,
     };
@@ -427,21 +424,6 @@ const FoodCreateOrderComponent = () => {
     }
   };
 
-  const proDuctInclusions = (product) => {
-    if (!product.inclusion || product.inclusion.length === 0) {
-      return "No inclusion details available"; // Return plain text for inclusion summary
-    }
-
-    const inclusionItems = product.inclusion[0]
-      .replace(/<[^>]*>/g, "") // Remove HTML tags
-      .replace(/&#[^;]*;/g, " ") // Replace special characters
-      .split("-") // Split by "-"
-      .map((item) => item.trim())
-      .filter((item) => item); // Remove empty items
-
-    return inclusionItems.map((item) => `- ${item}`).join("\n"); // Format inclusion items as a list for text
-  };
-
   const copyOrderSummary = () => {
     // Create selected dishes list
     let selectedDishesText = "";
@@ -451,7 +433,7 @@ const FoodCreateOrderComponent = () => {
     if (selectedDishItems.length > 0) {
       selectedDishesText += "\n*Selected Dishes*:";
       selectedDishItems.forEach((item, index) => {
-        selectedDishesText += `\n  ${index + 1}. ${item.name}: ₹${item.price}`;
+        selectedDishesText += `\n  ${index + 1}. ${item.name}`;
       });
     } else {
       selectedDishesText += "\n*Selected Dishes*: None";
@@ -497,17 +479,6 @@ const FoodCreateOrderComponent = () => {
       });
     }
 
-    // Create add-ons list
-    let addons = "";
-    if (products && products.length > 0 && products[0].name !== "") {
-      addons += "\n*Add-On Items*:";
-      products.forEach((item, index) => {
-        addons += `\n  ${index + 1}. ${item.name}: ₹${item.price}`;
-      });
-    } else {
-      addons += "\n*Add-On Items*: None";
-    }
-
     // Create the order summary string
     const orderSummary = `
   *Chef For Party Details*
@@ -524,14 +495,12 @@ const FoodCreateOrderComponent = () => {
   Total Dishes: ${totalDishes}
   
   *Price Details*:
-  Item Total: ₹${itemTotal}
   ${
     selectedItems.length > 7 ? "Extra Charge (>7 dishes): ₹700\n" : ""
-  }Final Amount: ₹${finalAmount}
-  Advance Payment: ₹${advancePayment}
+  }Total Amount: ₹${finalAmount}
+  Advance Amount: ₹${advancePayment}
   Balance Amount: ₹${balanceamount}
   ${selectedDishesText}
-  ${addons}
   ${ingredientsText}
   
   ${comment ? `*Comments*: ${comment}` : ""}
@@ -550,7 +519,7 @@ const FoodCreateOrderComponent = () => {
       //  className="main-container"
       className="container"
     >
-      <h1 className="page-title">Create Food Order</h1>
+      <h1 className="page-title">Create Chef For Party Order</h1>
 
       <div className="order-form">
         <div className="form-row">
@@ -741,7 +710,6 @@ const FoodCreateOrderComponent = () => {
             </div>
           )}
         </div>
-        {/* <h1>sohanverma</h1> */}
         {/* costumer chcek======================== */}
         <label htmlFor="customerNumber">Customer Number*</label>
         <input
@@ -844,41 +812,7 @@ const FoodCreateOrderComponent = () => {
                       placeholder="googleLocation"
                     />
                   </div>
-                  <div className="addon-container">
-                    <label htmlFor="addOn">Add On</label>
-
-                    <div className="addon-form">
-                      {products.map((product, index) => (
-                        <div className="addon-row" key={index}>
-                          <input
-                            type="text"
-                            className="addon-input name-input"
-                            placeholder="Name"
-                            value={product.name}
-                            onChange={(e) =>
-                              handleInputChange(index, "name", e.target.value)
-                            }
-                          />
-                          <input
-                            type="number"
-                            className="addon-input price-input"
-                            placeholder="Price"
-                            value={product.price}
-                            onChange={(e) =>
-                              handleInputChange(index, "price", e.target.value)
-                            }
-                          />
-                          <button
-                            type="button"
-                            className="add-new-btn"
-                            onClick={addProduct}
-                          >
-                            Add New
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                
 
                   <div
                     className="cityPincode-box"
@@ -1029,4 +963,4 @@ const style = {
   },
 };
 
-export default FoodCreateOrderComponent;
+export default ChefForPartyCreateOrderComponent;

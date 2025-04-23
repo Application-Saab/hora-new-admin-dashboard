@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import getOrderType from '../../../utils/getOrderType';
+import { ADMIN_ORDER_LIST, BASE_URL } from "../../../utils/apiconstant";
 
 const VendorCityTable = () => {
   const [orders, setOrders] = useState([]);
@@ -26,7 +27,7 @@ const VendorCityTable = () => {
     }
     try {
       const { data } = await axios.post(
-        "https://horaservices.com:3000/api/admin/adminOrderList",
+        BASE_URL + ADMIN_ORDER_LIST,
         {
           page: 1,
           per_page: 5000,

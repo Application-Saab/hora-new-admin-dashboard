@@ -24,7 +24,7 @@ function AddFoodOrder() {
   const [includeDisposable, setIncludeDisposable] = useState(false);
   const [includeTables, setIncludeTables] = useState(false);
   const [itemDataId, setItemDataId] = useState({ items: [] });
-  const deliveryCharges = 350;
+  const deliveryCharges = 400;
   const packingCost = 200;
 
   const handleChange = (event) => {
@@ -224,7 +224,7 @@ function AddFoodOrder() {
   });
 
   console.log(newTotalPrice);
-  console.log(totalPrice);
+  console.log(totalPrice, "jfdklsjfkldsjf");
   newTotalPrice = newTotalPrice * discountPercentagePrice;
 
   console.log(newTotalPrice);
@@ -683,9 +683,15 @@ function AddFoodOrder() {
                 }}
               >
                 ₹{" "}
-                {totalPrice - discountedPrice < 0
+                {/* {totalPrice - discountedPrice < 0
                   ? discountedPrice
-                  : totalPrice}
+                  : (deliveryCharges + totalPrice)} */}
+                  ₹ {
+  (Number(totalPrice || 0) - Number(discountedPrice || 0) < 0
+    ? Number(discountedPrice || 0)
+    : Number(totalPrice || 0)) + 400
+}
+
               </p>
             </div>
             {/* <img style={{ width: 290, height: 1, marginTop: 5, marginBottom: 5 }} src="../../assets/Rectangleline.png" alt="line" /> */}
@@ -886,7 +892,8 @@ function AddFoodOrder() {
                                                             </>
                                                         ) :
                                                          ( */}
-                      <p style={{ color: "#9252AA", fontWeight: "600" }}>
+                                                          <p style={{ color: "#008631", fontWeight: '600', marginRight: 5 }}>FREE</p>
+                      <p style={{textDecoration: "line-through", color: "#9252AA", fontWeight: "600" }}>
                         ₹ {deliveryCharges}
                       </p>
                       {/* )} */}

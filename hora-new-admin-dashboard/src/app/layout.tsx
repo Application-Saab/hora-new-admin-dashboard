@@ -33,6 +33,11 @@ const menuItems = [
     url: "/dashboard/food-create-order",
   },
   {
+    label: "Chef For Party Create Order",
+    icon: <FaPlusCircle />,
+    url: "/dashboard/chef-for-party-food-create",
+  },
+  {
     label: "Photography Create Order",
     icon: <FaCamera />,
     url: "/dashboard/photography-create-order",
