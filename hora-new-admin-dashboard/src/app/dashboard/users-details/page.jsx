@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import "./users.css";
 
 const fetchAdminUsers = async (params) => {
   try {
@@ -74,6 +75,61 @@ const AdminUsers = () => {
     }
   };
 
+
+   // State for modal visibility
+   const [isModalOpen, setIsModalOpen] = useState(false);
+
+   // Renamed state for user list
+   const [userList, setUserList] = useState([]);
+ 
+   // Loading indicator
+   const [loading, setLoading] = useState(false);
+ 
+   // Fetch users from API
+   const fetchUsers = async () => {
+     setLoading(true);
+     try {
+       const response = await fetch('https://horaservices.com:3000/api/admin/admin_user_list', {
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json',
+           // 'Authorization': 'Bearer YOUR_TOKEN' // Uncomment if needed
+         },
+         body: JSON.stringify({
+           role: 'customer',
+           page: 1,
+           per_page: 250,
+           status: 1,
+           phone: ''
+         }),
+       });
+ 
+       const data = await response.json();
+ 
+       // Extracting users from the response (adjusting based on the correct path)
+       if (data && data.data && Array.isArray(data.data.users)) {
+         setUserList(data.data.users);  // Now using the 'users' array from the response
+       } else {
+         setUserList([]);  // Handle cases where the expected data is not found
+       }
+     } catch (error) {
+       console.error('Error fetching users:', error);
+       setUserList([]); // Optionally, you can reset userList in case of error
+     } finally {
+       setLoading(false);
+     }
+   };
+ 
+   const handleShowUsers = () => {
+     setIsModalOpen(true);
+     fetchUsers();
+   };
+ 
+   const handleCloseModal = () => {
+     setIsModalOpen(false);
+   };
+
+   
   return (
     <div
       style={{
@@ -96,6 +152,55 @@ const AdminUsers = () => {
           textAlign: "center",
         }}
       />
+
+<button onClick={handleShowUsers}>Show Customer List</button>
+
+      {isModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h2>Customer List</h2>
+
+            {loading ? (
+              <p>Loading users...</p>
+            ) : (
+              <div className="table-container">
+                {Array.isArray(userList) && userList.length > 0 ? (
+                  <table>
+                    <thead>
+                      <tr
+                       style={{
+                        color: "white",
+                        background:
+                          "linear-gradient(90deg, rgba(221, 94, 137, 0.8), #97538c)",
+                      }}
+                      >
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Created At</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {userList.map((user, index) => (
+                        <tr key={index}>
+                          <td>{user.name || 'N/A'}</td>
+                          <td>{user.phone || 'No phone'}</td>
+                          <td>{new Date(user.createdAt).toLocaleString() || 'No date'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p>No users found</p>
+                )}
+              </div>
+            )}
+
+            <button className="close-btn" onClick={handleCloseModal}>Close</button>
+          </div>
+        </div>
+      )}
+
+
       <table
         style={{
           width: "100%",

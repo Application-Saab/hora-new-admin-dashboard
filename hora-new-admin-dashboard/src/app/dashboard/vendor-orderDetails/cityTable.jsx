@@ -37,11 +37,18 @@ const VendorCityTable = () => {
 
   // Calculate city ratings based on orders
   const getCityRatings = () => {
+    // const cityRatings = {
+    //   Hyderabad: { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0 },
+    //   Delhi: { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0 },
+    //   Mumbai: { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0 },
+    //   Bangalore: { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0 },
+    // };
+
     const cityRatings = {
-      Hyderabad: { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0 },
-      Delhi: { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0 },
-      Mumbai: { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0 },
-      Bangalore: { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0 },
+      Hyderabad: { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0, totalOrders: 0 },
+      Delhi: { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0, totalOrders: 0 },
+      Mumbai: { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0, totalOrders: 0 },
+      Bangalore: { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0, totalOrders: 0 },
     };
 
     orders.forEach((order) => {
@@ -50,6 +57,7 @@ const VendorCityTable = () => {
       if (!cities.includes(city)) return; // Skip cities not in our list
 
       const ratingArray = order?.userReviewRatingArray || [];
+      cityRatings[city].totalOrders += 1; // Increase the order count for this city
       if (ratingArray.length === 0) {
         cityRatings[city]["No Rating"] += 1;
       } else {
@@ -65,10 +73,14 @@ const VendorCityTable = () => {
 
   const cityRatings = getCityRatings();
 
+  console.log(cityRatings.Hyderabad.totalOrders, "hyderabad");  // Total orders for Hyderabad
+console.log(cityRatings.Mumbai.totalOrders, "mumbai");     // Total orders for Mumbai
+
+
   return (
     <div
       style={{
-        maxWidth: "500px",
+        maxWidth: "553px",
         margin: "40px auto",
         textAlign: "center",
         background: "#fff",
@@ -174,6 +186,15 @@ const VendorCityTable = () => {
                     {range}
                   </th>
                 ))}
+                 <th
+                style={{
+                  padding: "12px",
+                  fontSize: "18px",
+                  textAlign: "center",
+                }}
+              >
+                Total Orders
+              </th>
               </tr>
             </thead>
             <tbody>
@@ -210,6 +231,18 @@ const VendorCityTable = () => {
                       {ratings[range]}
                     </td>
                   ))}
+
+                  {/* Add the new Total Orders column */}
+                <td
+                  style={{
+                    padding: "12px",
+                    fontSize: "18px",
+                    textAlign: "center",
+                    color: "#222",
+                  }}
+                >
+                  {ratings.totalOrders}
+                </td>
                 </tr>
               ))}
             </tbody>

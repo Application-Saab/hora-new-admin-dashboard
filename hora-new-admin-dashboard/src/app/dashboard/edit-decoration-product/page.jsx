@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import "./DecorationEditor.css";
+import axios from "axios";
 
 const decCat = [
   { id: "2", subCategory: "Birthday" },
@@ -220,6 +221,10 @@ const DecorationEditor = () => {
       )
   );
 
+  console.log(filteredData, "filteredData");
+ 
+  
+
   return (
     <div className="container">
       <div className="content-wrapper">
@@ -268,6 +273,7 @@ const DecorationEditor = () => {
                   <th>Price</th>
                   <th>Tags</th>
                   <th>Actions</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -304,6 +310,31 @@ const DecorationEditor = () => {
                         Update
                       </button>
                     </td>
+                    
+                    {/* <td>{item.status}</td> */}
+                    <td className="actions-cell">
+  <button
+  className="action-button"
+    onClick={async () => {
+      const newStatus = item.status === 1 ? 0 : 1;
+
+      await axios.post('/api/update-status', {
+        id: item._id,
+        status: newStatus,
+      });
+
+      window.location.reload(); // reload the page
+    }}
+
+    style={{
+      backgroundColor: item.status === 1 ? 'green' : 'red',
+     
+    }}
+  >
+    {item.status === 1 ? 'Active' : 'Inactive'}
+  </button>
+</td>
+
                   </tr>
                 ))}
               </tbody>
