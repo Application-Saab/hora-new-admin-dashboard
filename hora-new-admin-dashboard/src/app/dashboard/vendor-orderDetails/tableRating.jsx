@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "tailwindcss/tailwind.css";
+import getOrderType from '../../../utils/getOrderType';
+import { ADMIN_ORDER_LIST, ADMIN_USER_LIST, BASE_URL } from "../../../utils/apiconstant";
 
 const AdminRatingsTable = () => {
   const [adminData, setAdminData] = useState([]);
@@ -9,7 +11,21 @@ const AdminRatingsTable = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  
+  const [selectedKey, setSelectedKey] = useState('');
+
+  const handleDropdownChange = (e) => {
+    const key = parseInt(e.target.value);
+    console.log(key, "key");
+    setSelectedKey(key);
+  };
+
   const handleSubmit = async () => {
+    console.log(selectedKey,"selectedkey");
+    if (!selectedKey) {
+      alert('Please select an order type first.');
+      return;
+    }
     console.log("handleSubmit started");
     setLoading(true);
     setAdminData([]);
@@ -17,12 +33,12 @@ const AdminRatingsTable = () => {
     try {
       console.log("Fetching orders with date range from backend...");
       const ordersRes = await axios.post(
-        "https://horaservices.com:3000/api/admin/adminOrderList",
+        BASE_URL + ADMIN_ORDER_LIST,
         {
           page: 1,
           per_page: 5000,
           status: 1,
-          type: 1,
+          type: selectedKey,
           order_locality: selectedCity || undefined,
           start_date: startDate || undefined,
           end_date: endDate || undefined
@@ -39,6 +55,7 @@ const AdminRatingsTable = () => {
       }
   
       const vendorOrdersMap = {};
+      let vendorDetailsMap = {};
       orders.forEach(order => {
         console.log(`Processing order for vendor: ${order.toId}`);
         if (!order.toId) return;
@@ -92,7 +109,7 @@ const AdminRatingsTable = () => {
   
       try {
         const adminUserRes = await axios.post(
-          "https://horaservices.com:3000/api/admin/admin_user_list",
+          BASE_URL + ADMIN_USER_LIST,
           {
             page: 1,
             per_page: 2000,
@@ -104,10 +121,17 @@ const AdminRatingsTable = () => {
         console.log("Fetched all supplier users:", users);
   
         // Create a map of vendorId -> vendor name
-        vendorNamesMap = users.reduce((acc, user) => {
-          acc[user._id] = user.name || "Unknown Vendor";
+        vendorDetailsMap = users.reduce((acc, user) => {
+          acc[user._id] = {
+            name: user.name || "Unknown Vendor",
+            phone: user.phone || "N/A",
+          };
           return acc;
         }, {});
+        // vendorNamesMap = users.reduce((acc, user) => {
+        //   acc[user._id] = user.name || "Unknown Vendor",;
+        //   return acc;
+        // }, {});
   
         console.log("Mapped Vendor Names:", vendorNamesMap);
       } catch (error) {
@@ -117,8 +141,14 @@ const AdminRatingsTable = () => {
       // After resolving all vendor names, map data to final structure
       const vendorData = vendorIds.map((vendorId) => ({
         ...vendorOrdersMap[vendorId],
-        name: vendorNamesMap[vendorId] || "Unknown Vendor",
+        name: vendorDetailsMap[vendorId]?.name || "Unknown Vendor",
+        phone: vendorDetailsMap[vendorId]?.phone || "N/A",
       }));
+      
+      // const vendorData = vendorIds.map((vendorId) => ({
+      //   ...vendorOrdersMap[vendorId],
+      //   name: vendorNamesMap[vendorId] || "Unknown Vendor",
+      // }));
   
       console.log("Final Vendor Data:", vendorData);
   
@@ -154,6 +184,40 @@ const AdminRatingsTable = () => {
             <input type="date" id="endDate" className="p-2 border rounded-md w-full mb-2" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
           </div>
         </div>
+        
+<div
+  style={{
+    padding: '16px',
+    borderRadius: '8px',
+    maxWidth: '300px',
+    marginLeft: "170px",
+    marginBottom: '10px',
+  }}
+>
+  <label style={{ display: 'block', marginBottom: '8px', marginLeft: "70px" }}>Select Order Type:</label>
+  <select
+    onChange={handleDropdownChange}
+    defaultValue=""
+    style={{
+      width: '100%',
+      padding: '8px',
+      borderRadius: '4px',
+      border: '1px solid #ccc'
+    }}
+  >
+    <option value="" disabled>
+      -- Select --
+    </option>
+    {[...Array(8)].map((_, i) => {
+      const value = i + 1;
+      return (
+        <option key={value} value={value}>
+          {getOrderType(value)}
+        </option>
+      );
+    })}
+  </select>
+</div>
         <button className="p-2 bg-blue-600 text-white rounded-md w-full hover:bg-blue-700" 
         style={{
           background:
@@ -174,6 +238,7 @@ const AdminRatingsTable = () => {
           >
             <tr>
               <th className="border p-2">Name</th>
+              <th className="border p-2">Phone</th>
               <th className="border p-2 w-32">Total Orders</th>
               <th className="border p-2 w-12">0-6</th>
               <th className="border p-2 w-12">6-8</th>
@@ -187,6 +252,7 @@ const AdminRatingsTable = () => {
               adminData.map(admin => (
                 <tr key={admin._id} className="hover:bg-gray-50">
                   <td className="border p-2">{admin.name}</td>
+                  <td className="border p-2">{admin.phone}</td>
                   <td className="border p-2">{admin.totalOrders}</td>
                   <td className="border p-2">{admin["0-6"]}</td>
                   <td className="border p-2">{admin["6-8"]}</td>

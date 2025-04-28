@@ -14,6 +14,7 @@ import {
   ADMIN_USER_LIST,
 } from "../../../utils/apiconstant";
 import { pincodes } from '../../../utils/pincodes.js';
+import {itemsData} from "../../../utils/itemData";
 
 
 const AddDecOrder = () => {
@@ -52,6 +53,27 @@ const AddDecOrder = () => {
   const [showPopup, setShowPopup] = useState(false); // For toggling the popup
   const [newCustomerName, setNewCustomerName] = useState(""); // For name input
   const [newCustomerPhone, setNewCustomerPhone] = useState("");
+
+  const [selectedItems, setSelectedItems] = useState({});
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const toggleItem = (id) => {
+    setSelectedItems((prev) => ({
+      ...prev,
+      [id]: prev[id] ? undefined : { quantity: 1 }
+    }));
+  };
+
+  const changeQuantity = (id, delta) => {
+    setSelectedItems((prev) => {
+      const qty = prev[id]?.quantity || 1;
+      const newQty = Math.max(1, qty + delta);
+      return {
+        ...prev,
+        [id]: { quantity: newQty }
+      };
+    });
+  };
 
   const handleInputChange = (index, field, value) => {
     const newProducts = [...products];
@@ -234,11 +256,24 @@ const AddDecOrder = () => {
     e.preventDefault();
     setlLoading(true);
     console.log('handlesubmit')
+
+    const add_on = Object.keys(selectedItems).map((id) => {
+      const item = itemsData.find((i) => i.id === parseInt(id));
+      return {
+        name: item.title + ' Quantity ' + selectedItems[id].quantity,
+        price: item.price,
+      };
+    });
+    
     const addOnProduct = products.map((product) => ({
       name: product.name,
       price: product.price,
     }));
-
+    
+    const combinedAddOns = [...add_on, ...addOnProduct];
+    
+    console.log(combinedAddOns, "All Add-Ons Combined");
+    
     const formattedDate = date ? formatDate(date) : null;
 
     const addressID = await saveAddress();
@@ -249,7 +284,7 @@ const AddDecOrder = () => {
     }
 
     const requestData = {
-      add_on: addOnProduct,
+      add_on: combinedAddOns,
       phone_no: customerNumber,
       toId: "",
       order_time: timeSlot.value,
@@ -551,6 +586,59 @@ const AddDecOrder = () => {
                 ))}
               </div>
             </div>
+
+            <div className="dropdown-container">
+            <button onClick={() => setDropdownOpen(!dropdownOpen)} className="orderCheck-btn">
+            Select AddOn ▼
+            </button>
+  
+            {dropdownOpen && (
+            <div className="dropdown-menu">
+            {itemsData && itemsData.map((item) => {
+              const selected = selectedItems[item.id];
+              return (
+                <div className="item-row" key={item.id}>
+                  <div className="left-section">
+                    <input
+                      type="checkbox"
+                      checked={!!selected}
+                      onChange={() => toggleItem(item.id)}
+                    />
+                    <div>
+                      <div className="item-title">{item.title}</div>
+                      <div className="item-price">₹{item.price}</div>
+                    </div>
+                  </div>
+  
+                  {selected && (
+                    <div className="right-section">
+                      <button onClick={() => changeQuantity(item.id, -1)} className="qty-btn">−</button>
+                      <span className="qty">{selected.quantity}</span>
+                      <button onClick={() => changeQuantity(item.id, 1)} className="qty-btn">+</button>
+                      <div className="total-price">₹{item.price * selected.quantity}</div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+      {Object.keys(selectedItems).length > 0 && (
+  <div className="selected-summary">
+    <h4>Selected Add-ons</h4>
+    <ul>
+      {Object.keys(selectedItems).map((id) => {
+        const item = itemsData.find((i) => i.id === parseInt(id));
+        return (
+          <li key={id}>
+            {item.title} — ₹{item.price} × {selectedItems[id].quantity}
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+)}
 
 
             <div className="amount-box">

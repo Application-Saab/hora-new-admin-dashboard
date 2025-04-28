@@ -1,0 +1,14 @@
+// src/data/itemsData.json
+[
+    {
+      "id": 1,
+      "title": "BOARD WITH STAND (SIZE- 2*3)",
+      "price": 100
+    },
+    {
+      "id": 2,
+      "title": "BOARD WITH STAND (SIZE- 2*3)",
+      "price": 200
+    }
+  ]
+  

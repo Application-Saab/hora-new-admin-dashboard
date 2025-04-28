@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import "./DecorationEditor.css";
+import { BASE_URL, EDIT_DECORATION_PRODUCT } from "../../../utils/apiconstant";
 
 const decCat = [
   { id: "2", subCategory: "Birthday" },
@@ -181,7 +182,7 @@ const DecorationEditor = () => {
 
       // Make the API request
       const response = await fetch(
-        "https://horaservices.com:3000/api/decoration/edit",
+        BASE_URL + EDIT_DECORATION_PRODUCT,
         {
           method: "POST",
           headers: {

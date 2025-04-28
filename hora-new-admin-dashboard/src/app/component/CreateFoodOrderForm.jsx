@@ -254,9 +254,11 @@ const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, cal
             setlLoading(false);
         }
     };
+
     const copyOrderSummary = () => {
-       
         let inclusions;
+        
+        // Format date function
         const formatDate = (inputDate) => {
             const dateObj = new Date(inputDate);
             const day = String(dateObj.getDate()).padStart(2, "0"); // Ensures 2-digit day
@@ -264,61 +266,55 @@ const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, cal
             const year = dateObj.getFullYear();
             return `${day}-${month}-${year}`;
         };
-
-        const formattedDate = date ? formatDate(date) : "To be shared by customer"; // Format the date
+    
+        const formattedDate = date ? formatDate(date) : "To be shared by customer";
+        
+        // Set inclusions based on selected option
         if (selectedOption === "food-delivery") {
-
             inclusions = [
-              "Complementary - Green salad, Mint Chutney, Achar",
-              "Doorstep Delivery",
-              "Freshly cooked food",
-              "Fork, Spoon, Tissue papers",
+                "Complementary - Green salad, Mint Chutney, Achar",
+                "Doorstep Delivery",
+                "Freshly cooked food",
+                "Fork, Spoon, Tissue papers",
             ];
             if (includeDisposable) {
-                inclusions.push("Disposable plates,  Bisleri Water bottles")
+                inclusions.push("Disposable plates, Bisleri Water bottles");
             }
-          } else if (selectedOption === "live-catering") {
+        } else if (selectedOption === "live-catering") {
             inclusions = [  
-              "Well Groomed Waiters (2 Nos)",
-              "Bone-china Crockery & Quality disposal for loose items",
-              "Transport (to & fro)",
-              "Dustbin with Garbage bag",
-              "Head Mask for waiters & chefs",
-              "Chafing Dish",
-              "Cocktail Napkins",
-              "2 Chefs"
+                "Well Groomed Waiters (2 Nos)",
+                "Bone-china Crockery & Quality disposal for loose items",
+                "Transport (to & fro)",
+                "Dustbin with Garbage bag",
+                "Head Mask for waiters & chefs",
+                "Chafing Dish",
+                "Cocktail Napkins",
+                "2 Chefs"
             ];               
-                
-          } else {
+        } else {
             inclusions = ["No specific inclusions for this order type"];
-          }
-        let orderData = `
-         *${selectedOption.charAt(0).toUpperCase() + selectedOption.slice(1)} Order Summary:*
-         
-        City: ${city}
-        Date: ${formattedDate}
-        Guest Count: ${peopleCount}
-        Time of Delivery: ${timeSlot ? timeSlot.value : "To be shared by customer"}
-        Address: ${address}
-        Google Map Location: ${googleLocation}
-            `;
-
-        if (selectedOption === "live-catering") {
-            orderData += `
-        Dishes:
-        ${selectedMealList.map((item) => item.name).join("\n -")}`
-
-            //     orderData += `           
-            // Total Amount: ₹ ${totalPrice}
-            // Discounts: ₹ ${totalDiscount}
-            // ${includeTables ? `Table Charges: +₹ 1200` : ""}
-            //     `;
         }
-
+        
+        // Create order summary with WhatsApp-friendly formatting
+        let orderData = `*${selectedOption.charAt(0).toUpperCase() + selectedOption.slice(1)} Order Summary:*\n\n`;
+        orderData += `*City:* ${city}\n`;
+        orderData += `*Date:* ${formattedDate}\n`;
+        orderData += `*Guest Count:* ${peopleCount}\n`;
+        orderData += `*Time of Delivery:* ${timeSlot ? timeSlot.value : "To be shared by customer"}\n`;
+        orderData += `*Address:* ${address}\n`;
+        orderData += `*Google Map Location:* ${googleLocation}\n\n`;
+    
+        if (selectedOption === "live-catering") {
+            orderData += `*Dishes:*\n`;
+            selectedMealList.forEach(item => {
+                orderData += `• ${item.name}\n`;
+            });
+        }
+    
         if (selectedOption === "food-delivery") {
-            orderData += `
-        Dishes:
-        ${selectedMealList?.map((item) => {
+            orderData += `*Dishes:*\n`;
+            
+            selectedMealList?.forEach(item => {
                 let quantity = parseFloat(item.quantity) * peopleCount;
                 const itemCount = selectedMealList.length;
                 const mainCourseItemCount = selectedMealList.filter(
@@ -330,68 +326,48 @@ const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, cal
                 const breadItemCount = selectedMealList.filter(
                     (meal) => meal.id[0] === "63edc4757e1b370928b149b3"
                 ).length;
-
+    
                 if (
-                    (item.id[0] === "63f1b6b7ed240f7a09f7e2de" &&
-                        mainCourseItemCount > 1) ||
-                    (item.id[0] === "63f1b39a4082ee76673a0a9f" &&
-                        appetizerItemCount > 1) ||
+                    (item.id[0] === "63f1b6b7ed240f7a09f7e2de" && mainCourseItemCount > 1) ||
+                    (item.id[0] === "63f1b39a4082ee76673a0a9f" && appetizerItemCount > 1) ||
                     (item.id[0] === "63edc4757e1b370928b149b3" && breadItemCount > 1)
                 ) {
                     if (itemCount > 5) {
                         const adjustment =
-                            itemCount === 6
-                                ? 0.15
-                                : itemCount === 8
-                                    ? 0.25
-                                    : itemCount === 9
-                                        ? 0.3
-                                        : itemCount === 10
-                                            ? 0.35
-                                            : itemCount >= 12
-                                                ? 0.5
-                                                : 0;
+                            itemCount === 6 ? 0.15 :
+                            itemCount === 8 ? 0.25 :
+                            itemCount === 9 ? 0.3 :
+                            itemCount === 10 ? 0.35 :
+                            itemCount >= 12 ? 0.5 : 0;
                         quantity *= 1 - adjustment;
                     }
                 }
-
+    
                 quantity = Math.round(quantity);
                 let unit = item.unit;
-
+    
                 if (quantity >= 1000) {
                     quantity /= 1000;
                     if (unit === "Gram") unit = "KG";
                     else if (unit === "ml") unit = "L";
                 }
-
-                return `${item.name}: ${quantity} ${unit}`;
-            })
-                    .join("\n")}`;
-            // aarti
-            //     orderData += `
-
-            // Total Amount: ₹${Number(totalPrice).toFixed(2)}`;
-
-
-            //     if (totalDiscount > 0) {
-            //         orderData += `Discounts: -₹${Number(totalDiscount).toFixed(2)}`;}
+    
+                orderData += `• ${item.name}: ${quantity} ${unit}\n`;
+            });
         }
-
-        // orderData += `
-        // *Final amount after discount: ₹${totalamount.toFixed(2)}* `;
-
-        // Advance Amount: ₹${advanceamount}
-        orderData += `
-
-        *Total amount: ₹${totalamount}*
-         *Advance Amount: ₹${advanceamount}*
-        *Balance Amount: ₹${balanceamount}*
-            `;
-
-        orderData += `
-        *Inclusions:*
-          -${inclusions.join("\n-")}`;
-
+    
+        // Financial information
+        orderData += `\n*Total amount:* ₹${totalamount}\n`;
+        orderData += `*Advance Amount:* ₹${advanceamount}\n`;
+        orderData += `*Balance Amount:* ₹${balanceamount}\n\n`;
+    
+        // Inclusions section
+        orderData += `*Inclusions:*\n`;
+        inclusions.forEach(item => {
+            orderData += `• ${item}\n`;
+        });
+    
+        // Copy to clipboard
         navigator.clipboard
             .writeText(orderData)
             .then(() => {
@@ -399,6 +375,14 @@ const CreateOrderForm = ({ calculateFinalTotal, deliveryCharges, itemDataId, cal
             })
             .catch((error) => {
                 console.error("Error copying to clipboard", error);
+                // Fallback for mobile
+                const textArea = document.createElement("textarea");
+                textArea.value = orderData;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand("copy");
+                document.body.removeChild(textArea);
+                alert("Order summary copied to clipboard!");
             });
     };
 
