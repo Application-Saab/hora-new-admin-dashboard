@@ -40,15 +40,11 @@ const ChefForPartyCreateOrderComponent = () => {
   const [timeSlot, setTimeSlot] = useState("");
   const [city, setCity] = useState("");
   const [pincode, setPincode] = useState("");
-  const [product, setProduct] = useState(null);
-  const [isContinueClicked, setIsContinueClicked] = useState(false);
   const [pincodeMessage, setPincodeMessage] = useState("");
   const [pincodeMessageColor, setPincodeMessageColor] = useState("");
   const [orderTakenBy, setOrderTakenBy] = useState("");
 
-  const [products, setProducts] = useState([{ name: "", price: "" }]);
   const [comment, setComment] = useState("");
-  const [dishNameError, setDishNameError] = useState("");
 
   const [showPopup, setShowPopup] = useState(false); // For toggling the popup
   const [newCustomerName, setNewCustomerName] = useState(""); // For name input
@@ -253,15 +249,6 @@ const ChefForPartyCreateOrderComponent = () => {
     }
   };
 
-  const handleInputChange = (index, field, value) => {
-    const newProducts = [...products];
-    newProducts[index][field] = value;
-    setProducts(newProducts);
-  };
-
-  const addProduct = () => {
-    setProducts([...products, { name: "", price: "" }]);
-  };
 
   const handleComment = (e) => {
     const commentText = e.target.value;
@@ -308,10 +295,6 @@ const ChefForPartyCreateOrderComponent = () => {
       setMessage("Failed to add customer.");
       setMessageColor("red");
     }
-  };
-
-  const handleContinueClick = () => {
-    setIsContinueClicked(true);
   };
 
   const formatDate = (dateString) => {
