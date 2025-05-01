@@ -185,6 +185,20 @@ const OrderList = () => {
     return orderTypes[orderTypeValue] || "Unknown Order Type";
   };
 
+   // popup active and inactive
+   const handleStatusUpdate = (orderId, currentStatus) => {
+    const newStatus = currentStatus === 1 ? 0 : 1;
+    const confirmationMessage =
+      newStatus === 1
+        ? "Are you sure you want to active this order?"
+        : "Are you sure you want to Inactive this order?";
+
+    // Show confirmation dialog
+    if (window.confirm(confirmationMessage)) {
+      updateOrderStatus(orderId, newStatus);
+    }
+  };
+  
   const updateOrderStatus = async (orderId, status) => {
     try {
       const response = await fetch(
@@ -324,6 +338,49 @@ const OrderList = () => {
         <option value="0">Inactive</option>
       </select>
     );
+  };
+
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  
+  const [decorationComment, setDecorationComment] = useState("");
+
+  const handleOpenEditOrderPopup = (orderId,decoration_comments) => {
+    console.log(orderId,"ordereditorder");
+    console.log(decoration_comments, "decoration_comments");
+    setSelectedOrderId(orderId);
+    setDecorationComment(decoration_comments || ""); 
+    setIsPopupOpen(true);
+  };
+
+  const handleSave = async () => {
+    const requestData = {
+      _id: selectedOrderId,
+      decoration_comments: decorationComment,
+    };
+
+    try {
+      const response = await fetch("https://horaservices.com:3000/api/order/edit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        console.log("Success:", result);
+        alert("Order updated successfully!"); 
+      } else {
+        console.error("Error:", result);
+        alert("Failed to update order.");
+      }
+    } catch (error) {
+      console.error("Request failed:", error);
+      alert("Network error, please try again.");
+    }
+
+    setIsPopupOpen(false); // Close the popup after saving
   };
 
   return (
@@ -482,6 +539,7 @@ const OrderList = () => {
                 <th>Action</th>
                 <th>Rating</th>
                 <th>Extra Pay</th>
+                <th>Edit Order</th>
               </tr>
             </thead>
             <tbody>
@@ -574,20 +632,19 @@ const OrderList = () => {
                     </td>
                     <td>
                       <button
-                        className={`status-button ${order.status === 0 ? "active" : "inactive"
-                          }`}
+                        className={`status-button ${
+                          order.status === 0 ? "active" : "inactive"
+                        }`}
                         onClick={() =>
-                          updateOrderStatus(
-                            order._id,
-                            order.status === 1 ? 0 : 1
-                          )
-                        } // Toggle between 1 and 0
+                          handleStatusUpdate(order._id, order.status)
+                        }
                       >
                         {order.status === 1 ? "Active" : "Inactive"}
                       </button>
                     </td>
                     <td>
-                      <FaEye
+                      <button
+                        style={styles.amountViewDetailsBtn}
                         onClick={() => {
                           openActionPopup(
                             order.order_id,
@@ -595,7 +652,9 @@ const OrderList = () => {
                             order.type
                           );
                         }}
-                      />
+                      >
+                        View Details
+                      </button>
                     </td>
                     <td style={{ width: "100px", paddingLeft: "16px" }}>
                       {order.type === 2 ? (
@@ -622,6 +681,28 @@ const OrderList = () => {
                       )}
 
                     </td>
+                    <td>
+  {(() => {
+    const now = new Date();
+    const orderDate = new Date(order.order_date);
+
+    // Strip the time to compare only the date
+    now.setHours(0, 0, 0, 0);
+    orderDate.setHours(0, 0, 0, 0);
+
+    // Show button only if order date is in the future
+    return orderDate > now;
+  })() && (
+    <button
+      style={styles.editOrderPopupBtn}
+      onClick={() =>
+        handleOpenEditOrderPopup(order._id, order.decoration_comments)
+      }
+    >
+      Edit Order
+    </button>
+  )}
+</td>
                   </tr>
                 ))
               ) : (
@@ -631,6 +712,59 @@ const OrderList = () => {
               )}
             </tbody>
           </table>
+          {isPopupOpen && (
+        <div className="popup-overlay">
+      <div className="popup">
+        <h2>Edit Order</h2>
+        <p>Order ID: {selectedOrderId}</p>
+        <h3>Decoration Comments</h3>
+        <input
+            type="text"
+            value={decorationComment}
+            onChange={(e) => setDecorationComment(e.target.value)}
+            placeholder="Enter decoration comment"
+            className="input-field"
+          />
+         <button 
+  onClick={handleSave} 
+  style={{
+    backgroundColor: '#4CAF50',
+    color: 'white',
+    border: 'none',
+    padding: '10px 20px',
+    textAlign: 'center',
+    textDecoration: 'none',
+    display: 'inline-block',
+    fontSize: '16px',
+    marginRight: '10px',
+    borderRadius: '4px',
+    cursor: 'pointer'
+  }}
+>
+  Save
+</button>
+
+<button 
+  onClick={() => setIsPopupOpen(false)} 
+  style={{
+    backgroundColor: '#f44336',
+    color: 'white',
+    border: 'none',
+    padding: '10px 20px',
+    textAlign: 'center',
+    textDecoration: 'none',
+    display: 'inline-block',
+    fontSize: '16px',
+    borderRadius: '4px',
+    cursor: 'pointer'
+  }}
+>
+  Close
+</button>
+
+      </div>
+      </div>
+    )}
         </div>
 
         <ActionPopup
@@ -775,5 +909,39 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-  }
+  },
+  editOrderPopupBtn: {
+    width: "85px",
+    height: "40px",
+    backgroundColor: "transparent",
+    backgroundImage: "linear-gradient(135deg, #ff6b6b,rgb(148, 140, 124))",
+    border: "none",
+    borderRadius: "10px",
+    cursor: "pointer",
+    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    color: "white",
+    fontSize: "10px",
+    fontWeight: "bold",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  amountViewDetailsBtn: {
+    width: "85px",
+    height: "40px",
+    backgroundColor: "transparent",
+    backgroundImage: "linear-gradient(135deg, #00b4d8, #0077b6)",
+    border: "none",
+    borderRadius: "10px",
+    cursor: "pointer",
+    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    color: "white",
+    fontSize: "10px",
+    fontWeight: "bold",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 };

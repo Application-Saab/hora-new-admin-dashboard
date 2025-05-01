@@ -5,8 +5,8 @@ body {
 }
 ul{
   padding-left: 16px;
-
 }
+
 .main-content{
   width:84%;
   background-color: #f0f0f0; 
@@ -15,12 +15,28 @@ ul{
   width: 15%;
   height: 100vh;
   background: linear-gradient(90deg, rgba(221, 94, 137, 0.8), #97538c);
-  /* padding: 20px; */
   position: sticky;
   left: 0;
-  top: 0; 
+  top: 0;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
+  overflow-y: auto; 
+  scrollbar-width: thin;
+  scrollbar-color: #ffffff50 transparent;
+}
+
+/* For Webkit-based browsers (Chrome, Edge, Safari) */
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: #ffffff50;
+  border-radius: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .sidebar a {

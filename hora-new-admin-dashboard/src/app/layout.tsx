@@ -12,6 +12,8 @@ import {
   FaShippingFast,
   FaUsers,
   FaPen,
+  FaUtensils,
+  // FaPlusCircle,
 } from "react-icons/fa";
 import { useRouter, usePathname } from "next/navigation";
 //  import Login from "./login/page";
@@ -72,7 +74,17 @@ const menuItems = [
     icon: <FaUsers />,
     url: "/dashboard/users-details",
   },
+  {
+    label: "Dish List",
+    icon: <FaUtensils />,
+    url: "/dashboard/dish-list",
+  },
  
+  {
+    label: "Create Dish",
+    icon: <FaPlusCircle />,
+    url: "/dashboard/create-dish",
+  },
 ];
 
 const Sidebar = ({ onLogout }: { onLogout: () => void }) => {
@@ -83,7 +95,7 @@ const Sidebar = ({ onLogout }: { onLogout: () => void }) => {
           <li key={index}>
             <Link href={item.url} className="link-button">
               {item.icon}
-              <span style={{ marginLeft: "8px" }}>{item.label}</span>
+              <span style={{ marginLeft: "8px", fontSize: "14px" }}>{item.label}</span>
             </Link>
           </li>
         ))}

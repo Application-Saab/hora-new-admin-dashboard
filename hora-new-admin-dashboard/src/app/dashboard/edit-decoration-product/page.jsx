@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import "./DecorationEditor.css";
 import { BASE_URL, EDIT_DECORATION_PRODUCT } from "../../../utils/apiconstant";
+import Image from 'next/image';
+import axios from "axios";
 
 const decCat = [
   { id: "2", subCategory: "Birthday" },
@@ -269,6 +271,7 @@ const DecorationEditor = () => {
                   <th>Price</th>
                   <th>Tags</th>
                   <th>Actions</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -277,10 +280,13 @@ const DecorationEditor = () => {
                     <td>{item.name}</td>
                     <td>
                       {item.featured_image ? (
-                        <img
-                          src={`https://horaservices.com/api/uploads/compressed_webp/${item.featured_image}`}
+                        <Image
+                          // src={`https://horaservices.com/api/uploads/compressed_webp/${item.featured_image}`}
+                          src={`https://horaservices.com/api/uploads/compressed_webp/${item?.featured_image.split('.')[0]}.webp`}
                           alt={item.name}
                           className="thumbnail"
+                          width={80}
+                          height={40}
                         />
                       ) : (
                         "No Image"
@@ -305,6 +311,28 @@ const DecorationEditor = () => {
                         Update
                       </button>
                     </td>
+                    <td className="actions-cell">
+  <button
+  className="action-button"
+    onClick={async () => {
+      const newStatus = item.status === 1 ? 0 : 1;
+
+      await axios.post('/api/update-status', {
+        id: item._id,
+        status: newStatus,
+      });
+
+      window.location.reload(); // reload the page
+    }}
+
+    style={{
+      backgroundColor: item.status === 1 ? 'green' : 'red',
+     
+    }}
+  >
+    {item.status === 1 ? 'Active' : 'Inactive'}
+  </button>
+</td>
                   </tr>
                 ))}
               </tbody>
