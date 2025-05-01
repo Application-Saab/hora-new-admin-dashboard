@@ -322,7 +322,7 @@ const DecorationEditor = () => {
         status: newStatus,
       });
 
-      window.location.reload(); // reload the page
+      window.location.reload(); // reload the page s
     }}
 
     style={{
