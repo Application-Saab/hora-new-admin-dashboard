@@ -39,8 +39,9 @@ const CheckSupplier = ({ SelectedOrder, setShowModal ,setIsSupplierAssigned}) =>
           userId: supplierData._id,
         }),
       });
-
+console.log(response, "responseee");
       const data = await response.json();
+      console.log(data, "dataaa");
 
       if (response.ok) {
         alert("Successfully assigned!");

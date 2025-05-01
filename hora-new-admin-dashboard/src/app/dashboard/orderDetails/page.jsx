@@ -35,7 +35,7 @@ const OrderList = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [vendorAmount, setVendorAmountInput] = useState("");
   const [orderId1, setOrderId] = useState("");
-  
+
   const fetchOrders = async (
     page,
     orderId = "",
@@ -185,6 +185,20 @@ const OrderList = () => {
     return orderTypes[orderTypeValue] || "Unknown Order Type";
   };
 
+  // popup active and inactive
+  const handleStatusUpdate = (orderId, currentStatus) => {
+    const newStatus = currentStatus === 1 ? 0 : 1;
+    const confirmationMessage =
+      newStatus === 1
+        ? "Are you sure you want to active this order?"
+        : "Are you sure you want to Inactive this order?";
+
+    // Show confirmation dialog
+    if (window.confirm(confirmationMessage)) {
+      updateOrderStatus(orderId, newStatus);
+    }
+  };
+
   const updateOrderStatus = async (orderId, status) => {
     try {
       const response = await fetch(
@@ -222,7 +236,10 @@ const OrderList = () => {
     setActionPopupOrderType(orderType);
     setPopupOpen(true); // Open the popup
   };
-  const openSupplierDeatilsPopup = async (orderId) => {
+
+  const [selectedSupplierOrder1, setSelectedSupplierOrder1] = useState(null);
+
+  const openSupplierDeatilsPopup = async (orderId, order) => {
     try {
       const response = await fetch(
         `https://horaservices.com:3000/api/admin/getUserDetails/${orderId}`
@@ -232,6 +249,7 @@ const OrderList = () => {
       }
       const data = await response.json();
       setSupplierDetails(data);
+      setSelectedSupplierOrder1(order); // Store the full order here
       setIsPopupOpen(true);
     } catch (error) {
       console.error("Error fetching user details:", error);
@@ -252,7 +270,6 @@ const OrderList = () => {
   // const CloseSupplierAssignPopup = () => {
   //   setIsModalOpen(false);
   // };
-
 
   const handleOpenVendorAmountPopup = (orderId) => {
     console.log(orderId, "orderId");
@@ -296,7 +313,7 @@ const OrderList = () => {
           )
         );
         handleCloseVendorAmountPopup();
-        setVendorAmountInput('')
+        setVendorAmountInput("");
       } else {
         alert("Failed to update vendor amount");
       }
@@ -494,16 +511,16 @@ const OrderList = () => {
                     <td>
                       {order?.order_date
                         ? new Date(
-                          order.order_date.split("T")[0]
-                        ).toLocaleDateString()
+                            order.order_date.split("T")[0]
+                          ).toLocaleDateString()
                         : "N/A"}
                     </td>
                     <td>
                       {order?.order_time
                         ? `${order.order_time}` // If `order_time` is available, show it
                         : order?.order_date
-                          ? `${order.order_date.split("T")[1].slice(0, 8)}`
-                          : "N/A"}
+                        ? `${order.order_date.split("T")[1].slice(0, 8)}`
+                        : "N/A"}
                     </td>
                     <td>{order.otp}</td>
                     <td>{order.order_taken_by || "N/A"}</td>
@@ -513,7 +530,7 @@ const OrderList = () => {
                       {order.toId ? (
                         <>
                           <button
-                            onClick={() => openSupplierDeatilsPopup(order.toId)}
+                            onClick={() => openSupplierDeatilsPopup(order.toId, order)}
                             className="assigningBtn assigned"
                           >
                             <FaEye />
@@ -554,8 +571,9 @@ const OrderList = () => {
 
                     <td>
                       <span
-                        className={`status ${getOrderStatus(order.order_status).className
-                          }`}
+                        className={`status ${
+                          getOrderStatus(order.order_status).className
+                        }`}
                       >
                         {getOrderStatus(order.order_status).status}
                       </span>
@@ -572,7 +590,20 @@ const OrderList = () => {
                         <div style={styles.btnGroup}></div>
                       </div>
                     </td>
+
                     <td>
+                      <button
+                        className={`status-button ${
+                          order.status === 0 ? "active" : "inactive"
+                        }`}
+                        onClick={() =>
+                          handleStatusUpdate(order._id, order.status)
+                        }
+                      >
+                        {order.status === 1 ? "Active" : "Inactive"}
+                      </button>
+                    </td>
+                    {/* <td>
                       <button
                         className={`status-button ${order.status === 0 ? "active" : "inactive"
                           }`}
@@ -585,9 +616,10 @@ const OrderList = () => {
                       >
                         {order.status === 1 ? "Active" : "Inactive"}
                       </button>
-                    </td>
+                    </td> */}
                     <td>
-                      <FaEye
+                      <button
+                        style={styles.amountViewDetailsBtn}
                         onClick={() => {
                           openActionPopup(
                             order.order_id,
@@ -595,7 +627,9 @@ const OrderList = () => {
                             order.type
                           );
                         }}
-                      />
+                      >
+                        View Details
+                      </button>
                     </td>
                     <td style={{ width: "100px", paddingLeft: "16px" }}>
                       {order.type === 2 ? (
@@ -616,11 +650,11 @@ const OrderList = () => {
                       ) : (
                         <button
                           onClick={() => handleOpenVendorAmountPopup(order._id)}
-                          style={styles.amountPopupBtn}>
+                          style={styles.amountPopupBtn}
+                        >
                           Set Vendor Amount
                         </button>
                       )}
-
                     </td>
                   </tr>
                 ))
@@ -650,9 +684,7 @@ const OrderList = () => {
             <input
               type="number"
               value={vendorAmount}
-              onChange={(e) =>
-                setVendorAmountInput(e.target.value)
-              }
+              onChange={(e) => setVendorAmountInput(e.target.value)}
               placeholder="Enter Amount"
               className="input-field"
             />
@@ -684,6 +716,12 @@ const OrderList = () => {
             <h3>Supplier Details</h3>
             <p>Name: {supplierDetails.data?.name || "NA"}</p>
             <p>Phone: {supplierDetails.data?.phone || "NA"}</p>
+            <button
+                            className="assigningBtn not-assigned"
+                            onClick={() => openSupplierAssignPopup(selectedSupplierOrder1)}
+                          >
+                            Not Assigned
+                          </button>
           </div>
         </div>
       )}
@@ -775,5 +813,22 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-  }
+  },
+  amountViewDetailsBtn: {
+    width: "85px",
+    height: "40px",
+    backgroundColor: "transparent",
+    backgroundImage: "linear-gradient(135deg, #00b4d8, #0077b6)",
+    border: "none",
+    borderRadius: "10px",
+    cursor: "pointer",
+    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    color: "white",
+    fontSize: "10px",
+    fontWeight: "bold",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 };
