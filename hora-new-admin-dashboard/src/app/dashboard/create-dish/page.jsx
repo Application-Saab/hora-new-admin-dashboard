@@ -1,4 +1,3 @@
-
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './DishManagementForm.module.css';
@@ -30,8 +29,8 @@ const DishManagementForm = () => {
 
   const [options, setOptions] = useState({
     vegNonOptions: [
-      { _id: 'veg', name: 'Veg' },
-      { _id: 'non-veg', name: 'Non-Veg' }
+      { _id: '1', name: 'Veg' },
+      { _id: '0', name: 'Non-Veg' }
     ],
     dishTypeOptions: [
       { _id: 'main-dish', name: 'Main Dish' },
@@ -45,8 +44,8 @@ const DishManagementForm = () => {
     cuisineTypeOptions: [],
     mealTypeOptions: [],
     preparationOptions: [
-      { _id: 'yes', name: 'Yes' },
-      { _id: 'no', name: 'No' }
+      { _id: 'true', name: 'true' },
+      { _id: 'false', name: 'false' }
     ],
     ingredientOptions: [],
     quantityUnitOptions: [
@@ -217,9 +216,10 @@ const DishManagementForm = () => {
         }
 
         const data = await response.json();
+        console.log(data, "dataaa");
         setFormData(prevData => ({
           ...prevData,
-          dishImage: data.data.imageUrl
+          dishImage: data.data
         }));
 
         if (errors.dishImage) {
@@ -321,7 +321,7 @@ const DishManagementForm = () => {
     const newErrors = {};
 
     if (!formData.dishName) newErrors.dishName = 'Dish name is required';
-    // if (!formData.dishImage) newErrors.dishImage = 'Dish image is required';
+    if (!formData.dishImage) newErrors.dishImage = 'Dish image is required';
     if (!formData.vegNon) newErrors.vegNon = 'Veg/Non selection is required';
     if (!formData.dishType) newErrors.dishType = 'Dish type is required';
     if (formData.cuisineType.length === 0) newErrors.cuisineType = 'At least one cuisine type is required';
@@ -338,39 +338,47 @@ const DishManagementForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const per_plate_qty = {
+      qty: formData.perPlateQuantity,
+      unit: formData.quantityUnit
+    };
+    
+
     if (validateForm()) {
       const requestData = {
-        dishName: formData.dishName,
-        dishImage: formData.dishImage,
-        vegNon: formData.vegNon,
-        dishType: formData.dishType,
-        category: formData.category,
-        cuisineType: formData.cuisineType,
-        mealType: formData.mealType,
-        dishRate: formData.dishRate,
-        preparation: formData.preparation,
-        perPlateQuantity: formData.perPlateQuantity,
-        quantityUnit: formData.quantityUnit,
-        cookingMinutes: formData.cookingMinutes,
-        preparationMinutes: formData.preparationMinutes,
-        peopleServed: formData.peopleServed,
-        generalAppliance: formData.generalAppliance,
-        specialAppliance: formData.specialAppliance,
-        gasRequired: formData.gasRequired === 'yes',
+        name: formData.dishName,
+        image: formData.dishImage,
+        is_dish: formData.vegNon,
+        dish_allow: true,
+        serving_dish: formData.servingDish,
+        cuisineId: formData.cuisineType,
+        mealId: formData.mealType,
+        dish_rate: formData.dishRate,
+        is_preparation: formData.preparation,
+        per_plate_qty: per_plate_qty,
+        cooking_min: formData.cookingMinutes,
+        preparation_min: formData.preparationMinutes,
+        special_appliance_id: formData.specialAppliance,
+        general_appliance_id: formData.generalAppliance,
+        is_gas: formData.gasRequired === 'yes',
         description: formData.description,
-        dishDescription: formData.dishDescription,
-        servingDish: formData.servingDish,
-        ingredients: selectedIngredients.map(ing => ({
-          ingredientId: ing.ingredientId,
-          quantity: ing.quantity,
+        preperationtext: formData.dishDescription,
+        noofpeopleServedByDish: formData.peopleServed,
+        ingredientUsed: selectedIngredients.map(ing => ({
+          _id: ing.ingredientId,
+          name: ing.name,
+          qty: ing.quantity,
           unit: ing.unit
-        }))
+        })),
+        categoryIds: formData.category,
+        catId: formData.category,
+        status: 1
       };
 
       console.log('Submitting data:', requestData);
 
       try {
-        const response = await fetch('https://horaservices.com:3000/api/your_create_dish_endpoint', {
+        const response = await fetch('https://horaservices.com:3000/api/dish/add', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -614,6 +622,7 @@ const DishManagementForm = () => {
         <div
           className={styles["dropdown-selected"]}
           onClick={() => toggleDropdown('ingredientUnit')}
+          // style={{width: '130%'}}
         >
           {ingredientUnit ?
             options.quantityUnitOptions.find(unit => unit._id === ingredientUnit)?.name :
@@ -771,7 +780,7 @@ const DishManagementForm = () => {
           <div className={styles["form-field"]}>
             <label>Per Plate Quantity</label>
             <input
-              type="text"
+              type="number"
               name="perPlateQuantity"
               value={formData.perPlateQuantity}
               onChange={handleInputChange}
