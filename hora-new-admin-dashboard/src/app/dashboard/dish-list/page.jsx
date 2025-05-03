@@ -221,6 +221,8 @@ import Image from "next/image";
 import DishPopup from './DishDetailsPopup';
 
 import { useRouter } from "next/navigation";
+import { useNavigate } from 'react-router-dom'; // if you're using React Router
+
 
 const DishTable = () => {
   const [dishes, setDishes] = useState([]);
@@ -237,6 +239,8 @@ const DishTable = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
    const router = useRouter();
+   
+const navigate = useNavigate();
 
   // Filter states
   const [searchName, setSearchName] = useState("");
@@ -289,11 +293,16 @@ const DishTable = () => {
   const handlePageChange = (newPage) => setPage(newPage);
   // const handleEdit = (id) => console.log("Edit:", id);
 
+
+  // const handleEdit = (dish) => {
+  //   console.log("Edit:", dish);
+  //   // localStorage.setItem('editDish', JSON.stringify(dish));
+  //   // router.push('/dashboard/create-dish');
+  // };
   const handleEdit = (dish) => {
-    localStorage.setItem('editDish', JSON.stringify(dish));
-    router.push('/dashboard/create-dish');
+    console.log("Edit:", dish);
+    navigate(`/edit-dish/${dish._id}`);
   };
-  
   
   const [popupDish, setPopupDish] = useState(null);
 
@@ -415,7 +424,7 @@ const DishTable = () => {
                     <button className="delete-btn" onClick={() => handleDetails(dish)}>View</button>
                   </td>
                   <td>
-                    <button className="edit-btn" onClick={() => handleEdit(dish)}>Edit</button>
+                    <button className="edit-btn" onClick={() => handleEdit(dish._id)}>Edit</button>
                   </td>
                 </tr>
               ))
