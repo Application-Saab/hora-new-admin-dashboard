@@ -183,3 +183,25 @@
   color: #e74c3c;
 }
 
+/* active and inactive button */
+.status-button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 20px;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.status-button.active {
+  background-color: #4caf50; /* green */
+}
+
+.status-button.inactive {
+  background-color: #f44336; /* red */
+}
+
+.status-button:hover {
+  opacity: 0.85;
+}
