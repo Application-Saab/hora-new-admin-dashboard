@@ -882,7 +882,7 @@ const OrderList = () => {
         fontWeight: 'bold'
       }}
     >
-      Total Amount
+    New Total Amount
     </label>
     <input
       id="totalAmountEdit"
@@ -912,7 +912,7 @@ const OrderList = () => {
         fontWeight: 'bold'
       }}
     >
-      Balance Amount
+    New  Balance Amount
     </label>
     <input
       id="balanceAmountEdit"
@@ -942,7 +942,7 @@ const OrderList = () => {
         fontWeight: 'bold'
       }}
     >
-      Advance Amount
+    New  Advance Amount
     </label>
     <input
       id="advanceAmountEdit"
