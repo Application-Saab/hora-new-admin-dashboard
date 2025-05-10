@@ -38,7 +38,7 @@ function AddFoodOrder() {
       setPeopleCount(10);
     }
   }, [selectedDeliveryOption]);
-  
+
   const handlePeopleChange = (e) => {
     const minNum = selectedDeliveryOption === "live-catering" ? 20 : 10;
 
@@ -129,6 +129,7 @@ function AddFoodOrder() {
         _id: dish._id,
       };
     });
+    console.log(updatedQuantities, "updatedQuantities");
 
     // Prepare the requestData object
     const newRequestData = updatedQuantities.map((item) => item.id);
@@ -359,8 +360,10 @@ function AddFoodOrder() {
     }
 
     return (
-      <div className="ordersummaryproduct">
-        <div className="ordersummary-sec1">
+      <div 
+      // className="ordersummaryproduct"
+      >
+        {/* <div className="ordersummary-sec1">
           <Image
             src={`https://horaservices.com/api/uploads/${item.image}`}
             alt={item.name}
@@ -387,10 +390,54 @@ function AddFoodOrder() {
               {parseFloat(quantity).toFixed(2) + " " + unit}
             </div>
           }
-        </div>
+        </div> */}
+       
+       <div className="order-row_tb">
+      {/* Column 1: Image */}
+      <div className="order-cell_tb image-cell_tb">
+        <Image
+          src={`https://horaservices.com/api/uploads/${item.image}`}
+          alt={item.name}
+          className="checkout-img_tb"
+          width={100}
+          height={100}
+        />
+      </div>
+
+      {/* Column 2: Name */}
+      <div className="order-cell_tb name-cell_tb">{item.name}</div>
+
+      {/* Column 3: Quantity */}
+      <div className="order-cell_tb quantity-cell_tb">
+        {parseFloat(quantity).toFixed(2)}
+      </div>
+
+      {/* Column 4: Unit */}
+      <div className="order-cell_tb unit-cell_tb">{unit.toUpperCase()}</div>
+    </div>
+
       </div>
     );
   };
+
+  const [userInputs, setUserInputs] = useState({});
+  const handleInputChange = (dishId, field, value) => {
+    setUserInputs((prev) => ({
+      ...prev,
+      [dishId]: {
+        ...prev[dishId],
+        [field]: value,
+      },
+    }));
+  };
+
+  const finalMealList = selectedMealList.map((dish) => ({
+    ...dish,
+    quantity: userInputs[dish._id]?.quantity ?? dish.quantity,
+    unit: userInputs[dish._id]?.unit ?? dish.unit,
+  }));
+
+  console.log("Final updated meal list:", finalMealList);
 
   return (
     <>
@@ -415,6 +462,7 @@ function AddFoodOrder() {
               </option>
               <option value="food-delivery">Food Delivery</option>
               <option value="live-catering">Live Catering</option>
+              <option value="food-customization">Food Customization</option>
             </select>
           </div>
           <div className="people-input-container" style={style.noOfPeople}>
@@ -478,7 +526,7 @@ function AddFoodOrder() {
             />
           </div>
         </div>
-        <div style={style.selectionMsg}>
+        {/* <div style={style.selectionMsg}>
           {selectedDeliveryOption === "" ? (
             <p>Please select a service to continue.</p>
           ) : selectedDeliveryOption === "food-delivery" ? (
@@ -490,7 +538,25 @@ function AddFoodOrder() {
               You have selected <strong>Live Catering</strong>.
             </p>
           )}
-        </div>
+        </div> */}
+
+<div style={style.selectionMsg}>
+  {selectedDeliveryOption === "" ? (
+    <p>Please select a service to continue.</p>
+  ) : selectedDeliveryOption === "food-delivery" ? (
+    <p>
+      You have selected <strong>Food Delivery</strong>.
+    </p>
+  ) : selectedDeliveryOption === "live-catering" ? (
+    <p>
+      You have selected <strong>Live Catering</strong>.
+    </p>
+  ) : selectedDeliveryOption === "food-customization" ? (
+    <p>
+      You have selected <strong>Food Customization</strong>.
+    </p>
+  ) : null}
+</div>
 
         <div className="search-bar-container" style={style.searchBarDiv}>
           <input
@@ -569,6 +635,8 @@ function AddFoodOrder() {
             </>
           )}
         </div>
+
+{/* 
         {selectedMealList.length > 0 && (
           <div style={style.dishSelectedContainer}>
             <div style={style.header}>
@@ -580,6 +648,104 @@ function AddFoodOrder() {
                 <RenderDishQuantity key={index} item={item} />
               ))}
             </div>
+          </div>
+        )} */}
+
+{selectedDeliveryOption !== "food-customization" && selectedMealList.length > 0 && (
+  // <div style={style.dishSelectedContainer}>
+  //   <div style={style.header}>
+  //     <p style={style.headerText}>Dishes selected</p>
+  //   </div>
+
+  //   <div style={style.selectedItemsContainer}>
+  //     {selectedMealList.map((item, index) => (
+  //       <RenderDishQuantity key={index} item={item} />
+  //     ))}
+  //   </div>
+  // </div>
+
+
+<div className="order-summary-table_tb">
+  <div className="order-row_tb header_tb">
+    <div className="order-cell_tb image-cell_tb">Image</div>
+    <div className="order-cell_tb name-cell_tb">Name</div>
+    <div className="order-cell_tb quantity-cell_tb">Quantity</div>
+    <div className="order-cell_tb unit-cell_tb">Unit</div>
+  </div>
+
+  {selectedMealList.map((item, index) => (
+    <RenderDishQuantity key={index} item={item} />
+  ))}
+</div>
+)}
+
+
+        {selectedDeliveryOption === "food-customization" && (
+          <div style={{ overflowX: "auto" }}>
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                fontSize: "14px",
+              }}
+            >
+              <thead>
+                <tr style={{ backgroundColor: "#f2f2f2" }}>
+                  <th style={style.cellStyle}>Image</th>
+                  <th style={style.cellStyle}>Name</th>
+                  <th style={style.cellStyle}>Quantity</th>
+                  <th style={style.cellStyle}>Unit</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedMealList.map((dish) => (
+                  <tr key={dish._id} style={{ borderBottom: "1px solid #ddd" }}>
+                    <td style={style.cellStyle}>
+                      <Image
+                        // src="attachment_dish67.png"
+
+                        src={`https://horaservices.com/api/uploads/${dish.image}`}
+                        alt={dish.name}
+                        style={{
+                          width: "40px",
+                          height: "40px",
+                          objectFit: "cover",
+                          borderRadius: "4px",
+                        }}
+                        width={10}
+                        height={10}
+                      />
+                    </td>
+                    <td style={style.cellStyle}>{dish.name}</td>
+                    <td style={style.cellStyle}>
+                      <input
+                        type="number"
+                        value={userInputs[dish._id]?.quantity ?? dish.quantity}
+                        onChange={(e) =>
+                          handleInputChange(
+                            dish._id,
+                            "quantity",
+                            Number(e.target.value)
+                          )
+                        }
+                        style={style.inputStyle}
+                      />
+                    </td>
+                    <td style={style.cellStyle}>
+                      <input
+                        type="text"
+                        value={userInputs[dish._id]?.unit ?? dish.unit}
+                        onChange={(e) =>
+                          handleInputChange(dish._id, "unit", e.target.value)
+                        }
+                        style={style.inputStyle}
+                        readOnly
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
 
@@ -656,6 +822,7 @@ function AddFoodOrder() {
             </div>
           </div>
           <div style={{ paddingTop: "5px" }}>
+          {selectedDeliveryOption !== "food-customization" && (
             <div
               style={{
                 display: "flex",
@@ -682,18 +849,17 @@ function AddFoodOrder() {
                   lineHeight: "20px",
                 }}
               >
-                ₹{" "}
+                {" "}
                 {/* {totalPrice - discountedPrice < 0
                   ? discountedPrice
                   : (deliveryCharges + totalPrice)} */}
-                  ₹ {
-  (Number(totalPrice || 0) - Number(discountedPrice || 0) < 0
-    ? Number(discountedPrice || 0)
-    : Number(totalPrice || 0)) + 400
-}
-
+                ₹{" "}
+                {(Number(totalPrice || 0) - Number(discountedPrice || 0) < 0
+                  ? Number(discountedPrice || 0)
+                  : Number(totalPrice || 0)) + 400}
               </p>
             </div>
+          )}
             {/* <img style={{ width: 290, height: 1, marginTop: 5, marginBottom: 5 }} src="../../assets/Rectangleline.png" alt="line" /> */}
             {totalPrice - discountedPrice > 0 && (
               <div>
@@ -740,7 +906,7 @@ function AddFoodOrder() {
                 {/* <img style={{ width: 290, height: 1, marginTop: 5, marginBottom: 5 }} src="../../assets/Rectangleline.png" alt="line" /> */}
               </div>
             )}
-            {selectedDeliveryOption === "food-delivery" && (
+            {(selectedDeliveryOption === "food-delivery" || selectedDeliveryOption === "food-customization") && (
               <div>
                 <div
                   style={{
@@ -821,6 +987,9 @@ function AddFoodOrder() {
                   </div>
                 </div>
                 {/* <img style={{ width: 290, height: 1, marginTop: 10, marginBottom: 5 }} src="../../assets/Rectangleline.png" alt="line" /> */}
+                {selectedDeliveryOption !== "food-customization" && (
+                  
+                <div>
                 <div
                   style={{
                     display: "flex",
@@ -892,14 +1061,31 @@ function AddFoodOrder() {
                                                             </>
                                                         ) :
                                                          ( */}
-                                                          <p style={{ color: "#008631", fontWeight: '600', marginRight: 5 }}>FREE</p>
-                      <p style={{textDecoration: "line-through", color: "#9252AA", fontWeight: "600" }}>
+                      <p
+                        style={{
+                          color: "#008631",
+                          fontWeight: "600",
+                          marginRight: 5,
+                        }}
+                      >
+                        FREE
+                      </p>
+                      <p
+                        style={{
+                          textDecoration: "line-through",
+                          color: "#9252AA",
+                          fontWeight: "600",
+                        }}
+                      >
                         ₹ {deliveryCharges}
                       </p>
                       {/* )} */}
                     </div>
                   </div>
                 </div>
+              </div>
+                              )}
+
               </div>
             )}
             {selectedDeliveryOption === "live-catering" && (
@@ -983,6 +1169,8 @@ function AddFoodOrder() {
               </div>
             )}
             {/* Calculation for final total amount */}
+            {selectedDeliveryOption !== "food-customization" && (
+              <div>
             <div
               style={{
                 display: "flex",
@@ -1043,12 +1231,15 @@ function AddFoodOrder() {
                 ₹ {calculateAdvancePayment()}
               </p>
             </div>
+            
+            </div>
+  )}
           </div>
         </div>
 
         <CreateFoodOrderForm
           itemDataId={itemDataId}
-          selectedMealList={selectedMealList}
+          selectedMealList={finalMealList}
           deliveryCharges={deliveryCharges}
           totalPrice={totalPrice}
           discountedPrice={discountedPrice}
@@ -1186,6 +1377,16 @@ const style = {
   priceBreakdown: {
     border: "1px solid black",
     padding: "10px",
+  },
+  cellStyle: {
+    padding: "8px",
+    textAlign: "left",
+  },
+
+  inputStyle: {
+    width: "60px",
+    padding: "4px",
+    fontSize: "13px",
   },
 };
 

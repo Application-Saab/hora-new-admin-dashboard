@@ -1,37 +1,41 @@
+"use client";
 import { useState } from "react";
 import axios from "axios";
 import getOrderType from "../../../utils/getOrderType";
 import { ADMIN_ORDER_LIST, BASE_URL } from "../../../utils/apiconstant";
 
-const VendorCityTable = () => {
+const CityOrdersSummary = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [showTable, setShowTable] = useState(false);
-
   const [selectedKey, setSelectedKey] = useState("");
+
+  // Define the four cities we want to track
+  const targetCities = ["Delhi", "Mumbai", "Bangalore", "Hyderabad"];
 
   const handleDropdownChange = (e) => {
     const key = parseInt(e.target.value);
-    console.log(key, "key");
     setSelectedKey(key);
   };
 
   const fetchFilteredOrders = async () => {
     setLoading(true);
-    console.log(selectedKey, "selectedkey");
+    
     if (!selectedKey) {
       alert("Please select an order type first.");
+      setLoading(false);
       return;
     }
+    
     try {
       const { data } = await axios.post(BASE_URL + ADMIN_ORDER_LIST, {
         page: 1,
         per_page: 5000,
         status: 1,
         type: selectedKey,
-        order_locality: "",
+        order_locality: "", // We'll filter the cities in our code
         start_date: startDate || null,
         end_date: endDate || null,
       });
@@ -44,43 +48,51 @@ const VendorCityTable = () => {
     setLoading(false);
   };
 
-  const ratingRanges = ["0-6", "6-8", "9-10", "No Rating"];
-  const cities = ["Hyderabad", "Delhi", "Mumbai", "Bangalore"];
-
-  // Calculate city ratings based on orders
-  const getCityRatings = () => {
-    const cityRatings = {
-      Hyderabad: { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0 },
-      Delhi: { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0 },
-      Mumbai: { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0 },
-      Bangalore: { "0-6": 0, "6-8": 0, "9-10": 0, "No Rating": 0 },
-    };
+  // Calculate city orders and totals
+  const getCityOrdersSummary = () => {
+    // Initialize summary for our target cities
+    const citySummary = {};
+    targetCities.forEach(city => {
+      citySummary[city] = {
+        orderCount: 0,
+        totalAmount: 0
+      };
+    });
+    
+    let totalOrders = 0;
+    let totalAmount = 0;
 
     orders.forEach((order) => {
-      let city = order?.order_locality?.trim() || "Unknown City";
+      // Only process if order status is 1
+      if (order.status !== 1) return;
+      
+      // Normalize city name
+      let city = order?.order_locality?.trim() || "";
       if (city.toLowerCase() === "hyderbad") city = "Hyderabad";
-      if (!cities.includes(city)) return; // Skip cities not in our list
-
-      const ratingArray = order?.userReviewRatingArray || [];
-      if (ratingArray.length === 0) {
-        cityRatings[city]["No Rating"] += 1;
-      } else {
-        const rating = ratingArray[0];
-        if (rating === "0-6") cityRatings[city]["0-6"] += 1;
-        else if (rating === "6-8") cityRatings[city]["6-8"] += 1;
-        else if (rating === "9-10") cityRatings[city]["9-10"] += 1;
-      }
+      
+      // Only process if it's one of our target cities
+      if (!targetCities.includes(city)) return;
+      
+      citySummary[city].orderCount += 1;
+      
+      // Handle vendor_amount properly, converting empty strings to 0
+      const vendorAmount = order?.vendor_amount ? parseFloat(order.vendor_amount) : 0;
+      citySummary[city].totalAmount += vendorAmount;
+      
+      // Add to grand totals
+      totalOrders += 1;
+      totalAmount += vendorAmount;
     });
 
-    return cityRatings;
+    return { citySummary, totalOrders, totalAmount };
   };
 
-  const cityRatings = getCityRatings();
+  const { citySummary, totalOrders, totalAmount } = getCityOrdersSummary();
 
   return (
     <div
       style={{
-        maxWidth: "500px",
+        maxWidth: "700px",
         margin: "40px auto",
         textAlign: "center",
         background: "#fff",
@@ -99,7 +111,7 @@ const VendorCityTable = () => {
           textShadow: "2px 2px 8px rgba(0,0,0,0.2)",
         }}
       >
-        Cities By Ratings
+        Status Orders By City
       </h2>
       <div className="flex space-x-4">
         <div className="w-full">
@@ -139,8 +151,8 @@ const VendorCityTable = () => {
           padding: "16px",
           borderRadius: "8px",
           maxWidth: "300px",
-          marginLeft: "88px",
-          marginBottom: "10px",
+          margin: "0 auto",
+          marginBottom: "20px",
         }}
       >
         <label style={{ display: "block", marginBottom: "8px" }}>
@@ -173,17 +185,21 @@ const VendorCityTable = () => {
       <button
         onClick={fetchFilteredOrders}
         style={{
-          padding: "8px 16px",
+          padding: "12px 24px",
           background:
             "linear-gradient(90deg, rgba(221, 94, 137, 0.8), #97538c)",
           color: "#fff",
           border: "none",
           borderRadius: "5px",
           cursor: "pointer",
+          marginBottom: "20px",
+          fontWeight: "bold",
+          fontSize: "16px",
         }}
       >
         Submit
       </button>
+      
       {loading ? (
         <p style={{ textAlign: "center", fontSize: "18px", color: "#666" }}>
           Loading orders...
@@ -199,6 +215,7 @@ const VendorCityTable = () => {
               boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
               backdropFilter: "blur(10px)",
               background: "rgba(255, 255, 255, 0.7)",
+              marginBottom: "20px",
             }}
           >
             <thead>
@@ -210,62 +227,105 @@ const VendorCityTable = () => {
                 }}
               >
                 <th style={{ padding: "12px", fontSize: "18px" }}>City</th>
-                {ratingRanges.map((range) => (
-                  <th
-                    key={range}
-                    style={{
-                      padding: "12px",
-                      fontSize: "18px",
-                      textAlign: "center",
-                    }}
-                  >
-                    {range}
-                  </th>
-                ))}
+                <th style={{ padding: "12px", fontSize: "18px", textAlign: "center" }}>
+                  Total Orders
+                </th>
+                <th style={{ padding: "12px", fontSize: "18px", textAlign: "center" }}>
+                  Vendor Amount
+                </th>
               </tr>
             </thead>
             <tbody>
-              {Object.entries(cityRatings).map(([city, ratings]) => (
-                <tr
-                  key={city}
-                  style={{
-                    backgroundColor: "#fff",
-                    transition: "background 0.3s ease-in-out",
-                    borderBottom: "1px solid #ddd",
-                  }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.backgroundColor = "#f3f8ff")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.backgroundColor = "#fff")
-                  }
-                >
-                  <td
-                    style={{ padding: "12px", fontSize: "18px", color: "#444" }}
+              {/* Show only our target cities in a consistent order */}
+              {targetCities.map((city) => {
+                const data = citySummary[city] || { orderCount: 0, totalAmount: 0 };
+                return (
+                  <tr
+                    key={city}
+                    style={{
+                      backgroundColor: "#fff",
+                      transition: "background 0.3s ease-in-out",
+                      borderBottom: "1px solid #ddd",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.backgroundColor = "#f3f8ff")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.backgroundColor = "#fff")
+                    }
                   >
-                    {city}
-                  </td>
-                  {ratingRanges.map((range) => (
                     <td
-                      key={range}
+                      style={{ padding: "12px", fontSize: "16px", color: "#444", fontWeight: "bold" }}
+                    >
+                      {city}
+                    </td>
+                    <td
                       style={{
                         padding: "12px",
-                        fontSize: "18px",
+                        fontSize: "16px",
                         textAlign: "center",
                         color: "#222",
                       }}
                     >
-                      {ratings[range]}
+                      {data.orderCount}
                     </td>
-                  ))}
-                </tr>
-              ))}
+                    <td
+                      style={{
+                        padding: "12px",
+                        fontSize: "16px",
+                        textAlign: "center",
+                        color: "#222",
+                      }}
+                    >
+                      ₹{data.totalAmount.toFixed(2)}
+                    </td>
+                  </tr>
+                );
+              })}
+              <tr
+                style={{
+                  backgroundColor: "#f8f4ff",
+                  borderTop: "2px solid #97538c",
+                  fontWeight: "bold",
+                }}
+              >
+                <td
+                  style={{
+                    padding: "15px",
+                    fontSize: "18px",
+                    color: "#333",
+                  }}
+                >
+                  Grand Total
+                </td>
+                <td
+                  style={{
+                    padding: "15px",
+                    fontSize: "18px",
+                    textAlign: "center",
+                    color: "#333",
+                  }}
+                >
+                  {totalOrders}
+                </td>
+                <td
+                  style={{
+                    padding: "15px",
+                    fontSize: "18px",
+                    textAlign: "center",
+                    color: "#333",
+                  }}
+                >
+                  ₹{totalAmount.toFixed(2)}
+                </td>
+              </tr>
             </tbody>
           </table>
+          
         </div>
       ) : null}
     </div>
   );
 };
 
-export default VendorCityTable;
+export default CityOrdersSummary;
