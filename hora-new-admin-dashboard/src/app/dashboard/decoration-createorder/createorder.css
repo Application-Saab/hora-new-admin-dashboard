@@ -418,3 +418,50 @@ button[disabled] {
   padding: 4px 0;
   color: #444;
 }
+
+
+/* new  */
+.order-summary-table_tb {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.order-row_tb {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #ccc;
+  padding: 10px 0;
+}
+
+.header_tb {
+  font-weight: bold;
+  color: #9252aa;
+  text-transform: uppercase;
+  border-bottom: 2px solid #9252aa;
+}
+
+.order-cell_tb {
+  flex: 1;
+  padding: 0 10px;
+  text-align: left;
+  font-weight: bold;
+  color: #9252aa;
+}
+
+.image-cell_tb {
+  flex: 1;
+}
+
+.name-cell_tb,
+.quantity-cell_tb,
+.unit-cell_tb {
+  flex: 1;
+}
+
+.checkout-img_tb {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+}

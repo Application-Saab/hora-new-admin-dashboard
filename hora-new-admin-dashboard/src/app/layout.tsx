@@ -85,6 +85,12 @@ const menuItems = [
     icon: <FaPlusCircle />,
     url: "/dashboard/create-dish",
   },
+
+  // {
+  //   label: "Edit Dish",
+  //   icon: <FaPlusCircle />,
+  //   url: "/dashboard/edit-dish/[id]",
+  // },
 ];
 
 const Sidebar = ({ onLogout }: { onLogout: () => void }) => {

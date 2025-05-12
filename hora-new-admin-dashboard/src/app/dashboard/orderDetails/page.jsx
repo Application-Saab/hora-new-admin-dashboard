@@ -35,7 +35,7 @@ const OrderList = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [vendorAmount, setVendorAmountInput] = useState("");
   const [orderId1, setOrderId] = useState("");
-  
+
   const fetchOrders = async (
     page,
     orderId = "",
@@ -185,20 +185,42 @@ const OrderList = () => {
     return orderTypes[orderTypeValue] || "Unknown Order Type";
   };
 
-   // popup active and inactive
-   const handleStatusUpdate = (orderId, currentStatus) => {
-    const newStatus = currentStatus === 1 ? 0 : 1;
-    const confirmationMessage =
-      newStatus === 1
-        ? "Are you sure you want to active this order?"
-        : "Are you sure you want to Inactive this order?";
+  // popup active and inactive
 
-    // Show confirmation dialog
-    if (window.confirm(confirmationMessage)) {
-      updateOrderStatus(orderId, newStatus);
-    }
+  // const handleStatusUpdate = (orderId, currentStatus) => {
+  //   const newStatus = currentStatus === 1 ? 0 : 1;
+  //   const confirmationMessage =
+  //     newStatus === 1
+  //       ? "Are you sure you want to active this order?"
+  //       : "Are you sure you want to Inactive this order?";
+
+  //   // Show confirmation dialog
+  //   if (window.confirm(confirmationMessage)) {
+  //     updateOrderStatus(orderId, newStatus);
+  //   }
+  // };
+
+  const [showPopup2, setShowPopup2] = useState(false);
+  const [popupData, setPopupData] = useState({
+    orderId: null,
+    newStatus: null,
+  });
+
+  const handleStatusUpdate = (orderId, currentStatus) => {
+    const newStatus = currentStatus === 1 ? 0 : 1;
+    setPopupData({ orderId, newStatus });
+    setShowPopup2(true);
   };
-  
+
+  const confirmUpdate = () => {
+    updateOrderStatus(popupData.orderId, popupData.newStatus);
+    setShowPopup2(false);
+  };
+
+  const cancelUpdate = () => {
+    setShowPopup2(false);
+  };
+
   const updateOrderStatus = async (orderId, status) => {
     try {
       const response = await fetch(
@@ -236,6 +258,7 @@ const OrderList = () => {
     setActionPopupOrderType(orderType);
     setPopupOpen(true); // Open the popup
   };
+
   const openSupplierDeatilsPopup = async (orderId) => {
     try {
       const response = await fetch(
@@ -266,7 +289,6 @@ const OrderList = () => {
   // const CloseSupplierAssignPopup = () => {
   //   setIsModalOpen(false);
   // };
-
 
   const handleOpenVendorAmountPopup = (orderId) => {
     console.log(orderId, "orderId");
@@ -310,7 +332,7 @@ const OrderList = () => {
           )
         );
         handleCloseVendorAmountPopup();
-        setVendorAmountInput('')
+        setVendorAmountInput("");
       } else {
         alert("Failed to update vendor amount");
       }
@@ -341,36 +363,80 @@ const OrderList = () => {
   };
 
   const [selectedOrderId, setSelectedOrderId] = useState(null);
-  
+
   const [decorationComment, setDecorationComment] = useState("");
 
-  const handleOpenEditOrderPopup = (orderId,decoration_comments) => {
-    console.log(orderId,"ordereditorder");
+  const [addOnList, setAddOnList] = useState([{ name: "", price: "" }]);
+
+  const [totalAmountEdit, setTotalAmountEdit] = useState("");
+  const [balanceAmountEdit, setBalanceAmountEdit] = useState("");
+  const [advanceAmountEdit, setAdvanceAmountEdit] = useState("");
+
+  const handleOpenEditOrderPopup = (
+    orderId,
+    decoration_comments,
+    add_ons = [],
+    totalAmount,
+    balanceAmount,
+    advanceAmount
+  ) => {
+    console.log(orderId, "ordereditorder");
     console.log(decoration_comments, "decoration_comments");
     setSelectedOrderId(orderId);
-    setDecorationComment(decoration_comments || ""); 
+    setDecorationComment(decoration_comments || "");
+    setAddOnList(add_ons.length ? add_ons : [{ name: "", price: "" }]);
+    setTotalAmountEdit(totalAmount || "");
+    setBalanceAmountEdit(balanceAmount || "");
+    setAdvanceAmountEdit(advanceAmount || "");
     setIsPopupOpen(true);
+  };
+
+  const handleAddOnChange = (index, field, value) => {
+    const updatedAddOns = [...addOnList];
+    updatedAddOns[index][field] = value;
+    setAddOnList(updatedAddOns);
+  };
+
+  const handleAddAddOn = () => {
+    setAddOnList([...addOnList, { name: "", price: "" }]);
+  };
+
+  const handleRemoveAddOn = (index) => {
+    const updatedAddOns = [...addOnList];
+    updatedAddOns.splice(index, 1);
+    setAddOnList(
+      updatedAddOns.length ? updatedAddOns : [{ name: "", price: "" }]
+    );
   };
 
   const handleSave = async () => {
     const requestData = {
       _id: selectedOrderId,
       decoration_comments: decorationComment,
+      add_on: addOnList, //add on list into array format
+      totalAmountEdit: totalAmountEdit, //totalAmountEdit is when user click edit order popup
+      balanceAmountEdit: balanceAmountEdit, //balanceAmountEdit is when user click edit order popup
+      advanceAmountEdit: advanceAmountEdit, //advanceAmountEdit is when user click edit order popup
     };
 
+    console.log(requestData, "requestdata");
+
     try {
-      const response = await fetch("https://horaservices.com:3000/api/order/edit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestData),
-      });
+      const response = await fetch(
+        "https://horaservices.com:3000/api/order/edit",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestData),
+        }
+      );
 
       const result = await response.json();
       if (response.ok) {
         console.log("Success:", result);
-        alert("Order updated successfully!"); 
+        alert("Order updated successfully!");
       } else {
         console.error("Error:", result);
         alert("Failed to update order.");
@@ -381,6 +447,41 @@ const OrderList = () => {
     }
 
     setIsPopupOpen(false); // Close the popup after saving
+  };
+
+  const [showModal, setShowModal] = useState(false);
+  const [selectedOrderId2, setSelectedOrderId2] = useState(null);
+
+  const handleOpenModal = (id) => {
+    console.log(id, "orderId");
+    setSelectedOrderId2(id);
+    setShowModal(true);
+  };
+
+  const handleCancelOrder = async () => {
+    if (selectedOrderId2) {
+      try {
+        const response = await axios.post(
+          "https://horaservices.com:3000/api/order/cancelOrder",
+          { _id: selectedOrderId2 }, // Body
+          {
+            headers: {
+              Authorisation: "jflkdsjfsdfjdsklfj", // Pass token in headers
+            },
+          }
+        );
+
+        setShowModal(false);
+        console.log("Cancel response:", response.data);
+        fetchOrders(); // Refresh the list
+      } catch (error) {
+        console.error("Cancel order error:", error);
+      }
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
   };
 
   return (
@@ -552,16 +653,16 @@ const OrderList = () => {
                     <td>
                       {order?.order_date
                         ? new Date(
-                          order.order_date.split("T")[0]
-                        ).toLocaleDateString()
+                            order.order_date.split("T")[0]
+                          ).toLocaleDateString()
                         : "N/A"}
                     </td>
                     <td>
                       {order?.order_time
                         ? `${order.order_time}` // If `order_time` is available, show it
                         : order?.order_date
-                          ? `${order.order_date.split("T")[1].slice(0, 8)}`
-                          : "N/A"}
+                        ? `${order.order_date.split("T")[1].slice(0, 8)}`
+                        : "N/A"}
                     </td>
                     <td>{order.otp}</td>
                     <td>{order.order_taken_by || "N/A"}</td>
@@ -580,12 +681,14 @@ const OrderList = () => {
                         </>
                       ) : (
                         <>
+                        {order.order_status !== 6 && (
                           <button
                             className="assigningBtn not-assigned"
                             onClick={() => openSupplierAssignPopup(order)}
                           >
                             Not Assigned
                           </button>
+                        )}
                           {/* supplier assign popup */}
                           {isModalOpen && selectedSupplierOrder && (
                             <>
@@ -612,13 +715,20 @@ const OrderList = () => {
 
                     <td>
                       <span
-                        className={`status ${getOrderStatus(order.order_status).className
-                          }`}
+                        className={`status ${
+                          getOrderStatus(order.order_status).className
+                        }`}
                       >
                         {getOrderStatus(order.order_status).status}
                       </span>
+                      <span
+                        style={{ cursor: "pointer", marginLeft: "8px" }}
+                        onClick={() => handleOpenModal(order._id)}
+                        title="Edit"
+                      >
+                        ✏️
+                      </span>
                     </td>
-
                     <td>{new Date(order.createdAt).toLocaleString()}</td>
                     <td>
                       <div style={styles.container}>
@@ -675,34 +785,41 @@ const OrderList = () => {
                       ) : (
                         <button
                           onClick={() => handleOpenVendorAmountPopup(order._id)}
-                          style={styles.amountPopupBtn}>
+                          style={styles.amountPopupBtn}
+                        >
                           Set Vendor Amount
                         </button>
                       )}
-
                     </td>
                     <td>
-  {(() => {
-    const now = new Date();
-    const orderDate = new Date(order.order_date);
+                      {(() => {
+                        const now = new Date();
+                        const orderDate = new Date(order.order_date);
 
-    // Strip the time to compare only the date
-    now.setHours(0, 0, 0, 0);
-    orderDate.setHours(0, 0, 0, 0);
+                        // Strip the time to compare only the date
+                        now.setHours(0, 0, 0, 0);
+                        orderDate.setHours(0, 0, 0, 0);
 
-    // Show button only if order date is in the future
-    return orderDate > now;
-  })() && (
-    <button
-      style={styles.editOrderPopupBtn}
-      onClick={() =>
-        handleOpenEditOrderPopup(order._id, order.decoration_comments)
-      }
-    >
-      Edit Order
-    </button>
-  )}
-</td>
+                        // Show button only if order date is in the future
+                        return orderDate > now;
+                      })() && (
+                        <button
+                          style={styles.editOrderPopupBtn}
+                          onClick={() =>
+                            handleOpenEditOrderPopup(
+                              order._id,
+                              order.decoration_comments,
+                              order.add_on,
+                              order.total_amount,
+                              order.balance_amount,
+                              order.advance_amount
+                            )
+                          }
+                        >
+                          Edit Order
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))
               ) : (
@@ -712,59 +829,253 @@ const OrderList = () => {
               )}
             </tbody>
           </table>
+
+          {/* status active and inactive popup */}
+          {showPopup2 && (
+            <div className="popup-overlay">
+              <div className="popup">
+                <h3>Changing the Status</h3>
+                <p>
+                  {popupData.newStatus === 1
+                    ? "Are you sure you want to active this order?"
+                    : "Are you sure you want to Inactive this order?"}
+                </p>
+                <div className="popup-buttons">
+                  <button className="submit-btn" onClick={confirmUpdate}>
+                    Yes
+                  </button>
+                  <button className="cancel-btn" onClick={cancelUpdate}>
+                    No
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {isPopupOpen && (
-        <div className="popup-overlay">
-      <div className="popup">
-        <h2>Edit Order</h2>
-        <p>Order ID: {selectedOrderId}</p>
-        <h3>Decoration Comments</h3>
-        <input
-            type="text"
-            value={decorationComment}
-            onChange={(e) => setDecorationComment(e.target.value)}
-            placeholder="Enter decoration comment"
-            className="input-field"
-          />
-         <button 
-  onClick={handleSave} 
-  style={{
-    backgroundColor: '#4CAF50',
-    color: 'white',
-    border: 'none',
-    padding: '10px 20px',
-    textAlign: 'center',
-    textDecoration: 'none',
-    display: 'inline-block',
-    fontSize: '16px',
-    marginRight: '10px',
-    borderRadius: '4px',
-    cursor: 'pointer'
-  }}
+            <div className="popup-overlay">
+              <div className="popup">
+                <h2>Edit Order</h2>
+                <label htmlFor="totalAmountEdit" style={{ display: 'block', fontWeight: 'bold' }}>
+  Decoration Comments
+</label>
+                <textarea
+                  type="text"
+                  value={decorationComment}
+                  onChange={(e) => setDecorationComment(e.target.value)}
+                  placeholder="Enter decoration comment"
+                  className="input-field"
+                  rows={4}
+                />
+               <div
+ 
 >
-  Save
-</button>
+  {/* Total Amount */}
+  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+    <label
+      htmlFor="totalAmountEdit"
+      style={{
+        minWidth: '120px',
+        fontWeight: '500',
+        color: '#333',
+        marginRight: '10px',
+        fontWeight: 'bold'
+      }}
+    >
+    New Total Amount
+    </label>
+    <input
+      id="totalAmountEdit"
+      type="text"
+      value={totalAmountEdit}
+      onChange={(e) => setTotalAmountEdit(e.target.value)}
+      placeholder="Enter total amount"
+      style={{
+        flex: 1,
+        padding: '10px',
+        borderRadius: '6px',
+        border: '1px solid #ccc',
+        fontSize: '14px'
+      }}
+    />
+  </div>
 
-<button 
-  onClick={() => setIsPopupOpen(false)} 
-  style={{
-    backgroundColor: '#f44336',
-    color: 'white',
-    border: 'none',
-    padding: '10px 20px',
-    textAlign: 'center',
-    textDecoration: 'none',
-    display: 'inline-block',
-    fontSize: '16px',
-    borderRadius: '4px',
-    cursor: 'pointer'
-  }}
->
-  Close
-</button>
+  {/* Balance Amount */}
+  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+    <label
+      htmlFor="balanceAmountEdit"
+      style={{
+        minWidth: '120px',
+        fontWeight: '500',
+        color: '#333',
+        marginRight: '10px',
+        fontWeight: 'bold'
+      }}
+    >
+    New  Balance Amount
+    </label>
+    <input
+      id="balanceAmountEdit"
+      type="text"
+      value={balanceAmountEdit}
+      onChange={(e) => setBalanceAmountEdit(e.target.value)}
+      placeholder="Enter balance amount"
+      style={{
+        flex: 1,
+        padding: '10px',
+        borderRadius: '6px',
+        border: '1px solid #ccc',
+        fontSize: '14px',
+      }}
+    />
+  </div>
 
-      </div>
-      </div>
-    )}
+  {/* Advance Amount */}
+  <div style={{ display: 'flex', alignItems: 'center' }}>
+    <label
+      htmlFor="advanceAmountEdit"
+      style={{
+        minWidth: '120px',
+        fontWeight: '500',
+        color: '#333',
+        marginRight: '10px',
+        fontWeight: 'bold'
+      }}
+    >
+    New  Advance Amount
+    </label>
+    <input
+      id="advanceAmountEdit"
+      type="text"
+      value={advanceAmountEdit}
+      onChange={(e) => setAdvanceAmountEdit(e.target.value)}
+      placeholder="Enter advance amount"
+      style={{
+        flex: 1,
+        padding: '10px',
+        borderRadius: '6px',
+        border: '1px solid #ccc',
+        fontSize: '14px'
+      }}
+    />
+  </div>
+</div>
+
+                <h3>Add-ons</h3>
+                <div>
+                  {addOnList.map((addOn, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        marginBottom: "10px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                      }}
+                    >
+                      <input
+                        type="text"
+                        placeholder="Add-on Name"
+                        value={addOn.name}
+                        onChange={(e) =>
+                          handleAddOnChange(index, "name", e.target.value)
+                        }
+                        style={{
+                          padding: "8px",
+                          fontSize: "14px",
+                          border: "1px solid #ccc",
+                          borderRadius: "4px",
+                          width: "150px",
+                        }}
+                      />
+                      <input
+                        type="number"
+                        placeholder="Price"
+                        value={addOn.price}
+                        onChange={(e) =>
+                          handleAddOnChange(index, "price", e.target.value)
+                        }
+                        style={{
+                          padding: "8px",
+                          fontSize: "14px",
+                          border: "1px solid #ccc",
+                          borderRadius: "4px",
+                          width: "100px",
+                        }}
+                      />
+                      <button
+                        onClick={() => handleRemoveAddOn(index)}
+                        style={{
+                          padding: "8px 12px",
+                          backgroundColor: "#ff4d4f",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+
+                  <button
+                    style={{
+                      padding: "8px 12px",
+                      backgroundColor: "#273F4F",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                      marginLeft: "100px",
+                    }}
+                    onClick={handleAddAddOn}
+                  >
+                    Add Another Add-on
+                  </button>
+                </div>
+
+                <div style={{ marginTop: "20px" }}>
+                  <button
+                    onClick={handleSave}
+                    style={{
+                      backgroundColor: "#4CAF50",
+                      color: "white",
+                      border: "none",
+                      padding: "10px 20px",
+                      textAlign: "center",
+                      textDecoration: "none",
+                      display: "inline-block",
+                      fontSize: "16px",
+                      marginRight: "10px",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Save
+                  </button>
+
+                  <button
+                    onClick={() => setIsPopupOpen(false)}
+                    style={{
+                      backgroundColor: "#f44336",
+                      color: "white",
+                      border: "none",
+                      padding: "10px 20px",
+                      textAlign: "center",
+                      textDecoration: "none",
+                      display: "inline-block",
+                      fontSize: "16px",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <ActionPopup
@@ -784,9 +1095,7 @@ const OrderList = () => {
             <input
               type="number"
               value={vendorAmount}
-              onChange={(e) =>
-                setVendorAmountInput(e.target.value)
-              }
+              onChange={(e) => setVendorAmountInput(e.target.value)}
               placeholder="Enter Amount"
               className="input-field"
             />
@@ -821,6 +1130,22 @@ const OrderList = () => {
           </div>
         </div>
       )}
+
+      {showModal && (
+        <div className="popup-overlay">
+          <div className="popup">
+            <h3>Cancel Order</h3>
+            <p>Are you sure you want to cancel this order?</p>
+            <button className="cancel-btn" onClick={handleCancelOrder}>
+              Cancel Order
+            </button>
+            <button className="close-button" onClick={handleCloseModal}>
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* pagination */}
       <div className="orderDetails_pagination">
         <button

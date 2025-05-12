@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import "./DecorationEditor.css";
 import { BASE_URL, EDIT_DECORATION_PRODUCT } from "../../../utils/apiconstant";
-import Image from 'next/image';
+import Image from "next/image";
 import axios from "axios";
 
 const decCat = [
@@ -183,16 +183,13 @@ const DecorationEditor = () => {
       console.log("Sending data:", requestData);
 
       // Make the API request
-      const response = await fetch(
-        BASE_URL + EDIT_DECORATION_PRODUCT,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestData),
-        }
-      );
+      const response = await fetch(BASE_URL + EDIT_DECORATION_PRODUCT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestData),
+      });
 
       const result = await response.json();
       console.log("API response:", result);
@@ -282,7 +279,9 @@ const DecorationEditor = () => {
                       {item.featured_image ? (
                         <Image
                           // src={`https://horaservices.com/api/uploads/compressed_webp/${item.featured_image}`}
-                          src={`https://horaservices.com/api/uploads/compressed_webp/${item?.featured_image.split('.')[0]}.webp`}
+                          src={`https://horaservices.com/api/uploads/compressed_webp/${
+                            item?.featured_image.split(".")[0]
+                          }.webp`}
                           alt={item.name}
                           className="thumbnail"
                           width={80}
@@ -312,27 +311,25 @@ const DecorationEditor = () => {
                       </button>
                     </td>
                     <td className="actions-cell">
-  <button
-  className="action-button"
-    onClick={async () => {
-      const newStatus = item.status === 1 ? 0 : 1;
+                      <button
+                        className="action-button"
+                        onClick={async () => {
+                          const newStatus = item.status === 1 ? 0 : 1;
 
-      await axios.post('/api/update-status', {
-        id: item._id,
-        status: newStatus,
-      });
+                          await axios.post("https://horaservices.com:3000/api/dish/update_decoration_status", {
+                            id: item._id,
+                            status: newStatus,
+                          });
 
-      window.location.reload(); // reload the page s
-    }}
-
-    style={{
-      backgroundColor: item.status === 1 ? 'green' : 'red',
-     
-    }}
-  >
-    {item.status === 1 ? 'Active' : 'Inactive'}
-  </button>
-</td>
+                          window.location.reload(); // reload the page s
+                        }}
+                        style={{
+                          backgroundColor: item.status === 1 ? "green" : "red",
+                        }}
+                      >
+                        {item.status === 1 ? "Active" : "Inactive"}
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
