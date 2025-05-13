@@ -201,7 +201,7 @@ function AddFoodOrder() {
     "63edc4757e1b370928b149b3",
   ];
 
-  console.log(selectedMealList);
+  console.log(selectedMealList,"sele");
 
   const discountPercentagePrice = calculateDiscountPercentage(peopleCount);
 
@@ -312,6 +312,7 @@ function AddFoodOrder() {
     //   const breadItemCount = dishObject.filter(meal => meal.id[0] === "63edc4757e1b370928b149b3").length
 
     let quantity = item.quantity * peopleCount;
+    console.log(quantity, "quantity");
 
     if (
       item.name !== "Tawa Rotis" &&
@@ -344,6 +345,8 @@ function AddFoodOrder() {
     }
     quantity = Math.round(quantity);
 
+    console.log(quantity, "quantity after discount");
+
     if (selectedDeliveryOption === "live-catering") {
       quantity = quantity * 1.1;
     }
@@ -360,62 +363,30 @@ function AddFoodOrder() {
     }
 
     return (
-      <div 
-      // className="ordersummaryproduct"
-      >
-        {/* <div className="ordersummary-sec1">
-          <Image
-            src={`https://horaservices.com/api/uploads/${item.image}`}
-            alt={item.name}
-            className="checkoutRightImg chef"
-            width={100}
-            height={100}
-          />
+      <div>
+        <div className="order-row_tb">
+          {/* Column 1: Image */}
+          <div className="order-cell_tb image-cell_tb">
+            <Image
+              src={`https://horaservices.com/api/uploads/${item.image}`}
+              alt={item.name}
+              className="checkout-img_tb"
+              width={100}
+              height={100}
+            />
+          </div>
+
+          {/* Column 2: Name */}
+          <div className="order-cell_tb name-cell_tb">{item.name}</div>
+
+          {/* Column 3: Quantity */}
+          <div className="order-cell_tb quantity-cell_tb">
+            {parseFloat(quantity).toFixed(2)}
+          </div>
+
+          {/* Column 4: Unit */}
+          <div className="order-cell_tb unit-cell_tb">{unit.toUpperCase()}</div>
         </div>
-        <div
-          style={{ color: "rgb(146, 82, 170)", fontWeight: "600" }}
-          className="ordersummary-sec2"
-        >
-          <p className="ordersummeryname">{item.name}</p>
-          {
-            <div
-              style={{
-                fontSize: "90%",
-                fontWeight: "700",
-                color: "#9252AA",
-                textTransform: "uppercase",
-              }}
-              className="ingredientrightsecsibheading"
-            >
-              {parseFloat(quantity).toFixed(2) + " " + unit}
-            </div>
-          }
-        </div> */}
-       
-       <div className="order-row_tb">
-      {/* Column 1: Image */}
-      <div className="order-cell_tb image-cell_tb">
-        <Image
-          src={`https://horaservices.com/api/uploads/${item.image}`}
-          alt={item.name}
-          className="checkout-img_tb"
-          width={100}
-          height={100}
-        />
-      </div>
-
-      {/* Column 2: Name */}
-      <div className="order-cell_tb name-cell_tb">{item.name}</div>
-
-      {/* Column 3: Quantity */}
-      <div className="order-cell_tb quantity-cell_tb">
-        {parseFloat(quantity).toFixed(2)}
-      </div>
-
-      {/* Column 4: Unit */}
-      <div className="order-cell_tb unit-cell_tb">{unit.toUpperCase()}</div>
-    </div>
-
       </div>
     );
   };
@@ -431,14 +402,93 @@ function AddFoodOrder() {
     }));
   };
 
-  const finalMealList = selectedMealList.map((dish) => ({
-    ...dish,
-    quantity: userInputs[dish._id]?.quantity ?? dish.quantity,
-    unit: userInputs[dish._id]?.unit ?? dish.unit,
-  }));
+  // console.log(quantity, "quantity23");
 
-  console.log("Final updated meal list:", finalMealList);
+  console.log(selectedMealList, "selectedMealList23");
+  // const finalMealList = selectedMealList.map((dish) => ({
+  //   ...dish,
+  //   quantity: userInputs[dish._id]?.quantity ?? dish.quantity,
+  //   unit: userInputs[dish._id]?.unit ?? dish.unit,
+  // }));
 
+
+  // console.log("Final updated meal list:", finalMealList);
+
+  const finalMealList = selectedMealList.map((dish) => {
+    let quantity = dish.quantity * peopleCount;
+    let unit = dish.unit;
+  
+    const isRotis = dish.name === "Tawa Rotis" || dish.name === "Rumali Rotis";
+    const validMealIds = [
+      "63f1b6b7ed240f7a09f7e2de",
+      "63f1b39a4082ee76673a0a9f",
+      "63edc4757e1b370928b149b3",
+    ];
+  
+    const dishObject = selectedMealList.filter(
+      (x) => x.name !== "Tawa Rotis" && x.name !== "Rumali Rotis"
+    );
+  
+    const itemCount = dishObject.filter((meal) =>
+      validMealIds.includes(meal.mealId[0])
+    ).length;
+  
+    if (
+      selectedDeliveryOption === "food-delivery" &&
+      !isRotis &&
+      validMealIds.includes(dish.mealId[0])
+    ) {
+      if (itemCount == 4) {
+        quantity *= 1.15;
+      } else if ([6, 7].includes(itemCount)) {
+        quantity *= 0.85;
+      } else if (itemCount == 8) {
+        quantity *= 0.75;
+      } else if ([9, 10].includes(itemCount)) {
+        quantity *= 0.65;
+      } else if (itemCount == 11) {
+        quantity *= 0.6;
+      } else if ([12, 13].includes(itemCount)) {
+        quantity *= 0.5;
+      } else if (itemCount == 14) {
+        quantity *= 0.47;
+      } else if (itemCount == 15) {
+        quantity *= 0.45;
+      }
+    }
+  
+    quantity = Math.round(quantity);
+  
+    if (selectedDeliveryOption === "live-catering") {
+      quantity = Math.round(quantity * 1.1);
+    }
+  
+    if (quantity >= 1000) {
+      quantity = quantity / 1000;
+      if (unit === "Gram") {
+        unit = "KG";
+      } else if (unit === "ml") {
+        unit = "L";
+      } else if (unit === "Peices") {
+        unit = "PCS";
+      }
+    }
+  
+    return {
+      ...dish,
+      quantity: selectedDeliveryOption === "food-delivery"
+        ? parseFloat(quantity.toFixed(2))
+        : userInputs[dish._id]?.quantity ?? dish.quantity,
+      unit: selectedDeliveryOption === "food-delivery"
+        ? unit
+        : userInputs[dish._id]?.unit ?? dish.unit,
+    };
+  });
+  
+  // ✅ Print the final meal list
+  console.log("Final updated meal list:2", finalMealList);
+
+  
   return (
     <>
       <div className="container">
@@ -540,23 +590,23 @@ function AddFoodOrder() {
           )}
         </div> */}
 
-<div style={style.selectionMsg}>
-  {selectedDeliveryOption === "" ? (
-    <p>Please select a service to continue.</p>
-  ) : selectedDeliveryOption === "food-delivery" ? (
-    <p>
-      You have selected <strong>Food Delivery</strong>.
-    </p>
-  ) : selectedDeliveryOption === "live-catering" ? (
-    <p>
-      You have selected <strong>Live Catering</strong>.
-    </p>
-  ) : selectedDeliveryOption === "food-customization" ? (
-    <p>
-      You have selected <strong>Food Customization</strong>.
-    </p>
-  ) : null}
-</div>
+        <div style={style.selectionMsg}>
+          {selectedDeliveryOption === "" ? (
+            <p>Please select a service to continue.</p>
+          ) : selectedDeliveryOption === "food-delivery" ? (
+            <p>
+              You have selected <strong>Food Delivery</strong>.
+            </p>
+          ) : selectedDeliveryOption === "live-catering" ? (
+            <p>
+              You have selected <strong>Live Catering</strong>.
+            </p>
+          ) : selectedDeliveryOption === "food-customization" ? (
+            <p>
+              You have selected <strong>Food Customization</strong>.
+            </p>
+          ) : null}
+        </div>
 
         <div className="search-bar-container" style={style.searchBarDiv}>
           <input
@@ -636,7 +686,7 @@ function AddFoodOrder() {
           )}
         </div>
 
-{/* 
+        {/* 
         {selectedMealList.length > 0 && (
           <div style={style.dishSelectedContainer}>
             <div style={style.header}>
@@ -651,34 +701,33 @@ function AddFoodOrder() {
           </div>
         )} */}
 
-{selectedDeliveryOption !== "food-customization" && selectedMealList.length > 0 && (
-  // <div style={style.dishSelectedContainer}>
-  //   <div style={style.header}>
-  //     <p style={style.headerText}>Dishes selected</p>
-  //   </div>
+        {selectedDeliveryOption !== "food-customization" &&
+          selectedMealList.length > 0 && (
+            // <div style={style.dishSelectedContainer}>
+            //   <div style={style.header}>
+            //     <p style={style.headerText}>Dishes selected</p>
+            //   </div>
 
-  //   <div style={style.selectedItemsContainer}>
-  //     {selectedMealList.map((item, index) => (
-  //       <RenderDishQuantity key={index} item={item} />
-  //     ))}
-  //   </div>
-  // </div>
+            //   <div style={style.selectedItemsContainer}>
+            //     {selectedMealList.map((item, index) => (
+            //       <RenderDishQuantity key={index} item={item} />
+            //     ))}
+            //   </div>
+            // </div>
 
+            <div className="order-summary-table_tb">
+              <div className="order-row_tb header_tb">
+                <div className="order-cell_tb image-cell_tb">Image</div>
+                <div className="order-cell_tb name-cell_tb">Name</div>
+                <div className="order-cell_tb quantity-cell_tb">Quantity</div>
+                <div className="order-cell_tb unit-cell_tb">Unit</div>
+              </div>
 
-<div className="order-summary-table_tb">
-  <div className="order-row_tb header_tb">
-    <div className="order-cell_tb image-cell_tb">Image</div>
-    <div className="order-cell_tb name-cell_tb">Name</div>
-    <div className="order-cell_tb quantity-cell_tb">Quantity</div>
-    <div className="order-cell_tb unit-cell_tb">Unit</div>
-  </div>
-
-  {selectedMealList.map((item, index) => (
-    <RenderDishQuantity key={index} item={item} />
-  ))}
-</div>
-)}
-
+              {selectedMealList.map((item, index) => (
+                <RenderDishQuantity key={index} item={item} />
+              ))}
+            </div>
+          )}
 
         {selectedDeliveryOption === "food-customization" && (
           <div style={{ overflowX: "auto" }}>
@@ -822,44 +871,44 @@ function AddFoodOrder() {
             </div>
           </div>
           <div style={{ paddingTop: "5px" }}>
-          {selectedDeliveryOption !== "food-customization" && (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginTop: 3,
-              }}
-            >
-              <p
+            {selectedDeliveryOption !== "food-customization" && (
+              <div
                 style={{
-                  color: "#9252AA",
-                  fontWeight: "600",
-                  fontSize: 14,
-                  lineHeight: "20px",
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginTop: 3,
                 }}
               >
-                Item Total
-              </p>
-              <p
-                style={{
-                  color: "#9252AA",
-                  fontWeight: "600",
-                  fontSize: 14,
-                  lineHeight: "20px",
-                }}
-              >
-                {" "}
-                {/* {totalPrice - discountedPrice < 0
+                <p
+                  style={{
+                    color: "#9252AA",
+                    fontWeight: "600",
+                    fontSize: 14,
+                    lineHeight: "20px",
+                  }}
+                >
+                  Item Total
+                </p>
+                <p
+                  style={{
+                    color: "#9252AA",
+                    fontWeight: "600",
+                    fontSize: 14,
+                    lineHeight: "20px",
+                  }}
+                >
+                  {" "}
+                  {/* {totalPrice - discountedPrice < 0
                   ? discountedPrice
                   : (deliveryCharges + totalPrice)} */}
-                ₹{" "}
-                {(Number(totalPrice || 0) - Number(discountedPrice || 0) < 0
-                  ? Number(discountedPrice || 0)
-                  : Number(totalPrice || 0)) + 400}
-              </p>
-            </div>
-          )}
+                  ₹{" "}
+                  {(Number(totalPrice || 0) - Number(discountedPrice || 0) < 0
+                    ? Number(discountedPrice || 0)
+                    : Number(totalPrice || 0)) + 400}
+                </p>
+              </div>
+            )}
             {/* <img style={{ width: 290, height: 1, marginTop: 5, marginBottom: 5 }} src="../../assets/Rectangleline.png" alt="line" /> */}
             {totalPrice - discountedPrice > 0 && (
               <div>
@@ -906,7 +955,8 @@ function AddFoodOrder() {
                 {/* <img style={{ width: 290, height: 1, marginTop: 5, marginBottom: 5 }} src="../../assets/Rectangleline.png" alt="line" /> */}
               </div>
             )}
-            {(selectedDeliveryOption === "food-delivery" || selectedDeliveryOption === "food-customization") && (
+            {(selectedDeliveryOption === "food-delivery" ||
+              selectedDeliveryOption === "food-customization") && (
               <div>
                 <div
                   style={{
@@ -988,104 +1038,102 @@ function AddFoodOrder() {
                 </div>
                 {/* <img style={{ width: 290, height: 1, marginTop: 10, marginBottom: 5 }} src="../../assets/Rectangleline.png" alt="line" /> */}
                 {selectedDeliveryOption !== "food-customization" && (
-                  
-                <div>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    marginTop: 3,
-                  }}
-                >
-                  <p
-                    style={{
-                      color: "#9252AA",
-                      fontWeight: "600",
-                      fontSize: 14,
-                      lineHeight: "20px",
-                    }}
-                  >
-                    Packing Cost
-                  </p>
-                  <div
-                    style={{
-                      display: "flex",
-                      color: "#9252AA",
-                      fontWeight: "600",
-                      fontSize: 14,
-                      lineHeight: "20px",
-                    }}
-                  >
-                    <p style={{ color: "#9252AA", fontWeight: "600" }}>
-                      {" "}
-                      ₹ {packingCost}
-                    </p>
-                  </div>
-                </div>
-
-                <div>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      marginTop: 3,
-                      borderBottom: "1px solid rgb(215, 215, 215)",
-                    }}
-                  >
-                    <p
-                      style={{
-                        color: "#9252AA",
-                        fontWeight: "600",
-                        fontSize: 14,
-                        lineHeight: "20px",
-                      }}
-                    >
-                      Delivery Charges
-                    </p>
+                  <div>
                     <div
                       style={{
-                        color: "#9252AA",
-                        fontWeight: "600",
-                        fontSize: 14,
-                        lineHeight: "20px",
                         display: "flex",
                         flexDirection: "row",
+                        justifyContent: "space-between",
+                        marginTop: 3,
                       }}
                     >
-                      {/* {discountedPrice > 4000 ? (
+                      <p
+                        style={{
+                          color: "#9252AA",
+                          fontWeight: "600",
+                          fontSize: 14,
+                          lineHeight: "20px",
+                        }}
+                      >
+                        Packing Cost
+                      </p>
+                      <div
+                        style={{
+                          display: "flex",
+                          color: "#9252AA",
+                          fontWeight: "600",
+                          fontSize: 14,
+                          lineHeight: "20px",
+                        }}
+                      >
+                        <p style={{ color: "#9252AA", fontWeight: "600" }}>
+                          {" "}
+                          ₹ {packingCost}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          marginTop: 3,
+                          borderBottom: "1px solid rgb(215, 215, 215)",
+                        }}
+                      >
+                        <p
+                          style={{
+                            color: "#9252AA",
+                            fontWeight: "600",
+                            fontSize: 14,
+                            lineHeight: "20px",
+                          }}
+                        >
+                          Delivery Charges
+                        </p>
+                        <div
+                          style={{
+                            color: "#9252AA",
+                            fontWeight: "600",
+                            fontSize: 14,
+                            lineHeight: "20px",
+                            display: "flex",
+                            flexDirection: "row",
+                          }}
+                        >
+                          {/* {discountedPrice > 4000 ? (
                                                             <>
                                                                 <p style={{ color: "#008631", fontWeight: '600', marginRight: 5 }}>FREE</p>
                                                                 <p style={{ textDecoration: "line-through", color: "#9252AA", fontWeight: '600' }}>₹ {deliveryCharges}</p>
                                                             </>
                                                         ) :
                                                          ( */}
-                      <p
-                        style={{
-                          color: "#008631",
-                          fontWeight: "600",
-                          marginRight: 5,
-                        }}
-                      >
-                        FREE
-                      </p>
-                      <p
-                        style={{
-                          textDecoration: "line-through",
-                          color: "#9252AA",
-                          fontWeight: "600",
-                        }}
-                      >
-                        ₹ {deliveryCharges}
-                      </p>
-                      {/* )} */}
+                          <p
+                            style={{
+                              color: "#008631",
+                              fontWeight: "600",
+                              marginRight: 5,
+                            }}
+                          >
+                            FREE
+                          </p>
+                          <p
+                            style={{
+                              textDecoration: "line-through",
+                              color: "#9252AA",
+                              fontWeight: "600",
+                            }}
+                          >
+                            ₹ {deliveryCharges}
+                          </p>
+                          {/* )} */}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-                              )}
-
+                )}
               </div>
             )}
             {selectedDeliveryOption === "live-catering" && (
@@ -1171,69 +1219,68 @@ function AddFoodOrder() {
             {/* Calculation for final total amount */}
             {selectedDeliveryOption !== "food-customization" && (
               <div>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginTop: 3,
-              }}
-            >
-              <p
-                style={{
-                  color: "#9252AA",
-                  fontWeight: "600",
-                  fontSize: 14,
-                  lineHeight: "20px",
-                }}
-              >
-                Final Amount
-              </p>
-              <p
-                style={{
-                  color: "#9252AA",
-                  fontWeight: "600",
-                  fontSize: 14,
-                  lineHeight: "20px",
-                }}
-              >
-                ₹ {calculateFinalTotal()}
-              </p>
-            </div>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    marginTop: 3,
+                  }}
+                >
+                  <p
+                    style={{
+                      color: "#9252AA",
+                      fontWeight: "600",
+                      fontSize: 14,
+                      lineHeight: "20px",
+                    }}
+                  >
+                    Final Amount
+                  </p>
+                  <p
+                    style={{
+                      color: "#9252AA",
+                      fontWeight: "600",
+                      fontSize: 14,
+                      lineHeight: "20px",
+                    }}
+                  >
+                    ₹ {calculateFinalTotal()}
+                  </p>
+                </div>
 
-            {/* Calculation for advance payment */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginTop: 3,
-              }}
-            >
-              <p
-                style={{
-                  color: "#9252AA",
-                  fontWeight: "600",
-                  fontSize: 14,
-                  lineHeight: "20px",
-                }}
-              >
-                Advance Payment
-              </p>
-              <p
-                style={{
-                  color: "#9252AA",
-                  fontWeight: "600",
-                  fontSize: 14,
-                  lineHeight: "20px",
-                }}
-              >
-                ₹ {calculateAdvancePayment()}
-              </p>
-            </div>
-            
-            </div>
-  )}
+                {/* Calculation for advance payment */}
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    marginTop: 3,
+                  }}
+                >
+                  <p
+                    style={{
+                      color: "#9252AA",
+                      fontWeight: "600",
+                      fontSize: 14,
+                      lineHeight: "20px",
+                    }}
+                  >
+                    Advance Payment
+                  </p>
+                  <p
+                    style={{
+                      color: "#9252AA",
+                      fontWeight: "600",
+                      fontSize: 14,
+                      lineHeight: "20px",
+                    }}
+                  >
+                    ₹ {calculateAdvancePayment()}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

@@ -27,6 +27,7 @@ const CreateOrderForm = ({
   console.log(calculateAdvancePayment, "calculateAdvancePayment");
   console.log(calculateFinalTotal, "calculateFinalTotal");
   console.log(selectedOption, "selectedOption");
+  console.log(selectedMealList,"selectedMealList");
 
   const [newCustomerName, setNewCustomerName] = useState("");
   const [newCustomerPhone, setNewCustomerPhone] = useState("");

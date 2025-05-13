@@ -36,6 +36,8 @@ const OrderList = () => {
   const [vendorAmount, setVendorAmountInput] = useState("");
   const [orderId1, setOrderId] = useState("");
 
+  const [createdAtDate, setCreatedAtDate] = useState("");
+
   const fetchOrders = async (
     page,
     orderId = "",
@@ -44,7 +46,8 @@ const OrderList = () => {
     orderType = "",
     orderCity = "",
     selectedDate = "",
-    selectedOfflineNum = ""
+    selectedOfflineNum = "",
+    createdAtDate = ""
   ) => {
     // Handle orderType mapping
     let typeId;
@@ -91,6 +94,7 @@ const OrderList = () => {
       order_date: selectedDate || "",
       phone_no: selectedOfflineNum || "",
       // online_phone_no :selectedOfflineNum || "",
+      createdAt: createdAtDate || "",
     };
 
     console.log(requestData);
@@ -140,7 +144,8 @@ const OrderList = () => {
       selectedOrderType,
       selectedCity,
       selectedDate,
-      selectedPhoneNumber
+      selectedPhoneNumber,
+      createdAtDate
     );
   }, [
     currentPage,
@@ -151,6 +156,7 @@ const OrderList = () => {
     selectedCity,
     selectedDate,
     selectedPhoneNumber,
+    createdAtDate,
   ]);
 
   const getOrderStatus = (orderStatusValue) => {
@@ -521,6 +527,15 @@ const OrderList = () => {
                 className="date-input"
               />
             </div>
+            <div className="date filter-box">
+              <label className="date-label">Order CreatedAt Date</label>
+              <input
+                type="date"
+                value={createdAtDate}
+                onChange={(e) => setCreatedAtDate(e.target.value)}
+                className="date-input"
+              />
+            </div>
 
             <div className="right-part">
               <button
@@ -729,7 +744,8 @@ const OrderList = () => {
                         ✏️
                       </span>
                     </td>
-                    <td>{new Date(order.createdAt).toLocaleString()}</td>
+                    {/* <td>{new Date(order.createdAt).toLocaleString()}</td> */}
+                    <td>{order.createdAt.split("T")[0]}</td>
                     <td>
                       <div style={styles.container}>
                         {/* Call Icon */}
