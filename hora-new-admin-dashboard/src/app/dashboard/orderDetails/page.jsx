@@ -746,7 +746,7 @@ const OrderList = () => {
                     </td>
                     {/* <td>{new Date(order.createdAt).toLocaleString()}</td> */}
                     <td>{order.createdAt.split("T")[0]}</td>
-                    <td>
+                    <td> 
                       <div style={styles.container}>
                         {/* Call Icon */}
                         <div onClick={() => handleCallClick(order.phone_no)}>
