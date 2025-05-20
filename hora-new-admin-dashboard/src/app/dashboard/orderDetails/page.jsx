@@ -38,6 +38,9 @@ const OrderList = () => {
 
   const [createdAtDate, setCreatedAtDate] = useState("");
 
+  const [orderTypeShow, setOrderTypeShow] = useState(null);
+  
+
   const fetchOrders = async (
     page,
     orderId = "",
@@ -191,20 +194,6 @@ const OrderList = () => {
     return orderTypes[orderTypeValue] || "Unknown Order Type";
   };
 
-  // popup active and inactive
-
-  // const handleStatusUpdate = (orderId, currentStatus) => {
-  //   const newStatus = currentStatus === 1 ? 0 : 1;
-  //   const confirmationMessage =
-  //     newStatus === 1
-  //       ? "Are you sure you want to active this order?"
-  //       : "Are you sure you want to Inactive this order?";
-
-  //   // Show confirmation dialog
-  //   if (window.confirm(confirmationMessage)) {
-  //     updateOrderStatus(orderId, newStatus);
-  //   }
-  // };
 
   const [showPopup2, setShowPopup2] = useState(false);
   const [popupData, setPopupData] = useState({
@@ -384,16 +373,19 @@ const OrderList = () => {
     add_ons = [],
     totalAmount,
     balanceAmount,
-    advanceAmount
+    advanceAmount,
+    type
   ) => {
     console.log(orderId, "ordereditorder");
     console.log(decoration_comments, "decoration_comments");
+    console.log(type, "type12");
     setSelectedOrderId(orderId);
     setDecorationComment(decoration_comments || "");
     setAddOnList(add_ons.length ? add_ons : [{ name: "", price: "" }]);
     setTotalAmountEdit(totalAmount || "");
     setBalanceAmountEdit(balanceAmount || "");
     setAdvanceAmountEdit(advanceAmount || "");
+    setOrderTypeShow(type);
     setIsPopupOpen(true);
   };
 
@@ -420,9 +412,9 @@ const OrderList = () => {
       _id: selectedOrderId,
       decoration_comments: decorationComment,
       add_on: addOnList, //add on list into array format
-      totalAmountEdit: totalAmountEdit, //totalAmountEdit is when user click edit order popup
-      balanceAmountEdit: balanceAmountEdit, //balanceAmountEdit is when user click edit order popup
-      advanceAmountEdit: advanceAmountEdit, //advanceAmountEdit is when user click edit order popup
+      total_amount: totalAmountEdit, //totalAmountEdit is when user click edit order popup
+      balance_amount: balanceAmountEdit, //balanceAmountEdit is when user click edit order popup
+      advance_amount: advanceAmountEdit, //advanceAmountEdit is when user click edit order popup
     };
 
     console.log(requestData, "requestdata");
@@ -443,6 +435,7 @@ const OrderList = () => {
       if (response.ok) {
         console.log("Success:", result);
         alert("Order updated successfully!");
+        window.location.reload();
       } else {
         console.error("Error:", result);
         alert("Failed to update order.");
@@ -693,17 +686,26 @@ const OrderList = () => {
                             <FaEye />
                             <span>Assigned</span>
                           </button>
+                          <span
+                            style={{ cursor: "pointer", marginLeft: "8px" }}
+                            // onClick={() => handleOpenModal(order._id)}
+
+                            onClick={() => openSupplierAssignPopup(order)}
+                            title="Edit"
+                          >
+                            ✏️
+                          </span>
                         </>
                       ) : (
                         <>
-                        {order.order_status !== 6 && (
+                          {/* {order.order_status !== 6 && ( */}
                           <button
                             className="assigningBtn not-assigned"
                             onClick={() => openSupplierAssignPopup(order)}
                           >
                             Not Assigned
                           </button>
-                        )}
+                          {/* // )} */}
                           {/* supplier assign popup */}
                           {isModalOpen && selectedSupplierOrder && (
                             <>
@@ -745,8 +747,13 @@ const OrderList = () => {
                       </span>
                     </td>
                     {/* <td>{new Date(order.createdAt).toLocaleString()}</td> */}
-                    <td>{order.createdAt.split("T")[0]}</td>
-                    <td> 
+                    {/* <td>{new Date(order.createdAt).toLocaleTimeString()}</td> */}
+
+                    <td>
+                      {order.createdAt.split("T")[0]}{" "}
+                      {new Date(order.createdAt).toLocaleTimeString()}
+                    </td>
+                    <td>
                       <div style={styles.container}>
                         {/* Call Icon */}
                         <div onClick={() => handleCallClick(order.phone_no)}>
@@ -828,7 +835,8 @@ const OrderList = () => {
                               order.add_on,
                               order.total_amount,
                               order.balance_amount,
-                              order.advance_amount
+                              order.advance_amount,
+                              order.type
                             )
                           }
                         >
@@ -872,9 +880,12 @@ const OrderList = () => {
             <div className="popup-overlay">
               <div className="popup">
                 <h2>Edit Order</h2>
-                <label htmlFor="totalAmountEdit" style={{ display: 'block', fontWeight: 'bold' }}>
-  Decoration Comments
-</label>
+                <label
+                  htmlFor="totalAmountEdit"
+                  style={{ display: "block", fontWeight: "bold" }}
+                >
+                  Decoration Comments
+                </label>
                 <textarea
                   type="text"
                   value={decorationComment}
@@ -883,100 +894,112 @@ const OrderList = () => {
                   className="input-field"
                   rows={4}
                 />
-               <div
- 
->
-  {/* Total Amount */}
-  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-    <label
-      htmlFor="totalAmountEdit"
-      style={{
-        minWidth: '120px',
-        fontWeight: '500',
-        color: '#333',
-        marginRight: '10px',
-        fontWeight: 'bold'
-      }}
-    >
-    New Total Amount
-    </label>
-    <input
-      id="totalAmountEdit"
-      type="text"
-      value={totalAmountEdit}
-      onChange={(e) => setTotalAmountEdit(e.target.value)}
-      placeholder="Enter total amount"
-      style={{
-        flex: 1,
-        padding: '10px',
-        borderRadius: '6px',
-        border: '1px solid #ccc',
-        fontSize: '14px'
-      }}
-    />
-  </div>
+                <div>
+                  {/* Total Amount */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      marginBottom: "16px",
+                    }}
+                  >
+                    <label
+                      htmlFor="totalAmountEdit"
+                      style={{
+                        minWidth: "120px",
+                        fontWeight: "500",
+                        color: "#333",
+                        marginRight: "10px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      New Total Amount
+                    </label>
+                    <input
+                      id="totalAmountEdit"
+                      type="text"
+                      value={totalAmountEdit}
+                      onChange={(e) => setTotalAmountEdit(e.target.value)}
+                      placeholder="Enter total amount"
+                      style={{
+                        flex: 1,
+                        padding: "10px",
+                        borderRadius: "6px",
+                        border: "1px solid #ccc",
+                        fontSize: "14px",
+                      }}
+                    />
+                  </div>
 
-  {/* Balance Amount */}
-  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-    <label
-      htmlFor="balanceAmountEdit"
-      style={{
-        minWidth: '120px',
-        fontWeight: '500',
-        color: '#333',
-        marginRight: '10px',
-        fontWeight: 'bold'
-      }}
-    >
-    New  Balance Amount
-    </label>
-    <input
-      id="balanceAmountEdit"
-      type="text"
-      value={balanceAmountEdit}
-      onChange={(e) => setBalanceAmountEdit(e.target.value)}
-      placeholder="Enter balance amount"
-      style={{
-        flex: 1,
-        padding: '10px',
-        borderRadius: '6px',
-        border: '1px solid #ccc',
-        fontSize: '14px',
-      }}
-    />
-  </div>
+                  {/* Balance Amount */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      marginBottom: "16px",
+                    }}
+                  >
+                    <label
+                      htmlFor="balanceAmountEdit"
+                      style={{
+                        minWidth: "120px",
+                        fontWeight: "500",
+                        color: "#333",
+                        marginRight: "10px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      New Balance Amount
+                    </label>
+                    <input
+                      id="balanceAmountEdit"
+                      type="text"
+                      value={balanceAmountEdit}
+                      onChange={(e) => setBalanceAmountEdit(e.target.value)}
+                      placeholder="Enter balance amount"
+                      style={{
+                        flex: 1,
+                        padding: "10px",
+                        borderRadius: "6px",
+                        border: "1px solid #ccc",
+                        fontSize: "14px",
+                      }}
+                    />
+                  </div>
 
-  {/* Advance Amount */}
-  <div style={{ display: 'flex', alignItems: 'center' }}>
-    <label
-      htmlFor="advanceAmountEdit"
-      style={{
-        minWidth: '120px',
-        fontWeight: '500',
-        color: '#333',
-        marginRight: '10px',
-        fontWeight: 'bold'
-      }}
-    >
-    New  Advance Amount
-    </label>
-    <input
-      id="advanceAmountEdit"
-      type="text"
-      value={advanceAmountEdit}
-      onChange={(e) => setAdvanceAmountEdit(e.target.value)}
-      placeholder="Enter advance amount"
-      style={{
-        flex: 1,
-        padding: '10px',
-        borderRadius: '6px',
-        border: '1px solid #ccc',
-        fontSize: '14px'
-      }}
-    />
-  </div>
-</div>
+                  {/* Advance Amount */}
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <label
+                      htmlFor="advanceAmountEdit"
+                      style={{
+                        minWidth: "120px",
+                        fontWeight: "500",
+                        color: "#333",
+                        marginRight: "10px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      New Advance Amount
+                    </label>
+                    <input
+                      id="advanceAmountEdit"
+                      type="text"
+                      value={advanceAmountEdit}
+                      onChange={(e) => setAdvanceAmountEdit(e.target.value)}
+                      placeholder="Enter advance amount"
+                      style={{
+                        flex: 1,
+                        padding: "10px",
+                        borderRadius: "6px",
+                        border: "1px solid #ccc",
+                        fontSize: "14px",
+                      }}
+                    />
+                  </div>
+                </div>
 
+{orderTypeShow === 1 && (
+<>
                 <h3>Add-ons</h3>
                 <div>
                   {addOnList.map((addOn, index) => (
@@ -1050,6 +1073,8 @@ const OrderList = () => {
                     Add Another Add-on
                   </button>
                 </div>
+                </>
+)}
 
                 <div style={{ marginTop: "20px" }}>
                   <button

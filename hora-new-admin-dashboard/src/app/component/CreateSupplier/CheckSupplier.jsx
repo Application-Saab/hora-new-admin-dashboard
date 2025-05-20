@@ -1,9 +1,15 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { BASE_URL, ACCEPT_ORDER } from "../../../utils/apiconstant";
+import { BASE_URL, ACCEPT_ORDER, ORDER_EDIT } from "../../../utils/apiconstant";
 import CreateSupplierPopup from "./CreateSupplierPopup";
 
-const CheckSupplier = ({ SelectedOrder, setShowModal ,setIsSupplierAssigned}) => {
+const CheckSupplier = ({
+  SelectedOrder,
+  setShowModal,
+  setIsSupplierAssigned,
+}) => {
+  console.log("SelectedOrder in CheckSupplier:", SelectedOrder);
+  console.log("SelectedOrder in CheckSuppliertoid:", SelectedOrder.toId);
   const [supplierData, setSupplierData] = useState(null);
   const [showCreatePopup, setShowCreatePopup] = useState(false);
   const [customerNumber, setCustomerNumber] = useState("");
@@ -45,9 +51,47 @@ const CheckSupplier = ({ SelectedOrder, setShowModal ,setIsSupplierAssigned}) =>
       if (response.ok) {
         alert("Successfully assigned!");
         setShowModal(false); // Close modal after assignment
-        setIsSupplierAssigned(true)
+        setIsSupplierAssigned(true);
       } else {
         alert(data.message || "Failed to assign. Try again.");
+      }
+    } catch (error) {
+      console.error("Error during API request:", error);
+      alert("An error occurred. Please try again.");
+    }
+  };
+
+
+  
+  const handleReAssignPopup = async () => {
+    if (!supplierData || !SelectedOrder) {
+      alert("Missing supplier or order details.");
+      return;
+    }
+
+    try {
+      const response = await fetch(BASE_URL + ORDER_EDIT, {
+        method: "POST",
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          // Authorisation: supplierData.device_token,
+          // otp: SelectedOrder.otp,
+          _id: SelectedOrder._id,
+          toId: supplierData._id,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Successfully re-assigned!");
+        setShowModal(false); // Close modal after assignment
+        setIsSupplierAssigned(true);
+      } else {
+        alert(data.message || "Failed to re-assign. Try again.");
       }
     } catch (error) {
       console.error("Error during API request:", error);
@@ -104,7 +148,7 @@ const CheckSupplier = ({ SelectedOrder, setShowModal ,setIsSupplierAssigned}) =>
     } catch (err) {
       setMessage("An error occurred while checking the supplier.");
       setMessageColor("red");
-      console.error("Error:", err ,showPopup);
+      console.error("Error:", err, showPopup);
       setSupplierData(null);
     } finally {
       setLoading(false);
@@ -162,15 +206,32 @@ const CheckSupplier = ({ SelectedOrder, setShowModal ,setIsSupplierAssigned}) =>
               <strong>Order ID:</strong> {SelectedOrder._id}
             </p>
 
-            <button className="assign-btn" onClick={handleAssignPopup}>
-              Assign
-            </button>
+            {/* <button className="assign-btn" onClick={handleReAssignPopup}>
+              Assign12
+            </button> */}
+            {SelectedOrder.order_status === 6 ? (
+              <button className="assign-btn" onClick={handleReAssignPopup}>
+                Re-Assign
+              </button>
+            ) : null // or nothing, to hide the Assign button
+            }
+
+            {/* // Show Reassign only if order_status is NOT 6 */}
+            {SelectedOrder.order_status !== 6 && (
+              <button className="assign-btn" onClick={handleAssignPopup}>
+                Assign
+              </button>
+            )}
+
           </div>
         )}
 
         {/* Show "Create Supplier" button if supplier does not exist */}
         {!supplierData && message && (
-          <button className="create-supplier-btn" onClick={handleCreateSupplier}>
+          <button
+            className="create-supplier-btn"
+            onClick={handleCreateSupplier}
+          >
             Create Supplier
           </button>
         )}

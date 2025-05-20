@@ -16,6 +16,8 @@ export const PRODUCT_MEAL_TYPE = "/api/meals/admin_meals_list";
 export const IMAGE_UPLOAD = "/api/decoration_image_upload";
 export const ADD_DECORATION_PRODUCT = "/api/dish/add";
 export const EDIT_DECORATION_PRODUCT = "/api/decoration/edit";
+export const ORDER_EDIT = "/api/order/edit";
+
 // https://horaservices.com:3000/api/admin/admin_user_list
 // https://horaservices.com:3000/api/decoration_image_upload
 // api/decoration/edit

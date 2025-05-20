@@ -163,12 +163,23 @@ const ChefForPartyCreateOrderComponent = () => {
   console.log(priceForPeople, "priceForPeople");
   console.log(selectedDishPrice, "selectedDishPrice");
 
+  // let totalPrice = parseInt(selectedDishPrice) + priceForPeople;
+  // console.log(totalPrice, "totalPrice");
+  // if (selectedItems.length > 7) {
+  //   totalPrice += 700;
+  //   console.log(totalPrice, "totalPrice with 700 extra charge");
+  // }
   let totalPrice = parseInt(selectedDishPrice) + priceForPeople;
-  console.log(totalPrice, "totalPrice");
-  if (selectedItems.length > 7) {
-    totalPrice += 700;
-    console.log(totalPrice, "totalPrice with 700 extra charge");
-  }
+console.log(totalPrice, "Initial totalPrice");
+
+if (selectedItems.length <= 7) {
+  totalPrice += 49;
+  console.log(totalPrice, "TotalPrice with ₹49 extra charge (less than 7 items)");
+} else {
+  totalPrice += 750;
+  console.log(totalPrice, "TotalPrice with ₹700 extra charge (7 or more items)");
+}
+
 
   console.log(totalPrice, "totalpricehehehehe");
   const itemTotal = selectedDishPrice;

@@ -389,9 +389,10 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
 
                   <span>Balance Amount</span>
                   <span>
-                    {orderDetails?.total_amount && orderDetails?.advance_amount
+                    {/* {orderDetails?.total_amount && orderDetails?.advance_amount
                       ? `₹ ${(orderDetails.total_amount - orderDetails.advance_amount)}`
-                      : 0}
+                      : 0} */}
+                      ₹{orderDetails.balance_amount || 0}
                   </span>
                 </li>
 
