@@ -57,6 +57,12 @@ const menuItems = [
     icon: <FaCamera />,
     url: "/dashboard/photo-folder",
   },
+    {
+    label: "Photography Add More Images",
+    icon: <FaPlusCircle />,
+    url: "/dashboard/add-more-images",
+  },
+
   {
     label: "Vendor Order Details",
     icon: <FaClipboardList />,
@@ -93,6 +99,7 @@ const menuItems = [
     icon: <FaPlusCircle />,
     url: "/dashboard/create-dish",
   },
+
 
   // {
   //   label: "Edit Dish",
