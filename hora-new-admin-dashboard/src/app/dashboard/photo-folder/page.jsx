@@ -48,6 +48,7 @@ const PhotoCreateProject = () => {
   };
 
   const handleCustomerId = (id) => {
+    console.log(id, 'id from check customer');
     console.log(isCustomer ,'is custoimer')
     setCustomerId(id); // Update parent state when customer is found/added
   };
@@ -118,7 +119,7 @@ const PhotoCreateProject = () => {
         </>)}
 
       {showFolder && (
-        <ImageUpload customerId={customerId} folderTitle={folderTitle} />
+        <ImageUpload customerId={customerId} folderTitle={folderTitle} enteredNum={enteredNum} />
       )}
 
       {/* {activeTab === 'check' && (

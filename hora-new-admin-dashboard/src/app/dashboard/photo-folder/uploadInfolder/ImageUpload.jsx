@@ -2,13 +2,100 @@
 import React, { useState } from "react";
 import ThumbnailGallery from "./ThumbnailGallery";
 
-const ImageUpload = ({ folderTitle, customerId }) => {
+const ImageUpload = ({ folderTitle, customerId, enteredNum }) => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [showThumbnailComp, setShowThumbnailComp] = useState(false);
   const [updatedImg, setUpdatedImg] = useState(true);
   const [showLink, setShowLink] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0); // To track current image during upload
+
+   const [refreshKey, setRefreshKey] = useState(0);
+  //  const [isUploading, setIsUploading] = useState(false);
+
+
+  // const handleImageUpload = async (event) => {
+  //   const files = event.target.files;
+  //   if (!files || files.length === 0) return;
+
+  //   const fileArray = Array.from(files);
+
+  //   console.log(`You selected ${fileArray.length} image(s):`);
+  //   fileArray.forEach((file, index) => {
+  //     console.log(`Image ${index + 1}: ${file.name}`);
+  //   });
+
+  //   const formData = new FormData();
+  //   fileArray.forEach(file => {
+  //     formData.append('files', file);
+  //   });
+
+
+  //   formData.append('customerId', customerId);
+  //   formData.append('folderName', folderTitle);
+  //   formData.append('phoneNo', '9340785987');
+
+  //   try {
+  //      const res = await fetch(
+  //         "https://horaservices.com:3000/api/photo/upload",
+  //         {
+  //           method: "POST",
+  //           body: formData,
+  //         }
+  //       );
+
+  //        const data = await res.json();
+  //       console.log("Uploaded123:", data);
+  //     // On success, refresh the ThumbnailGallery
+  //     setRefreshKey(prev => prev + 1);
+  //   } catch (error) {
+  //     console.error('Upload failed:', error);
+  //     alert('Failed to upload image');
+  //   }
+  // };
+
+  const handleImageUpload = async (event) => {
+  const files = event.target.files;
+  if (!files || files.length === 0) return;
+
+  const fileArray = Array.from(files);
+
+  console.log(`You selected ${fileArray.length} image(s):`);
+  fileArray.forEach((file, index) => {
+    console.log(`Image ${index + 1}: ${file.name}`);
+  });
+
+  // Show loading
+  setIsUploading(true);
+
+  for (let file of fileArray) {
+    const formData = new FormData();
+    formData.append('files', file); // Keep 'files' if that's what backend expects
+    formData.append('customerId', customerId);
+    formData.append('folderName', folderTitle);
+    formData.append('phoneNo', '9340785987');
+
+    try {
+      const res = await fetch(
+        "https://horaservices.com:3000/api/photo/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const data = await res.json();
+      console.log(`Uploaded ${file.name}:`, data);
+    } catch (error) {
+      console.error(`Upload failed for ${file.name}:`, error);
+      alert(`Failed to upload ${file.name}`);
+    }
+  }
+
+  // All uploads completed
+  setIsUploading(false);
+  setRefreshKey(prev => prev + 1);
+};
 
   // Handle file selection
   const handleImageChange = (e) => {
@@ -28,6 +115,7 @@ const ImageUpload = ({ folderTitle, customerId }) => {
     formData.append("folderName", folderTitle);
     formData.append("customerId", customerId);
     formData.append("files", image.file, image.name);
+    formData.append("phoneNo", enteredNum);
 
     try {
       const response = await fetch("https://horaservices.com:3000/api/photo/upload", {
@@ -106,6 +194,7 @@ const ImageUpload = ({ folderTitle, customerId }) => {
           </p>
         </>
       )}
+
       <div className="imageupload-container">
         <input
           type="file"
@@ -151,8 +240,47 @@ const ImageUpload = ({ folderTitle, customerId }) => {
         )}
       </div>
 
+      {isUploading && <p style={{ color: 'green' }}>Uploading images, please wait...</p>}
+
       {updatedImg && folderTitle && customerId && showThumbnailComp && (
-        <ThumbnailGallery folderName={folderTitle} customerId={customerId} />
+        <>
+        <div style={{ marginTop: '30px' }}>
+        <label
+  htmlFor="imageUpload"
+  style={{
+    display: 'inline-block',
+    cursor: 'pointer',
+    padding: '10px 20px',
+    backgroundColor: '#007bff',
+    color: '#fff',
+    borderRadius: '4px',
+    textAlign: 'center',
+  }}
+>
+  Add More Images
+</label>
+
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            multiple
+            style={{
+              cursor: 'pointer',
+              padding: '10px',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              backgroundColor: '#007bff',
+              color: '#fff',
+            }}
+          />
+</div>
+          <ThumbnailGallery
+            key={refreshKey}
+            folderName={folderTitle}
+            customerId={customerId}
+          />
+        </>
       )}
     </>
   );

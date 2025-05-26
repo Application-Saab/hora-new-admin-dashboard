@@ -35,7 +35,7 @@ const CityOrdersSummary = () => {
         per_page: 5000,
         status: 1,
         type: selectedKey,
-        order_locality: "", // We'll filter the cities in our code
+        order_locality: "", 
         start_date: startDate || null,
         end_date: endDate || null,
       });

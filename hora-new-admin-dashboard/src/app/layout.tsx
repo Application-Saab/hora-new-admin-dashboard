@@ -19,6 +19,14 @@ import { useRouter, usePathname } from "next/navigation";
 //  import Login from "./login/page";
 const menuItems = [
   { label: "Dashboard", icon: <FaTachometerAlt />, url: "/dashboard" },
+
+
+  {
+    label: "Analysis",
+    icon: <FaClipboardList />,
+    url: "/dashboard/analysis",
+  },
+
   {
     label: "Order Details",
     icon: <FaClipboardList />,
@@ -79,7 +87,7 @@ const menuItems = [
     icon: <FaUtensils />,
     url: "/dashboard/dish-list",
   },
- 
+
   {
     label: "Create Dish",
     icon: <FaPlusCircle />,
@@ -101,7 +109,9 @@ const Sidebar = ({ onLogout }: { onLogout: () => void }) => {
           <li key={index}>
             <Link href={item.url} className="link-button">
               {item.icon}
-              <span style={{ marginLeft: "8px", fontSize: "14px" }}>{item.label}</span>
+              <span style={{ marginLeft: "8px", fontSize: "14px" }}>
+                {item.label}
+              </span>
             </Link>
           </li>
         ))}

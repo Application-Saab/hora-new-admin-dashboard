@@ -734,7 +734,9 @@ const ActionPopup = ({ isOpen, actionPopupOrderId, actionPopupChefOrderId, actio
                                     <p><strong>Product Name:</strong>{dec.name}</p>
                                     <p><strong>Product Price: </strong>{dec.price}</p>
                                     <p>
-                                      <Image src={`https://horaservices.com/api/uploads/${dec.featured_image}`} width={200} height={200} alt={`${dec.featured_image}-name`} />
+                                      <Image 
+                                      src={`https://horaservices.com/api/uploads/compressed_webp/${dec.featured_image.split('.')[0]}.webp`}
+                                      width={200} height={200} alt={`${dec.featured_image}-name`} />
                                     </p>
                                     <div>{getItemInclusion(dec.inclusion)}</div>
                                   </div>
