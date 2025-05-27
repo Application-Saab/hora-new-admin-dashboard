@@ -171,7 +171,7 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum }) => {
 
   for (let file of fileArray) {
     const formData = new FormData();
-    formData.append('files', file); // Keep 'files' if that's what backend expects
+    formData.append('files', file); 
     formData.append('customerId', customerId);
     formData.append('folderName', folderTitle);
     formData.append('phoneNo', enteredNum);

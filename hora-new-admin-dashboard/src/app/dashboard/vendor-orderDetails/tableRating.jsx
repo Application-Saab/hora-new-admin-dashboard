@@ -15,9 +15,9 @@ const AdminRatingsTable = () => {
   const [selectedKey, setSelectedKey] = useState('');
 
   const handleDropdownChange = (e) => {
-    const key = parseInt(e.target.value);
-    console.log(key, "key");
-    setSelectedKey(key);
+    const value = e.target.value;
+    console.log(value, "selected value");
+    setSelectedKey(value);
   };
 
   const handleSubmit = async () => {
@@ -32,17 +32,25 @@ const AdminRatingsTable = () => {
   
     try {
       console.log("Fetching orders with date range from backend...");
+      
+      // Prepare the request payload
+      const requestPayload = {
+        page: 1,
+        per_page: 5000,
+        status: 1,
+        order_locality: selectedCity || undefined,
+        start_date: startDate || undefined,
+        end_date: endDate || undefined
+      };
+
+      // Only add type if selectedKey is not "all"
+      if (selectedKey !== "all") {
+        requestPayload.type = parseInt(selectedKey);
+      }
+
       const ordersRes = await axios.post(
         BASE_URL + ADMIN_ORDER_LIST,
-        {
-          page: 1,
-          per_page: 5000,
-          status: 1,
-          type: selectedKey,
-          order_locality: selectedCity || undefined,
-          start_date: startDate || undefined,
-          end_date: endDate || undefined
-        }
+        requestPayload
       );
   
       const orders = ordersRes.data.data?.order || [];
@@ -197,7 +205,7 @@ const AdminRatingsTable = () => {
   <label style={{ display: 'block', marginBottom: '8px', marginLeft: "70px" }}>Select Order Type:</label>
   <select
     onChange={handleDropdownChange}
-    defaultValue=""
+    value={selectedKey}
     style={{
       width: '100%',
       padding: '8px',
@@ -208,6 +216,7 @@ const AdminRatingsTable = () => {
     <option value="" disabled>
       -- Select --
     </option>
+    <option value="all">All</option>  
     {[...Array(8)].map((_, i) => {
       const value = i + 1;
       return (

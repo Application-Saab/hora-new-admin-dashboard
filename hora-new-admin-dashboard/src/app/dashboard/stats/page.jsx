@@ -16,7 +16,7 @@ const CityOrdersSummary = () => {
   const targetCities = ["Delhi", "Mumbai", "Bangalore", "Hyderabad"];
 
   const handleDropdownChange = (e) => {
-    const key = parseInt(e.target.value);
+    const key = e.target.value;
     setSelectedKey(key);
   };
 
@@ -30,15 +30,22 @@ const CityOrdersSummary = () => {
     }
     
     try {
-      const { data } = await axios.post(BASE_URL + ADMIN_ORDER_LIST, {
+      // Prepare the API payload
+      const payload = {
         page: 1,
         per_page: 5000,
         status: 1,
-        type: selectedKey,
         order_locality: "", 
         start_date: startDate || null,
         end_date: endDate || null,
-      });
+      };
+
+      // Only add type if "all" is not selected
+      if (selectedKey !== "all") {
+        payload.type = parseInt(selectedKey);
+      }
+
+      const { data } = await axios.post(BASE_URL + ADMIN_ORDER_LIST, payload);
 
       setOrders(data.data?.order || []);
       setShowTable(true);
@@ -104,43 +111,46 @@ const CityOrdersSummary = () => {
       <h2
         style={{
           textAlign: "center",
-          fontSize: "32px",
+          fontSize: "24px",
           fontWeight: "bold",
           marginBottom: "20px",
           color: "#333",
           textShadow: "2px 2px 8px rgba(0,0,0,0.2)",
         }}
       >
-        Status Orders By City
+       Order Filter: Start Date, End Date, And Type
       </h2>
-      <div className="flex space-x-4">
-        <div className="w-full">
-          <label
-            htmlFor="startDate"
-            className="block text-sm font-medium text-gray-700"
-          >
+        <div style={{ display: "flex", gap: "30px", marginBottom: "20px" }}>
+        <div style={{ flex: 1 }}>
+          <label htmlFor="startDate" style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>
             Start Date
           </label>
           <input
             type="date"
             id="startDate"
-            className="p-2 border rounded-md w-full mb-2"
+            style={{
+              padding: "8px",
+              border: "1px solid #d1d5db",
+              borderRadius: "6px",
+              width: "100%",
+            }}
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
           />
         </div>
-
-        <div className="w-full">
-          <label
-            htmlFor="endDate"
-            className="block text-sm font-medium text-gray-700"
-          >
+        <div style={{ flex: 1 }}>
+          <label htmlFor="endDate" style={{ display: "block", fontSize: "14px", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>
             End Date
           </label>
           <input
             type="date"
             id="endDate"
-            className="p-2 border rounded-md w-full mb-2"
+            style={{
+              padding: "8px",
+              border: "1px solid #d1d5db",
+              borderRadius: "6px",
+              width: "100%",
+            }}
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
           />
@@ -160,7 +170,7 @@ const CityOrdersSummary = () => {
         </label>
         <select
           onChange={handleDropdownChange}
-          defaultValue=""
+          value={selectedKey}
           style={{
             width: "100%",
             padding: "8px",
@@ -170,6 +180,9 @@ const CityOrdersSummary = () => {
         >
           <option value="" disabled>
             -- Select --
+          </option>
+          <option value="all">
+            All Order Types
           </option>
           {[...Array(8)].map((_, i) => {
             const value = i + 1;

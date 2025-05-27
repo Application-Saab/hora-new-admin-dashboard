@@ -13,7 +13,7 @@ const VendorCityTable = () => {
   const [selectedKey, setSelectedKey] = useState("");
 
   const handleDropdownChange = (e) => {
-    const key = parseInt(e.target.value);
+    const key = e.target.value;
     console.log(key, "key");
     setSelectedKey(key);
   };
@@ -21,20 +21,27 @@ const VendorCityTable = () => {
   const fetchFilteredOrders = async () => {
     setLoading(true);
     console.log(selectedKey, "selectedkey");
-    if (!selectedKey) {
+    if (selectedKey === "") {
       alert("Please select an order type first.");
       return;
     }
+    
     try {
-      const { data } = await axios.post(BASE_URL + ADMIN_ORDER_LIST, {
+      const requestBody = {
         page: 1,
         per_page: 5000,
         status: 1,
-        type: selectedKey,
         order_locality: "",
         start_date: startDate || null,
         end_date: endDate || null,
-      });
+      };
+
+      // Only add type parameter if selectedKey is not "all"
+      if (selectedKey !== "all") {
+        requestBody.type = parseInt(selectedKey);
+      }
+
+      const { data } = await axios.post(BASE_URL + ADMIN_ORDER_LIST, requestBody);
 
       setOrders(data.data?.order || []);
       setShowTable(true);
@@ -159,6 +166,7 @@ const VendorCityTable = () => {
           <option value="" disabled>
             -- Select --
           </option>
+          <option value="all">All</option>
           {[...Array(8)].map((_, i) => {
             const value = i + 1;
             return (
