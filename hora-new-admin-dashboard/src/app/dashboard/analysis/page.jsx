@@ -19,7 +19,7 @@ const CityOrdersSummary = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [user, setUser] = useState(null);
+  const [, setUser] = useState(null);
   const [timerId, setTimerId] = useState(null);
 
   const cities = [
@@ -40,22 +40,22 @@ const CityOrdersSummary = () => {
     setSelectedCity(city);
   };
 
-  // Fixed date formatting function to handle timezone properly
-  const formatDateToLocal = (dateString) => {
-    if (!dateString) return "Unknown";
-    const date = new Date(dateString);
-    // Get local date components to avoid timezone issues
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
+  // // Fixed date formatting function to handle timezone properly
+  // const formatDateToLocal = (dateString) => {
+  //   if (!dateString) return "Unknown";
+  //   const date = new Date(dateString);
+  //   // Get local date components to avoid timezone issues
+  //   const year = date.getFullYear();
+  //   const month = String(date.getMonth() + 1).padStart(2, "0");
+  //   const day = String(date.getDate()).padStart(2, "0");
+  //   return `${year}-${month}-${day}`;
+  // };
 
-  // Helper function to create date from YYYY-MM-DD string in local timezone
-  const createLocalDate = (dateString) => {
-    const [year, month, day] = dateString.split("-").map(Number);
-    return new Date(year, month - 1, day); // month is 0-indexed in Date constructor
-  };
+  // // Helper function to create date from YYYY-MM-DD string in local timezone
+  // const createLocalDate = (dateString) => {
+  //   const [year, month, day] = dateString.split("-").map(Number);
+  //   return new Date(year, month - 1, day); // month is 0-indexed in Date constructor
+  // };
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -269,7 +269,7 @@ const CityOrdersSummary = () => {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ role: "admin" }),
+          body: JSON.stringify({ role: "adminanalysis" }),
         }
       );
 
@@ -302,7 +302,7 @@ const CityOrdersSummary = () => {
       } else {
         setError("Incorrect email or password");
       }
-    } catch (err) {
+    } catch  {
       setError("Login failed. Please try again.");
     }
   };

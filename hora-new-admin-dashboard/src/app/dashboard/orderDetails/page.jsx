@@ -39,7 +39,6 @@ const OrderList = () => {
   const [createdAtDate, setCreatedAtDate] = useState("");
 
   const [orderTypeShow, setOrderTypeShow] = useState(null);
-  
 
   const fetchOrders = async (
     page,
@@ -193,7 +192,6 @@ const OrderList = () => {
     };
     return orderTypes[orderTypeValue] || "Unknown Order Type";
   };
-
 
   const [showPopup2, setShowPopup2] = useState(false);
   const [popupData, setPopupData] = useState({
@@ -489,58 +487,65 @@ const OrderList = () => {
         <div className="order-header">
           <h1>Order Details</h1>
         </div>
-        <div className="filter-wrapper">
-          <div className="filter-container">
-            <div className="search filter-box">
+
+        <div className="filter-wrapper_new">
+          <div className="filter-grid_new">
+            <div className="filter-item_new">
+              <label htmlFor="orderId" className="label_new">
+                Order ID
+              </label>
               <input
+                id="orderId"
                 type="text"
-                className="small-search byId"
-                placeholder="Search by Order ID"
+                className="input_new"
+                placeholder="e.g., ORD123456"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
 
-            <div className="phone filter-box">
+            <div className="filter-item_new">
+              <label htmlFor="customerNumber" className="label_new">
+                Customer Number
+              </label>
               <input
+                id="customerNumber"
                 type="text"
-                className="small-search byPhone"
-                placeholder="Search by Customer Number"
+                className="input_new"
+                placeholder="e.g., +1234567890"
                 value={selectedPhoneNumber}
                 onChange={(e) => setSelectedPhoneNumber(e.target.value)}
               />
             </div>
 
-            <div className="date filter-box">
-              <label className="date-label">Order Fulfillment Date</label>
+            <div className="filter-item_new">
+              <label htmlFor="fulfillmentDate" className="label_new">
+                Fulfillment Date
+              </label>
               <input
+                id="fulfillmentDate"
                 type="date"
+                className="input_new"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="date-input"
               />
             </div>
-            <div className="date filter-box">
-              <label className="date-label">Order CreatedAt Date</label>
+
+            <div className="filter-item_new">
+              <label htmlFor="createdAtDate" className="label_new">
+                Created At
+              </label>
               <input
+                id="createdAtDate"
                 type="date"
+                className="input_new"
                 value={createdAtDate}
                 onChange={(e) => setCreatedAtDate(e.target.value)}
-                className="date-input"
               />
             </div>
 
-            <div className="right-part">
-              <button
-                className="filter-btn"
-                onClick={() => window.location.reload()}
-              >
-                Reset All Filters
-              </button>
-            </div>
-
-            <div className="status-dropdown-container">
-              <label htmlFor="statusDropdown" className="status-label">
+            <div className="filter-item_new">
+              <label htmlFor="statusDropdown" className="label_new">
                 Status
               </label>
               <StatusDropdown
@@ -548,6 +553,15 @@ const OrderList = () => {
                 selectedActiveStatus={selectedActiveStatus}
                 setSelectedActiveStatus={setSelectedActiveStatus}
               />
+            </div>
+
+            <div className="filter-actions_new">
+              <button
+                className="reset-button_new"
+                onClick={() => window.location.reload()}
+              >
+                🔄 Reset Filters
+              </button>
             </div>
           </div>
         </div>
@@ -789,7 +803,15 @@ const OrderList = () => {
                         View Details
                       </button>
                     </td>
-                    <td style={{ width: "100px", paddingLeft: "16px" }}>
+<td style={{ width: "100px", paddingLeft: "16px" }}> 
+  <ul style={{ paddingLeft: "0" }}>
+    {order.userReviewRatingArray.map((i, index) => (
+      <li key={index}>{i}</li>
+    ))}
+  </ul>
+</td>
+
+                    {/* <td style={{ width: "100px", paddingLeft: "16px" }}>
                       {order.type === 2 ? (
                         <ul style={{ paddingLeft: "0" }}>
                           {order.userReviewRatingArray.map((i, index) => (
@@ -801,7 +823,7 @@ const OrderList = () => {
                       ) : (
                         order.userReviewRatingArray[0]
                       )}
-                    </td>
+                    </td> */}
                     <td>
                       {order.vendor_amount ? (
                         <span>₹{order.vendor_amount}</span>
@@ -998,83 +1020,83 @@ const OrderList = () => {
                   </div>
                 </div>
 
-{orderTypeShow === 1 && (
-<>
-                <h3>Add-ons</h3>
-                <div>
-                  {addOnList.map((addOn, index) => (
-                    <div
-                      key={index}
-                      style={{
-                        marginBottom: "10px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "10px",
-                      }}
-                    >
-                      <input
-                        type="text"
-                        placeholder="Add-on Name"
-                        value={addOn.name}
-                        onChange={(e) =>
-                          handleAddOnChange(index, "name", e.target.value)
-                        }
-                        style={{
-                          padding: "8px",
-                          fontSize: "14px",
-                          border: "1px solid #ccc",
-                          borderRadius: "4px",
-                          width: "150px",
-                        }}
-                      />
-                      <input
-                        type="number"
-                        placeholder="Price"
-                        value={addOn.price}
-                        onChange={(e) =>
-                          handleAddOnChange(index, "price", e.target.value)
-                        }
-                        style={{
-                          padding: "8px",
-                          fontSize: "14px",
-                          border: "1px solid #ccc",
-                          borderRadius: "4px",
-                          width: "100px",
-                        }}
-                      />
+                {orderTypeShow === 1 && (
+                  <>
+                    <h3>Add-ons</h3>
+                    <div>
+                      {addOnList.map((addOn, index) => (
+                        <div
+                          key={index}
+                          style={{
+                            marginBottom: "10px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                          }}
+                        >
+                          <input
+                            type="text"
+                            placeholder="Add-on Name"
+                            value={addOn.name}
+                            onChange={(e) =>
+                              handleAddOnChange(index, "name", e.target.value)
+                            }
+                            style={{
+                              padding: "8px",
+                              fontSize: "14px",
+                              border: "1px solid #ccc",
+                              borderRadius: "4px",
+                              width: "150px",
+                            }}
+                          />
+                          <input
+                            type="number"
+                            placeholder="Price"
+                            value={addOn.price}
+                            onChange={(e) =>
+                              handleAddOnChange(index, "price", e.target.value)
+                            }
+                            style={{
+                              padding: "8px",
+                              fontSize: "14px",
+                              border: "1px solid #ccc",
+                              borderRadius: "4px",
+                              width: "100px",
+                            }}
+                          />
+                          <button
+                            onClick={() => handleRemoveAddOn(index)}
+                            style={{
+                              padding: "8px 12px",
+                              backgroundColor: "#ff4d4f",
+                              color: "#fff",
+                              border: "none",
+                              borderRadius: "4px",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+
                       <button
-                        onClick={() => handleRemoveAddOn(index)}
                         style={{
                           padding: "8px 12px",
-                          backgroundColor: "#ff4d4f",
+                          backgroundColor: "#273F4F",
                           color: "#fff",
                           border: "none",
                           borderRadius: "4px",
                           cursor: "pointer",
+                          marginLeft: "100px",
                         }}
+                        onClick={handleAddAddOn}
                       >
-                        Remove
+                        Add Another Add-on
                       </button>
                     </div>
-                  ))}
-
-                  <button
-                    style={{
-                      padding: "8px 12px",
-                      backgroundColor: "#273F4F",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: "4px",
-                      cursor: "pointer",
-                      marginLeft: "100px",
-                    }}
-                    onClick={handleAddAddOn}
-                  >
-                    Add Another Add-on
-                  </button>
-                </div>
-                </>
-)}
+                  </>
+                )}
 
                 <div style={{ marginTop: "20px" }}>
                   <button
