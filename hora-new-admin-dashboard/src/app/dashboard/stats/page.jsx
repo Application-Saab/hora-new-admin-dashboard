@@ -399,7 +399,7 @@ const CityOrdersSummary = () => {
     citySummary,
     totalOrders,
     totalAmount,
-    totalOrderAmount,
+    // totalOrderAmount,
     totalMarketingCost,
   } = getCityOrdersSummary();
 
