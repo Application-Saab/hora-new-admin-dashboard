@@ -13,7 +13,7 @@ const OrderList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPage, setTotalPage] = useState(0);
   // const [setTotalItems] = useState(0);
-  const itemsPerPage = 15;
+  const itemsPerPage = 10;
   const [searchTerm, setSearchTerm] = useState("");
   const [popupOpen, setPopupOpen] = useState(false);
   const [selectedPhoneNumber, setSelectedPhoneNumber] = useState("");
@@ -484,87 +484,81 @@ const OrderList = () => {
   return (
     <div className="orderDetailsList">
       <div className="order-list-container">
-        <div className="order-header">
-          <h1>Order Details</h1>
-        </div>
+        {/* <div className="order-header">
+          <h1 >Order Details</h1>
+        </div> */}
+<div class="centered-container">
+  <h1>Order Details</h1>
+</div>
 
-        <div className="filter-wrapper_new">
-          <div className="filter-grid_new">
-            <div className="filter-item_new">
-              <label htmlFor="orderId" className="label_new">
-                Order ID
-              </label>
-              <input
-                id="orderId"
-                type="text"
-                className="input_new"
-                placeholder="e.g., ORD123456"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
 
-            <div className="filter-item_new">
-              <label htmlFor="customerNumber" className="label_new">
-                Customer Number
-              </label>
-              <input
-                id="customerNumber"
-                type="text"
-                className="input_new"
-                placeholder="e.g., +1234567890"
-                value={selectedPhoneNumber}
-                onChange={(e) => setSelectedPhoneNumber(e.target.value)}
-              />
-            </div>
+<div className="filter-wrapper_new">
+  <div className="filter-grid_new">
+    <div className="filter-item_new">
+      <label htmlFor="orderId" className="label_new">Order ID</label>
+      <input
+        id="orderId"
+        type="text"
+        className="input_new"
+        placeholder="e.g., ORD123456"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+    </div>
 
-            <div className="filter-item_new">
-              <label htmlFor="fulfillmentDate" className="label_new">
-                Fulfillment Date
-              </label>
-              <input
-                id="fulfillmentDate"
-                type="date"
-                className="input_new"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-              />
-            </div>
+    <div className="filter-item_new">
+      <label htmlFor="customerNumber" className="label_new">Customer Number</label>
+      <input
+        id="customerNumber"
+        type="text"
+        className="input_new"
+        placeholder="e.g., +1234567890"
+        value={selectedPhoneNumber}
+        onChange={(e) => setSelectedPhoneNumber(e.target.value)}
+      />
+    </div>
 
-            <div className="filter-item_new">
-              <label htmlFor="createdAtDate" className="label_new">
-                Created At
-              </label>
-              <input
-                id="createdAtDate"
-                type="date"
-                className="input_new"
-                value={createdAtDate}
-                onChange={(e) => setCreatedAtDate(e.target.value)}
-              />
-            </div>
+    <div className="filter-item_new">
+      <label htmlFor="fulfillmentDate" className="label_new">Fulfillment Date</label>
+      <input
+        id="fulfillmentDate"
+        type="date"
+        className="input_new"
+        value={selectedDate}
+        onChange={(e) => setSelectedDate(e.target.value)}
+      />
+    </div>
 
-            <div className="filter-item_new">
-              <label htmlFor="statusDropdown" className="label_new">
-                Status
-              </label>
-              <StatusDropdown
-                id="statusDropdown"
-                selectedActiveStatus={selectedActiveStatus}
-                setSelectedActiveStatus={setSelectedActiveStatus}
-              />
-            </div>
+    <div className="filter-item_new">
+      <label htmlFor="createdAtDate" className="label_new">Created At</label>
+      <input
+        id="createdAtDate"
+        type="date"
+        className="input_new"
+        value={createdAtDate}
+        onChange={(e) => setCreatedAtDate(e.target.value)}
+      />
+    </div>
 
-            <div className="filter-actions_new">
-              <button
-                className="reset-button_new"
-                onClick={() => window.location.reload()}
-              >
-                🔄 Reset Filters
-              </button>
-            </div>
-          </div>
-        </div>
+    <div className="filter-item_new">
+      <label htmlFor="statusDropdown" className="label_new">Status</label>
+      <StatusDropdown
+        id="statusDropdown"
+        selectedActiveStatus={selectedActiveStatus}
+        setSelectedActiveStatus={setSelectedActiveStatus}
+      />
+    </div>
+
+    <div className="filter-actions_new">
+      <button
+        className="reset-button_new"
+        onClick={() => window.location.reload()}
+      >
+        🔄 Reset
+      </button>
+    </div>
+  </div>
+</div>
 
         <div className="orders-box">
           <table className="order-table">

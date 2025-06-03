@@ -1,5 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
+
+import axios from "axios";
 import Link from "next/link";
 import "./globals.css";
 import {
@@ -69,6 +71,12 @@ const menuItems = [
     url: "/dashboard/vendor-orderDetails",
   },
   {
+    label: "Vendor Order Reports",
+    icon: <FaClipboardList />,
+    url: "/dashboard/vendor-orderReports",
+  },
+  // vendor-orderReports
+  {
     label: "Add Decoration Product",
     icon: <FaCartPlus />,
     url: "/dashboard/add-decoration-product",
@@ -136,7 +144,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  // const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   useEffect(() => {
@@ -154,6 +161,56 @@ export default function RootLayout({
       router.replace("/dashboard-login");
     }
   }, [pathname]);
+
+  useEffect(() => {
+  const intervalId = setInterval(async () => {
+    const savedHash = localStorage.getItem("adminHashPassword");
+    const token = localStorage.getItem("authToken");
+    const adminEmail = localStorage.getItem("adminEmail") || "admin@admin.com";
+
+    if (!token || !savedHash) {
+      setIsLoggedIn(false);
+      router.replace("/dashboard-login");
+      return;
+    }
+
+    try {
+      const response = await axios.post("https://horaservices.com:3000/api/admin/admin_user_list", {
+        email: adminEmail,
+        role: "admin",
+      });
+
+      const users = response?.data?.data?.users;
+
+      if (!Array.isArray(users) || users.length === 0) {
+        console.warn("⚠️ Users data is missing or empty:", users);
+        localStorage.clear();
+        setIsLoggedIn(false);
+        router.replace("/dashboard-login");
+        return;
+      }
+
+      const passwordFromAPI = users[0]?.hashpassword;
+      // console.log("Fetched password from API:", passwordFromAPI);
+      // console.log("Saved hash from localStorage:", savedHash);
+
+      if (passwordFromAPI !== savedHash) {
+        // console.warn("❌ Hash mismatch. Logging out...");
+        localStorage.clear();
+        setIsLoggedIn(false);
+        router.replace("/dashboard-login");
+      } else {
+        console.log("✅ Hash match. Stay logged in.");
+      }
+
+    } catch (err) {
+      console.error("❌ Error verifying password hash:", err);
+    }
+  }, 1200000); // every 5 minutes
+
+  return () => clearInterval(intervalId);
+}, [router]);
+
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");

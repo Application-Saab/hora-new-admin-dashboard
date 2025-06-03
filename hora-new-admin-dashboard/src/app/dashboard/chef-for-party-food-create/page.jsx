@@ -50,6 +50,10 @@ const ChefForPartyCreateOrderComponent = () => {
   const [newCustomerName, setNewCustomerName] = useState(""); // For name input
   const [newCustomerPhone, setNewCustomerPhone] = useState("");
 
+   const [totalamount, setTotalAmount] = useState('');
+  const [advanceamount, setAdvanceAmount] = useState('');
+  const [balanceamount1, setBalanceAmount1] = useState('');
+
   const cuisineIds = [
     "63edfa1c74aafa0d9a24cbbc",
     "63f08e361976aaf885f161fd",
@@ -389,16 +393,16 @@ if (selectedItems.length <= 7) {
       order_date: formattedDate,
       no_of_burner: 0,
       order_locality: city,
-      total_amount: totalPrice,
+      total_amount: totalamount,
       orderApplianceIds: [],
-      payable_amount: totalPrice,
-      advance_amount: advancePayment,
+      payable_amount: totalamount,
+      advance_amount: advanceamount,
       is_gst: "0",
       order_type: true,
       items: selectedItems,
       decoration_comments: comment,
       status: 1,
-      balance_amount: balanceamount,
+      balance_amount: balanceamount1,
       order_taken_by: orderTakenBy,
     };
 
@@ -507,6 +511,17 @@ if (selectedItems.length <= 7) {
     // Alert the user
     alert("Order summary copied!");
   };
+
+   useEffect(() => {
+    const total = parseFloat(totalamount) || 0;
+    const advance = parseFloat(advanceamount) || 0;
+    const balance = total - advance;
+    setBalanceAmount1(balance);
+  }, [totalamount, advanceamount]);
+
+  console.log("Balance Amount:", balanceamount1);
+  console.log("totalamount:", totalamount);
+  console.log("advanceamount:", advanceamount);
 
   return (
     <div
@@ -806,6 +821,39 @@ if (selectedItems.length <= 7) {
                       placeholder="googleLocation"
                     />
                   </div>
+                   <label htmlFor="totalamount" >
+        Total Amount*
+      </label>
+      <input
+        type="text"
+        id="totalamount"
+        value={totalamount}
+        onChange={(e) => setTotalAmount(e.target.value)}
+        placeholder="Total Amount"
+        required
+      />
+
+      <label htmlFor="advanceamount" >
+        Advance Amount
+      </label>
+      <input
+        type="text"
+        id="advanceamount"
+        value={advanceamount}
+        onChange={(e) => setAdvanceAmount(e.target.value)}
+        placeholder="Advance Amount"
+      />
+
+      <label htmlFor="balanceamount" >
+        Balance Amount
+      </label>
+      <input
+        type="text"
+        id="balanceamount"
+        value={balanceamount1}
+        placeholder="Balance Amount"
+        disabled
+      />
                 
 
                   <div

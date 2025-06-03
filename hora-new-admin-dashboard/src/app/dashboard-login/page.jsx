@@ -26,8 +26,11 @@ const Login = () => {
 console.log(data,"data");
       if (response.ok && data.token) {
         localStorage.setItem("authToken", data.token);
+        localStorage.setItem("adminHashPassword", data.data.hashpassword);
+        localStorage.setItem("adminEmail", data.data.email);
         router.push("/dashboard/decoration-createorder");
       } else {
+
         setError(data.message || "Invalid Credentials");
       }
     } catch (err) {

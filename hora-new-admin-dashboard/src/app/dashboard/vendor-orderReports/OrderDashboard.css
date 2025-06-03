@@ -1,0 +1,443 @@
+/* =================================
+   DASHBOARD CONTAINER & LAYOUT
+   ================================= */
+.dashboard-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
+  min-height: 100vh;
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 30px;
+  color: white;
+}
+
+.dashboard-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.dashboard-subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin: 0;
+  font-weight: 300;
+}
+
+/* =================================
+   CONTROL PANEL
+   ================================= */
+.control-panel {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 25px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 20px;
+  align-items: end;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-input {
+  padding: 12px 15px;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #667eea;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.generate-btn {
+  padding: 12px 25px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  width: 142px;
+    margin-left: 25px;
+}
+
+.generate-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.generate-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =================================
+   STATUS MESSAGES
+   ================================= */
+.status-message {
+  padding: 15px 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.status-message.success {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.status-message.error {
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+  color: white;
+  box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+}
+
+.status-message::before {
+  content: '✓';
+  margin-right: 10px;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.status-message.error::before {
+  content: '⚠';
+}
+
+/* =================================
+   SECTIONS
+   ================================= */
+.section {
+  background: white;
+  border-radius: 15px;
+  margin-bottom: 25px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.section-title {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  margin: 0;
+  padding: 20px 25px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+/* =================================
+   TABLE STYLING
+   ================================= */
+.table-container {
+  overflow-x: auto;
+  padding: 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+th {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  color: #495057;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 15px 12px;
+  text-align: left;
+  border-bottom: 3px solid #667eea;
+  font-size: 0.8rem;
+}
+
+td {
+  padding: 12px;
+  border-bottom: 1px solid #e9ecef;
+  vertical-align: middle;
+}
+
+/* Row Alternating Colors */
+.even-row {
+  background: #f8f9fa;
+}
+
+.odd-row {
+  background: white;
+}
+
+tr:hover {
+  background: #e3f2fd !important;
+  transform: scale(1.01);
+  transition: all 0.2s ease;
+}
+
+/* =================================
+   SUMMARY TABLE SPECIFIC
+   ================================= */
+.summary-table {
+  font-size: 1rem;
+}
+
+.summary-table .metric-name {
+  font-weight: 600;
+  color: #333;
+  width: 40%;
+}
+
+.summary-table .amount {
+  font-weight: 700;
+  font-size: 1.1rem;
+  width: 35%;
+}
+
+.summary-table .percentage {
+  font-weight: 600;
+  width: 25%;
+  text-align: center;
+}
+
+.total-row {
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  color: white;
+}
+
+.total-row:hover {
+  background: linear-gradient(135deg, #5a6fd8, #6a42a0) !important;
+}
+
+/* =================================
+   MONTHLY TABLE SPECIFIC
+   ================================= */
+.monthly-table .month-cell {
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+}
+
+.monthly-table .count {
+  text-align: center;
+  font-weight: 600;
+  background: #f0f8ff;
+  border-radius: 15px;
+  padding: 5px 10px;
+}
+
+/* =================================
+   ORDERS TABLE SPECIFIC
+   ================================= */
+.orders-table {
+  font-size: 0.85rem;
+}
+
+.order-id {
+  font-weight: 700;
+  color: #667eea;
+  font-family: 'Courier New', monospace;
+}
+
+.date-cell {
+  white-space: nowrap;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.phone-cell {
+  font-family: 'Courier New', monospace;
+  font-weight: 500;
+}
+
+.locality-cell {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =================================
+   AMOUNT STYLING
+   ================================= */
+.amount {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  text-align: right;
+}
+
+.amount.total {
+  color: #2196F3;
+}
+
+.amount.balance {
+  color: #4CAF50;
+}
+
+.amount.vendor {
+  color: #FF9800;
+}
+
+.amount.advance {
+  color: #9C27B0;
+}
+
+.amount.avg {
+  color: #607D8B;
+  font-style: italic;
+}
+
+/* =================================
+   STATUS BADGES
+   ================================= */
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.status-1 { background: #e3f2fd; color: #1976d2; } /* Pending */
+.status-2 { background: #fff3e0; color: #f57c00; } /* Confirmed */
+.status-3 { background: #f3e5f5; color: #7b1fa2; } /* In Progress */
+.status-4 { background: #e8f5e8; color: #388e3c; } /* Completed */
+.status-5 { background: #ffebee; color: #d32f2f; } /* Cancelled */
+.status-6 { background: #e4f7e4; color: #2e7d2e; } /* Delivered */
+
+/* =================================
+   PAGINATION INFO
+   ================================= */
+.pagination-info {
+  padding: 15px 25px;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
+
+/* =================================
+   RESPONSIVE DESIGN
+   ================================= */
+@media (max-width: 1200px) {
+  .control-panel {
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 15px;
+  }
+  
+  .control-panel {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .dashboard-title {
+    font-size: 2rem;
+  }
+  
+  table {
+    font-size: 0.8rem;
+  }
+  
+  th, td {
+    padding: 8px;
+  }
+  
+  .section-title {
+    padding: 15px 20px;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-title {
+    font-size: 1.5rem;
+  }
+  
+  .table-container {
+    overflow-x: scroll;
+  }
+  
+  table {
+    min-width: 800px;
+  }
+}
+
+/* =================================
+   ANIMATIONS
+   ================================= */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.section {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.table-container {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* =================================
+   LOADING ANIMATION
+   ================================= */
+.generate-btn:disabled::after {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-left: 8px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
