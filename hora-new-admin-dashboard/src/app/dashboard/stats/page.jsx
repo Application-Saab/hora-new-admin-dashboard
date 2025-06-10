@@ -135,9 +135,7 @@ const CityOrdersSummary = () => {
         // Combine orders from both types
         ordersData = [...ordersType6, ...ordersType7];
         
-        // For marketing data, since fetchData converts 7 to 6, we only need to call it once
-        // But we need to fetch marketing data for the combined order types
-        marketingResult = await fetchAllMarketingData(6); // This covers both 6 and 7
+        marketingResult = await fetchAllMarketingData(6); 
         
         console.log("Combined orders:", ordersData.length);
         console.log("Marketing data:", marketingResult.length);
@@ -151,12 +149,10 @@ const CityOrdersSummary = () => {
           order_locality: "",
         };
 
-        // Add date filters if provided
         if (startDate) {
           payload.start_createdAt = startDate;
         }
         if (endDate) {
-          // Add one day to include the full end date
           const endDatePlusOne = new Date(endDate);
           endDatePlusOne.setDate(endDatePlusOne.getDate() + 1);
           payload.end_createdAt = endDatePlusOne.toISOString().split('T')[0];
