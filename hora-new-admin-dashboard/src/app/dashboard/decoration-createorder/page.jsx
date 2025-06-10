@@ -57,6 +57,9 @@ const AddDecOrder = () => {
   const [selectedItems, setSelectedItems] = useState({});
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  const [isOrderCreated, setIsOrderCreated] = useState(false);
+
+
   const toggleItem = (id) => {
     setSelectedItems((prev) => ({
       ...prev,
@@ -239,6 +242,7 @@ const AddDecOrder = () => {
       });
 
       if (response.status === API_SUCCESS_CODE) {
+          setIsOrderCreated(true);
         return response.data.data._id;
       } else {
         console.error("Failed to save address", response.status);
@@ -315,6 +319,7 @@ const AddDecOrder = () => {
     try {
       const response = await axios.post(`${BASE_URL}${CONFIRM_ORDER_ENDPOINT}`, requestData);
       alert("Order created successfully:", response.data);
+    
     } catch (error) {
       console.error("Error creating order:", error);
       alert("There was an error creating the order. Please try again.");
@@ -733,11 +738,13 @@ const AddDecOrder = () => {
               />
             </div>
 
+{!isOrderCreated && (
+  <button className="orderCheck-btn" type="submit" disabled={lloading}>
+    {lloading ? "Creating Order..." : "Create Order"}
+  </button>
+)}
 
-            <button className="orderCheck-btn" type="submit">
-              {/* Create Order */}
-              {lloading ? "Creating Order..." : "Create Order"}
-            </button>
+
           </div>)
           :
           <> {lloading && <div className="loader">Loading...</div>}

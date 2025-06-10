@@ -106,7 +106,7 @@ const VendorCityTable = () => {
           textShadow: "2px 2px 8px rgba(0,0,0,0.2)",
         }}
       >
-        Cities By Ratings
+        Cities By Ratings <span style={{fontSize: "10px"}}>(Fullfillment date)</span>
       </h2>
       <div className="flex space-x-4">
         <div className="w-full">

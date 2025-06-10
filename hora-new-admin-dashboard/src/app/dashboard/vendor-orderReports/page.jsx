@@ -194,6 +194,13 @@ const OrderDashboard = () => {
     }
   };
 
+  
+  const getOrderId = (e) => {
+    const orderId1 = 10800 + e;
+    const updateOrderId = "#" + orderId1;
+    return updateOrderId;
+  };
+
   return (
     <div className="dashboard-container">
       {/* Header */}
@@ -216,7 +223,7 @@ const OrderDashboard = () => {
         </div>
         
         <div className="form-group">
-          <label>Start Date</label>
+          <label>Start Date(fulfillment)</label>
           <input
             type="date"
             value={startDate}
@@ -226,7 +233,7 @@ const OrderDashboard = () => {
         </div>
         
         <div className="form-group">
-          <label>End Date</label>
+          <label>End Date(fullfillment)</label>
           <input
             type="date"
             value={endDate}
@@ -287,7 +294,7 @@ const OrderDashboard = () => {
                     </td>
                   </tr>
                   <tr>
-                    <td className="metric-name">Vendor Amount</td>
+                    <td className="metric-name">Extra Pay</td>
                     <td className="amount vendor">{formatCurrency(report.summary.vendor_amount)}</td>
                     <td className="percentage">
                       {report.summary.total_amount ? ((report.summary.vendor_amount / report.summary.total_amount) * 100).toFixed(1) : 0}%
@@ -321,7 +328,7 @@ const OrderDashboard = () => {
                       <th>Month</th>
                       <th>Total Amount</th>
                       <th>Balance Amount</th>
-                      <th>Vendor Amount</th>
+                      <th>Extra Pay</th>
                       <th>Advance Amount</th>
                       <th>Order Count</th>
                       <th>Avg Order Value</th>
@@ -363,7 +370,7 @@ const OrderDashboard = () => {
                       <th>Total Amount</th>
                       <th>Balance Amount</th>
                       <th>Advance Amount</th>
-                      <th>Vendor Amount</th>
+                      <th>Extra Pay</th>
                       <th>Status</th>
                       <th>Phone</th>
                       <th>Locality</th>
@@ -374,7 +381,7 @@ const OrderDashboard = () => {
                       const orderStatus = getOrderStatus(order.order_status);
                       return (
                         <tr key={order._id} className={index % 2 === 0 ? 'even-row' : 'odd-row'}>
-                          <td className="order-id">#{order.order_id}</td>
+                          <td className="order-id">{getOrderId(order.order_id)}</td>
                           <td className="date-cell">{formatDate(order.order_date)}</td>
                           <td className="date-cell">{formatDate(order.createdAt)}</td>
                           <td className="amount total">{formatCurrency(order.total_amount || 0)}</td>

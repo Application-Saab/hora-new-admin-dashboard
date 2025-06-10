@@ -1,226 +1,3 @@
-// "use client";
-// import { useState } from "react";
-// import axios from "axios";
-// import getOrderType from "../../../utils/getOrderType";
-// import { ADMIN_ORDER_LIST, BASE_URL } from "../../../utils/apiconstant";
-// import "./stats.css";
-
-// const CityOrdersSummary = () => {
-//   const [allOrders, setAllOrders] = useState([]);
-//   const [loading, setLoading] = useState(false);
-//   const [startDate, setStartDate] = useState("");
-//   const [endDate, setEndDate] = useState("");
-//   const [showTable, setShowTable] = useState(false);
-//   const [selectedKey, setSelectedKey] = useState("");
-
-//   // Define the four cities we want to track
-//   const targetCities = ["Delhi", "Mumbai", "Bangalore", "Hyderabad"];
-
-//   const handleDropdownChange = (e) => {
-//     const key = e.target.value;
-//     setSelectedKey(key);
-//   };
-
-//   const fetchAllOrders = async () => {
-//     setLoading(true);
-
-//     if (!selectedKey) {
-//       alert("Please select an order type first.");
-//       setLoading(false);
-//       return;
-//     }
-
-//     try {
-//       // Prepare the API payload - fetch all data without date filters
-//       const payload = {
-//         page: 1,
-//         per_page: 5000,
-//         status: 1,
-//         order_locality: "",
-//         start_date: null,
-//         end_date: null,
-//       };
-
-//       // Only add type if "all" is not selected
-//       if (selectedKey !== "all") {
-//         payload.type = parseInt(selectedKey);
-//       }
-
-//       const { data } = await axios.post(BASE_URL + ADMIN_ORDER_LIST, payload);
-
-//       setAllOrders(data.data?.order || []);
-//       setShowTable(true);
-//     } catch (error) {
-//       console.error("Error fetching orders:", error);
-//     }
-//     setLoading(false);
-//   };
-
-//   // Filter orders by date range on frontend
-//   const getFilteredOrders = () => {
-//     if (!startDate && !endDate) {
-//       return allOrders;
-//     }
-
-//     return allOrders.filter((order) => {
-//       if (!order.createdAt) return false;
-
-//       const orderDate = new Date(order.createdAt).toISOString().split("T")[0];
-
-//       if (startDate && endDate) {
-//         return orderDate >= startDate && orderDate <= endDate;
-//       } else if (startDate) {
-//         return orderDate >= startDate;
-//       } else if (endDate) {
-//         return orderDate <= endDate;
-//       }
-
-//       return true;
-//     });
-//   };
-
-//   // Calculate city orders and totals from filtered data
-//   const getCityOrdersSummary = () => {
-//     const filteredOrders = getFilteredOrders();
-
-//     // Initialize summary for our target cities
-//     const citySummary = {};
-//     targetCities.forEach((city) => {
-//       citySummary[city] = {
-//         orderCount: 0,
-//         totalAmount: 0,
-//       };
-//     });
-
-//     let totalOrders = 0;
-//     let totalAmount = 0;
-
-//     filteredOrders.forEach((order) => {
-//       // Only process if order status is 1
-//       if (order.status !== 1) return;
-
-//       // Normalize city name
-//       let city = order?.order_locality?.trim() || "";
-//       if (city.toLowerCase() === "hyderbad") city = "Hyderabad";
-
-//       // Only process if it's one of our target cities
-//       if (!targetCities.includes(city)) return;
-
-//       citySummary[city].orderCount += 1;
-
-//       // Handle vendor_amount properly, converting empty strings to 0
-//       const vendorAmount = order?.vendor_amount
-//         ? parseFloat(order.vendor_amount)
-//         : 0;
-//       citySummary[city].totalAmount += vendorAmount;
-
-//       // Add to grand totals
-//       totalOrders += 1;
-//       totalAmount += vendorAmount;
-//     });
-
-//     return { citySummary, totalOrders, totalAmount };
-//   };
-
-//   const { citySummary, totalOrders, totalAmount } = getCityOrdersSummary();
-
-//   return (
-//     <div className="city-orders-container">
-//       <h2 className="city-orders-title">
-//         Order Filter: Start Date, End Date, And Type
-//       </h2>
-
-//       <div className="filter-container">
-//         <div className="filter-block">
-//           <label htmlFor="startDate">Start Date</label>
-//           <input
-//             type="date"
-//             id="startDate"
-//             value={startDate}
-//             onChange={(e) => setStartDate(e.target.value)}
-//           />
-//         </div>
-//         <div className="filter-block">
-//           <label htmlFor="endDate">End Date</label>
-//           <input
-//             type="date"
-//             id="endDate"
-//             value={endDate}
-//             onChange={(e) => setEndDate(e.target.value)}
-//           />
-//         </div>
-
-//         <div className="filter-block">
-//           <label htmlFor="orderType">Order Type</label>
-//           <select
-//             onChange={handleDropdownChange}
-//             value={selectedKey}
-//             className="dropdown-select"
-//           >
-//             <option value="" disabled>
-//               -- Select --
-//             </option>
-//             <option value="all">All Order Types</option>
-//             {[...Array(8)].map((_, i) => {
-//               const value = i + 1;
-//               return (
-//                 <option key={value} value={value}>
-//                   {getOrderType(value)}
-//                 </option>
-//               );
-//             })}
-//           </select>
-//         </div>
-//       </div>
-
-//       <button onClick={fetchAllOrders} className="load-data-button">
-//         Load Data
-//       </button>
-
-//       {loading ? (
-//         <p className="loading-text">Loading orders...</p>
-//       ) : showTable ? (
-//         <div className="table-container">
-//           <table className="orders-table">
-//             <thead>
-//               <tr className="table-header">
-//                 <th>City</th>
-//                 <th>Total Orders</th>
-//                 <th>Vendor Amount</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//               {/* Show only our target cities in a consistent order */}
-//               {targetCities.map((city) => {
-//                 const data = citySummary[city] || {
-//                   orderCount: 0,
-//                   totalAmount: 0,
-//                 };
-//                 return (
-//                   <tr key={city} className="table-row">
-//                     <td className="table-cell city-name">{city}</td>
-//                     <td className="table-cell">{data.orderCount}</td>
-//                     <td className="table-cell amount">
-//                       ₹{data.totalAmount.toFixed(2)}
-//                     </td>
-//                   </tr>
-//                 );
-//               })}
-//               <tr className="grand-total-row">
-//                 <td className="grand-total-cell">Grand Total</td>
-//                 <td className="grand-total-cell">{totalOrders}</td>
-//                 <td className="grand-total-cell">₹{totalAmount.toFixed(2)}</td>
-//               </tr>
-//             </tbody>
-//           </table>
-//         </div>
-//       ) : null}
-//     </div>
-//   );
-// };
-
-// export default CityOrdersSummary;
-
 "use client";
 import { useState } from "react";
 import axios from "axios";
@@ -244,12 +21,22 @@ const CityOrdersSummary = () => {
     setSelectedKey(key);
   };
 
-  const fetchData = async (city, startDate, endDate) => {
+  const fetchData = async (city, startDate, endDate, categoryNumber) => {
+    console.log(categoryNumber, "categoryNumber");
     try {
-      const url = `https://script.google.com/macros/s/AKfycbw-cjT3C4o3qIBA5zA8u4Nb3gWb_sZtU08f6lfVwYeLzqk7WA80Idd79RM9CUytgVsS/exec?city=${city}&startDate=${startDate}&endDate=${endDate}`;
+      if (categoryNumber === 7) categoryNumber = 6;
+      
+      // Build URL with conditional categoryNumber parameter
+      let url = `https://script.google.com/macros/s/AKfycbzODlS3to4AC-sA7UvD6qY_SH8cNfvUoXZ9jGu8sp3DnvXKXHRIvvX9WowHdLCFy_yv/exec?city=${city}&startDate=${startDate}&endDate=${endDate}`;
+      
+      // Only add categoryNumber if it's not null (for "all" case, we don't send categoryNumber)
+      if (categoryNumber !== null) {
+        url += `&categoryNumber=${categoryNumber}`;
+      }
 
       const response = await fetch(url);
       const result = await response.json();
+      console.log(result, "result");
 
       return result;
     } catch (error) {
@@ -258,21 +45,68 @@ const CityOrdersSummary = () => {
     }
   };
 
-  const fetchAllMarketingData = async () => {
+  const fetchAllMarketingData = async (type) => {
     if (!startDate || !endDate) {
       return [];
     }
 
-    const allMarketingData = [];
+    // If type is "all", fetch all data without category filter
+    if (type === "all") {
+      const fetchPromises = targetCities.map(city =>
+        fetchData(city, startDate, endDate, null) // Pass null for categoryNumber to get all categories
+      );
 
-    for (const city of targetCities) {
-      const cityData = await fetchData(city, startDate, endDate);
-      if (Array.isArray(cityData)) {
-        allMarketingData.push(...cityData);
+      try {
+        const results = await Promise.all(fetchPromises);
+        const allMarketingData = results.flat().filter(Boolean);
+        return allMarketingData;
+      } catch (error) {
+        console.error("Error fetching all marketing data:", error);
+        return [];
       }
     }
 
-    return allMarketingData;
+    // For specific types, fetch data for that type only
+    const fetchPromises = targetCities.map(city =>
+      fetchData(city, startDate, endDate, type)
+    );
+
+    try {
+      const results = await Promise.all(fetchPromises); // Parallel fetching
+
+      // Flatten the array of arrays
+      const allMarketingData = results.flat().filter(Boolean); // remove null/undefined if any
+
+      return allMarketingData;
+    } catch (error) {
+      console.error("Error fetching all marketing data:", error);
+      return [];
+    }
+  };
+
+  // New function to fetch orders by type with date filtering
+  const fetchOrdersByType = async (orderType) => {
+    const payload = {
+      page: 1,
+      per_page: 1000,
+      status: 1,
+      order_locality: "",
+      type: orderType,
+    };
+
+    // Add date filters if provided
+    if (startDate) {
+      payload.start_createdAt = startDate;
+    }
+    if (endDate) {
+      // Add one day to include the full end date
+      const endDatePlusOne = new Date(endDate);
+      endDatePlusOne.setDate(endDatePlusOne.getDate() + 1);
+      payload.end_createdAt = endDatePlusOne.toISOString().split('T')[0];
+    }
+
+    const { data } = await axios.post(BASE_URL + ADMIN_ORDER_LIST, payload);
+    return data.data?.order || [];
   };
 
   const fetchAllOrders = async () => {
@@ -285,26 +119,67 @@ const CityOrdersSummary = () => {
     }
 
     try {
-      const payload = {
-        page: 1,
-        per_page: 3000,
-        status: 1,
-        order_locality: "",
-        start_date: null,
-        end_date: null,
-      };
+      let ordersData = [];
+      let marketingResult = [];
 
-      if (selectedKey !== "all") {
-        payload.type = parseInt(selectedKey);
+      // Handle type 6 or 7 - fetch both types and combine
+      if (selectedKey === "6" || selectedKey === "7") {
+        console.log("Fetching data for both type 6 and 7");
+        
+        // Fetch orders for both types
+        const [ordersType6, ordersType7] = await Promise.all([
+          fetchOrdersByType(6),
+          fetchOrdersByType(7)
+        ]);
+        
+        // Combine orders from both types
+        ordersData = [...ordersType6, ...ordersType7];
+        
+        // For marketing data, since fetchData converts 7 to 6, we only need to call it once
+        // But we need to fetch marketing data for the combined order types
+        marketingResult = await fetchAllMarketingData(6); // This covers both 6 and 7
+        
+        console.log("Combined orders:", ordersData.length);
+        console.log("Marketing data:", marketingResult.length);
+        
+      } else if (selectedKey === "all") {
+        // Handle "all" case
+        const payload = {
+          page: 1,
+          per_page: 1000,
+          status: 1,
+          order_locality: "",
+        };
+
+        // Add date filters if provided
+        if (startDate) {
+          payload.start_createdAt = startDate;
+        }
+        if (endDate) {
+          // Add one day to include the full end date
+          const endDatePlusOne = new Date(endDate);
+          endDatePlusOne.setDate(endDatePlusOne.getDate() + 1);
+          payload.end_createdAt = endDatePlusOne.toISOString().split('T')[0];
+        }
+
+        // Don't add type parameter for "all" - this will fetch all order types
+        const { data } = await axios.post(BASE_URL + ADMIN_ORDER_LIST, payload);
+        ordersData = data.data?.order || [];
+        
+        // For "all", fetch marketing data for all categories
+        marketingResult = await fetchAllMarketingData("all");
+        
+      } else {
+        // Handle other specific types
+        const orderType = parseInt(selectedKey);
+        ordersData = await fetchOrdersByType(orderType);
+        marketingResult = await fetchAllMarketingData(orderType);
       }
 
-      const { data } = await axios.post(BASE_URL + ADMIN_ORDER_LIST, payload);
-      setAllOrders(data.data?.order || []);
-
-      const marketingResult = await fetchAllMarketingData();
+      setAllOrders(ordersData);
       setMarketingData(marketingResult);
-
       setShowTable(true);
+      
     } catch (error) {
       console.error("Error fetching orders:", error);
     }
@@ -312,25 +187,9 @@ const CityOrdersSummary = () => {
   };
 
   const getFilteredOrders = () => {
-    if (!startDate && !endDate) {
-      return allOrders;
-    }
-
-    return allOrders.filter((order) => {
-      if (!order.createdAt) return false;
-
-      const orderDate = new Date(order.createdAt).toISOString().split("T")[0];
-
-      if (startDate && endDate) {
-        return orderDate >= startDate && orderDate <= endDate;
-      } else if (startDate) {
-        return orderDate >= startDate;
-      } else if (endDate) {
-        return orderDate <= endDate;
-      }
-
-      return true;
-    });
+    // Since we're now filtering at API level, we don't need client-side filtering
+    // But keeping this function for backward compatibility
+    return allOrders;
   };
 
   const getMarketingCostByCity = (cityName) => {
@@ -412,7 +271,7 @@ const CityOrdersSummary = () => {
   return (
     <div className="city-orders-container">
       <h2 className="city-orders-title">
-Order Split by City
+        Order Split by City  <span style={{fontSize: "10px"}}>(CreatedAt date)</span>
       </h2>
 
       <div className="filter-container">
@@ -485,19 +344,20 @@ Order Split by City
                   totalOrderAmount: 0,
                   marketingCost: 0,
                 };
-                // const marketingContribution =
-                //   data.totalOrderAmount > 0
-                //     ? data.marketingCost / data.totalOrderAmount
-                //     : 0;
+                
                 console.log(
                   `City: ${city}, Total Order Amount: ${data.totalOrderAmount}`
                 );
+                console.log("Marketing Cost:", data.marketingCost);
                 const marketingContributionRatio =
                   data.totalOrderAmount > 0
                     ? data.marketingCost / data.totalOrderAmount
                     : 0;
-                const marketingContributionPercentage =
-                  marketingContributionRatio * 100;
+                console.log("Marketing Contribution Ratio:", marketingContributionRatio);
+
+                const marketingContributionPercentage = marketingContributionRatio * 100;
+
+                console.log("Marketing Contribution Percentage:", marketingContributionPercentage + "%");
 
                 return (
                   <tr key={city} className="table-row">
@@ -546,287 +406,3 @@ Order Split by City
 };
 
 export default CityOrdersSummary;
-
-// "use client";
-// import { useState } from "react";
-// import axios from "axios";
-// import getOrderType from "../../../utils/getOrderType";
-// import { ADMIN_ORDER_LIST, BASE_URL } from "../../../utils/apiconstant";
-// import "./stats.css";
-
-// const CityOrdersSummary = () => {
-//   const [allOrders, setAllOrders] = useState([]);
-//   const [marketingData, setMarketingData] = useState([]);
-//   const [loading, setLoading] = useState(false);
-//   const [startDate, setStartDate] = useState("");
-//   const [endDate, setEndDate] = useState("");
-//   const [showTable, setShowTable] = useState(false);
-//   const [selectedKey, setSelectedKey] = useState("");
-
-//   // Define the four cities we want to track
-//   const targetCities = ["Delhi", "Mumbai", "Bangalore", "Hyderabad"];
-
-//   const handleDropdownChange = (e) => {
-//     const key = e.target.value;
-//     setSelectedKey(key);
-//   };
-
-//   const fetchData = async (city, startDate, endDate) => {
-//     try {
-//       const url = `https://script.google.com/macros/s/AKfycbw-cjT3C4o3qIBA5zA8u4Nb3gWb_sZtU08f6lfVwYeLzqk7WA80Idd79RM9CUytgVsS/exec?city=${city}&startDate=${startDate}&endDate=${endDate}`;
-
-//       const response = await fetch(url);
-//       const result = await response.json();
-
-//       console.log(response, "response");
-//       console.log(result, "result");
-
-//       return result;
-//     } catch (error) {
-//       console.error("Error fetching marketing data:", error);
-//       return [];
-//     }
-//   };
-
-//   const fetchAllMarketingData = async () => {
-//     if (!startDate || !endDate) {
-//       return [];
-//     }
-
-//     const allMarketingData = [];
-
-//     // Fetch marketing data for each target city
-//     for (const city of targetCities) {
-//       const cityData = await fetchData(city, startDate, endDate);
-//       if (Array.isArray(cityData)) {
-//         allMarketingData.push(...cityData);
-//       }
-//     }
-
-//     return allMarketingData;
-//   };
-
-//   const fetchAllOrders = async () => {
-//     setLoading(true);
-
-//     if (!selectedKey) {
-//       alert("Please select an order type first.");
-//       setLoading(false);
-//       return;
-//     }
-
-//     try {
-//       // Prepare the API payload - fetch all data without date filters
-//       const payload = {
-//         page: 1,
-//         per_page: 2000,
-//         status: 1,
-//         order_locality: "",
-//         start_date: null,
-//         end_date: null,
-//       };
-
-//       // Only add type if "all" is not selected
-//       if (selectedKey !== "all") {
-//         payload.type = parseInt(selectedKey);
-//       }
-
-//       // Fetch orders data
-//       const { data } = await axios.post(BASE_URL + ADMIN_ORDER_LIST, payload);
-//       setAllOrders(data.data?.order || []);
-
-//       // Fetch marketing data
-//       const marketingResult = await fetchAllMarketingData();
-//       setMarketingData(marketingResult);
-
-//       setShowTable(true);
-//     } catch (error) {
-//       console.error("Error fetching orders:", error);
-//     }
-//     setLoading(false);
-//   };
-
-//   // Filter orders by date range on frontend
-//   const getFilteredOrders = () => {
-//     if (!startDate && !endDate) {
-//       return allOrders;
-//     }
-
-//     return allOrders.filter((order) => {
-//       if (!order.createdAt) return false;
-
-//       const orderDate = new Date(order.createdAt).toISOString().split("T")[0];
-
-//       if (startDate && endDate) {
-//         return orderDate >= startDate && orderDate <= endDate;
-//       } else if (startDate) {
-//         return orderDate >= startDate;
-//       } else if (endDate) {
-//         return orderDate <= endDate;
-//       }
-
-//       return true;
-//     });
-//   };
-
-//   // Calculate marketing cost by city
-//   const getMarketingCostByCity = (cityName) => {
-//     return marketingData
-//       .filter(item => item.city === cityName)
-//       .reduce((total, item) => total + (parseFloat(item.cost) || 0), 0);
-//   };
-
-//   // Calculate city orders and totals from filtered data
-//   const getCityOrdersSummary = () => {
-//     const filteredOrders = getFilteredOrders();
-
-//     // Initialize summary for our target cities
-//     const citySummary = {};
-//     targetCities.forEach((city) => {
-//       citySummary[city] = {
-//         orderCount: 0,
-//         totalAmount: 0,
-//         marketingCost: getMarketingCostByCity(city)  * 1.18,
-//       };
-//     });
-
-//     let totalOrders = 0;
-//     let totalAmount = 0;
-//     let totalMarketingCost = 0;
-
-//     filteredOrders.forEach((order) => {
-//       // Only process if order status is 1
-//       if (order.status !== 1) return;
-
-//       // Normalize city name
-//       let city = order?.order_locality?.trim() || "";
-//       if (city.toLowerCase() === "hyderbad") city = "Hyderabad";
-
-//       // Only process if it's one of our target cities
-//       if (!targetCities.includes(city)) return;
-
-//       citySummary[city].orderCount += 1;
-
-//       // Handle vendor_amount properly, converting empty strings to 0
-//       const vendorAmount = order?.vendor_amount
-//         ? parseFloat(order.vendor_amount)
-//         : 0;
-//       citySummary[city].totalAmount += vendorAmount;
-
-//       // Add to grand totals
-//       totalOrders += 1;
-//       totalAmount += vendorAmount;
-//     });
-
-//     // Calculate total marketing cost
-//     targetCities.forEach((city) => {
-//       totalMarketingCost += citySummary[city].marketingCost;
-//     });
-
-//     return { citySummary, totalOrders, totalAmount, totalMarketingCost };
-//   };
-
-//   const { citySummary, totalOrders, totalAmount, totalMarketingCost } = getCityOrdersSummary();
-
-//   return (
-//     <div className="city-orders-container">
-//       <h2 className="city-orders-title">
-//         Order Filter: Start Date, End Date, And Type
-//       </h2>
-
-//       <div className="filter-container">
-//         <div className="filter-block">
-//           <label htmlFor="startDate">Start Date</label>
-//           <input
-//             type="date"
-//             id="startDate"
-//             value={startDate}
-//             onChange={(e) => setStartDate(e.target.value)}
-//           />
-//         </div>
-//         <div className="filter-block">
-//           <label htmlFor="endDate">End Date</label>
-//           <input
-//             type="date"
-//             id="endDate"
-//             value={endDate}
-//             onChange={(e) => setEndDate(e.target.value)}
-//           />
-//         </div>
-
-//         <div className="filter-block">
-//           <label htmlFor="orderType">Order Type</label>
-//           <select
-//             onChange={handleDropdownChange}
-//             value={selectedKey}
-//             className="dropdown-select"
-//           >
-//             <option value="" disabled>
-//               -- Select --
-//             </option>
-//             <option value="all">All Order Types</option>
-//             {[...Array(8)].map((_, i) => {
-//               const value = i + 1;
-//               return (
-//                 <option key={value} value={value}>
-//                   {getOrderType(value)}
-//                 </option>
-//               );
-//             })}
-//           </select>
-//         </div>
-//       </div>
-
-//       <button onClick={fetchAllOrders} className="load-data-button">
-//         Load Data
-//       </button>
-
-//       {loading ? (
-//         <p className="loading-text">Loading orders...</p>
-//       ) : showTable ? (
-//         <div className="table-container">
-//           <table className="orders-table">
-//             <thead>
-//               <tr className="table-header">
-//                 <th>City</th>
-//                 <th>Total Orders</th>
-//                 <th>Vendor Amount</th>
-//                 <th>Marketing Cost</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//               {/* Show only our target cities in a consistent order */}
-//               {targetCities.map((city) => {
-//                 const data = citySummary[city] || {
-//                   orderCount: 0,
-//                   totalAmount: 0,
-//                   marketingCost: 0,
-//                 };
-//                 return (
-//                   <tr key={city} className="table-row">
-//                     <td className="table-cell city-name">{city}</td>
-//                     <td className="table-cell">{data.orderCount}</td>
-//                     <td className="table-cell amount">
-//                       ₹{data.totalAmount.toFixed(2)}
-//                     </td>
-//                     <td className="table-cell amount">
-//                       ₹{data.marketingCost.toFixed(2)}
-//                     </td>
-//                   </tr>
-//                 );
-//               })}
-//               <tr className="grand-total-row">
-//                 <td className="grand-total-cell">Grand Total</td>
-//                 <td className="grand-total-cell">{totalOrders}</td>
-//                 <td className="grand-total-cell">₹{totalAmount.toFixed(2)}</td>
-//                 <td className="grand-total-cell">₹{totalMarketingCost.toFixed(2) }</td>
-//               </tr>
-//             </tbody>
-//           </table>
-//         </div>
-//       ) : null}
-//     </div>
-//   );
-// };
-
-// export default CityOrdersSummary;

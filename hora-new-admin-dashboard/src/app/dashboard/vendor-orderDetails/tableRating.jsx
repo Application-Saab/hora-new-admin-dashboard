@@ -173,7 +173,7 @@ const AdminRatingsTable = () => {
   
   return (
     <div className="max-w-4xl mx-auto p-4 bg-white shadow-lg rounded-lg w-full">
-      <h2 className="text-xl font-semibold mb-4 text-center">Vendor Ratings Table</h2>
+      <h2 className="text-xl font-semibold mb-4 text-center">Vendor Ratings Table <span style={{fontSize: "10px"}}>(Fullfillment date)</span></h2>
       <div className="mb-4">
         <select className="p-2 border rounded-md w-full mb-2" value={selectedCity} onChange={(e) => setSelectedCity(e.target.value)}>
           <option value="">All Cities</option>
