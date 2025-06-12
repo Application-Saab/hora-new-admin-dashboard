@@ -40,8 +40,7 @@ const AddPhotoOrder = () => {
   const [product, setProduct] = useState(null);
   const [setIsContinueClicked] = useState(false);
   const [showProductDetails, setShowProductDetails] = useState(false);
-  // const [setIsFetched] = useState(false);
-  const [, setIsFetched] = useState(false);
+  const [isFetched, setIsFetched] = useState(false);
   const [pincodeMessage, setPincodeMessage] = useState("");
   const [pincodeMessageColor, setPincodeMessageColor] = useState("");
   const [totalamount, setTotalAmount] = useState("");
@@ -63,15 +62,11 @@ const AddPhotoOrder = () => {
   const [lloading, setlLoading] = useState(false);
   const [showButton, setShowButton] = useState(false);
 
-  // isFetched = true;
-
-
   const handleComment = (e) => {
     const commentText = e.target.value;
     setComment(commentText);
   };
 
-  // Fetch products based on selected tag
   useEffect(() => {
     if (selectedTag) {
       const fetchProductsByTag = async () => {

@@ -1,6 +1,21 @@
 import Image from "next/image";
 import "./Actionpopup.css";
 import { useState, useEffect } from "react";
+import axios from 'axios';
+
+const categoryMap = {
+  '65a92271ae1586258ccd0628': 'anniversary-decoration',
+  '65a95dcb6995e7401e78c2ea': 'baby-shower-decoration',
+  '65aeaf3747d5cb78ba19d4b6': 'balloon-bouquets-decoration',
+  '65a91598ae1586258cccffd4': 'birthday-decoration',
+  '65a92085ae1586258ccd04ff': 'first-night-decoration',
+  '66ad224731c3672040d8d32a': 'haldi-mehendi-decoration',
+  '65aeaf5147d5cb78ba19d4d3': 'kids-birthday-decoration',
+  '65a92efbae1586258ccd0c6e': 'premium-decoration',
+  '66c9df0922ed47b721180334': 'Proposal-Decorations',
+  '65a2d129513d9389d34e31d4': 'welcome-baby-decoration',
+  '66c44baf8bd9c45aaa2c42b5': 'bachelorette-decoration',
+};
 
 const ActionPopup = ({
   isOpen,
@@ -87,6 +102,38 @@ const ActionPopup = ({
     const orderId1 = 10800 + e;
     const updateOrderId = "#" + orderId1;
     return updateOrderId;
+  };
+
+  // 
+  const handleClick = async () => {
+    setLoading(true); // Start loader
+    try {
+      const encodedName = encodeURIComponent(productName);
+      const response = await axios.get(`https://horaservices.com:3000/api/Decoration/searchByName/${encodedName}`);
+
+      const product = response.data.data[0];
+
+      if (product && product.tag && product.tag.length > 0) {
+        const matchedTag = product.tag.find(tag => categoryMap[tag]);
+
+        if (matchedTag) {
+          const categoryName = categoryMap[matchedTag];
+          const formattedName = product.name.split(' ').join('-');	
+          const finalUrl = `https://horaservices.com/balloon-decoration/${categoryName}/product/${formattedName}`;
+
+          await navigator.clipboard.writeText(finalUrl);
+          console.log("✅ URL copied to clipboard:", finalUrl);
+        } else {
+          console.warn("❌ No matching category tag found");
+        }
+      } else {
+        console.warn("❌ Product not found or no tags");
+      }
+    } catch (error) {
+      console.error("❌ API call failed:", error);
+    } finally {
+      setLoading(false); // Stop loader
+    }
   };
 
   const getOrderType = (orderTypeValue) => {
@@ -448,12 +495,14 @@ const ActionPopup = ({
     message += `\n*Add-On Items:*\n`;
 
     if (addOnItems && addOnItems.length > 0) {
-      addOnItems.forEach((item, index) => {
-        message += `\n${index + 1}. ${item.name}: ₹${item.price}`;
-      });
-    } else {
-      message += ` None`; // Show "None" if there are no add-ons
-    }
+  addOnItems.forEach((item, index) => {
+    const itemLabel = [item.name, item.title].filter(Boolean).join(" ");
+    message += `\n${index + 1}. ${itemLabel}: ₹${item.price}`;
+  });
+} else {
+  message += ` None`;
+}
+
 
     // Add Decoration Items
     orderDetails.items.forEach((item) => {
@@ -477,6 +526,137 @@ const ActionPopup = ({
         console.error("Failed to copy order details to clipboard: ", err);
       });
   };
+
+  
+  // const sendOrderDetailsToWhatsAppDocUsers = () => {
+  //   console.log(JSON.stringify(orderDetails.items));
+
+  //   // Extract order details
+  //   const orderId = getOrderId(orderDetails._doc.order_id) || "N/A";
+  //   const orderDate =
+  //     new Date(orderDetails._doc.order_date).toLocaleDateString() || "N/A";
+  //   // const orderType = getOrderType(orderDetails._doc.type) || "N/A";
+  //   const address = orderDetails._doc.addressId?.address1 || "N/A";
+  //   const googleMapLocation = orderDetails._doc.addressId?.address2 || "N/A";
+  //   const orderTime = orderDetails._doc.order_time || "N/A";
+  //   const decorationComments = orderDetails._doc.decoration_comments || "N/A";
+  //   const addOnItems = orderDetails._doc.add_on || [];
+  //   // Create a Google Maps link
+  //   const googleMapUrl = `https://www.google.com/maps/search/?q=${encodeURIComponent(
+  //     googleMapLocation
+  //   )}`;
+  //   // Calculate balance amount
+  //   let balanceAmount = orderDetails._doc.total_amount;
+  //   // orderDetails._doc.total_amount
+    
+  //   // Construct the message
+  //   // Order Type: ${orderType}\n
+  //   let message = `Order Details:\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\nAddress: ${address}\nGoogleMapLocation: ${googleMapUrl}\nArrival Time: ${orderTime}\n\n*Amount:₹${balanceAmount}*\n\n*Comments*:\n ${decorationComments}\n`;
+
+  //   // Add Add-On Items
+  //   message += `\n*Add-On Items:*\n`;
+
+  //   if (addOnItems && addOnItems.length > 0) {
+  //     addOnItems.forEach((item, index) => {
+  //       message += `\n${index + 1}. ${item.name}: ₹${item.price}`;
+  //     });
+  //   } else {
+  //     message += ` None`; // Show "None" if there are no add-ons
+  //   }
+
+  //   // Add Decoration Items
+  //   orderDetails.items.forEach((item) => {
+  //     // \n*Product Price:* ₹${dec.price}
+  //     item.decoration.forEach((dec) => {
+  //       message += `\n\n*Product Name:* ${dec.name}\n*Image URL:* https://horaservices.com/api/uploads/${dec.featured_image}\n`;
+  //       const inclusionText = getCleanInclusionText(dec.inclusion); // Assuming this function formats the inclusion text
+  //       message += `\n*Inclusion:* \n${inclusionText}`;
+  //     });
+  //   });
+
+  //   navigator.clipboard
+  //     .writeText(message)
+  //     .then(() => {
+  //       alert("Order details have been copied to the clipboard!");
+  //     })
+  //     .catch((err) => {
+  //       console.error("Failed to copy order details to clipboard: ", err);
+  //     });
+  // };
+
+  const sendOrderDetailsToWhatsAppDocUsers = async () => {
+  try {
+    setLoading(true);
+
+    console.log(JSON.stringify(orderDetails.items));
+
+    const orderId = getOrderId(orderDetails._doc.order_id) || "N/A";
+    const orderDate = new Date(orderDetails._doc.order_date).toLocaleDateString() || "N/A";
+    const address = orderDetails._doc.addressId?.address1 || "N/A";
+    const googleMapLocation = orderDetails._doc.addressId?.address2 || "N/A";
+    const orderTime = orderDetails._doc.order_time || "N/A";
+    const decorationComments = orderDetails._doc.decoration_comments || "N/A";
+    const addOnItems = orderDetails._doc.add_on || [];
+    const googleMapUrl = `https://www.google.com/maps/search/?q=${encodeURIComponent(googleMapLocation)}`;
+
+    let balanceAmount = orderDetails._doc.total_amount;
+    let message = `Order Details:\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\nAddress: ${address}\nGoogleMapLocation: ${googleMapUrl}\nArrival Time: ${orderTime}\n\n*Amount: ₹${balanceAmount}*\n\n*Comments*:\n ${decorationComments}\n`;
+
+    message += `\n*Add-On Items:*\n`;
+   
+   if (addOnItems && addOnItems.length > 0) {
+  addOnItems.forEach((item, index) => {
+    const itemLabel = [item.name, item.title].filter(Boolean).join(" ");
+    message += `\n${index + 1}. ${itemLabel}: ₹${item.price}`;
+  });
+} else {
+  message += ` None`;
+}
+
+
+    // Loop through decorations and append dynamic URL info
+    for (const item of orderDetails.items) {
+      for (const dec of item.decoration) {
+        message += `\n\n*Product Name:* ${dec.name}\n`;
+
+        // 🔄 Dynamic URL based on API response
+        const encodedName = encodeURIComponent(dec.name);
+        try {
+          const response = await axios.get(`https://horaservices.com:3000/api/Decoration/searchByName/${encodedName}`);
+          const product = response.data.data[0];
+
+          if (product && product.tag && product.tag.length > 0) {
+            const matchedTag = product.tag.find(tag => categoryMap[tag]);
+            if (matchedTag) {
+              const categoryName = categoryMap[matchedTag];
+              const formattedName = dec.name.split(' ').join('-');
+              const finalUrl = `https://horaservices.com/balloon-decoration/${categoryName}/product/${formattedName}`;
+              message += `*Product Page:* ${finalUrl}\n`;
+              console.log("📌 Product URL:", finalUrl);
+            } else {
+              console.warn("❌ No matching tag found for:", dec.name);
+            }
+          } else {
+            console.warn("❌ Product not found in API for:", dec.name);
+          }
+        } catch (apiErr) {
+          console.error("❌ API call failed for:", dec.name, apiErr);
+        }
+
+        const inclusionText = getCleanInclusionText(dec.inclusion);
+        message += `\n*Inclusion:* \n${inclusionText}`;
+      }
+    }
+
+    await navigator.clipboard.writeText(message);
+    alert("Order details have been copied to the clipboard!");
+  } catch (err) {
+    console.error("Failed to send order details:", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
   const sendOrderDetailsToWhatsAppPhoto = () => {
     console.log(JSON.stringify(orderDetails.items));
 
@@ -797,6 +977,14 @@ const ActionPopup = ({
                       >
                         Copy Order Summary(For Vendor)
                       </button>
+
+                       <button
+                        className="startbutton"
+                        onClick={sendOrderDetailsToWhatsAppDocUsers}
+                      >
+                        Copy Order Summary(For Users)
+                      </button>
+               
                     </div>
                   </div>
                 </div>
