@@ -40,7 +40,7 @@ const AddPhotoOrder = () => {
   const [product, setProduct] = useState(null);
   const [setIsContinueClicked] = useState(false);
   const [showProductDetails, setShowProductDetails] = useState(false);
-  const [isFetched, setIsFetched] = useState(false);
+  const [, setIsFetched] = useState(false);
   const [pincodeMessage, setPincodeMessage] = useState("");
   const [pincodeMessageColor, setPincodeMessageColor] = useState("");
   const [totalamount, setTotalAmount] = useState("");
