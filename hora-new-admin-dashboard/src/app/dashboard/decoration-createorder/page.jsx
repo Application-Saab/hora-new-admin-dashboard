@@ -188,6 +188,7 @@ const AddDecOrder = () => {
       console.log("Customer added:", response.data.dataToSave._id);
       setCustomerId(response.data.dataToSave);
       setMessage("Customer successfully added.");
+      window.location.reload();
       // window.location.reload(false);
       setMessageColor("green");
       setShowPopup(false);

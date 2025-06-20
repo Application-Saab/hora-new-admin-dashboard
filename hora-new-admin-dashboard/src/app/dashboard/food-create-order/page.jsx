@@ -10,6 +10,7 @@ import {
 } from "../../../utils/apiconstant";
 import checkImage from "../../../assets/check.png";
 import CreateFoodOrderForm from "../../component/CreateFoodOrderForm";
+// import { log } from "console";
 
 function AddFoodOrder() {
   const [loading, setLoading] = useState(false);
@@ -285,6 +286,7 @@ function AddFoodOrder() {
 
     return finalTotal;
   };
+
 
   // Function to calculate the advance payment
   const calculateAdvancePayment = () => {
@@ -1294,7 +1296,8 @@ function AddFoodOrder() {
           calculateAdvancePayment={calculateAdvancePayment}
           peopleCount={peopleCount}
           selectedOption={selectedDeliveryOption}
-          includeTables={includeTables}
+          // includeTables={includeTables}
+          {...(selectedDeliveryOption === "live-catering" ? { includeTables } : {})}
           includeDisposable={includeDisposable}
         />
       </div>

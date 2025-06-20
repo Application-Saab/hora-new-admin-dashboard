@@ -206,7 +206,7 @@ export default function RootLayout({
     } catch (err) {
       console.error("❌ Error verifying password hash:", err);
     }
-  }, 1200000); // every 5 minutes
+  }, 10800000); // every 3 hours
 
   return () => clearInterval(intervalId);
 }, [router]);

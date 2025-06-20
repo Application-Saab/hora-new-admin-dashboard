@@ -246,8 +246,11 @@ const OrderList = () => {
   };
 
   const openActionPopup = (orderId, order_id, orderType) => {
+    console.log(orderId, "orderId");
+    console.log(order_id, "order_id");
+    console.log(orderType, "orderType");
     setActionPopupOrderId(orderId);
-    setActionPopupChefOrderId(order_id);
+    setActionPopupChefOrderId(orderId);
     setActionPopupOrderType(orderType);
     setPopupOpen(true); // Open the popup
   };

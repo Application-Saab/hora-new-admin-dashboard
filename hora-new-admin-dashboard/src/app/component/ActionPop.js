@@ -1,20 +1,20 @@
 import Image from "next/image";
 import "./Actionpopup.css";
 import { useState, useEffect } from "react";
-import axios from 'axios';
+import axios from "axios";
 
 const categoryMap = {
-  '65a92271ae1586258ccd0628': 'anniversary-decoration',
-  '65a95dcb6995e7401e78c2ea': 'baby-shower-decoration',
-  '65aeaf3747d5cb78ba19d4b6': 'balloon-bouquets-decoration',
-  '65a91598ae1586258cccffd4': 'birthday-decoration',
-  '65a92085ae1586258ccd04ff': 'first-night-decoration',
-  '66ad224731c3672040d8d32a': 'haldi-mehendi-decoration',
-  '65aeaf5147d5cb78ba19d4d3': 'kids-birthday-decoration',
-  '65a92efbae1586258ccd0c6e': 'premium-decoration',
-  '66c9df0922ed47b721180334': 'Proposal-Decorations',
-  '65a2d129513d9389d34e31d4': 'welcome-baby-decoration',
-  '66c44baf8bd9c45aaa2c42b5': 'bachelorette-decoration',
+  "65a92271ae1586258ccd0628": "anniversary-decoration",
+  "65a95dcb6995e7401e78c2ea": "baby-shower-decoration",
+  "65aeaf3747d5cb78ba19d4b6": "balloon-bouquets-decoration",
+  "65a91598ae1586258cccffd4": "birthday-decoration",
+  "65a92085ae1586258ccd04ff": "first-night-decoration",
+  "66ad224731c3672040d8d32a": "haldi-mehendi-decoration",
+  "65aeaf5147d5cb78ba19d4d3": "kids-birthday-decoration",
+  "65a92efbae1586258ccd0c6e": "premium-decoration",
+  "66c9df0922ed47b721180334": "Proposal-Decorations",
+  "65a2d129513d9389d34e31d4": "welcome-baby-decoration",
+  "66c44baf8bd9c45aaa2c42b5": "bachelorette-decoration",
 };
 
 const ActionPopup = ({
@@ -29,6 +29,10 @@ const ActionPopup = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   let apiUrl = "";
+
+  console.log(actionPopupOrderId, "actionPopupOrderId");
+  console.log(actionPopupChefOrderId, "actionPopupChefOrderId");
+  console.log(actionPopupOrderType, "actionPopupOrderType");
 
   let foodDeliveryInclusions = [
     "Complementary - Green salad, Mint Chutney, Achar",
@@ -66,7 +70,8 @@ const ActionPopup = ({
     } else if (actionPopupOrderType === 8) {
       // Need new api for photograpgy
       const photographyOrderId = actionPopupChefOrderId.toString();
-      apiUrl = `https://horaservices.com:3000/api/order/order_details/v1/${photographyOrderId}`;
+      apiUrl = `https://horaservices.com:3000/api/order/order_details_photography/${photographyOrderId}`;
+      // https://horaservices.com:3000/api/order/order_details_photography/9753
       setPopupType("Photography");
     } else {
       setError("Currently, data is not available");
@@ -82,6 +87,8 @@ const ActionPopup = ({
         const response = await fetch(apiUrl);
         const data = await response.json();
         setLoading(false);
+
+        console.log(data.data.items[0], "data.data");
 
         if (!data.error && data.status === 200) {
           setOrderDetails(data.data);
@@ -104,21 +111,23 @@ const ActionPopup = ({
     return updateOrderId;
   };
 
-  // 
+  //
   const handleClick = async () => {
     setLoading(true); // Start loader
     try {
       const encodedName = encodeURIComponent(productName);
-      const response = await axios.get(`https://horaservices.com:3000/api/Decoration/searchByName/${encodedName}`);
+      const response = await axios.get(
+        `https://horaservices.com:3000/api/Decoration/searchByName/${encodedName}`
+      );
 
       const product = response.data.data[0];
 
       if (product && product.tag && product.tag.length > 0) {
-        const matchedTag = product.tag.find(tag => categoryMap[tag]);
+        const matchedTag = product.tag.find((tag) => categoryMap[tag]);
 
         if (matchedTag) {
           const categoryName = categoryMap[matchedTag];
-          const formattedName = product.name.split(' ').join('-');	
+          const formattedName = product.name.split(" ").join("-");
           const finalUrl = `https://horaservices.com/balloon-decoration/${categoryName}/product/${formattedName}`;
 
           await navigator.clipboard.writeText(finalUrl);
@@ -236,7 +245,7 @@ const ActionPopup = ({
                 </p>
                 <p>
                   <strong>Order Comments:</strong>{" "}
-                  {orderDetails.decoration_comments || "N/A"}
+                  {/* {orderDetails.decoration_comments || "N/A"} */}
                 </p>
               </div>
               <h3>Ordered Items:</h3>
@@ -495,14 +504,13 @@ const ActionPopup = ({
     message += `\n*Add-On Items:*\n`;
 
     if (addOnItems && addOnItems.length > 0) {
-  addOnItems.forEach((item, index) => {
-    const itemLabel = [item.name, item.title].filter(Boolean).join(" ");
-    message += `\n${index + 1}. ${itemLabel}: ₹${item.price}`;
-  });
-} else {
-  message += ` None`;
-}
-
+      addOnItems.forEach((item, index) => {
+        const itemLabel = [item.name, item.title].filter(Boolean).join(" ");
+        message += `\n${index + 1}. ${itemLabel}: ₹${item.price}`;
+      });
+    } else {
+      message += ` None`;
+    }
 
     // Add Decoration Items
     orderDetails.items.forEach((item) => {
@@ -527,7 +535,6 @@ const ActionPopup = ({
       });
   };
 
-  
   // const sendOrderDetailsToWhatsAppDocUsers = () => {
   //   console.log(JSON.stringify(orderDetails.items));
 
@@ -548,7 +555,7 @@ const ActionPopup = ({
   //   // Calculate balance amount
   //   let balanceAmount = orderDetails._doc.total_amount;
   //   // orderDetails._doc.total_amount
-    
+
   //   // Construct the message
   //   // Order Type: ${orderType}\n
   //   let message = `Order Details:\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\nAddress: ${address}\nGoogleMapLocation: ${googleMapUrl}\nArrival Time: ${orderTime}\n\n*Amount:₹${balanceAmount}*\n\n*Comments*:\n ${decorationComments}\n`;
@@ -585,132 +592,155 @@ const ActionPopup = ({
   // };
 
   const sendOrderDetailsToWhatsAppDocUsers = async () => {
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    console.log(JSON.stringify(orderDetails.items));
+      console.log(JSON.stringify(orderDetails.items));
 
-    const orderId = getOrderId(orderDetails._doc.order_id) || "N/A";
-    const orderDate = new Date(orderDetails._doc.order_date).toLocaleDateString() || "N/A";
-    const address = orderDetails._doc.addressId?.address1 || "N/A";
-    const googleMapLocation = orderDetails._doc.addressId?.address2 || "N/A";
-    const orderTime = orderDetails._doc.order_time || "N/A";
-    const decorationComments = orderDetails._doc.decoration_comments || "N/A";
-    const addOnItems = orderDetails._doc.add_on || [];
-    const googleMapUrl = `https://www.google.com/maps/search/?q=${encodeURIComponent(googleMapLocation)}`;
+      const orderId = getOrderId(orderDetails._doc.order_id) || "N/A";
+      const orderDate =
+        new Date(orderDetails._doc.order_date).toLocaleDateString() || "N/A";
+      const address = orderDetails._doc.addressId?.address1 || "N/A";
+      const googleMapLocation = orderDetails._doc.addressId?.address2 || "N/A";
+      const orderTime = orderDetails._doc.order_time || "N/A";
+      const decorationComments = orderDetails._doc.decoration_comments || "N/A";
+      const addOnItems = orderDetails._doc.add_on || [];
+      const googleMapUrl = `https://www.google.com/maps/search/?q=${encodeURIComponent(
+        googleMapLocation
+      )}`;
 
-    let balanceAmount = orderDetails._doc.total_amount;
-    let message = `Order Details:\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\nAddress: ${address}\nGoogleMapLocation: ${googleMapUrl}\nArrival Time: ${orderTime}\n\n*Amount: ₹${balanceAmount}*\n\n*Comments*:\n ${decorationComments}\n`;
+      let balanceAmount = orderDetails._doc.total_amount;
+      let message = `Order Details:\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\nAddress: ${address}\nGoogleMapLocation: ${googleMapUrl}\nArrival Time: ${orderTime}\n\n*Amount: ₹${balanceAmount}*\n\n*Comments*:\n ${decorationComments}\n`;
 
-    message += `\n*Add-On Items:*\n`;
-   
-   if (addOnItems && addOnItems.length > 0) {
-  addOnItems.forEach((item, index) => {
-    const itemLabel = [item.name, item.title].filter(Boolean).join(" ");
-    message += `\n${index + 1}. ${itemLabel}: ₹${item.price}`;
-  });
-} else {
-  message += ` None`;
-}
+      message += `\n*Add-On Items:*\n`;
 
-
-    // Loop through decorations and append dynamic URL info
-    for (const item of orderDetails.items) {
-      for (const dec of item.decoration) {
-        message += `\n\n*Product Name:* ${dec.name}\n`;
-
-        // 🔄 Dynamic URL based on API response
-        const encodedName = encodeURIComponent(dec.name);
-        try {
-          const response = await axios.get(`https://horaservices.com:3000/api/Decoration/searchByName/${encodedName}`);
-          const product = response.data.data[0];
-
-          if (product && product.tag && product.tag.length > 0) {
-            const matchedTag = product.tag.find(tag => categoryMap[tag]);
-            if (matchedTag) {
-              const categoryName = categoryMap[matchedTag];
-              const formattedName = dec.name.split(' ').join('-');
-              const finalUrl = `https://horaservices.com/balloon-decoration/${categoryName}/product/${formattedName}`;
-              message += `*Product Page:* ${finalUrl}\n`;
-              console.log("📌 Product URL:", finalUrl);
-            } else {
-              console.warn("❌ No matching tag found for:", dec.name);
-            }
-          } else {
-            console.warn("❌ Product not found in API for:", dec.name);
-          }
-        } catch (apiErr) {
-          console.error("❌ API call failed for:", dec.name, apiErr);
-        }
-
-        const inclusionText = getCleanInclusionText(dec.inclusion);
-        message += `\n*Inclusion:* \n${inclusionText}`;
+      if (addOnItems && addOnItems.length > 0) {
+        addOnItems.forEach((item, index) => {
+          const itemLabel = [item.name, item.title].filter(Boolean).join(" ");
+          message += `\n${index + 1}. ${itemLabel}: ₹${item.price}`;
+        });
+      } else {
+        message += ` None`;
       }
-    }
 
-    await navigator.clipboard.writeText(message);
-    alert("Order details have been copied to the clipboard!");
-  } catch (err) {
-    console.error("Failed to send order details:", err);
-  } finally {
-    setLoading(false);
-  }
-};
+      // Loop through decorations and append dynamic URL info
+      for (const item of orderDetails.items) {
+        for (const dec of item.decoration) {
+          message += `\n\n*Product Name:* ${dec.name}\n`;
+
+          // 🔄 Dynamic URL based on API response
+          const encodedName = encodeURIComponent(dec.name);
+          try {
+            const response = await axios.get(
+              `https://horaservices.com:3000/api/Decoration/searchByName/${encodedName}`
+            );
+            const product = response.data.data[0];
+
+            if (product && product.tag && product.tag.length > 0) {
+              const matchedTag = product.tag.find((tag) => categoryMap[tag]);
+              if (matchedTag) {
+                const categoryName = categoryMap[matchedTag];
+                const formattedName = dec.name.split(" ").join("-");
+                const finalUrl = `https://horaservices.com/balloon-decoration/${categoryName}/product/${formattedName}`;
+                message += `*Product Page:* ${finalUrl}\n`;
+                console.log("📌 Product URL:", finalUrl);
+              } else {
+                console.warn("❌ No matching tag found for:", dec.name);
+              }
+            } else {
+              console.warn("❌ Product not found in API for:", dec.name);
+            }
+          } catch (apiErr) {
+            console.error("❌ API call failed for:", dec.name, apiErr);
+          }
+
+          const inclusionText = getCleanInclusionText(dec.inclusion);
+          message += `\n*Inclusion:* \n${inclusionText}`;
+        }
+      }
+
+      await navigator.clipboard.writeText(message);
+      alert("Order details have been copied to the clipboard!");
+    } catch (err) {
+      console.error("Failed to send order details:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const sendOrderDetailsToWhatsAppPhoto = () => {
-    console.log(JSON.stringify(orderDetails.items));
+  const orderId = getOrderId(orderDetails._doc.order_id) || "N/A";
+  const orderDate = new Date(orderDetails._doc.order_date).toLocaleDateString() || "N/A";
+  const address = orderDetails._doc.addressId?.address1 || "N/A";
+  const googleMapLocation = orderDetails._doc.addressId?.address2 || "N/A";
+  const orderTime = orderDetails._doc.order_time || "N/A";
+  const decorationComments = orderDetails._doc.decoration_comments || "N/A";
+  const addOnItems = orderDetails._doc.add_on || [];
 
-    // Extract order details
-    const orderId = getOrderId(orderDetails.order_id) || "N/A";
-    const orderDate =
-      new Date(orderDetails.order_date).toLocaleDateString() || "N/A";
-    // const orderType = getOrderType(orderDetails._doc.type) || "N/A";
-    const address = orderDetails.addressId?.address1 || "N/A";
-    const googleMapLocation = orderDetails.addressId?.address2 || "N/A";
-    const orderTime = orderDetails.order_time || "N/A";
-    const decorationComments = orderDetails.decoration_comments || "N/A";
-    const addOnItems = orderDetails.add_on || [];
-    // Create a Google Maps link
-    const googleMapUrl = `https://www.google.com/maps/search/?q=${encodeURIComponent(
-      googleMapLocation
-    )}`;
-    // Calculate balance amount
-    let balanceAmount = 0;
-    if (orderDetails.phone_no) {
-      balanceAmount = orderDetails.total_amount - orderDetails.advance_amount;
+  // Format Inclusion Section
+  let inclusionText = "None";
+  const inclusionRaw = orderDetails.items?.[0]?.photography?.[0]?.inclusion?.[0] || "";
+
+  if (inclusionRaw) {
+    const cleaned = inclusionRaw
+      .replace(/<\/div>/gi, "\n")       
+      .replace(/<[^>]+>/g, "")          
+      .replace(/\n+/g, "\n")            
+      .trim();
+
+    // Add '-' at the beginning of each line
+    inclusionText = cleaned
+      .split("\n")
+      .map(line => `${line.trim()}`)
+      .join("\n");
+  }
+
+  const googleMapUrl = `https://www.google.com/maps/search/?q=${encodeURIComponent(googleMapLocation)}`;
+
+  let balanceAmount = 0;
+  if (orderDetails._doc.phone_no) {
+    balanceAmount = orderDetails._doc.total_amount - orderDetails._doc.advance_amount;
+  } else {
+    if ([2, 3, 4, 5].includes(orderDetails?._doc.type)) {
+      balanceAmount = Math.round((orderDetails?._doc.payable_amount * 4) / 5);
+    } else if ([6, 7].includes(orderDetails?._doc.type)) {
+      balanceAmount = Math.round(orderDetails?._doc.payable_amount * 0.35);
     } else {
-      if ([2, 3, 4, 5].includes(orderDetails?.type)) {
-        balanceAmount = Math.round((orderDetails?.payable_amount * 4) / 5);
-      } else if ([6, 7].includes(orderDetails?.type)) {
-        balanceAmount = Math.round(orderDetails?.payable_amount * 0.35);
-      } else {
-        balanceAmount = Math.round(orderDetails?.payable_amount * 0.65);
-      }
+      balanceAmount = Math.round(orderDetails?._doc.payable_amount * 0.65);
     }
+  }
 
-    // Construct the message
-    // Order Type: ${orderType}\n
-    let message = `Photography Order Details:\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\nAddress: ${address}\nGoogleMapLocation: ${googleMapUrl}\nArrival Time: ${orderTime}\n\n*Amount:₹${balanceAmount}*\n\n*Comments*:\n ${decorationComments}\n`;
+  let message = `📸 *Photography Order Details:*\n\n`;
+  message += `*Order ID:* ${orderId}\n`;
+  message += `*Order Date:* ${orderDate}\n`;
+  message += `*Address:* ${address}\n`;
+  message += `*Google Map Location:* ${googleMapUrl}\n`;
+  message += `*Arrival Time:* ${orderTime}\n`;
+  message += `\n💰 *Amount: ₹${balanceAmount}*\n`;
+  message += `\n📝 *Comments:*\n${decorationComments || "None"}\n`;
 
-    // Add Inclusion Items
-    message += `\n*Inclusion:*\n`;
-    if (addOnItems && addOnItems.length > 0) {
-      addOnItems.forEach((item, index) => {
-        message += `\n${index + 1}. ${item}`;
-      });
-    } else {
-      message += ` None`; // Show "None" if there are no add-ons
-    }
+  // ✅ Final Bullet-formatted Inclusion section
+  message += `\n📷 *Order Included:*\n${inclusionText}\n`;
 
-    navigator.clipboard
-      .writeText(message)
-      .then(() => {
-        alert("Order details have been copied to the clipboard!");
-      })
-      .catch((err) => {
-        console.error("Failed to copy order details to clipboard: ", err);
-      });
-  };
+  // ✅ Add-ons
+  message += `\n➕ *Add-ons:*\n`;
+  if (addOnItems.length > 0) {
+    addOnItems.forEach((item, index) => {
+      message += `\n${index + 1}. ${item.title}\n   - ₹${item.price} x ${item.quantity}\n   - ${item.description}`;
+    });
+  } else {
+    message += `\nNone`;
+  }
+
+  navigator.clipboard
+    .writeText(message)
+    .then(() => {
+      alert("Order details have been copied to the clipboard!");
+    })
+    .catch((err) => {
+      console.error("Failed to copy order details to clipboard: ", err);
+    });
+};
 
   const sendOrderDetailsToWhatsAppchef = (orderDetails) => {
     console.log(orderDetails);
@@ -978,13 +1008,12 @@ const ActionPopup = ({
                         Copy Order Summary(For Vendor)
                       </button>
 
-                       <button
+                      <button
                         className="startbutton"
                         onClick={sendOrderDetailsToWhatsAppDocUsers}
                       >
                         Copy Order Summary(For Users)
                       </button>
-               
                     </div>
                   </div>
                 </div>
@@ -1016,50 +1045,203 @@ const ActionPopup = ({
                       <div className="order-detail-row">
                         <p>
                           <strong>Order Id:</strong>{" "}
-                          {getOrderId(orderDetails.order_id)}
+                          {getOrderId(orderDetails._doc.order_id)}
                         </p>
                         <p>
                           <strong>Order Date:</strong>{" "}
                           {new Date(
-                            orderDetails.order_date
+                            orderDetails._doc.order_date
                           ).toLocaleDateString()}
                         </p>
                         <p>
                           <strong>Order Type:</strong>{" "}
-                          {getOrderType(orderDetails.type)}
+                          {getOrderType(orderDetails._doc.type)}
                         </p>
                         <p>
                           <strong>Order City:</strong>{" "}
-                          {orderDetails.order_locality || "N/A"}
+                          {orderDetails._doc.order_locality || "N/A"}
                         </p>
                         <p>
                           <strong>Order Address:</strong>{" "}
-                          {orderDetails.addressId?.address1 || "N/A"}
+                          {orderDetails._doc.addressId?.address1 || "N/A"}
                         </p>
                         <p>
                           <strong>Order Google Map Location:</strong>{" "}
-                          {orderDetails.addressId?.address2 || "N/A"}
+                          {orderDetails._doc.addressId?.address2 || "N/A"}
                         </p>
                         <p>
                           <strong>Order Time:</strong>{" "}
-                          {orderDetails.order_time || "N/A"}
+                          {orderDetails._doc.order_time || "N/A"}
                         </p>
                         <p>
                           <strong>Order Comments:</strong>{" "}
-                          {orderDetails.decoration_comments || "N/A"}
+                          {orderDetails._doc.decoration_comments || "N/A"}
                         </p>
-                        <p>
-                          <strong>Order Included:</strong>
-                          {orderDetails.add_on.length > 0 ? (
-                            <ul>
-                              {orderDetails.add_on.map((item, index) => (
-                                <li key={index}>- {item}</li>
-                              ))}
-                            </ul>
+                       
+                        <div
+                          style={{
+                            backgroundColor: "#f9f9f9",
+                            border: "1px solid #ddd",
+                            borderRadius: "8px",
+                            padding: "12px 16px",
+                            marginTop: "16px",
+                            fontSize: "14px",
+                            lineHeight: "1.6",
+                            color: "#333",
+                          }}
+                        >
+                          <p
+                            style={{
+                              marginBottom: "8px",
+                              fontWeight: "600",
+                              fontSize: "15px",
+                              color: "#444",
+                            }}
+                          >
+                            Order Included:
+                          </p>
+                          {orderDetails.items[0].photography &&
+                          orderDetails.items[0].photography.length > 0 &&
+                          orderDetails.items[0].photography[0].inclusion &&
+                          orderDetails.items[0].photography[0].inclusion
+                            .length > 0 ? (
+                            <div
+                              dangerouslySetInnerHTML={{
+                                __html:
+                                  orderDetails.items[0].photography[0]
+                                    .inclusion[0],
+                              }}
+                            />
                           ) : (
-                            "N/A"
+                            <p style={{ fontSize: "13px", color: "#777" }}>
+                              N/A
+                            </p>
                           )}
-                        </p>
+                        </div>
+
+                        <div
+                          style={{
+                            backgroundColor: "#f3f4f6",
+                            padding: "16px 12px",
+                            borderRadius: "12px",
+                            boxShadow: "inset 0 1px 4px rgba(0,0,0,0.03)",
+                          }}
+                        >
+                          <div
+                            style={{
+                              backgroundColor: "#ffffff",
+                              borderRadius: "12px",
+                              boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+                              padding: "16px",
+                            }}
+                          >
+                            <p
+                              style={{
+                                fontWeight: "600",
+                                fontSize: "14px",
+                                marginBottom: "12px",
+                              }}
+                            >
+                              <strong>ADD-ON:</strong>
+                            </p>
+
+                            {orderDetails._doc.add_on.length > 0 ? (
+                              <div
+                                style={{
+                                  display: "grid",
+                                  gridTemplateColumns:
+                                    "repeat(auto-fit, minmax(200px, 1fr))",
+                                  gap: "16px",
+                                }}
+                              >
+                                {orderDetails._doc.add_on.map((item, index) => (
+                                  <div
+                                    key={index}
+                                    style={{
+                                      backgroundColor: "#fff",
+                                      borderRadius: "10px",
+                                      boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+                                      overflow: "hidden",
+                                      display: "flex",
+                                      flexDirection: "column",
+                                      border: "1px solid #e5e7eb",
+                                    }}
+                                  >
+                                    {/* Image on top */}
+                                    <div
+                                      style={{
+                                        width: "100%",
+                                        height: "120px",
+                                        overflow: "hidden",
+                                      }}
+                                    >
+                                      <Image
+                                        src={item.image}
+                                        alt={item.title}
+                                        width={240}
+                                        height={120}
+                                        style={{
+                                          width: "100%",
+                                          height: "100%",
+                                          objectFit: "cover",
+                                        }}
+                                      />
+                                    </div>
+
+                                    {/* Info below */}
+                                    <div
+                                      style={{
+                                        padding: "10px",
+                                        textAlign: "left",
+                                      }}
+                                    >
+                                      <p
+                                        style={{
+                                          fontSize: "13px",
+                                          fontWeight: "600",
+                                          color: "#059669",
+                                        }}
+                                      >
+                                        ₹{item.price}
+                                      </p>
+
+                                      <h3
+                                        style={{
+                                          fontSize: "13px",
+                                          fontWeight: "500",
+                                          color: "#1f2937",
+                                          marginTop: "2px",
+                                        }}
+                                      >
+                                        {item.title}
+                                      </h3>
+
+                                      <p
+                                        style={{
+                                          fontSize: "12px",
+                                          color: "#6b7280",
+                                          marginTop: "4px",
+                                        }}
+                                      >
+                                        {item.description}
+                                      </p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p
+                                style={{
+                                  fontSize: "12px",
+                                  color: "#6b7280",
+                                  marginTop: "6px",
+                                }}
+                              >
+                                N/A
+                              </p>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -1068,35 +1250,30 @@ const ActionPopup = ({
                       <ul style={{ listStyleType: "none", padding: 0 }}>
                         <li className="priceList">
                           <strong>Total Amount:</strong>{" "}
-                          <span>₹{orderDetails.total_amount}</span>
+                          <span>₹{orderDetails._doc.total_amount}</span>
                         </li>
                         <li className="priceList">
                           <strong>Advance Amount:</strong>{" "}
-                          <span>₹{orderDetails.advance_amount || 0}</span>
+                          <span>₹{orderDetails._doc.advance_amount || 0}</span>
                         </li>
                         <li className="priceList">
                           <span>Balance Amount</span>
                           <span>
-                            {orderDetails.total_amount &&
-                            orderDetails.advance_amount
-                              ? `₹ ${
-                                  orderDetails.total_amount -
-                                  orderDetails.advance_amount
-                                }`
-                              : "N/A"}
+                            {orderDetails._doc.total_amount -
+                              orderDetails._doc.advance_amount}
                           </span>
                         </li>
                         <li className="priceList">
                           <strong>Discount:</strong>{" "}
-                          <span>₹{orderDetails.discount || 0}</span>
+                          <span>₹{orderDetails._doc.discount || 0}</span>
                         </li>
                         <li className="priceList">
                           <strong>GST:</strong>{" "}
-                          <span>₹{orderDetails.gst || 0}</span>
+                          <span>₹{orderDetails._doc.gst || 0}</span>
                         </li>
                         <li className="priceList">
                           <strong>Per person cost:</strong>{" "}
-                          <span>₹{orderDetails.per_person_cost || 0}</span>
+                          <span>₹{orderDetails._doc.per_person_cost || 0}</span>
                         </li>
                       </ul>
                       <button

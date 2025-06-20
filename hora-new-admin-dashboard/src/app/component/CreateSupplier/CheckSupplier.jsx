@@ -8,6 +8,7 @@ const CheckSupplier = ({
   setShowModal,
   setIsSupplierAssigned,
 }) => {
+  // console.log(setIsSupplierAssigned," setIsSupplierAssigned in CheckSupplier");
   console.log("SelectedOrder in CheckSupplier:", SelectedOrder);
   console.log("SelectedOrder in CheckSuppliertoid:", SelectedOrder.toId);
   const [supplierData, setSupplierData] = useState(null);
@@ -209,19 +210,26 @@ const CheckSupplier = ({
             {/* <button className="assign-btn" onClick={handleReAssignPopup}>
               Assign12
             </button> */}
-            {SelectedOrder.order_status === 6 ? (
-              <button className="assign-btn" onClick={handleReAssignPopup}>
-                Re-Assign
-              </button>
-            ) : null // or nothing, to hide the Assign button
-            }
+          
+          {SelectedOrder.order_status === 6 ? (
+  <button className="assign-btn" onClick={handleReAssignPopup}>
+    Re-Assign
+  </button>
+) : null}
 
-            {/* // Show Reassign only if order_status is NOT 6 */}
-            {SelectedOrder.order_status !== 6 && (
-              <button className="assign-btn" onClick={handleAssignPopup}>
-                Assign
-              </button>
-            )}
+{/* // Show Assign or One-more time only if order_status is NOT 6 */}
+{SelectedOrder.order_status !== 6 && (
+  SelectedOrder.toId ? (
+    <button className="assign-btn" onClick={handleReAssignPopup}>
+      One-more time
+    </button>
+  ) : (
+    <button className="assign-btn" onClick={handleAssignPopup}>
+      Assign
+    </button>
+  )
+)}
+
 
           </div>
         )}

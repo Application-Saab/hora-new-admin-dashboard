@@ -24,14 +24,18 @@ const CityOrdersSummary = () => {
   const fetchData = async (city, startDate, endDate, categoryNumber) => {
     console.log(categoryNumber, "categoryNumber");
     try {
-      if (categoryNumber === 7) categoryNumber = 6;
+      // For Google Sheets API, always use 6 for types 6, 7, and 8
+      let googleSheetsCategoryNumber = categoryNumber;
+      if (categoryNumber === 7 || categoryNumber === 8) {
+        googleSheetsCategoryNumber = 6;
+      }
       
       // Build URL with conditional categoryNumber parameter
       let url = `https://script.google.com/macros/s/AKfycbzODlS3to4AC-sA7UvD6qY_SH8cNfvUoXZ9jGu8sp3DnvXKXHRIvvX9WowHdLCFy_yv/exec?city=${city}&startDate=${startDate}&endDate=${endDate}`;
       
       // Only add categoryNumber if it's not null (for "all" case, we don't send categoryNumber)
-      if (categoryNumber !== null) {
-        url += `&categoryNumber=${categoryNumber}`;
+      if (googleSheetsCategoryNumber !== null) {
+        url += `&categoryNumber=${googleSheetsCategoryNumber}`;
       }
 
       const response = await fetch(url);
@@ -53,7 +57,7 @@ const CityOrdersSummary = () => {
     // If type is "all", fetch all data without category filter
     if (type === "all") {
       const fetchPromises = targetCities.map(city =>
-        fetchData(city, startDate, endDate, null) // Pass null for categoryNumber to get all categories
+        fetchData(city, startDate, endDate, null) 
       );
 
       try {
@@ -66,7 +70,7 @@ const CityOrdersSummary = () => {
       }
     }
 
-    // For specific types, fetch data for that type only
+    // For types 6, 7, and 8, all will get categoryNumber=6 for Google Sheets
     const fetchPromises = targetCities.map(city =>
       fetchData(city, startDate, endDate, type)
     );
@@ -75,7 +79,7 @@ const CityOrdersSummary = () => {
       const results = await Promise.all(fetchPromises); // Parallel fetching
 
       // Flatten the array of arrays
-      const allMarketingData = results.flat().filter(Boolean); // remove null/undefined if any
+      const allMarketingData = results.flat().filter(Boolean); 
 
       return allMarketingData;
     } catch (error) {
@@ -94,12 +98,10 @@ const CityOrdersSummary = () => {
       type: orderType,
     };
 
-    // Add date filters if provided
     if (startDate) {
       payload.start_createdAt = startDate;
     }
     if (endDate) {
-      // Add one day to include the full end date
       const endDatePlusOne = new Date(endDate);
       endDatePlusOne.setDate(endDatePlusOne.getDate() + 1);
       payload.end_createdAt = endDatePlusOne.toISOString().split('T')[0];
@@ -122,9 +124,9 @@ const CityOrdersSummary = () => {
       let ordersData = [];
       let marketingResult = [];
 
-      // Handle type 6 or 7 - fetch both types and combine
-      if (selectedKey === "6" || selectedKey === "7") {
-        console.log("Fetching data for both type 6 and 7");
+      // Handle type 8 (Food Delivery + Live Catering) - fetch both types and combine
+      if (selectedKey === "8") {
+        console.log("Fetching data for type 8 (Food Delivery + Live Catering) - calling both type 6 and 7");
         
         // Fetch orders for both types
         const [ordersType6, ordersType7] = await Promise.all([
@@ -135,10 +137,31 @@ const CityOrdersSummary = () => {
         // Combine orders from both types
         ordersData = [...ordersType6, ...ordersType7];
         
-        marketingResult = await fetchAllMarketingData(6); 
+        // For marketing data, pass type 8 but it will use categoryNumber=6 in Google Sheets
+        marketingResult = await fetchAllMarketingData(8); 
         
-        console.log("Combined orders:", ordersData.length);
-        console.log("Marketing data:", marketingResult.length);
+        console.log("Combined orders for type 8:", ordersData.length);
+        console.log("Marketing data for type 8:", marketingResult.length);
+        
+      } else if (selectedKey === "6") {
+        // Handle type 6 (Food Delivery only)
+        console.log("Fetching data for type 6 (Food Delivery only)");
+        
+        ordersData = await fetchOrdersByType(6);
+        marketingResult = await fetchAllMarketingData(6);
+        
+        console.log("Orders for type 6:", ordersData.length);
+        console.log("Marketing data for type 6:", marketingResult.length);
+        
+      } else if (selectedKey === "7") {
+        // Handle type 7 (Live Catering only)
+        console.log("Fetching data for type 7 (Live Catering only)");
+        
+        ordersData = await fetchOrdersByType(7);
+        marketingResult = await fetchAllMarketingData(7);
+        
+        console.log("Orders for type 7:", ordersData.length);
+        console.log("Marketing data for type 7:", marketingResult.length);
         
       } else if (selectedKey === "all") {
         // Handle "all" case
@@ -166,7 +189,7 @@ const CityOrdersSummary = () => {
         marketingResult = await fetchAllMarketingData("all");
         
       } else {
-        // Handle other specific types
+        // Handle other specific types (1, 2, 3, 4, 5)
         const orderType = parseInt(selectedKey);
         ordersData = await fetchOrdersByType(orderType);
         marketingResult = await fetchAllMarketingData(orderType);
@@ -183,8 +206,6 @@ const CityOrdersSummary = () => {
   };
 
   const getFilteredOrders = () => {
-    // Since we're now filtering at API level, we don't need client-side filtering
-    // But keeping this function for backward compatibility
     return allOrders;
   };
 
@@ -250,6 +271,14 @@ const CityOrdersSummary = () => {
     };
   };
 
+  // Custom function to get order type names including the new type 8
+  const getCustomOrderType = (value) => {
+    if (value === 8) {
+      return "Food Delivery + Live Catering";
+    }
+    return getOrderType(value);
+  };
+
   const {
     citySummary,
     totalOrders,
@@ -301,14 +330,19 @@ const CityOrdersSummary = () => {
               -- Select --
             </option>
             <option value="all">All Order Types</option>
-            {[...Array(8)].map((_, i) => {
+            {[...Array(5)].map((_, i) => {
               const value = i + 1;
               return (
                 <option key={value} value={value}>
-                  {getOrderType(value)}
+                  {getCustomOrderType(value)}
                 </option>
               );
             })}
+            {/* Separate options for Food Delivery and Live Catering */}
+            <option value="6">Food Delivery</option>
+            <option value="7">Live Catering</option>
+            {/* Combined option */}
+            <option value="8">Food Delivery + Live Catering</option>
           </select>
         </div>
       </div>

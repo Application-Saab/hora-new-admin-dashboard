@@ -5,6 +5,7 @@ import getOrderType from "../../../utils/getOrderType";
 import { ADMIN_ORDER_LIST, BASE_URL } from "../../../utils/apiconstant";
 import Stats from "../stats/page";
 import "./analysis.css";
+// import OrderDashboard from "../testing/page";
 
 const CityOrdersSummary = () => {
   const [filteredOrders, setFilteredOrders] = useState([]);
@@ -24,6 +25,9 @@ const CityOrdersSummary = () => {
   const [error, setError] = useState("");
   const [, setUser] = useState(null);
   const [timerId, setTimerId] = useState(null);
+
+  const [sendingDataToPage, setSendingDataToPage] = useState("");
+  console.log(sendingDataToPage, "sendingDataToPage");
 
   const cities = [
     { value: "", label: "All" },
@@ -47,41 +51,38 @@ const CityOrdersSummary = () => {
     setLoading(true);
 
     try {
-      // Prepare API payload
       const payload = {
         page: 1,
         per_page: 2000,
         status: 1,
       };
 
-      // Add type only if not "All" (empty string)
       if (selectedKey !== "") {
         payload.type = parseInt(selectedKey);
       }
 
-      // Add order_locality only if not "All" (empty string)
       if (selectedCity !== "") {
         payload.order_locality = selectedCity;
       }
 
-      // Add date filters to payload
       if (startDate) {
         payload.start_createdAt = startDate;
       }
 
       if (endDate) {
-        // Add one day to end date to include the full last day
         const endDateObj = new Date(endDate);
         endDateObj.setDate(endDateObj.getDate() + 1);
         const adjustedEndDate = endDateObj.toISOString().split('T')[0];
         payload.end_createdAt = adjustedEndDate;
       }
 
-      console.log("API Payload:", payload); // Debug log to see what's being sent
+      console.log("API Payload:", payload); 
 
       const { data } = await axios.post(BASE_URL + ADMIN_ORDER_LIST, payload);
 
       const orders = data.data?.order || [];
+      console.log("Fetched orders:", orders); 
+      setSendingDataToPage(orders);
       setFilteredOrders(orders);
       setShowTable(true);
     } catch (error) {
@@ -104,7 +105,6 @@ const CityOrdersSummary = () => {
     const start = new Date(startDate + "T00:00:00");
     const end = new Date(endDate + "T00:00:00");
 
-    // Iterate through each day in the range
     for (
       let day = new Date(start);
       day <= end;
@@ -139,12 +139,9 @@ const CityOrdersSummary = () => {
 
     const dateWiseSummary = {};
 
-    // Debug: Log total orders received from API
     console.log("Total orders from API:", filteredOrders.length);
     console.log("Date range:", startDate, "to", endDate);
 
-    // Since API now handles date filtering, we don't need to filter by date again
-    // We'll process all orders returned by the API
     const processedOrders = filteredOrders.filter((order) => {
       return order.status === 1;
     });
@@ -152,7 +149,6 @@ const CityOrdersSummary = () => {
     console.log("Processed orders count:", processedOrders.length);
 
     processedOrders.forEach((order) => {
-      // Format the date consistently for grouping using UTC
       const orderDate = new Date(order.createdAt);
       const orderDateUTC =
         orderDate.getUTCFullYear() +
@@ -263,7 +259,7 @@ const CityOrdersSummary = () => {
       console.log(matchedUser, "matchedUser");
 
       if (matchedUser) {
-        const expiry = Date.now() + 30 * 60 * 1000; // 30 minutes
+const expiry = Date.now() + 60 * 60 * 1000; // 60 minutes
         localStorage.setItem(
           "analysis-session",
           JSON.stringify({ user: matchedUser, expiry })
@@ -272,7 +268,7 @@ const CityOrdersSummary = () => {
         setShowLogin(false);
         const timeout = setTimeout(() => {
           handleLogout(); // auto logout
-        }, 30 * 60 * 1000); // 30 minutes
+        }, 60 * 60 * 1000); // 60 minutes
 
         setTimerId(timeout);
       } else {
@@ -390,7 +386,7 @@ const CityOrdersSummary = () => {
                   <p className="loading-text">Loading orders...</p>
                 ) : showTable ? (
                   <>
-                  <div className="table-container">
+                  <div className="table-container" style={{ maxHeight: '300px', overflowY: 'auto', border: '1px solid #ccc' }}>
                     <table className="data-table">
                       <thead className="table-header">
                         <tr>
@@ -441,8 +437,13 @@ const CityOrdersSummary = () => {
               </div>
               
           </div>
-
-        
+{/* <OrderDashboard
+      startDate={startDate}
+      endDate={endDate}
+      orders={sendingDataToPage}
+      orderType={selectedKey}
+      city={selectedCity}
+    /> */}
         </>
       )}
     </div>

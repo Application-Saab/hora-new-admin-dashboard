@@ -23,11 +23,14 @@ const CreateOrderForm = ({
   selectedOption,
   selectedMealList,
   includeDisposable,
+  includeTables,
 }) => {
   console.log(calculateAdvancePayment, "calculateAdvancePayment");
   console.log(calculateFinalTotal, "calculateFinalTotal");
   console.log(selectedOption, "selectedOption");
   console.log(selectedMealList,"selectedMealList");
+  console.log(includeDisposable, "includeDisposable");
+  console.log(includeTables, "includeTables");
 
   const [newCustomerName, setNewCustomerName] = useState("");
   const [newCustomerPhone, setNewCustomerPhone] = useState("");
@@ -226,6 +229,13 @@ const CreateOrderForm = ({
     setComment(commentText);
   };
 
+  const decoration_comments =
+  (comment || "") + (includeTables === true ? "\nYou've picked the serving table with a cloth for ₹1200." : "");
+
+  // Now decoration_comments includes both the comment and the booking message if applicable
+
+  console.log("decoration_comments:", decoration_comments);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setlLoading(true);
@@ -270,7 +280,7 @@ const CreateOrderForm = ({
       is_gst: "0",
       order_type: true,
       items: selectedMealList,
-      decoration_comments: comment,
+      decoration_comments: decoration_comments,
       status: 1,
       balance_amount: balanceamount,
       order_taken_by: orderTakenBy,
