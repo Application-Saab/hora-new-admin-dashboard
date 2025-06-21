@@ -112,38 +112,38 @@ const ActionPopup = ({
   };
 
   //
-  const handleClick = async () => {
-    setLoading(true); // Start loader
-    try {
-      const encodedName = encodeURIComponent(productName);
-      const response = await axios.get(
-        `https://horaservices.com:3000/api/Decoration/searchByName/${encodedName}`
-      );
+  // const handleClick = async () => {
+  //   setLoading(true); // Start loader
+  //   try {
+  //     const encodedName = encodeURIComponent(productName);
+  //     const response = await axios.get(
+  //       `https://horaservices.com:3000/api/Decoration/searchByName/${encodedName}`
+  //     );
 
-      const product = response.data.data[0];
+  //     const product = response.data.data[0];
 
-      if (product && product.tag && product.tag.length > 0) {
-        const matchedTag = product.tag.find((tag) => categoryMap[tag]);
+  //     if (product && product.tag && product.tag.length > 0) {
+  //       const matchedTag = product.tag.find((tag) => categoryMap[tag]);
 
-        if (matchedTag) {
-          const categoryName = categoryMap[matchedTag];
-          const formattedName = product.name.split(" ").join("-");
-          const finalUrl = `https://horaservices.com/balloon-decoration/${categoryName}/product/${formattedName}`;
+  //       if (matchedTag) {
+  //         const categoryName = categoryMap[matchedTag];
+  //         const formattedName = product.name.split(" ").join("-");
+  //         const finalUrl = `https://horaservices.com/balloon-decoration/${categoryName}/product/${formattedName}`;
 
-          await navigator.clipboard.writeText(finalUrl);
-          console.log("✅ URL copied to clipboard:", finalUrl);
-        } else {
-          console.warn("❌ No matching category tag found");
-        }
-      } else {
-        console.warn("❌ Product not found or no tags");
-      }
-    } catch (error) {
-      console.error("❌ API call failed:", error);
-    } finally {
-      setLoading(false); // Stop loader
-    }
-  };
+  //         await navigator.clipboard.writeText(finalUrl);
+  //         console.log("✅ URL copied to clipboard:", finalUrl);
+  //       } else {
+  //         console.warn("❌ No matching category tag found");
+  //       }
+  //     } else {
+  //       console.warn("❌ Product not found or no tags");
+  //     }
+  //   } catch (error) {
+  //     console.error("❌ API call failed:", error);
+  //   } finally {
+  //     setLoading(false); // Stop loader
+  //   }
+  // };
 
   const getOrderType = (orderTypeValue) => {
     const orderTypes = {
