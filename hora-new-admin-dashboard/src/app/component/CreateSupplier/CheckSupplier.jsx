@@ -62,8 +62,6 @@ const CheckSupplier = ({
     }
   };
 
-
-  
   const handleReAssignPopup = async () => {
     if (!supplierData || !SelectedOrder) {
       alert("Missing supplier or order details.");
@@ -207,30 +205,25 @@ const CheckSupplier = ({
               <strong>Order ID:</strong> {SelectedOrder._id}
             </p>
 
-            {/* <button className="assign-btn" onClick={handleReAssignPopup}>
-              Assign12
-            </button> */}
-          
-          {SelectedOrder.order_status === 6 ? (
-  <button className="assign-btn" onClick={handleReAssignPopup}>
-    Re-Assign
-  </button>
-) : null}
+            {SelectedOrder.order_status === 6 ? (
+              <button className="assign-btn" onClick={handleReAssignPopup}>
+                Re-Assign
+              </button>
+            ) : null}
 
-{/* // Show Assign or One-more time only if order_status is NOT 6 */}
-{SelectedOrder.order_status !== 6 && (
-  SelectedOrder.toId ? (
-    <button className="assign-btn" onClick={handleReAssignPopup}>
-      One-more time
-    </button>
-  ) : (
-    <button className="assign-btn" onClick={handleAssignPopup}>
-      Assign
-    </button>
-  )
-)}
-
-
+            {/* // Show Assign or One-more time only if order_status is NOT 6 */}
+            {
+            SelectedOrder.order_status !== 6 &&
+              (SelectedOrder.toId ? (
+                <button className="assign-btn" onClick={handleReAssignPopup}>
+                  One-more time
+                </button>
+              ) : (
+                <button className="assign-btn" onClick={handleAssignPopup}>
+                  Assign
+                </button>
+              ))
+              }
           </div>
         )}
 

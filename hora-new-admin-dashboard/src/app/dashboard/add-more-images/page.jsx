@@ -40,7 +40,7 @@ const AddMoreImages = () => {
           const response = await axios.post('https://horaservices.com:3000/api/admin/admin_user_list', {
             role: 'customer',
             page: 1,
-            per_page: 2000
+            per_page: 3000
           });
 
           const customers = response.data.data?.users || [];

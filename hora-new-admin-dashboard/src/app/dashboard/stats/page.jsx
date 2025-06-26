@@ -24,9 +24,9 @@ const CityOrdersSummary = () => {
   const fetchData = async (city, startDate, endDate, categoryNumber) => {
     console.log(categoryNumber, "categoryNumber");
     try {
-      // For Google Sheets API, always use 6 for types 6, 7, and 8
+      // For Google Sheets API, always use 6 for types 6, 7, and 10
       let googleSheetsCategoryNumber = categoryNumber;
-      if (categoryNumber === 7 || categoryNumber === 8) {
+      if (categoryNumber === 7 || categoryNumber === 10) {
         googleSheetsCategoryNumber = 6;
       }
       
@@ -70,7 +70,7 @@ const CityOrdersSummary = () => {
       }
     }
 
-    // For types 6, 7, and 8, all will get categoryNumber=6 for Google Sheets
+    // For types 6, 7, and 10, all will get categoryNumber=6 for Google Sheets
     const fetchPromises = targetCities.map(city =>
       fetchData(city, startDate, endDate, type)
     );
@@ -124,9 +124,9 @@ const CityOrdersSummary = () => {
       let ordersData = [];
       let marketingResult = [];
 
-      // Handle type 8 (Food Delivery + Live Catering) - fetch both types and combine
-      if (selectedKey === "8") {
-        console.log("Fetching data for type 8 (Food Delivery + Live Catering) - calling both type 6 and 7");
+      // Handle type 10 (Food Delivery + Live Catering) - fetch both types and combine
+      if (selectedKey === "10") {
+        console.log("Fetching data for type 10 (Food Delivery + Live Catering) - calling both type 6 and 7");
         
         // Fetch orders for both types
         const [ordersType6, ordersType7] = await Promise.all([
@@ -137,11 +137,11 @@ const CityOrdersSummary = () => {
         // Combine orders from both types
         ordersData = [...ordersType6, ...ordersType7];
         
-        // For marketing data, pass type 8 but it will use categoryNumber=6 in Google Sheets
-        marketingResult = await fetchAllMarketingData(8); 
+        // For marketing data, pass type 10 but it will use categoryNumber=6 in Google Sheets
+        marketingResult = await fetchAllMarketingData(10); 
         
-        console.log("Combined orders for type 8:", ordersData.length);
-        console.log("Marketing data for type 8:", marketingResult.length);
+        console.log("Combined orders for type 10:", ordersData.length);
+        console.log("Marketing data for type 10:", marketingResult.length);
         
       } else if (selectedKey === "6") {
         // Handle type 6 (Food Delivery only)
@@ -163,7 +163,15 @@ const CityOrdersSummary = () => {
         console.log("Orders for type 7:", ordersData.length);
         console.log("Marketing data for type 7:", marketingResult.length);
         
-      } else if (selectedKey === "all") {
+      } else if (selectedKey === "8") {
+        
+        ordersData = await fetchOrdersByType(8);
+        marketingResult = await fetchAllMarketingData(8);
+        
+        console.log("Orders for type 8:", ordersData.length);
+        console.log("Marketing data for type 8:", marketingResult.length);
+        
+      } else if (selectedKey === "10") {
         // Handle "all" case
         const payload = {
           page: 1,
@@ -271,9 +279,9 @@ const CityOrdersSummary = () => {
     };
   };
 
-  // Custom function to get order type names including the new type 8
+  // Custom function to get order type names including the new type mappings
   const getCustomOrderType = (value) => {
-    if (value === 8) {
+    if (value === 10) {
       return "Food Delivery + Live Catering";
     }
     return getOrderType(value);
@@ -287,7 +295,6 @@ const CityOrdersSummary = () => {
     totalMarketingCost,
   } = getCityOrdersSummary();
 
-  // Ensure totalOrderAmount is calculated correctly
   const grandTotalOrderAmount = Object.values(citySummary).reduce(
     (sum, cityData) => sum + cityData.totalOrderAmount,
     0
@@ -341,8 +348,10 @@ const CityOrdersSummary = () => {
             {/* Separate options for Food Delivery and Live Catering */}
             <option value="6">Food Delivery</option>
             <option value="7">Live Catering</option>
+            {/* Photography option */}
+            <option value="8">Photography</option>
             {/* Combined option */}
-            <option value="8">Food Delivery + Live Catering</option>
+            <option value="10">Food Delivery + Live Catering</option>
           </select>
         </div>
       </div>

@@ -24,6 +24,9 @@ const OrderList = () => {
   const [actionPopupChefOrderId, setActionPopupChefOrderId] = useState("");
   const [actionPopupOrderType, setActionPopupOrderType] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
+  
+  const [actionPopupChefOrder_Id, setActionPopupChefOrder_Id] = useState("");
+
   // supplier
   const [isSupplierAssigned, setIsSupplierAssigned] = useState(false);
   const [selectedDate, setSelectedDate] = useState("");
@@ -39,6 +42,8 @@ const OrderList = () => {
   const [createdAtDate, setCreatedAtDate] = useState("");
 
   const [orderTypeShow, setOrderTypeShow] = useState(null);
+
+  console.log(isSupplierAssigned);
 
   const fetchOrders = async (
     page,
@@ -247,11 +252,12 @@ const OrderList = () => {
 
   const openActionPopup = (orderId, order_id, orderType) => {
     console.log(orderId, "orderId");
-    console.log(order_id, "order_id");
+    console.log(order_id, "order_id1");
     console.log(orderType, "orderType");
     setActionPopupOrderId(orderId);
     setActionPopupChefOrderId(orderId);
     setActionPopupOrderType(orderType);
+    setActionPopupChefOrder_Id(order_id);
     setPopupOpen(true); // Open the popup
   };
 
@@ -278,6 +284,7 @@ const OrderList = () => {
   };
 
   const openSupplierAssignPopup = (order) => {
+    console.log(order, "orderrr");
     setSelectedSupplierOrder(order);
     setIsModalOpen(true);
   };
@@ -687,50 +694,45 @@ const OrderList = () => {
                     <td>{order.order_taken_by || "N/A"}</td>
                     <td>{order.phone_no || "N/A"}</td>
                     {/* <td>{order.online_phone_no || "N/A"}</td> */}
-                    <td>
-                      {order.toId ? (
-                        <>
-                          <button
-                            onClick={() => openSupplierDeatilsPopup(order.toId)}
-                            className="assigningBtn assigned"
-                          >
-                            <FaEye />
-                            <span>Assigned</span>
-                          </button>
-                          <span
-                            style={{ cursor: "pointer", marginLeft: "8px" }}
-                            // onClick={() => handleOpenModal(order._id)}
+                   <td>
+  {order.toId ? (
+    <>
+      <button
+        onClick={() => openSupplierDeatilsPopup(order.toId)}
+        className="assigningBtn assigned"
+      >
+        <FaEye />
+        <span>Assigned</span>
+      </button>
+      <span
+        style={{ cursor: "pointer", marginLeft: "8px" }}
+        onClick={() => openSupplierAssignPopup(order)}
+        title="Edit"
+      >
+        ✏️
+      </span>
+    </>
+  ) : (
+    <>
+      <button
+        className="assigningBtn not-assigned"
+        onClick={() => openSupplierAssignPopup(order)}
+      >
+        Not Assigned
+      </button>
+    </>
+  )}
 
-                            onClick={() => openSupplierAssignPopup(order)}
-                            title="Edit"
-                          >
-                            ✏️
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          {/* {order.order_status !== 6 && ( */}
-                          <button
-                            className="assigningBtn not-assigned"
-                            onClick={() => openSupplierAssignPopup(order)}
-                          >
-                            Not Assigned
-                          </button>
-                          {/* // )} */}
-                          {/* supplier assign popup */}
-                          {isModalOpen && selectedSupplierOrder && (
-                            <>
-                              {console.log(isSupplierAssigned)}
-                              <CheckSupplier
-                                SelectedOrder={selectedSupplierOrder}
-                                setShowModal={setIsModalOpen}
-                                setIsSupplierAssigned={setIsSupplierAssigned}
-                              />
-                            </>
-                          )}
-                        </>
-                      )}
-                    </td>
+  {/* Always render the modal if needed */}
+  {isModalOpen && selectedSupplierOrder && (
+    <CheckSupplier
+      SelectedOrder={selectedSupplierOrder}
+      setShowModal={setIsModalOpen}
+      setIsSupplierAssigned={setIsSupplierAssigned}
+    />
+  )}
+</td>
+
                     <td>
                       {`${order.job_start_time.replace(
                         /(\d{4})(\d{1,2}:\d{2}:\d{2} (AM|PM))/,
@@ -1143,6 +1145,7 @@ const OrderList = () => {
           actionPopupOrderId={actionPopupOrderId}
           actionPopupChefOrderId={actionPopupChefOrderId}
           actionPopupOrderType={actionPopupOrderType}
+          actionPopupChefOrder_Id={actionPopupChefOrder_Id}
           onClose={closePopup}
         />
       </div>
