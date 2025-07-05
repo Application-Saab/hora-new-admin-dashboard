@@ -176,3 +176,43 @@ select{
   border: 1px solid grey;
 }
 
+
+/* children */
+.nested-menu {
+  margin-left: 20px;
+  margin-top: 5px;
+}
+
+.nested-item {
+  margin: 4px 0;
+}
+
+.link-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  color: inherit;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.group-button {
+  width: 100%;
+}
+
+.chevron-icon {
+  margin-left: auto;
+}
+
+.logout-button {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.logout-icon {
+  margin-right: 5px;
+}

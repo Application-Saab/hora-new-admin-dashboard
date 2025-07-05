@@ -14,7 +14,7 @@ export const ACCEPT_ORDER = "/api/order/acceptOrder";
 export const PRODUCT_TYPE = "/api/configuration/admin_configuration_list_all";
 export const PRODUCT_MEAL_TYPE = "/api/meals/admin_meals_list";
 export const IMAGE_UPLOAD = "/api/decoration_image_upload";
-export const ADD_DECORATION_PRODUCT = "/api/dish/add";
+export const ADD_DECORATION_PRODUCT = "/api/dish/add1";
 export const EDIT_DECORATION_PRODUCT = "/api/decoration/edit";
 export const ORDER_EDIT = "/api/order/edit";
 

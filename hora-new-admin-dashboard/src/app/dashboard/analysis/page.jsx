@@ -6,6 +6,7 @@ import { ADMIN_ORDER_LIST, BASE_URL } from "../../../utils/apiconstant";
 import Stats from "../stats/page";
 import "./analysis.css";
 // import OrderDashboard from "../testing/page";
+import NewUserCount from "../new-user-count/page";
 
 const CityOrdersSummary = () => {
   const [filteredOrders, setFilteredOrders] = useState([]);
@@ -435,8 +436,13 @@ const expiry = Date.now() + 60 * 60 * 1000; // 60 minutes
                 <Stats />
                 
               </div>
-              
+
           </div>
+
+              <div>
+                <NewUserCount />
+              </div>
+              
 {/* <OrderDashboard
       startDate={startDate}
       endDate={endDate}

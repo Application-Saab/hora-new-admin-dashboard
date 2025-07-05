@@ -114,7 +114,6 @@ const ActionPopup = ({
     return updateOrderId;
   };
 
-
   const getOrderType = (orderTypeValue) => {
     const orderTypes = {
       1: "Decoration",
@@ -583,78 +582,85 @@ const ActionPopup = ({
   };
 
   const sendOrderDetailsToWhatsAppPhoto = () => {
-  const orderId = getOrderId(orderDetails._doc.order_id) || "N/A";
-  const orderDate = new Date(orderDetails._doc.order_date).toLocaleDateString() || "N/A";
-  const address = orderDetails._doc.addressId?.address1 || "N/A";
-  const googleMapLocation = orderDetails._doc.addressId?.address2 || "N/A";
-  const orderTime = orderDetails._doc.order_time || "N/A";
-  const decorationComments = orderDetails._doc.decoration_comments || "N/A";
-  const addOnItems = orderDetails._doc.add_on || [];
+    const orderId = getOrderId(orderDetails._doc.order_id) || "N/A";
+    const orderDate =
+      new Date(orderDetails._doc.order_date).toLocaleDateString() || "N/A";
+    const address = orderDetails._doc.addressId?.address1 || "N/A";
+    const googleMapLocation = orderDetails._doc.addressId?.address2 || "N/A";
+    const orderTime = orderDetails._doc.order_time || "N/A";
+    const decorationComments = orderDetails._doc.decoration_comments || "N/A";
+    const addOnItems = orderDetails._doc.add_on || [];
 
-  // Format Inclusion Section
-  let inclusionText = "None";
-  const inclusionRaw = orderDetails.items?.[0]?.photography?.[0]?.inclusion?.[0] || "";
+    // Format Inclusion Section
+    let inclusionText = "None";
+    const inclusionRaw =
+      orderDetails.items?.[0]?.photography?.[0]?.inclusion?.[0] || "";
 
-  if (inclusionRaw) {
-    const cleaned = inclusionRaw
-      .replace(/<\/div>/gi, "\n")       
-      .replace(/<[^>]+>/g, "")          
-      .replace(/\n+/g, "\n")            
-      .trim();
+    if (inclusionRaw) {
+      const cleaned = inclusionRaw
+        .replace(/<\/div>/gi, "\n")
+        .replace(/<[^>]+>/g, "")
+        .replace(/\n+/g, "\n")
+        .trim();
 
-    // Add '-' at the beginning of each line
-    inclusionText = cleaned
-      .split("\n")
-      .map(line => `${line.trim()}`)
-      .join("\n");
-  }
-
-  const googleMapUrl = `https://www.google.com/maps/search/?q=${encodeURIComponent(googleMapLocation)}`;
-
-  let balanceAmount = 0;
-  if (orderDetails._doc.phone_no) {
-    balanceAmount = orderDetails._doc.total_amount - orderDetails._doc.advance_amount;
-  } else {
-    if ([2, 3, 4, 5].includes(orderDetails?._doc.type)) {
-      balanceAmount = Math.round((orderDetails?._doc.payable_amount * 4) / 5);
-    } else if ([6, 7].includes(orderDetails?._doc.type)) {
-      balanceAmount = Math.round(orderDetails?._doc.payable_amount * 0.35);
-    } else {
-      balanceAmount = Math.round(orderDetails?._doc.payable_amount * 0.65);
+      // Add '-' at the beginning of each line
+      inclusionText = cleaned
+        .split("\n")
+        .map((line) => `${line.trim()}`)
+        .join("\n");
     }
-  }
 
-  let message = `📸 *Photography Order Details:*\n\n`;
-  message += `*Order ID:* ${orderId}\n`;
-  message += `*Order Date:* ${orderDate}\n`;
-  message += `*Address:* ${address}\n`;
-  message += `*Google Map Location:* ${googleMapUrl}\n`;
-  message += `*Arrival Time:* ${orderTime}\n`;
-  message += `\n💰 *Amount: ₹${balanceAmount}*\n`;
-  message += `\n📝 *Comments:*\n${decorationComments || "None"}\n`;
+    const googleMapUrl = `https://www.google.com/maps/search/?q=${encodeURIComponent(
+      googleMapLocation
+    )}`;
 
-  // ✅ Final Bullet-formatted Inclusion section
-  message += `\n📷 *Order Included:*\n${inclusionText}\n`;
+    let balanceAmount = 0;
+    if (orderDetails._doc.phone_no) {
+      balanceAmount =
+        orderDetails._doc.total_amount - orderDetails._doc.advance_amount;
+    } else {
+      if ([2, 3, 4, 5].includes(orderDetails?._doc.type)) {
+        balanceAmount = Math.round((orderDetails?._doc.payable_amount * 4) / 5);
+      } else if ([6, 7].includes(orderDetails?._doc.type)) {
+        balanceAmount = Math.round(orderDetails?._doc.payable_amount * 0.35);
+      } else {
+        balanceAmount = Math.round(orderDetails?._doc.payable_amount * 0.65);
+      }
+    }
 
-  // ✅ Add-ons
-  message += `\n➕ *Add-ons:*\n`;
-  if (addOnItems.length > 0) {
-    addOnItems.forEach((item, index) => {
-      message += `\n${index + 1}. ${item.title}\n   - ₹${item.price} x ${item.quantity}\n   - ${item.description}`;
-    });
-  } else {
-    message += `\nNone`;
-  }
+    let message = `📸 *Photography Order Details:*\n\n`;
+    message += `*Order ID:* ${orderId}\n`;
+    message += `*Order Date:* ${orderDate}\n`;
+    message += `*Address:* ${address}\n`;
+    message += `*Google Map Location:* ${googleMapUrl}\n`;
+    message += `*Arrival Time:* ${orderTime}\n`;
+    message += `\n💰 *Amount: ₹${balanceAmount}*\n`;
+    message += `\n📝 *Comments:*\n${decorationComments || "None"}\n`;
 
-  navigator.clipboard
-    .writeText(message)
-    .then(() => {
-      alert("Order details have been copied to the clipboard!");
-    })
-    .catch((err) => {
-      console.error("Failed to copy order details to clipboard: ", err);
-    });
-};
+    // ✅ Final Bullet-formatted Inclusion section
+    message += `\n📷 *Order Included:*\n${inclusionText}\n`;
+
+    // ✅ Add-ons
+    message += `\n➕ *Add-ons:*\n`;
+    if (addOnItems.length > 0) {
+      addOnItems.forEach((item, index) => {
+        message += `\n${index + 1}. ${item.title}\n   - ₹${item.price} x ${
+          item.quantity
+        }\n   - ${item.description}`;
+      });
+    } else {
+      message += `\nNone`;
+    }
+
+    navigator.clipboard
+      .writeText(message)
+      .then(() => {
+        alert("Order details have been copied to the clipboard!");
+      })
+      .catch((err) => {
+        console.error("Failed to copy order details to clipboard: ", err);
+      });
+  };
 
   const sendOrderDetailsToWhatsAppchef = (orderDetails) => {
     console.log(orderDetails);
@@ -991,7 +997,7 @@ const ActionPopup = ({
                           <strong>Order Comments:</strong>{" "}
                           {orderDetails._doc.decoration_comments || "N/A"}
                         </p>
-                       
+
                         <div
                           style={{
                             backgroundColor: "#f9f9f9",
@@ -1059,103 +1065,119 @@ const ActionPopup = ({
                               <strong>ADD-ON:</strong>
                             </p>
 
-                            {orderDetails._doc.add_on.length > 0 ? (
-                              <div
-                                style={{
-                                  display: "grid",
-                                  gridTemplateColumns:
-                                    "repeat(auto-fit, minmax(200px, 1fr))",
-                                  gap: "16px",
-                                }}
-                              >
-                                {orderDetails._doc.add_on.map((item, index) => (
-                                  <div
-                                    key={index}
+                            {(() => {
+                              const addOns =
+                                Array.isArray(orderDetails._doc.add_on) &&
+                                orderDetails._doc.add_on.filter(
+                                  (item) =>
+                                    item &&
+                                    typeof item === "object" &&
+                                    Object.keys(item).length > 0 &&
+                                    item.title 
+                                );
+
+                              if (!addOns || addOns.length === 0) {
+                                return (
+                                  <p
                                     style={{
-                                      backgroundColor: "#fff",
-                                      borderRadius: "10px",
-                                      boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-                                      overflow: "hidden",
-                                      display: "flex",
-                                      flexDirection: "column",
-                                      border: "1px solid #e5e7eb",
+                                      fontSize: "12px",
+                                      color: "#6b7280",
+                                      marginTop: "6px",
                                     }}
                                   >
-                                    {/* Image on top */}
+                                    N/A
+                                  </p>
+                                );
+                              }
+
+                              return (
+                                <div
+                                  style={{
+                                    display: "grid",
+                                    gridTemplateColumns:
+                                      "repeat(auto-fit, minmax(200px, 1fr))",
+                                    gap: "16px",
+                                  }}
+                                >
+                                  {addOns.map((item, index) => (
                                     <div
+                                      key={index}
                                       style={{
-                                        width: "100%",
-                                        height: "120px",
+                                        backgroundColor: "#fff",
+                                        borderRadius: "10px",
+                                        boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
                                         overflow: "hidden",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        border: "1px solid #e5e7eb",
                                       }}
                                     >
-                                      <Image
-                                        src={item.image}
-                                        alt={item.title}
-                                        width={240}
-                                        height={120}
+                                      {/* Image */}
+                                      <div
                                         style={{
                                           width: "100%",
-                                          height: "100%",
-                                          objectFit: "cover",
+                                          height: "120px",
+                                          overflow: "hidden",
                                         }}
-                                      />
+                                      >
+                                        <Image
+                                          src={item.image}
+                                          alt={item.title}
+                                          width={240}
+                                          height={120}
+                                          style={{
+                                            width: "100%",
+                                            height: "100%",
+                                            objectFit: "cover",
+                                          }}
+                                        />
+                                      </div>
+
+                                      {/* Info */}
+                                      <div
+                                        style={{
+                                          padding: "10px",
+                                          textAlign: "left",
+                                        }}
+                                      >
+                                        <p
+                                          style={{
+                                            fontSize: "13px",
+                                            fontWeight: "600",
+                                            color: "#059669",
+                                          }}
+                                        >
+                                          ₹{item.price}
+                                        </p>
+                                        <h3
+                                          style={{
+                                            fontSize: "13px",
+                                            fontWeight: "500",
+                                            color: "#1f2937",
+                                            marginTop: "2px",
+                                          }}
+                                        >
+                                          {item.title}
+                                        </h3>
+                                        <p
+                                          style={{
+                                            fontSize: "12px",
+                                            color: "#6b7280",
+                                            marginTop: "4px",
+                                          }}
+                                        >
+                                          {item.description}
+                                        </p>
+                                      </div>
                                     </div>
-
-                                    {/* Info below */}
-                                    <div
-                                      style={{
-                                        padding: "10px",
-                                        textAlign: "left",
-                                      }}
-                                    >
-                                      <p
-                                        style={{
-                                          fontSize: "13px",
-                                          fontWeight: "600",
-                                          color: "#059669",
-                                        }}
-                                      >
-                                        ₹{item.price}
-                                      </p>
-
-                                      <h3
-                                        style={{
-                                          fontSize: "13px",
-                                          fontWeight: "500",
-                                          color: "#1f2937",
-                                          marginTop: "2px",
-                                        }}
-                                      >
-                                        {item.title}
-                                      </h3>
-
-                                      <p
-                                        style={{
-                                          fontSize: "12px",
-                                          color: "#6b7280",
-                                          marginTop: "4px",
-                                        }}
-                                      >
-                                        {item.description}
-                                      </p>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <p
-                                style={{
-                                  fontSize: "12px",
-                                  color: "#6b7280",
-                                  marginTop: "6px",
-                                }}
-                              >
-                                N/A
-                              </p>
-                            )}
+                                  ))}
+                                </div>
+                              );
+                            })()}
                           </div>
                         </div>
+
+                        {/*  */}
                       </div>
                     </div>
 

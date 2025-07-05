@@ -15,6 +15,7 @@ import {
 } from "../../../utils/apiconstant";
 import { timeSlotOptions } from "../../../utils/timeSlots";
 import { pincodes } from "../../../utils/pincodes";
+import { addOnProductsById } from '../../../utils/addOnProducts';
 
 const tagIds = {
 Intimate_Moments: "66c96b4e22ed47b72117e09a",
@@ -62,6 +63,10 @@ const AddPhotoOrder = () => {
   const [lloading, setlLoading] = useState(false);
   const [showButton, setShowButton] = useState(false);
 
+ const [selectedAddOns, setSelectedAddOns] = useState([]);
+  const [addOnProducts, setAddOnProducts] = useState([]);
+  // const [addOnsTotalPrice, setAddOnsTotalPrice] = useState(0);
+
   const handleComment = (e) => {
     const commentText = e.target.value;
     setComment(commentText);
@@ -80,6 +85,9 @@ const AddPhotoOrder = () => {
           } else {
             setProducts([]);
           }
+          // Set add-on products for the selected tag
+          const tagId = tagIds[selectedTag];
+          setAddOnProducts(addOnProductsById[tagId] || []);
         } catch (error) {
           console.error("Error fetching products:", error);
           setProducts([]);
@@ -157,11 +165,14 @@ const AddPhotoOrder = () => {
 
     try {
       const response = await axios.post(`${BASE_URL}${ADMIN_USER_LIST}`, {
-        email: "",
-        page: "",
-        per_page: 2000,
-        phone: "",
-        role: "customer",
+        // email: "",
+        // page: "",
+        // per_page: 10000,
+        // phone: "",
+        // role: "customer",
+        phone: customerNumber,  // Filter by phone directly
+          per_page: 1,            // Fetch only 1 result
+          role: "customer",
       });
 
       const users = response?.data?.data?.users;
@@ -288,7 +299,8 @@ const AddPhotoOrder = () => {
     }
 
     const requestData = {
-      add_on: inclusion,
+      add_on: selectedAddOns,
+      inclusion: inclusion,
       selecteditems: dishName,
       phone_no: customerNumber,
       toId: "",
@@ -366,6 +378,18 @@ const AddPhotoOrder = () => {
     });
   };
 
+
+  // Handle add-on selection
+  const handleAddOnChange = (addOn, isChecked) => {
+    setSelectedAddOns(prev => {
+      if (isChecked) {
+        return [...prev, addOn];
+      } else {
+        return prev.filter(item => item.title !== addOn.title);
+      }
+    });
+  };
+
   return (
     <div className="container">
       <h1>Photography 📸</h1>
@@ -401,6 +425,7 @@ const AddPhotoOrder = () => {
 
         {isLoadingProducts && <p>Loading products...</p>}
 
+      
         {/* Product Selection */}
         {products.length > 0 && (
           <>
@@ -575,6 +600,108 @@ const AddPhotoOrder = () => {
                 disabled
               />
             </div>
+
+    {/* Add-On Products */}
+        {addOnProducts.length > 0 && (
+          <div className="add-on-section" style={{ 
+            border: "1px solid #ccc", 
+            padding: "15px", 
+            borderRadius: "5px", 
+            marginBottom: "20px",
+            backgroundColor: "#f9f9f9"
+          }}>
+            <h3>Add-On Products</h3>
+            <div className="add-on-grid" style={{ 
+              display: "grid", 
+              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", 
+              gap: "15px" 
+            }}>
+              {addOnProducts.map((addOn, index) => (
+                <div key={index} className="add-on-card" style={{ 
+                  border: "1px solid #ddd", 
+                  borderRadius: "8px", 
+                  padding: "12px",
+                  backgroundColor: "white",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px"
+                }}>
+                  <input
+                    type="checkbox"
+                    id={`addon-${index}`}
+                    checked={selectedAddOns.some(item => item.title === addOn.title)}
+                    onChange={(e) => handleAddOnChange(addOn, e.target.checked)}
+                    style={{ transform: "scale(1.2)" }}
+                  />
+                  <img 
+                    src={addOn.image} 
+                    alt={addOn.title}
+                    style={{ 
+                      width: "60px", 
+                      height: "60px", 
+                      objectFit: "cover", 
+                      borderRadius: "4px" 
+                    }}
+                  />
+                  <div style={{ flex: 1 }}>
+                    <label htmlFor={`addon-${index}`} style={{ 
+                      fontWeight: "bold", 
+                      cursor: "pointer",
+                      display: "block",
+                      marginBottom: "4px"
+                    }}>
+                      {addOn.title}
+                    </label>
+                    <p style={{ 
+                      margin: "0", 
+                      fontSize: "12px", 
+                      color: "#666",
+                      marginBottom: "4px"
+                    }}>
+                      {addOn.description}
+                    </p>
+                    <p style={{ 
+                      margin: "0", 
+                      fontWeight: "bold", 
+                      color: "#28a745",
+                      fontSize: "14px"
+                    }}>
+                      ₹{addOn.price}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {selectedAddOns.length > 0 && (
+              <div style={{ 
+                marginTop: "15px", 
+                padding: "10px", 
+                backgroundColor: "#e8f5e8", 
+                borderRadius: "5px",
+                border: "1px solid #28a745"
+              }}>
+                <h4 style={{ margin: "0 0 10px 0", color: "#28a745" }}>Selected Add-Ons:</h4>
+                <ul style={{ margin: "0", paddingLeft: "20px" }}>
+                  {selectedAddOns.map((addOn, index) => (
+                    <li key={index} style={{ marginBottom: "5px" }}>
+                      {addOn.title} - ₹{addOn.price}
+                    </li>
+                  ))}
+                </ul>
+                {/* <p style={{ 
+                  margin: "10px 0 0 0", 
+                  fontWeight: "bold", 
+                  fontSize: "16px",
+                  color: "#28a745"
+                }}>
+                  Total Add-Ons: ₹{addOnsTotalPrice}
+                </p> */}
+              </div>
+            )}
+          </div>
+        )}
+
+
             <div className="cityPincode-box" style={{ margin: "10px 0", width: "100%" }}>
               <div className="city-box">
                 <label
