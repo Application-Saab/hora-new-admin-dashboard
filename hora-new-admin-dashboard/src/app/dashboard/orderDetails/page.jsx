@@ -7,6 +7,7 @@ import { BASE_URL, ADMIN_ORDER_LIST } from "../../../utils/apiconstant";
 // import * as XLSX from "xlsx";
 import CheckSupplier from "../../component/createsupplier/CheckSupplier";
 import axios from "axios";
+import DownloadCSVFile from "../testing/page";
 
 const OrderList = () => {
   const [orders, setOrders] = useState([]);
@@ -24,7 +25,7 @@ const OrderList = () => {
   const [actionPopupChefOrderId, setActionPopupChefOrderId] = useState("");
   const [actionPopupOrderType, setActionPopupOrderType] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
-  
+
   const [actionPopupChefOrder_Id, setActionPopupChefOrder_Id] = useState("");
 
   // supplier
@@ -497,78 +498,88 @@ const OrderList = () => {
         {/* <div className="order-header">
           <h1 >Order Details</h1>
         </div> */}
-<div class="centered-container">
-  <h1>Order Details</h1>
-</div>
+        <div class="centered-container">
+          <h1>Order Details</h1>
+        </div>
 
+        <div className="filter-wrapper_new">
+          <div className="filter-grid_new">
+            <div className="filter-item_new">
+              <label htmlFor="orderId" className="label_new">
+                Order ID
+              </label>
+              <input
+                id="orderId"
+                type="text"
+                className="input_new"
+                placeholder="e.g., ORD123456"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
 
-<div className="filter-wrapper_new">
-  <div className="filter-grid_new">
-    <div className="filter-item_new">
-      <label htmlFor="orderId" className="label_new">Order ID</label>
-      <input
-        id="orderId"
-        type="text"
-        className="input_new"
-        placeholder="e.g., ORD123456"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-    </div>
+            <div className="filter-item_new">
+              <label htmlFor="customerNumber" className="label_new">
+                Customer Number
+              </label>
+              <input
+                id="customerNumber"
+                type="text"
+                className="input_new"
+                placeholder="e.g., +1234567890"
+                value={selectedPhoneNumber}
+                onChange={(e) => setSelectedPhoneNumber(e.target.value)}
+              />
+            </div>
 
-    <div className="filter-item_new">
-      <label htmlFor="customerNumber" className="label_new">Customer Number</label>
-      <input
-        id="customerNumber"
-        type="text"
-        className="input_new"
-        placeholder="e.g., +1234567890"
-        value={selectedPhoneNumber}
-        onChange={(e) => setSelectedPhoneNumber(e.target.value)}
-      />
-    </div>
+            <div className="filter-item_new">
+              <label htmlFor="fulfillmentDate" className="label_new">
+                Fulfillment Date
+              </label>
+              <input
+                id="fulfillmentDate"
+                type="date"
+                className="input_new"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+              />
+            </div>
 
-    <div className="filter-item_new">
-      <label htmlFor="fulfillmentDate" className="label_new">Fulfillment Date</label>
-      <input
-        id="fulfillmentDate"
-        type="date"
-        className="input_new"
-        value={selectedDate}
-        onChange={(e) => setSelectedDate(e.target.value)}
-      />
-    </div>
+            <div className="filter-item_new">
+              <label htmlFor="createdAtDate" className="label_new">
+                Created At
+              </label>
+              <input
+                id="createdAtDate"
+                type="date"
+                className="input_new"
+                value={createdAtDate}
+                onChange={(e) => setCreatedAtDate(e.target.value)}
+              />
+            </div>
 
-    <div className="filter-item_new">
-      <label htmlFor="createdAtDate" className="label_new">Created At</label>
-      <input
-        id="createdAtDate"
-        type="date"
-        className="input_new"
-        value={createdAtDate}
-        onChange={(e) => setCreatedAtDate(e.target.value)}
-      />
-    </div>
+            <div className="filter-item_new">
+              <label htmlFor="statusDropdown" className="label_new">
+                Status
+              </label>
+              <StatusDropdown
+                id="statusDropdown"
+                selectedActiveStatus={selectedActiveStatus}
+                setSelectedActiveStatus={setSelectedActiveStatus}
+              />
+            </div>
 
-    <div className="filter-item_new">
-      <label htmlFor="statusDropdown" className="label_new">Status</label>
-      <StatusDropdown
-        id="statusDropdown"
-        selectedActiveStatus={selectedActiveStatus}
-        setSelectedActiveStatus={setSelectedActiveStatus}
-      />
-    </div>
-
-    <div className="filter-actions_new">
-      <button
-        className="reset-button_new"
-        onClick={() => window.location.reload()}
-      >
-        🔄 Reset
-      </button>
-    </div>
-  </div>
-</div>
+            <div className="filter-actions_new">
+              <button
+                className="reset-button_new"
+                onClick={() => window.location.reload()}
+              >
+                🔄 Reset
+              </button>
+            </div>
+          </div>
+          <DownloadCSVFile />
+        </div>
 
         <div className="orders-box">
           <table className="order-table">
@@ -678,11 +689,10 @@ const OrderList = () => {
                     <td>{order.order_locality || "N/A"}</td>
                     <td>
                       {order?.order_date
-                        ? new Date(
-                            order.order_date.split("T")[0]
-                          ).toLocaleDateString()
+                        ? new Date(order.order_date).toLocaleDateString("en-GB")
                         : "N/A"}
                     </td>
+
                     <td>
                       {order?.order_time
                         ? `${order.order_time}` // If `order_time` is available, show it
@@ -694,44 +704,44 @@ const OrderList = () => {
                     <td>{order.order_taken_by || "N/A"}</td>
                     <td>{order.phone_no || "N/A"}</td>
                     {/* <td>{order.online_phone_no || "N/A"}</td> */}
-                   <td>
-  {order.toId ? (
-    <>
-      <button
-        onClick={() => openSupplierDeatilsPopup(order.toId)}
-        className="assigningBtn assigned"
-      >
-        <FaEye />
-        <span>Assigned</span>
-      </button>
-      <span
-        style={{ cursor: "pointer", marginLeft: "8px" }}
-        onClick={() => openSupplierAssignPopup(order)}
-        title="Edit"
-      >
-        ✏️
-      </span>
-    </>
-  ) : (
-    <>
-      <button
-        className="assigningBtn not-assigned"
-        onClick={() => openSupplierAssignPopup(order)}
-      >
-        Not Assigned
-      </button>
-    </>
-  )}
+                    <td>
+                      {order.toId ? (
+                        <>
+                          <button
+                            onClick={() => openSupplierDeatilsPopup(order.toId)}
+                            className="assigningBtn assigned"
+                          >
+                            <FaEye />
+                            <span>Assigned</span>
+                          </button>
+                          <span
+                            style={{ cursor: "pointer", marginLeft: "8px" }}
+                            onClick={() => openSupplierAssignPopup(order)}
+                            title="Edit"
+                          >
+                            ✏️
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            className="assigningBtn not-assigned"
+                            onClick={() => openSupplierAssignPopup(order)}
+                          >
+                            Not Assigned
+                          </button>
+                        </>
+                      )}
 
-  {/* Always render the modal if needed */}
-  {isModalOpen && selectedSupplierOrder && (
-    <CheckSupplier
-      SelectedOrder={selectedSupplierOrder}
-      setShowModal={setIsModalOpen}
-      setIsSupplierAssigned={setIsSupplierAssigned}
-    />
-  )}
-</td>
+                      {/* Always render the modal if needed */}
+                      {isModalOpen && selectedSupplierOrder && (
+                        <CheckSupplier
+                          SelectedOrder={selectedSupplierOrder}
+                          setShowModal={setIsModalOpen}
+                          setIsSupplierAssigned={setIsSupplierAssigned}
+                        />
+                      )}
+                    </td>
 
                     <td>
                       {`${order.job_start_time.replace(
@@ -763,8 +773,16 @@ const OrderList = () => {
                     {/* <td>{new Date(order.createdAt).toLocaleTimeString()}</td> */}
 
                     <td>
-                      {order.createdAt.split("T")[0]}{" "}
-                      {new Date(order.createdAt).toLocaleTimeString()}
+                      {/* {order.createdAt.split("T")[0]}{" "} */}
+                      {(() => {
+                        const [year, month, day] = order.createdAt
+                          .split("T")[0]
+                          .split("-");
+                        return `${day}/${month}/${year}`;
+                      })()}
+                      <div>
+                        {new Date(order.createdAt).toLocaleTimeString()}
+                      </div>{" "}
                     </td>
                     <td>
                       <div style={styles.container}>
@@ -802,13 +820,13 @@ const OrderList = () => {
                         View Details
                       </button>
                     </td>
-<td style={{ width: "100px", paddingLeft: "16px" }}> 
-  <ul style={{ paddingLeft: "0" }}>
-    {order.userReviewRatingArray.map((i, index) => (
-      <li key={index}>{i}</li>
-    ))}
-  </ul>
-</td>
+                    <td style={{ width: "100px", paddingLeft: "16px" }}>
+                      <ul style={{ paddingLeft: "0" }}>
+                        {order.userReviewRatingArray.map((i, index) => (
+                          <li key={index}>{i}</li>
+                        ))}
+                      </ul>
+                    </td>
 
                     {/* <td style={{ width: "100px", paddingLeft: "16px" }}>
                       {order.type === 2 ? (

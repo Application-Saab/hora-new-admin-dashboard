@@ -25,15 +25,31 @@ const menuItems = [
 
   { label: "Analysis", icon: <FaClipboardList />, url: "/dashboard/analysis" },
 
-  { label: "Order Details", icon: <FaClipboardList />, url: "/dashboard/orderDetails" },
+  {
+    label: "Order Details",
+    icon: <FaClipboardList />,
+    url: "/dashboard/orderDetails",
+  },
 
   {
     label: "Decoration",
     icon: <FaCartPlus />,
     children: [
-      { label: "Create Order", icon: <FaPlusCircle />, url: "/dashboard/decoration-createorder" },
-      { label: "Add Product", icon: <FaCartPlus />, url: "/dashboard/add-decoration-product" },
-      { label: "Edit Product", icon: <FaPen />, url: "/dashboard/edit-decoration-product" },
+      {
+        label: "Create Order",
+        icon: <FaPlusCircle />,
+        url: "/dashboard/decoration-createorder",
+      },
+      {
+        label: "Add Product",
+        icon: <FaCartPlus />,
+        url: "/dashboard/add-decoration-product",
+      },
+      {
+        label: "Edit Product",
+        icon: <FaPen />,
+        url: "/dashboard/edit-decoration-product",
+      },
     ],
   },
 
@@ -41,9 +57,21 @@ const menuItems = [
     label: "Photography",
     icon: <FaCamera />,
     children: [
-      { label: "Create Order", icon: <FaCamera />, url: "/dashboard/photography-create-order" },
-      { label: "Create Folder", icon: <FaCamera />, url: "/dashboard/photo-folder" },
-      { label: "Add More Images", icon: <FaPlusCircle />, url: "/dashboard/add-more-images" },
+      {
+        label: "Create Order",
+        icon: <FaCamera />,
+        url: "/dashboard/photography-create-order",
+      },
+      {
+        label: "Create Folder",
+        icon: <FaCamera />,
+        url: "/dashboard/photo-folder",
+      },
+      {
+        label: "Add More Images",
+        icon: <FaPlusCircle />,
+        url: "/dashboard/add-more-images",
+      },
     ],
   },
 
@@ -51,8 +79,16 @@ const menuItems = [
     label: "Vendor",
     icon: <FaClipboardList />,
     children: [
-      { label: "Order Details", icon: <FaClipboardList />, url: "/dashboard/vendor-orderDetails" },
-      { label: "Order Reports", icon: <FaClipboardList />, url: "/dashboard/vendor-orderReports" },
+      {
+        label: "Order Details",
+        icon: <FaClipboardList />,
+        url: "/dashboard/vendor-orderDetails",
+      },
+      {
+        label: "Order Reports",
+        icon: <FaClipboardList />,
+        url: "/dashboard/vendor-orderReports",
+      },
     ],
   },
 
@@ -60,18 +96,48 @@ const menuItems = [
     label: "Supplier & Users",
     icon: <FaUsers />,
     children: [
-      { label: "Supplier Details", icon: <FaShippingFast />, url: "/dashboard/supplier-details" },
-      { label: "Users Details", icon: <FaUsers />, url: "/dashboard/users-details" },
+      {
+        label: "Supplier Details",
+        icon: <FaShippingFast />,
+        url: "/dashboard/supplier-details",
+      },
+      {
+        label: "Users Details",
+        icon: <FaUsers />,
+        url: "/dashboard/users-details",
+      },
+      {
+        label: "Supplier Create",
+        icon: <FaClipboardList />,
+        url: "/dashboard/supplier-create",
+      },
     ],
   },
 
-  { label: "Food Create Order", icon: <FaPlusCircle />, url: "/dashboard/food-create-order" },
-
-  { label: "Chef For Party Create Order", icon: <FaPlusCircle />, url: "/dashboard/chef-for-party-food-create" },
+  {
+    label: "Food & Chef For Party",
+    icon: <FaUtensils />,
+    children: [
+      {
+        label: "Food Create Order",
+        icon: <FaPlusCircle />,
+        url: "/dashboard/food-create-order",
+      },
+      {
+        label: "Chef For Party Create Order",
+        icon: <FaPlusCircle />,
+        url: "/dashboard/chef-for-party-food-create",
+      },
+    ],
+  },
 
   { label: "Dish List", icon: <FaUtensils />, url: "/dashboard/dish-list" },
 
-  { label: "Create Dish", icon: <FaPlusCircle />, url: "/dashboard/create-dish" },
+  {
+    label: "Create Dish",
+    icon: <FaPlusCircle />,
+    url: "/dashboard/create-dish",
+  },
 ];
 
 // SIDEBAR COMPONENT WITH RIGHT-SIDE TOGGLE ICON
@@ -93,10 +159,15 @@ const Sidebar = ({ onLogout }: { onLogout: () => void }) => {
             const isOpen = openGroups[item.label];
             return (
               <li key={index}>
-                <button onClick={() => toggleGroup(item.label)} className="link-button group-button">
+                <button
+                  onClick={() => toggleGroup(item.label)}
+                  className="link-button group-button"
+                >
                   <div style={{ display: "flex", alignItems: "center" }}>
                     {item.icon}
-                    <span style={{ marginLeft: "8px", fontSize: "14px" }}>{item.label}</span>
+                    <span style={{ marginLeft: "8px", fontSize: "14px" }}>
+                      {item.label}
+                    </span>
                   </div>
                   <span className="chevron-icon">
                     {isOpen ? <FaChevronDown /> : <FaChevronRight />}
@@ -108,7 +179,9 @@ const Sidebar = ({ onLogout }: { onLogout: () => void }) => {
                       <li key={childIndex} className="nested-item">
                         <Link href={child.url} className="link-button">
                           {child.icon}
-                          <span style={{ marginLeft: "8px", fontSize: "13px" }}>{child.label}</span>
+                          <span style={{ marginLeft: "8px", fontSize: "13px" }}>
+                            {child.label}
+                          </span>
                         </Link>
                       </li>
                     ))}
@@ -121,7 +194,9 @@ const Sidebar = ({ onLogout }: { onLogout: () => void }) => {
               <li key={index}>
                 <Link href={item.url} className="link-button">
                   {item.icon}
-                  <span style={{ marginLeft: "8px", fontSize: "14px" }}>{item.label}</span>
+                  <span style={{ marginLeft: "8px", fontSize: "14px" }}>
+                    {item.label}
+                  </span>
                 </Link>
               </li>
             );
@@ -162,7 +237,8 @@ export default function RootLayout({
     const intervalId = setInterval(async () => {
       const savedHash = localStorage.getItem("adminHashPassword");
       const token = localStorage.getItem("authToken");
-      const adminEmail = localStorage.getItem("adminEmail") || "admin@admin.com";
+      const adminEmail =
+        localStorage.getItem("adminEmail") || "admin@admin.com";
 
       if (!token || !savedHash) {
         setIsLoggedIn(false);
@@ -214,10 +290,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <div className={`dashBoard_page ${isLoggedIn}`} style={{ display: "flex" }}>
+        <div
+          className={`dashBoard_page ${isLoggedIn}`}
+          style={{ display: "flex" }}
+        >
           {isLoggedIn && <Sidebar onLogout={handleLogout} />}
           <div
-            className={`main-content ${pathname === "/dashboard-login" ? "loginPage" : ""}`}
+            className={`main-content ${
+              pathname === "/dashboard-login" ? "loginPage" : ""
+            }`}
           >
             {children}
           </div>

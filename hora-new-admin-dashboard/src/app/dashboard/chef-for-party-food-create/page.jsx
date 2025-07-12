@@ -144,7 +144,7 @@ const ChefForPartyCreateOrderComponent = () => {
   useEffect(() => {
     const selectedPrices = items
       .filter((item) => selectedItems.includes(item._id))
-      .reduce((sum, item) => sum + parseInt(item.price), 0);
+      .reduce((sum, item) => sum + parseInt(item.dish_rate), 0);
     setSelectedDishPrice(selectedPrices);
 
     // Set total dishes count
@@ -583,7 +583,10 @@ if (selectedItems.length <= 7) {
                         />
                       </div>
                       <div className="dish-name">{item.name}</div>
-                      <div className="dish-price">₹{item.price}</div>
+                      <div className="dish-price">₹
+                        {/* {item.price} */}
+                        {item.dish_rate}</div>
+                      {/* <div>}</div> */}
                       <div className="dish-checkbox">
                         <input
                           type="checkbox"
@@ -656,7 +659,7 @@ if (selectedItems.length <= 7) {
                         />
                       </div>
                       <div className="selected-item-name">{item.name}</div>
-                      <div className="selected-item-price">₹{item.price}</div>
+                      <div className="selected-item-price">₹{item.dish_rate}</div>
                     </div>
                   ))}
               </div>

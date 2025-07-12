@@ -158,51 +158,109 @@ const AddPhotoOrder = () => {
     }
   }, [pincode]);
 
+
+  // const handleCheckCustomer = async (e) => {
+  //   e.preventDefault();
+  //   setMessage("");
+  //   setLoading(true);
+
+  //   try {
+  //     const response = await axios.post(`${BASE_URL}${ADMIN_USER_LIST}`, {
+  //       phone: customerNumber,  
+  //         per_page: 1,          
+  //         role: "customer",
+  //     });
+
+  //     const users = response?.data?.data?.users;
+
+  //     if (Array.isArray(users)) {
+  //       const customer = users.find((user) => user.phone === customerNumber);
+  //       console.log(customer, "customer");
+  //       setCustomerId(customer);
+  //       if (customer) {
+  //         setMessage("Customer exists.");
+  //         setMessageColor("green");
+  //         setShowButton(true);
+  //       } else {
+  //         setMessage("Customer does not exist.");
+  //         setMessageColor("red");
+  //         setShowPopup(true);
+  //         setShowButton(false);
+  //       }
+  //     } else {
+  //       setMessage("No users found in the response.");
+  //       setShowButton(false);
+  //     }
+  //   } catch (err) {
+  //     setMessage("An error occurred while checking the customer.");
+  //     console.error(err);
+  //     setShowButton(false);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleCheckCustomer = async (e) => {
-    e.preventDefault();
-    setMessage("");
-    setLoading(true);
+  e.preventDefault();
+  setMessage("");
+  setLoading(true);
 
-    try {
-      const response = await axios.post(`${BASE_URL}${ADMIN_USER_LIST}`, {
-        // email: "",
-        // page: "",
-        // per_page: 10000,
-        // phone: "",
-        // role: "customer",
-        phone: customerNumber,  // Filter by phone directly
-          per_page: 1,            // Fetch only 1 result
-          role: "customer",
-      });
+  try {
+    const response = await axios.post(`${BASE_URL}${ADMIN_USER_LIST}`, {
+      phone: customerNumber,
+      per_page: 1,
+      role: "customer",
+    });
 
-      const users = response?.data?.data?.users;
+    console.log("API response:", response?.data);
 
-      if (Array.isArray(users)) {
-        const customer = users.find((user) => user.phone === customerNumber);
-        console.log(customer, "customer");
+    const users = response?.data?.data?.users;
+
+    if (Array.isArray(users) && users.length > 0) {
+      const customer = users.find((user) => user.phone === customerNumber);
+
+      console.log("Matched customer:", customer);
+
+      if (customer) {
+        setMessage("Customer exists.");
+        setMessageColor("green");
+        setShowButton(true);
+        setShowPopup(false);
         setCustomerId(customer);
-        if (customer) {
-          setMessage("Customer exists.");
-          setMessageColor("green");
-          setShowButton(true);
-        } else {
-          setMessage("Customer does not exist.");
-          setMessageColor("red");
-          setShowPopup(true);
-          setShowButton(false);
-        }
       } else {
-        setMessage("No users found in the response.");
+        // User list returned but phone not matched
+        setMessage("Customer does not exist.");
+        setMessageColor("red");
+        setShowPopup(true);
         setShowButton(false);
+        setCustomerId(null);
       }
-    } catch (err) {
-      setMessage("An error occurred while checking the customer.");
-      console.error(err);
+    } else {
+      // Users array is empty or undefined
+      setMessage("Customer does not exist.");
+      setMessageColor("red");
+      setShowPopup(true);
       setShowButton(false);
-    } finally {
-      setLoading(false);
+      setCustomerId(null);
     }
-  };
+
+  } catch (err) {
+    console.error("API error:", err);
+
+    // Try to get backend message
+    const apiMessage =
+      err?.response?.data?.message || "An error occurred while checking the customer.";
+
+    setMessage(apiMessage);
+    setMessageColor("red");
+    setShowPopup(true);   // ✅ always show popup on error
+    setShowButton(false);
+    setCustomerId(null);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleAddCustomer = async () => {
     const requestData = {
@@ -220,6 +278,7 @@ const AddPhotoOrder = () => {
 
       setCustomerId(response.data.dataToSave);
       setMessage("Customer successfully added.");
+      window.location.reload();
       setMessageColor("green");
       setShowPopup(false);
       setShowButton(true);

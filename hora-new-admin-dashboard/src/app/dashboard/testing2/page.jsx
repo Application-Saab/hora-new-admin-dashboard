@@ -1,12 +1,9 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import getOrderType from "../../../utils/getOrderType";
 import { ADMIN_ORDER_LIST, BASE_URL } from "../../../utils/apiconstant";
-import Stats from "../stats/page";
-import "./analysis.css";
-import NewUserCount from "../new-user-count/page";
-import CancelOrderPage from "../testing2/page";
+import "../analysis/analysis.css";
 
 const CityOrdersSummary = () => {
   const [filteredOrders, setFilteredOrders] = useState([]);
@@ -18,14 +15,6 @@ const CityOrdersSummary = () => {
   const [selectedCity, setSelectedCity] = useState("");
   console.log(startDate, endDate, "startDate, endDate");
   console.log(selectedKey, selectedCity, "selectedKey, selectedCity");
-
-  // login popup
-  const [showLogin, setShowLogin] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [, setUser] = useState(null);
-  const [timerId, setTimerId] = useState(null);
 
   const [sendingDataToPage, setSendingDataToPage] = useState("");
   console.log(sendingDataToPage, "sendingDataToPage");
@@ -56,6 +45,7 @@ const CityOrdersSummary = () => {
         page: 1,
         per_page: 2000,
         status: 1,
+        order_status: 4,
       };
 
       if (selectedKey !== "") {
@@ -210,112 +200,9 @@ const CityOrdersSummary = () => {
   } = getOrdersSummary();
   const dateWiseData = fillMissingDates(rawDateWiseData);
 
-  // login function
-  useEffect(() => {
-    const sessionData = JSON.parse(localStorage.getItem("analysis-session"));
-
-    if (!sessionData || Date.now() > sessionData.expiry) {
-      setShowLogin(true);
-    } else {
-      setUser(sessionData.user);
-      const timeLeft = sessionData.expiry - Date.now();
-
-      const timeout = setTimeout(() => {
-        handleLogout(); // auto logout
-      }, timeLeft);
-
-      setTimerId(timeout);
-    }
-
-    return () => {
-      if (timerId) clearTimeout(timerId);
-    };
-  }, []);
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
-
-    try {
-      const res = await fetch(
-        "https://horaservices.com:3000/api/admin/admin_user_list",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ role: "adminanalysis" }),
-        }
-      );
-
-      const responseData = await res.json();
-      console.log(responseData, "responseData");
-      const users = responseData?.data?.users || [];
-      console.log(users, "users");
-
-      const matchedUser = users.find(
-        (u) =>
-          u.email?.toLowerCase() === email.toLowerCase() &&
-          u.password === password
-      );
-
-      console.log(matchedUser, "matchedUser");
-
-      if (matchedUser) {
-        const expiry = Date.now() + 60 * 60 * 1000; // 60 minutes
-        localStorage.setItem(
-          "analysis-session",
-          JSON.stringify({ user: matchedUser, expiry })
-        );
-        setUser(matchedUser);
-        setShowLogin(false);
-        const timeout = setTimeout(() => {
-          handleLogout(); // auto logout
-        }, 60 * 60 * 1000); // 60 minutes
-
-        setTimerId(timeout);
-      } else {
-        setError("Incorrect email or password");
-      }
-    } catch {
-      setError("Login failed. Please try again.");
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("analysis-session");
-    setUser(null);
-    setShowLogin(true);
-    if (timerId) clearTimeout(timerId);
-  };
 
   return (
     <div className="analysis-container">
-      {showLogin ? (
-        <div className="login-popup">
-          <h3>Login to view Analysis</h3>
-          {error && <p className="login-error">{error}</p>}
-          <form onSubmit={handleLogin}>
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="login-input"
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="login-input"
-            />
-            <button type="submit" className="login-button">
-              Login
-            </button>
-          </form>
-        </div>
-      ) : (
         <>
           <div className="main-layout">
             {/* Left Side - Main Content */}
@@ -324,6 +211,7 @@ const CityOrdersSummary = () => {
                 <h2 className="content-title">
                   Order Split by Date{" "}
                   <span style={{ fontSize: "10px" }}>(CreatedAt date)</span>
+                   <span style={{ fontSize: "8px" }}>(Cancel Order)</span>
                 </h2>
 
                 <div className="filter-container">
@@ -444,24 +332,11 @@ const CityOrdersSummary = () => {
                 ) : null}
               </div>
             </div>
-
-            {/* Right Side - Stats */}
-            <div className="stats-sidebar">
-              <Stats />
-            </div>
           </div>
 
-        <div style={{ display: 'flex' }}>
-  <div style={{ flex: 1 }}>
-    <NewUserCount />
-  </div>
-  <div style={{ flex: 1 }}>
-    <CancelOrderPage />
-  </div>
-</div>
-
         </>
-      )}
+        {/* <Stats /> */}
+        {/* <NewUserCount /> */}
     </div>
   );
 };

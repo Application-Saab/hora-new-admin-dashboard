@@ -492,16 +492,6 @@ const AddProductForm = () => {
         </div>
       </div>
 
-      {/* <div className="form-group">
-        <label>Product Inclusion</label>
-        <textarea
-          placeholder="Enter text here..."
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        ></textarea>
-      </div> */}
-
-
  <div style={container}>
 
       {/* Dropdown to select mode */}

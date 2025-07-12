@@ -37,6 +37,7 @@ const ActionPopup = ({
 
   console.log(actionPopupChefOrder_Id, "actionPopupChefOrder_Id");
 
+
   let foodDeliveryInclusions = [
     "Complementary - Green salad, Mint Chutney, Achar",
     "Doorstep Delivery",
@@ -174,10 +175,13 @@ const ActionPopup = ({
       </>
     );
   };
+  
   // fetch orderdetails
   const FetchOrderDetails = ({ orderDetails }) => {
     // console.log(getOrderType(orderDetails?.type), JSON.stringify(orderDetails))
     console.log(orderDetails, "orderDetails in FetchOrderDetails");
+    
+  console.log(orderDetails.selecteditems[0].ingredientUsed,"dfsdfdsf");
     return (
       <div>
         <div className="order-details-container">
@@ -329,6 +333,7 @@ const ActionPopup = ({
                     })}
                   </ul>
                 ) : (
+                  <div>
                   <ul className="order-items-list">
                     {orderDetails?.selecteditems?.map((item) => (
                       <li key={item._id} className="order-item">
@@ -351,8 +356,45 @@ const ActionPopup = ({
                       </li>
                     ))}
                   </ul>
+                  </div>
                 )}
               </div>
+
+                {orderDetails?.type === 2 && (
+                  <>
+                  
+              <h3>Ingredient Used:</h3>
+                  <div className="order-items-container">
+
+ <ul className="order-items-list">
+                    {orderDetails?.selecteditems[0]?.ingredientUsed.map((item) => (
+                      <li key={item._id} className="order-item">
+                        <Image
+                          src={`https://horaservices.com/api/uploads/${item.image}`}
+                          alt={item.name}
+                          width={80}
+                          height={80}
+                          className="order-item-image"
+                        />
+
+                        <div className="order-item-details">
+                          <strong className="order-item-title">
+                            {item.name}
+                          </strong>
+                          <span className="order-item-price">
+                            {item.qty} {item.unit}
+                          </span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+
+                    </div>
+                    </>
+              
+
+                ) }
+
               {orderDetails?.type === 6 ? (
                 <>
                   <h3>Inclusions</h3>
@@ -704,6 +746,8 @@ const ActionPopup = ({
     // const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     // window.open(whatsappUrl, "_blank");
   };
+  
+  
   const sendOrderDetailsToWhatsAppFood = (orderDetails) => {
     console.log(orderDetails);
 
@@ -747,9 +791,13 @@ const ActionPopup = ({
     }
     // Start building the message
     let message = `*${orderType} Order Summary:*\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\n\nCity: ${orderCity}\nGuest Count: ${peopleCount}\nTime of Delivery: ${orderTime}\n\nAddress: ${address}\n\nGoogleMapLocation: ${googleMapUrl}\n*Amount: ₹${balanceAmount}*\n\n*Dishes*\n`;
+    
     // Append each dish to the message
+    
+  if (orderDetails?.order_taken_by === "Booked Online") {
+    // Use userOrderDishImageArray
     if (orderDetails?.userOrderDishImageArray?.length) {
-      const dishesObject = orderDetails.userOrderDishImageArray[0]; // Access the first object in the array
+      const dishesObject = orderDetails.userOrderDishImageArray[0];
       message += Object.entries(dishesObject)
         .map(([dishName, details]) => {
           if (details.quantity && details.unit) {
@@ -757,13 +805,31 @@ const ActionPopup = ({
           } else if (details.quantity) {
             return `${dishName}: ${details.quantity}`;
           }
-          return null; // Handle cases where details are incomplete
+          return null;
         })
-        .filter(Boolean) // Remove any null or invalid entries
+        .filter(Boolean)
         .join("\n");
     } else {
       message += "No dishes selected";
     }
+  } else {
+    // Use items
+    if (orderDetails?.items?.length) {
+      message += orderDetails.items
+        .map((item) => {
+          if (item.quantity && item.unit) {
+            return `${item.name}: ${item.quantity} ${item.unit}`;
+          } else if (item.quantity) {
+            return `${item.name}: ${item.quantity}`;
+          }
+          return `${item.name}`;
+        })
+        .join("\n");
+    } else {
+      message += "No items selected";
+    }
+  }
+
 
     message += "\n\n*Inclusions:*\n-" + inclusions.join("\n-");
     navigator.clipboard
@@ -778,6 +844,8 @@ const ActionPopup = ({
     // const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     // window.open(whatsappUrl, "_blank");
   };
+
+
   return (
     <>
       {isOpen && (

@@ -18,6 +18,7 @@ const decCat = [
   { id: "10", subCategory: "Haldi-Mehandi" },
   { id: "12", subCategory: "bachelorette" },
   { id: "13", subCategory: "Proposal-Decoration" },
+  { id: "14", subCategory: "Wedding" },
 ];
 
 const tagMapping = {
@@ -32,6 +33,7 @@ const tagMapping = {
   "66ad224731c3672040d8d32a": "Haldi-Mehandi",
   "66c44baf8bd9c45aaa2c42b5": "Bachelorette",
   "66c9df0922ed47b721180334": "Proposal-Decoration",
+  "68590e84ac7f23b432086de9": "Wedding-Decoration"
 };
 
 const DecorationEditor = () => {
