@@ -3,7 +3,7 @@ import { useState } from "react";
 import axios from "axios";
 import getOrderType from "../../../utils/getOrderType";
 import { ADMIN_ORDER_LIST, BASE_URL } from "../../../utils/apiconstant";
-import "../analysis/analysis.css";
+// import "../analysis/analysis.css";
 
 const CityOrdersSummary = () => {
   const [filteredOrders, setFilteredOrders] = useState([]);

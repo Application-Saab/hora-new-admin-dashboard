@@ -6,7 +6,7 @@ import { ADMIN_ORDER_LIST, BASE_URL } from "../../../utils/apiconstant";
 import Stats from "../stats/page";
 import "./analysis.css";
 import NewUserCount from "../new-user-count/page";
-import CancelOrderPage from "../testing2/page";
+import CancelOrderPage from "../CancelOrderPage/page";
 
 const CityOrdersSummary = () => {
   const [filteredOrders, setFilteredOrders] = useState([]);

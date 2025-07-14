@@ -24,8 +24,14 @@ const DishManagementForm = () => {
     gasRequired: '',
     description: '',
     dishDescription: '',
-    servingDish: [] // Changed to array
+    servingDish: [], // Changed to array
+    foodDeliveryHora: '',
+    foodDeliveryHoraQuantity: '',
+    foodDeliveryVendor: '',
+    foodDeliveryVendorQuantity: ''
   });
+  
+  const fixedUnit = 'Gram';
 
   const [options, setOptions] = useState({
     vegNonOptions: [
@@ -176,6 +182,7 @@ const DishManagementForm = () => {
     }
   };
 
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -293,13 +300,15 @@ const DishManagementForm = () => {
     }
 
     const ingredient = options.ingredientOptions.find(ing => ing._id === selectedIngredient);
+    console.log(ingredient, "ingredient");
     if (ingredient) {
       const newIngredient = {
         id: Date.now(),
         ingredientId: selectedIngredient,
         name: ingredient.name,
         quantity: ingredientQuantity,
-        unit: ingredientUnit
+        unit: ingredientUnit,
+        image: ingredient.image || ''
       };
 
       setSelectedIngredients([...selectedIngredients, newIngredient]);
@@ -342,6 +351,16 @@ const DishManagementForm = () => {
       qty: formData.perPlateQuantity,
       unit: formData.quantityUnit
     };
+
+    const cuisineArray = [
+      formData.foodDeliveryHora,
+      formData.foodDeliveryHoraQuantity,
+      fixedUnit,
+      formData.foodDeliveryVendor,
+      formData.foodDeliveryVendorQuantity,
+      fixedUnit
+    ];
+
     
 
     if (validateForm()) {
@@ -368,10 +387,12 @@ const DishManagementForm = () => {
           _id: ing.ingredientId,
           name: ing.name,
           qty: ing.quantity,
-          unit: ing.unit
+          unit: ing.unit,
+          image: ing.image
         })),
         categoryIds: formData.category,
         catId: formData.category,
+        cuisineArray: cuisineArray,
         status: 1
       };
 
@@ -709,13 +730,69 @@ const DishManagementForm = () => {
           {renderMultiDropdown("mealType", "Meal Type", options.mealTypeOptions, true)}
 
           <div className={styles["form-field"]}>
-            <label>Dish Rate</label>
+            <label>Dish Rate (Chef)</label>
             <input
               type="number"
               name="dishRate"
               value={formData.dishRate}
               onChange={handleInputChange}
               placeholder="Enter dish rate"
+              min="0"
+              step="0.01"
+              className={styles["input-field"]}
+            />
+          </div>
+
+<div className={styles["form-field"]}>
+            <label>Hora Food Delivery Rate</label>
+            <input
+              type="number"
+              name="foodDeliveryHora"
+              value={formData.foodDeliveryHora}
+              onChange={handleInputChange}
+              placeholder="Hora Food Delivery Rate"
+              min="0"
+              step="0.01"
+              className={styles["input-field"]}
+            />
+          </div>
+
+<div className={styles["form-field"]}>
+            <label>Food Delivery Quantity(Gram)</label>
+            <input
+              type="number"
+              name="foodDeliveryHoraQuantity"
+              value={formData.foodDeliveryHoraQuantity}
+              onChange={handleInputChange}
+              placeholder="Food Delivery Quantity"
+              min="0"
+              step="0.01"
+              className={styles["input-field"]}
+            />
+          </div>
+
+<div className={styles["form-field"]}>
+            <label>Vendor Food Delivery Rate</label>
+            <input
+              type="number"
+              name="foodDeliveryVendor"
+              value={formData.foodDeliveryVendor}
+              onChange={handleInputChange}
+              placeholder="Vendor Food Delivery Rate"
+              min="0"
+              step="0.01"
+              className={styles["input-field"]}
+            />
+          </div>
+
+<div className={styles["form-field"]}>
+            <label>Vendor Food Delivery Quantity(Gram)</label>
+            <input
+              type="number"
+              name="foodDeliveryVendorQuantity"
+              value={formData.foodDeliveryVendorQuantity}
+              onChange={handleInputChange}
+              placeholder="Vendor Food Delivery Quantity"
               min="0"
               step="0.01"
               className={styles["input-field"]}
@@ -763,6 +840,10 @@ const DishManagementForm = () => {
                   {selectedIngredients.map(ing => (
                     <div key={ing.id} className={styles["ingredient-item"]}>
                       <span>{ing.name} - {ing.quantity} {options.quantityUnitOptions.find(u => u._id === ing.unit)?.name}</span>
+                       {/* <img src={`https://horaservices.com/api/uploads/${ing.image}`} 
+                        // alt={ing.name}
+                      //  style={{ width: "100%", height: "auto" }} width={30} height={30}
+                        // /> */}
                       <button
                         type="button"
                         className={`${styles["btn"]} ${styles["btn-danger"]}`}

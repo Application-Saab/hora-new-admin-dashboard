@@ -7,7 +7,7 @@ import { BASE_URL, ADMIN_ORDER_LIST } from "../../../utils/apiconstant";
 // import * as XLSX from "xlsx";
 import CheckSupplier from "../../component/createsupplier/CheckSupplier";
 import axios from "axios";
-import DownloadCSVFile from "../testing/page";
+import DownloadCSVFile from "../downloadCsv/page";
 
 const OrderList = () => {
   const [orders, setOrders] = useState([]);

@@ -5,6 +5,8 @@ import styles from '../create-dish/DishManagementForm.module.css';
 // const DishManagementForm = ({ initialData }) => {
     const DishManagementForm = ({ initialData, dishId }) => {
         console.log("Dish ID:", dishId);
+        console.log(initialData, "Initial Data in DishManagementForm");
+        
   const [formData, setFormData] = useState({
     dishName: '',
     dishImage: null,
@@ -25,7 +27,13 @@ import styles from '../create-dish/DishManagementForm.module.css';
     gasRequired: '',
     description: '',
     dishDescription: '',
-    servingDish: []
+    servingDish: [],
+    foodDeliveryHora: '',
+    foodDeliveryHoraQuantity: '',
+    foodDeliveryHoraUnit: '',
+    foodDeliveryVendor: '',
+    foodDeliveryVendorQuantity: '',
+    foodDeliveryVendorUnit: '',
   });
 
   const [options, setOptions] = useState({
@@ -100,7 +108,13 @@ import styles from '../create-dish/DishManagementForm.module.css';
         gasRequired: initialData.is_gas ? 'yes' : 'no',
         description: initialData.preperationtext,
         dishDescription: initialData.description,
-        servingDish: initialData.serving_dish
+        servingDish: initialData.serving_dish,
+        foodDeliveryHora: initialData.cuisineArray[0],
+        foodDeliveryHoraQuantity: initialData.cuisineArray[1],
+        foodDeliveryHoraUnit: initialData.cuisineArray[2],
+        foodDeliveryVendor: initialData.cuisineArray[3],
+        foodDeliveryVendorQuantity: initialData.cuisineArray[4],
+        foodDeliveryVendorUnit: initialData.cuisineArray[5],
       });
 
       setSelectedIngredients(initialData.ingredientUsed.map(ing => ({
@@ -108,7 +122,8 @@ import styles from '../create-dish/DishManagementForm.module.css';
         ingredientId: ing._id,
         name: ing.name,
         quantity: ing.qty,
-        unit: ing.unit
+        unit: ing.unit,
+        image: ing.image || '' 
       })));
     }
   }, [initialData]);
@@ -330,7 +345,8 @@ import styles from '../create-dish/DishManagementForm.module.css';
         ingredientId: selectedIngredient,
         name: ingredient.name,
         quantity: ingredientQuantity,
-        unit: ingredientUnit
+        unit: ingredientUnit,
+        image: ingredient.image || ''
       };
 
       setSelectedIngredients([...selectedIngredients, newIngredient]);
@@ -374,6 +390,18 @@ import styles from '../create-dish/DishManagementForm.module.css';
       unit: formData.quantityUnit
     };
 
+    
+  const fixedUnit = 'Gram';
+
+const cuisineArray = [
+      formData.foodDeliveryHora,
+      formData.foodDeliveryHoraQuantity,
+      fixedUnit,
+      formData.foodDeliveryVendor,
+      formData.foodDeliveryVendorQuantity,
+      fixedUnit
+    ];
+
     if (validateForm()) {
       const requestData = {
         name: formData.dishName,
@@ -403,13 +431,15 @@ import styles from '../create-dish/DishManagementForm.module.css';
           _id: ing.ingredientId,
           name: ing.name,
           qty: ing.quantity,
-          unit: ing.unit
+          unit: ing.unit,
+          image: ing.image || '' 
         })),
         categoryIds: formData.category.filter(id => id !== null),
         catId: formData.category.filter(id => id !== null),
         // formData.generalAppliance.filter(id => id !== null),
         status: 1,
-        _id: dishId
+        _id: dishId,
+        cuisineArray: cuisineArray
       };
 
       console.log('Submitting data:', requestData);
@@ -757,6 +787,89 @@ import styles from '../create-dish/DishManagementForm.module.css';
               className={styles["input-field"]}
             />
           </div>
+
+           <div className={styles["form-field"]}>
+        <label>Hora Food Delivery Rate</label>
+        <input
+          type="number"
+          name="foodDeliveryHora"
+          value={formData.foodDeliveryHora}
+          onChange={handleInputChange}
+          placeholder="Hora Food Delivery Rate"
+          min="0"
+          step="0.01"
+          className={styles["input-field"]}
+        />
+      </div>
+
+ <div className={styles["form-field"]}>
+        <label>Food Delivery Quantity</label>
+        <input
+          type="number"
+          name="foodDeliveryHoraQuantity"
+          value={formData.foodDeliveryHoraQuantity}
+          onChange={handleInputChange}
+          placeholder="Food Delivery Quantity"
+          min="0"
+          step="0.01"
+          className={styles["input-field"]}
+          
+        />
+      </div>
+
+      <div className={styles["form-field"]}>
+        <label>Food Delivery Unit</label>
+        <input
+          type="text"
+          name="foodDeliveryHoraUnit"
+          value={formData.foodDeliveryHoraUnit}
+          onChange={handleInputChange}
+          placeholder="Food Delivery Unit"
+          className={styles["input-field"]}
+          readOnly
+        />
+      </div>
+
+      <div className={styles["form-field"]}>
+        <label>Vendor Food Delivery Rate</label>
+        <input
+          type="number"
+          name="foodDeliveryVendor"
+          value={formData.foodDeliveryVendor}
+          onChange={handleInputChange}
+          placeholder="Vendor Food Delivery Rate"
+          min="0"
+          step="0.01"
+          className={styles["input-field"]}
+        />
+      </div>
+
+      <div className={styles["form-field"]}>
+        <label>Vendor Delivery Quantity</label>
+        <input
+          type="number"
+          name="foodDeliveryVendorQuantity"
+          value={formData.foodDeliveryVendorQuantity}
+          onChange={handleInputChange}
+          placeholder="Vendor Delivery Quantity"
+          min="0"
+          step="0.01"
+          className={styles["input-field"]}
+        />
+      </div>
+
+      <div className={styles["form-field"]}>
+        <label>Vendor Delivery Unit</label>
+        <input
+          type="text"
+          name="foodDeliveryVendorUnit"
+          value={formData.foodDeliveryVendorUnit}
+          onChange={handleInputChange}
+          placeholder="Vendor Delivery Unit"
+          className={styles["input-field"]}
+          readOnly
+        />
+      </div>
 
           {renderDropdown("preparation", "Preparation", options.preparationOptions, true)}
 
