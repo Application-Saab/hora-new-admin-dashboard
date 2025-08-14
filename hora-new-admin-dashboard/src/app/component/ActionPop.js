@@ -2,6 +2,7 @@ import Image from "next/image";
 import "./Actionpopup.css";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import * as XLSX from "xlsx";
 
 const categoryMap = {
   "65a92271ae1586258ccd0628": "anniversary-decoration",
@@ -31,12 +32,13 @@ const ActionPopup = ({
   const [error, setError] = useState(null);
   let apiUrl = "";
 
+  const [photographyProductName, setPhotographyProductName] = useState("");
+
   console.log(actionPopupOrderId, "actionPopupOrderId");
   console.log(actionPopupChefOrderId, "actionPopupChefOrderId");
   console.log(actionPopupOrderType, "actionPopupOrderType");
 
   console.log(actionPopupChefOrder_Id, "actionPopupChefOrder_Id");
-
 
   let foodDeliveryInclusions = [
     "Complementary - Green salad, Mint Chutney, Achar",
@@ -84,6 +86,8 @@ const ActionPopup = ({
       return;
     }
 
+    console.log(orderDetails, "sorry");
+
     // Fetch data from the API
     const fetchOrderapi = async () => {
       setLoading(true);
@@ -93,6 +97,7 @@ const ActionPopup = ({
         setLoading(false);
 
         console.log(data.data.items[0], "data.data");
+        // setPhotographyProductName(data.data.items[0].photography[0].name);
 
         if (!data.error && data.status === 200) {
           setOrderDetails(data.data);
@@ -175,13 +180,15 @@ const ActionPopup = ({
       </>
     );
   };
-  
+
+  // console.log(orderDetails.items[0].photography[0].name, "orderdetailssorry");
+  // setPhotographyProductName(orderDetails.items[0].photography[0].name);
   // fetch orderdetails
   const FetchOrderDetails = ({ orderDetails }) => {
     // console.log(getOrderType(orderDetails?.type), JSON.stringify(orderDetails))
     console.log(orderDetails, "orderDetails in FetchOrderDetails");
-    
-  console.log(orderDetails.selecteditems[0].ingredientUsed,"dfsdfdsf");
+
+    console.log(orderDetails.selecteditems[0].ingredientUsed, "dfsdfdsf");
     return (
       <div>
         <div className="order-details-container">
@@ -334,66 +341,63 @@ const ActionPopup = ({
                   </ul>
                 ) : (
                   <div>
-                  <ul className="order-items-list">
-                    {orderDetails?.selecteditems?.map((item) => (
-                      <li key={item._id} className="order-item">
-                        <Image
-                          src={`https://horaservices.com/api/uploads/${item.image}`}
-                          alt={item.name}
-                          width={80}
-                          height={80}
-                          className="order-item-image"
-                        />
+                    <ul className="order-items-list">
+                      {orderDetails?.selecteditems?.map((item) => (
+                        <li key={item._id} className="order-item">
+                          <Image
+                            src={`https://horaservices.com/api/uploads/${item.image}`}
+                            alt={item.name}
+                            width={80}
+                            height={80}
+                            className="order-item-image"
+                          />
 
-                        <div className="order-item-details">
-                          <strong className="order-item-title">
-                            {item.name}
-                          </strong>
-                          <span className="order-item-price">
-                            ₹{item.price}
-                          </span>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+                          <div className="order-item-details">
+                            <strong className="order-item-title">
+                              {item.name}
+                            </strong>
+                            <span className="order-item-price">
+                              ₹{item.price}
+                            </span>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 )}
               </div>
 
-                {orderDetails?.type === 2 && (
-                  <>
-                  
-              <h3>Ingredient Used:</h3>
+              {orderDetails?.type === 2 && (
+                <>
+                  <h3>Ingredient Used:</h3>
                   <div className="order-items-container">
+                    <ul className="order-items-list">
+                      {orderDetails?.selecteditems[0]?.ingredientUsed.map(
+                        (item) => (
+                          <li key={item._id} className="order-item">
+                            <Image
+                              src={`https://horaservices.com/api/uploads/${item.image}`}
+                              alt={item.name}
+                              width={80}
+                              height={80}
+                              className="order-item-image"
+                            />
 
- <ul className="order-items-list">
-                    {orderDetails?.selecteditems[0]?.ingredientUsed.map((item) => (
-                      <li key={item._id} className="order-item">
-                        <Image
-                          src={`https://horaservices.com/api/uploads/${item.image}`}
-                          alt={item.name}
-                          width={80}
-                          height={80}
-                          className="order-item-image"
-                        />
-
-                        <div className="order-item-details">
-                          <strong className="order-item-title">
-                            {item.name}
-                          </strong>
-                          <span className="order-item-price">
-                            {item.qty} {item.unit}
-                          </span>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-
-                    </div>
-                    </>
-              
-
-                ) }
+                            <div className="order-item-details">
+                              <strong className="order-item-title">
+                                {item.name}
+                              </strong>
+                              <span className="order-item-price">
+                                {item.qty} {item.unit}
+                              </span>
+                            </div>
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  </div>
+                </>
+              )}
 
               {orderDetails?.type === 6 ? (
                 <>
@@ -466,6 +470,12 @@ const ActionPopup = ({
                 }}
               >
                 Copy Order Summary(For Vendor)
+              </button>
+              <button
+                className="startbutton"
+                onClick={() => createdCsvFileOfVendorFood(orderDetails)}
+              >
+                vendor bro
               </button>
             </div>
           </div>
@@ -746,10 +756,9 @@ const ActionPopup = ({
     // const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     // window.open(whatsappUrl, "_blank");
   };
-  
-  
+
   const sendOrderDetailsToWhatsAppFood = (orderDetails) => {
-    console.log(orderDetails);
+    console.log(orderDetails, "123456u");
 
     // Extract details
     const orderId = getOrderId(orderDetails?.order_id) || "N/A";
@@ -791,45 +800,44 @@ const ActionPopup = ({
     }
     // Start building the message
     let message = `*${orderType} Order Summary:*\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\n\nCity: ${orderCity}\nGuest Count: ${peopleCount}\nTime of Delivery: ${orderTime}\n\nAddress: ${address}\n\nGoogleMapLocation: ${googleMapUrl}\n*Amount: ₹${balanceAmount}*\n\n*Dishes*\n`;
-    
-    // Append each dish to the message
-    
-  if (orderDetails?.order_taken_by === "Booked Online") {
-    // Use userOrderDishImageArray
-    if (orderDetails?.userOrderDishImageArray?.length) {
-      const dishesObject = orderDetails.userOrderDishImageArray[0];
-      message += Object.entries(dishesObject)
-        .map(([dishName, details]) => {
-          if (details.quantity && details.unit) {
-            return `${dishName}: ${details.quantity} ${details.unit}`;
-          } else if (details.quantity) {
-            return `${dishName}: ${details.quantity}`;
-          }
-          return null;
-        })
-        .filter(Boolean)
-        .join("\n");
-    } else {
-      message += "No dishes selected";
-    }
-  } else {
-    // Use items
-    if (orderDetails?.items?.length) {
-      message += orderDetails.items
-        .map((item) => {
-          if (item.quantity && item.unit) {
-            return `${item.name}: ${item.quantity} ${item.unit}`;
-          } else if (item.quantity) {
-            return `${item.name}: ${item.quantity}`;
-          }
-          return `${item.name}`;
-        })
-        .join("\n");
-    } else {
-      message += "No items selected";
-    }
-  }
 
+    // Append each dish to the message
+
+    if (orderDetails?.order_taken_by === "Booked Online") {
+      // Use userOrderDishImageArray
+      if (orderDetails?.userOrderDishImageArray?.length) {
+        const dishesObject = orderDetails.userOrderDishImageArray[0];
+        message += Object.entries(dishesObject)
+          .map(([dishName, details]) => {
+            if (details.quantity && details.unit) {
+              return `${dishName}: ${details.quantity} ${details.unit}`;
+            } else if (details.quantity) {
+              return `${dishName}: ${details.quantity}`;
+            }
+            return null;
+          })
+          .filter(Boolean)
+          .join("\n");
+      } else {
+        message += "No dishes selected";
+      }
+    } else {
+      // Use items
+      if (orderDetails?.items?.length) {
+        message += orderDetails.items
+          .map((item) => {
+            if (item.quantity && item.unit) {
+              return `${item.name}: ${item.quantity} ${item.unit}`;
+            } else if (item.quantity) {
+              return `${item.name}: ${item.quantity}`;
+            }
+            return `${item.name}`;
+          })
+          .join("\n");
+      } else {
+        message += "No items selected";
+      }
+    }
 
     message += "\n\n*Inclusions:*\n-" + inclusions.join("\n-");
     navigator.clipboard
@@ -845,6 +853,272 @@ const ActionPopup = ({
     // window.open(whatsappUrl, "_blank");
   };
 
+  // const createdCsvFileOfVendorFood = (orderDetails) => {
+  //   console.log(orderDetails, "orderdetaillskeyboard");
+  // };
+
+  function createdCsvFileOfVendorFood(orderDetails) {
+    // Build order info section
+    const orderInfo = [
+      ["Guest Count", orderDetails.no_of_people || ""],
+      [
+        "Order Date",
+        orderDetails.order_date
+          ? new Date(orderDetails.order_date).toLocaleDateString("en-GB")
+          : "",
+      ],
+      ["Times of Delivery", orderDetails.order_time || ""],
+      ["Address", orderDetails.addressId?.address1 || ""],
+      ["Google Map Location", orderDetails.addressId?.address2 || ""],
+      ["City", orderDetails.order_locality || ""],
+      [],
+    ];
+
+    // Build items table headers
+    const headers = [
+      "Item Name",
+      "Quantity(Customer)",
+      "Price",
+      "Packaging Material",
+      "Amount",
+    ];
+    const rows = [];
+
+    orderDetails.items.forEach((item) => {
+      const selectedItem = orderDetails.selecteditems.find(
+        (sel) => sel._id === item._id
+      );
+
+      if (
+        selectedItem &&
+        Array.isArray(selectedItem.cuisineArray) &&
+        selectedItem.cuisineArray.length >= 4
+      ) {
+        const pieces = parseFloat(selectedItem.cuisineArray[1]);
+        const price = parseFloat(selectedItem.cuisineArray[3]);
+        const packagingMaterial =
+          selectedItem.cuisineArray[selectedItem.cuisineArray.length - 1];
+
+        let quantity = parseFloat(item.quantity);
+        let displayQuantity = `${item.quantity} ${item.unit}`;
+        if (item.unit && item.unit.toLowerCase() === "kg") {
+          quantity *= 1000;
+          displayQuantity = `${quantity} g`;
+        }
+
+        const amount = (quantity / pieces) * price;
+
+        rows.push([
+          item.name,
+          displayQuantity,
+          price,
+          packagingMaterial,
+          amount.toFixed(2),
+        ]);
+      }
+    });
+
+    if (rows.length === 0) {
+      alert("No matching items found.");
+      return;
+    }
+
+    // Merge order info + table data
+    const sheetData = [...orderInfo, headers, ...rows];
+
+    // Create XLSX workbook
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(sheetData);
+
+    // Style headers
+    const headerRange = XLSX.utils.decode_range(ws["!ref"]);
+    for (let C = 0; C < headers.length; C++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: orderInfo.length, c: C });
+      if (!ws[cellAddress]) continue;
+      ws[cellAddress].s = {
+        font: { bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "4F81BD" } },
+        alignment: { horizontal: "center", vertical: "center" },
+      };
+    }
+
+    // Set column widths
+    ws["!cols"] = [
+      { wch: 25 },
+      { wch: 20 },
+      { wch: 10 },
+      { wch: 35 },
+      { wch: 12 },
+    ];
+
+    // Add sheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, "Vendor Food Report");
+
+    // Export as XLSX file
+    XLSX.writeFile(wb, "vendor_food_report.xlsx");
+  }
+
+  //   function createdCsvFileOfVendorFood(orderDetails) {
+  //     const headers = ["Item Name", "Quantity(Customer)", "Price", "Packaging Material", "Amount"];
+  //     const rows = [];
+
+  //     orderDetails.items.forEach(item => {
+  //         const selectedItem = orderDetails.selecteditems.find(sel => sel._id === item._id);
+
+  //         if (selectedItem && Array.isArray(selectedItem.cuisineArray) && selectedItem.cuisineArray.length >= 4) {
+  //             const pieces = parseFloat(selectedItem.cuisineArray[1]); // e.g. 2.5
+  //             const price = parseFloat(selectedItem.cuisineArray[3]);  // e.g. 35
+  //             const packagingMaterial = selectedItem.cuisineArray[selectedItem.cuisineArray.length - 1];
+
+  //             // Handle quantity conversion if KG
+  //             let quantity = parseFloat(item.quantity);
+  //             let displayQuantity = `${item.quantity} ${item.unit}`;
+  //             if (item.unit && item.unit.toLowerCase() === "kg") {
+  //                 quantity = quantity * 1000; // Convert KG to grams
+  //                 displayQuantity = `${quantity} g`; // Show in grams
+  //             }
+
+  //             // Calculate Amount
+  //             const amount = (quantity / pieces) * price;
+
+  //             rows.push([
+  //                 item.name,
+  //                 displayQuantity,
+  //                 price,
+  //                 packagingMaterial,
+  //                 amount.toFixed(2)
+  //             ]);
+  //         }
+  //     });
+
+  //     if (rows.length === 0) {
+  //         alert("No matching items found.");
+  //         return;
+  //     }
+
+  //     // Convert order date to dd/mm/yy
+  //     let orderDateStr = "";
+  //     if (orderDetails.order_date) {
+  //         const dateObj = new Date(orderDetails.order_date);
+  //         const dd = String(dateObj.getDate()).padStart(2, '0');
+  //         const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+  //         const yy = String(dateObj.getFullYear()).slice(-2);
+  //         orderDateStr = `${dd}/${mm}/${yy}`;
+  //     }
+
+  //     // Build CSV content with order info at the top
+  //     let csvContent = "";
+  //     csvContent += `Guest Count,${orderDetails.no_of_people || ""}\n`;
+  //     csvContent += `Order Date,${orderDateStr}\n`;
+  //     csvContent += `Times of Delivery,${orderDetails.order_time || ""}\n`;
+  //     csvContent += `Address,${orderDetails.addressId?.address1 || ""}\n`;
+  //     csvContent += `Google Map Location,${orderDetails.addressId?.address2 || ""}\n`;
+  //     csvContent += `City,${orderDetails.order_locality || ""}\n\n`;
+
+  //     // Add table headers and rows
+  //     csvContent += headers.join(",") + "\n";
+  //     rows.forEach(row => {
+  //         csvContent += row.map(val => `"${val}"`).join(",") + "\n";
+  //     });
+
+  //     // Trigger CSV download
+  //     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  //     const url = URL.createObjectURL(blob);
+  //     const link = document.createElement("a");
+  //     link.setAttribute("href", url);
+  //     link.setAttribute("download", "vendor_food.csv");
+  //     link.click();
+  // }
+
+  // working model
+  //   function createdCsvFileOfVendorFood(orderDetails) {
+  //     const headers = ["Item Name", "Quantity(Customer)", "Price", "Packaging Material", "Amount"];
+  //     const rows = [];
+
+  //     orderDetails.items.forEach(item => {
+  //         const selectedItem = orderDetails.selecteditems.find(sel => sel._id === item._id);
+
+  //         if (selectedItem && Array.isArray(selectedItem.cuisineArray) && selectedItem.cuisineArray.length >= 4) {
+  //             const pieces = parseFloat(selectedItem.cuisineArray[1]); // 2.5 in example
+  //             const price = parseFloat(selectedItem.cuisineArray[3]);  // 35 in example
+  //             const packagingMaterial = selectedItem.cuisineArray[selectedItem.cuisineArray.length - 1];
+
+  //             // Handle quantity conversion if KG
+  //             let quantity = parseFloat(item.quantity);
+  //             let displayQuantity = `${item.quantity} ${item.unit}`;
+  //             if (item.unit && item.unit.toLowerCase() === "kg") {
+  //                 quantity = quantity * 1000; // Convert KG to grams
+  //                 displayQuantity = `${quantity} g`; // Display in grams
+  //             }
+
+  //             // Calculate Amount
+  //             const amount = (quantity / pieces) * price;
+
+  //             rows.push([
+  //                 item.name,
+  //                 displayQuantity,
+  //                 price,
+  //                 packagingMaterial,
+  //                 amount.toFixed(2)
+  //             ]);
+  //         }
+  //     });
+
+  //     if (rows.length === 0) {
+  //         alert("No matching items found.");
+  //         return;
+  //     }
+
+  //     let csvContent = headers.join(",") + "\n";
+  //     rows.forEach(row => {
+  //         csvContent += row.map(val => `"${val}"`).join(",") + "\n";
+  //     });
+
+  //     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  //     const url = URL.createObjectURL(blob);
+  //     const link = document.createElement("a");
+  //     link.setAttribute("href", url);
+  //     link.setAttribute("download", "vendor_food.csv");
+  //     link.click();
+  // }
+
+  //   function createdCsvFileOfVendorFood(orderDetails) {
+  //     console.log(orderDetails, "orderdorkdfjdslkjfdsf");
+  //     const headers = ["Item Name", "Quantity(Customer)", "Price", "Packaging Material"];
+  //     const rows = [];
+
+  //     orderDetails.items.forEach(item => {
+  //         const selectedItem = orderDetails.selecteditems.find(sel => sel._id === item._id);
+
+  //         if (selectedItem && Array.isArray(selectedItem.cuisineArray)) {
+  //             const packagingMaterial = selectedItem.cuisineArray[selectedItem.cuisineArray.length - 1];
+
+  //             rows.push([
+  //                 item.name,
+  //                 `${item.quantity} ${item.unit}`, // Quantity with unit
+  //                 item.price,
+  //                 packagingMaterial
+  //             ]);
+  //         }
+  //     });
+
+  //     if (rows.length === 0) {
+  //         alert("No matching items found.");
+  //         return;
+  //     }
+
+  //     let csvContent = headers.join(",") + "\n";
+  //     rows.forEach(row => {
+  //         csvContent += row.map(val => `"${val}"`).join(",") + "\n";
+  //     });
+
+  //     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  //     const url = URL.createObjectURL(blob);
+  //     const link = document.createElement("a");
+  //     link.setAttribute("href", url);
+  //     link.setAttribute("download", "vendor_food.csv");
+  //     link.click();
+  // }
 
   return (
     <>
@@ -948,6 +1222,48 @@ const ActionPopup = ({
                             ))
                           )}
                         </p>
+                        {/* <p>Decoration Order Images</p> */}
+                        <strong>Decoration Order Images</strong>
+                        <p>
+                          {/* {orderDetails._doc.userOrderDishImageArray[0]} */}
+
+                          <div
+                            style={{
+                              display: "flex",
+                              flexWrap: "wrap", // allows the images to wrap to the next row
+                              gap: "10px", // space between images
+                              justifyContent: "flex-start", // align items to the left (can be adjusted)
+                            }}
+                          >
+                            {orderDetails._doc.userOrderDishImageArray.map(
+                              (image, index) => {
+                                const imageUrl = `https://horaservices.com/api/uploads/${image}`;
+                                return (
+                                  <div
+                                    key={index}
+                                    style={{
+                                      width: "150px", // Adjust the width of the image containers
+                                      height: "150px", // Adjust the height as well
+                                      overflow: "hidden", // Prevents images from overflowing their container
+                                    }}
+                                  >
+                                    <img
+                                      src={imageUrl}
+                                      alt={`Dish ${index + 1}`}
+                                      style={{
+                                        width: "100%",
+                                        height: "100%",
+                                        objectFit: "cover", // Keeps the aspect ratio and covers the area
+                                      }}
+                                    />
+                                  </div>
+                                );
+                              }
+                            )}
+                          </div>
+                        </p>
+
+                        {/* <p>{userOrderDishImageArray[0]}</p> */}
                       </div>
                     </div>
 
@@ -1031,6 +1347,10 @@ const ActionPopup = ({
                   <div className="order-grid">
                     <div className="order-details-box">
                       <div className="order-detail-row">
+                        <p>
+                          <strong>Product Name:</strong>{" "}
+                          {orderDetails.items[0].photography[0].name}
+                        </p>
                         <p>
                           <strong>Order Id:</strong>{" "}
                           {getOrderId(orderDetails._doc.order_id)}
@@ -1141,7 +1461,7 @@ const ActionPopup = ({
                                     item &&
                                     typeof item === "object" &&
                                     Object.keys(item).length > 0 &&
-                                    item.title 
+                                    item.title
                                 );
 
                               if (!addOns || addOns.length === 0) {

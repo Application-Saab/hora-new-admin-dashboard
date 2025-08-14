@@ -118,7 +118,12 @@ const ReportDownloader = () => {
                     {value:'All',label:'All'},
                     {value:'1',label:getOrderType(1)},
                     {value:'2',label:getOrderType(2)},
-                    {value:'3',label:getOrderType(3)}
+                    {value:'3',label:getOrderType(3)},
+                    {value:'4',label:getOrderType(4)},
+                    {value:'5',label:getOrderType(5)},
+                    {value:'6',label:getOrderType(6)},
+                    {value:'7',label:getOrderType(7)},
+                    {value:'8',label:getOrderType(8)}
                   ]}
                 />
               </div>

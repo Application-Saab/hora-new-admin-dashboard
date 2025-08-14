@@ -13,6 +13,9 @@
     "@mobiscroll/react-lite": "^4.10.9",
     "@mui/icons-material": "^7.0.1",
     "@mui/material": "^7.0.0",
+    "@react-spring/three": "^10.0.1",
+    "@react-three/drei": "^9.122.0",
+    "@react-three/fiber": "^8.18.0",
     "axios": "^1.7.7",
     "baseui": "^14.0.0",
     "datatables.net": "^2.1.8",
@@ -36,6 +39,7 @@
     "recharts": "^2.15.3",
     "sharp": "^0.33.5",
     "slick-carousel": "^1.8.1",
+    "three": "^0.179.1",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

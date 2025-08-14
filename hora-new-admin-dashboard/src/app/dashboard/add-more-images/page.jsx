@@ -35,38 +35,69 @@ const AddMoreImages = () => {
     }
   };
 
+  // useEffect(() => {
+  //   const fetchCustomerData = async () => {
+  //     if (customerId) {
+  //       try {
+  //         const response = await axios.post(
+  //           "https://horaservices.com:3000/api/admin/admin_user_list",
+  //           {
+  //             role: "customer",
+  //             page: 1,
+  //             per_page: 3000,
+  //           }
+  //         );
+
+  //         const customers = response.data.data?.users || [];
+  //         const match = customers.find((user) => user._id === customerId);
+
+  //         if (match) {
+  //           setPhoneNumber(match.phone || "Phone number not found");
+  //         } else {
+  //           setPhoneNumber("");
+  //           setError("Customer ID not found.");
+  //         }
+  //       } catch (err) {
+  //         console.error("API call failed:", err);
+  //         setError("API call failed.");
+  //         setPhoneNumber("");
+  //       }
+  //     }
+  //   };
+
+  //   fetchCustomerData();
+  // }, [customerId]);
   useEffect(() => {
-    const fetchCustomerData = async () => {
-      if (customerId) {
-        try {
-          const response = await axios.post(
-            "https://horaservices.com:3000/api/admin/admin_user_list",
-            {
-              role: "customer",
-              page: 1,
-              per_page: 3000,
-            }
-          );
-
-          const customers = response.data.data?.users || [];
-          const match = customers.find((user) => user._id === customerId);
-
-          if (match) {
-            setPhoneNumber(match.phone || "Phone number not found");
-          } else {
-            setPhoneNumber("");
-            setError("Customer ID not found.");
+  const fetchCustomerData = async () => {
+    if (customerId) {
+      try {
+        const response = await axios.post(
+          "https://horaservices.com:3000/api/admin/admin_user_list",
+          {
+            role: "customer",
+            _id: customerId, // pass customerId as _id
           }
-        } catch (err) {
-          console.error("API call failed:", err);
-          setError("API call failed.");
-          setPhoneNumber("");
-        }
-      }
-    };
+        );
 
-    fetchCustomerData();
-  }, [customerId]);
+        const customers = response.data.data?.users || [];
+        const match = customers.find((user) => user._id === customerId);
+
+        if (match) {
+          setPhoneNumber(match.phone || "Phone number not found");
+        } else {
+          setPhoneNumber("");
+          setError("Customer ID not found.");
+        }
+      } catch (err) {
+        console.error("API call failed:", err);
+        setError("API call failed.");
+        setPhoneNumber("");
+      }
+    }
+  };
+
+  fetchCustomerData();
+}, [customerId]);
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);

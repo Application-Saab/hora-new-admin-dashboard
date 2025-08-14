@@ -1,9 +1,13 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaEye } from "react-icons/fa";
 import ActionPopup from "../../component/ActionPop";
 import "./orderdetails.css";
-import { BASE_URL, ADMIN_ORDER_LIST } from "../../../utils/apiconstant";
+import {
+  BASE_URL,
+  ADMIN_ORDER_LIST,
+  ORDER_EDIT,
+} from "../../../utils/apiconstant";
 // import * as XLSX from "xlsx";
 import CheckSupplier from "../../component/createsupplier/CheckSupplier";
 import axios from "axios";
@@ -492,6 +496,155 @@ const OrderList = () => {
     setShowModal(false);
   };
 
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState("");
+  const [selectedOrderEventId, setSelectedOrderEventId] = useState(null);
+
+  const handleOpen = (orderId) => {
+    setSelectedOrderEventId(orderId);
+    setIsOpen(true);
+  };
+
+  const handleClose = () => {
+    setSelectedEvent("");
+    setSelectedOrderEventId(null);
+    setIsOpen(false);
+  };
+
+  const handleAdd = async () => {
+    console.log(selectedOrderEventId, "selectedOrderEventId");
+    if (!selectedEvent || !selectedOrderEventId) {
+      alert("Please select an event and ensure order ID is available");
+      return;
+    }
+
+    console.log(selectedOrderEventId, "selectedOrderEventId");
+
+    try {
+      const response = await fetch(BASE_URL + ORDER_EDIT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          _id: selectedOrderEventId,
+          eventName: selectedEvent,
+        }),
+      });
+      console.log(response, "response");
+
+      if (response.ok) {
+        alert("Event saved successfully!");
+        handleClose();
+      } else {
+        alert("Failed to save event");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("API error");
+    }
+  };
+
+  const [showBox, setShowBox] = useState(false);
+  const [bigId, setBigId] = useState(null);
+  const [pictureList, setPictureList] = useState([]);
+  const [uploadedNames, setUploadedNames] = useState([]); // <-- store filenames from "data"
+  const filePicker = useRef(null);
+
+  const openBox = (id) => {
+    console.log("id", "bro", id)
+    setBigId(id);
+    setShowBox(true);
+  };
+
+  const closeBox = () => {
+    setShowBox(false);
+    setPictureList([]);
+    setUploadedNames([]);
+  };
+
+  const clickPickButton = () => {
+    if (filePicker.current) {
+      filePicker.current.click();
+    }
+  };
+
+  const whenPicturePicked = async (e) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const formThing = new FormData();
+
+    for (let i = 0; i < files.length; i++) {
+      formThing.append("files", files[i]);
+    }
+
+    try {
+      const answer = await fetch(
+        "https://horaservices.com:3000/api/multiple_image_upload",
+        {
+          method: "POST",
+          body: formThing,
+        }
+      );
+
+      if (!answer.ok) {
+        console.error("Upload failed");
+        return;
+      }
+
+      const data = await answer.json();
+      setPictureList(data.data); // Full filenames
+      setUploadedNames(data.data); // Save to send later
+      console.log("Uploaded:", data.data);
+    } catch (err) {
+      console.error("Upload error:", err);
+    }
+  };
+
+  const sendImagesToBackend = async (order) => {
+    console.log("🟢 Add button clicked");
+
+    console.log(order._id, "order id");
+
+    if (!order?._id) {
+      console.error("❌ order._id is missing");
+      return;
+    }
+
+    if (uploadedNames.length === 0) {
+      console.warn("⚠️ No images uploaded");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "https://horaservices.com:3000/api/order/edit",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            _id: bigId,
+            userOrderDishImageArray: uploadedNames,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (result.error) {
+        console.error("❌ Backend error:", result.message);
+      } else {
+        console.log("✅ Images attached:", result);
+        alert("Image Updated Sucessfully");
+        window.location.reload();
+        setShowBox(false); // Close modal if success
+      }
+    } catch (err) {
+      console.error("❌ Failed to send request:", err);
+    }
+  };
+
   return (
     <div className="orderDetailsList">
       <div className="order-list-container">
@@ -678,6 +831,8 @@ const OrderList = () => {
                 <th>Rating</th>
                 <th>Extra Pay</th>
                 <th>Edit Order</th>
+                <th>Add EventName</th>
+                <th>Add Order Image</th>
               </tr>
             </thead>
             <tbody>
@@ -883,6 +1038,423 @@ const OrderList = () => {
                         </button>
                       )}
                     </td>
+                    <td style={{ padding: "10px" }}>
+                      {/* <button
+                        onClick={() => handleOpen(order._id)}
+                        style={{
+                          backgroundColor: "#007bff",
+                          color: "#fff",
+                          padding: "8px 16px",
+                          borderRadius: "4px",
+                          border: "none",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Add Event
+                      </button> */}
+
+                      {order.eventName ? (
+                        <span
+                          style={{
+                            display: "inline-block",
+                            background:
+                              "linear-gradient(135deg, #fdfcfb, #e2d1c3)", // warm, elegant gradient
+                            color: "#3e3e3e", // neutral dark gray for text
+                            fontWeight: "600",
+                            padding: "8px 16px",
+                            borderRadius: "30px",
+                            fontSize: "14px",
+                            boxShadow: "0 6px 12px rgba(0, 0, 0, 0.1)", // softer shadow
+                            fontFamily: "'Inter', 'Segoe UI', sans-serif",
+                            transition: "all 0.3s ease",
+                            border: "1px solid rgba(0, 0, 0, 0.05)", // subtle border for definition
+                          }}
+                        >
+                          {order.eventName}
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => handleOpen(order._id)}
+                          style={styles.editOrderPopupBtn2}
+                        >
+                          Add Event
+                        </button>
+                      )}
+
+                      {isOpen && (
+                        <div
+                          style={{
+                            position: "fixed",
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundColor: "rgba(0,0,0,0.5)",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            zIndex: 999,
+                          }}
+                        >
+                          <div
+                            style={{
+                              backgroundColor: "#fff",
+                              padding: "20px",
+                              borderRadius: "8px",
+                              width: "300px",
+                              boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
+                            }}
+                          >
+                            <h3
+                              style={{ marginBottom: "16px", fontSize: "18px" }}
+                            >
+                              Select Event
+                            </h3>
+
+                            <select
+                              value={selectedEvent}
+                              onChange={(e) => setSelectedEvent(e.target.value)}
+                              style={{
+                                width: "100%",
+                                padding: "8px",
+                                marginBottom: "16px",
+                                borderRadius: "4px",
+                                border: "1px solid #ccc",
+                              }}
+                            >
+                              <option value="">--Select--</option>
+                              <option value="Birthday">Birthday</option>
+                              <option value="Baby Shower">Baby Shower</option>
+                              <option value="Seemantham">Seemantham</option>
+                              <option value="Dohale Jevan">Dohale Jevan</option>
+                              <option value="Godh Bharai">Godh Bharai</option>
+                              <option value="Chatti">Chatti</option>
+                              <option value="Naming Ceremony">
+                                Naming Ceremony
+                              </option>
+                              <option value="Namkaran">Namkaran</option>
+                              <option value="Annaprashan">Annaprashan</option>
+                              <option value="Choroonu">Choroonu</option>
+                              <option value="Hatey Khori">Hatey Khori</option>
+                              <option value="Vidyarambham">Vidyarambham</option>
+                              <option value="First Birthday">
+                                First Birthday
+                              </option>
+                              <option value="Half Birthday">
+                                Half Birthday
+                              </option>
+                              <option value="First Tooth Celebration">
+                                First Tooth Celebration
+                              </option>
+                              <option value="First Walk Ceremony">
+                                First Walk Ceremony
+                              </option>
+                              <option value="Ayush Homam">Ayush Homam</option>
+                              <option value="Pet Birthday">Pet Birthday</option>
+                              <option value="Proposal Party">
+                                Proposal Party
+                              </option>
+                              <option value="Dating Anniversary">
+                                Dating Anniversary
+                              </option>
+                              <option value="Valentine's Day Party">
+                                Valentine's Day Party
+                              </option>
+                              <option value="Pre-Engagement">
+                                Pre-Engagement
+                              </option>
+                              <option value="Engagement">Engagement</option>
+                              <option value="Roka Ceremony">
+                                Roka Ceremony
+                              </option>
+                              <option value="Haldi">Haldi</option>
+                              <option value="Mehendi">Mehendi</option>
+                              <option value="Sangeet">Sangeet</option>
+                              <option value="Tilak Ceremony">
+                                Tilak Ceremony
+                              </option>
+                              <option value="Bou Bhaat">Bou Bhaat</option>
+                              <option value="Mameru">Mameru</option>
+                              <option value="Wedding">Wedding</option>
+                              <option value="Reception">Reception</option>
+                              <option value="Post-Wedding Party">
+                                Post-Wedding Party
+                              </option>
+                              <option value="Gender Reveal">
+                                Gender Reveal
+                              </option>
+                              <option value="Housewarming">Housewarming</option>
+                              <option value="Griha Pravesh">
+                                Griha Pravesh
+                              </option>
+                              <option value="Satyanarayan Puja">
+                                Satyanarayan Puja
+                              </option>
+                              <option value="Ramayan Katha">
+                                Ramayan Katha
+                              </option>
+                              <option value="Vrat Udyapan">Vrat Udyapan</option>
+                              <option value="Thread Ceremony (Upanayan)">
+                                Thread Ceremony (Upanayan)
+                              </option>
+                              <option value="Thread Ceremony for Girls">
+                                Thread Ceremony for Girls
+                              </option>
+                              <option value="Baptism">Baptism</option>
+                              <option value="Christening">Christening</option>
+                              <option value="Eid">Eid</option>
+                              <option value="Iftar">Iftar</option>
+                              <option value="Diwali">Diwali</option>
+                              <option value="Holi">Holi</option>
+                              <option value="Karva Chauth Udyapan">
+                                Karva Chauth Udyapan
+                              </option>
+                              <option value="Kitty Party">Kitty Party</option>
+                              <option value="Farewell Party">
+                                Farewell Party
+                              </option>
+                              <option value="Raksha Bandhan">
+                                Raksha Bandhan
+                              </option>
+                              <option value="Navratri">Navratri</option>
+                              <option value="Dussehra">Dussehra</option>
+                              <option value="Ganesh Chaturthi">
+                                Ganesh Chaturthi
+                              </option>
+                              <option value="Onam">Onam</option>
+                              <option value="Durga Puja">Durga Puja</option>
+                              <option value="Pongal">Pongal</option>
+                              <option value="Makar Sankranti">
+                                Makar Sankranti
+                              </option>
+                              <option value="Lohri">Lohri</option>
+                              <option value="Bihu">Bihu</option>
+                              <option value="Ugadi">Ugadi</option>
+                              <option value="Gudi Padwa">Gudi Padwa</option>
+                              <option value="Vishu">Vishu</option>
+                              <option value="Mahavir Jayanti">
+                                Mahavir Jayanti
+                              </option>
+                              <option value="Guru Nanak Jayanti">
+                                Guru Nanak Jayanti
+                              </option>
+                              <option value="Janmashtami">Janmashtami</option>
+                              <option value="Baisakhi">Baisakhi</option>
+                              <option value="Karva Chauth">Karva Chauth</option>
+                              <option value="Chhath Puja">Chhath Puja</option>
+                              <option value="Game Night">Game Night</option>
+                              <option value="Tambola">Tambola</option>
+                              <option value="Housie Party">Housie Party</option>
+                              <option value="Poker Night">Poker Night</option>
+                              <option value="Retirement">Retirement</option>
+                              <option value="Pet Welcome">Pet Welcome</option>
+                            </select>
+
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                gap: "10px",
+                              }}
+                            >
+                              <button
+                                onClick={handleAdd}
+                                style={{
+                                  backgroundColor: "#28a745",
+                                  color: "#fff",
+                                  padding: "8px 12px",
+                                  borderRadius: "4px",
+                                  border: "none",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                Add
+                              </button>
+                              <button
+                                onClick={handleClose}
+                                style={{
+                                  backgroundColor: "#ccc",
+                                  color: "#333",
+                                  padding: "8px 12px",
+                                  borderRadius: "4px",
+                                  border: "none",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </td>
+                    {/* <td>s</td> */}
+                    <>
+                      <td>
+  {order.type === 1 ? (
+    order.userOrderDishImageArray && order.userOrderDishImageArray.length > 0 ? (
+      <div
+        style={{
+          display: "inline-block",
+          background: "linear-gradient(135deg, #fdfcfb, #e2d1c3)",
+          color: "#3e3e3e",
+          fontWeight: "600",
+          padding: "8px 16px",
+          borderRadius: "30px",
+          fontSize: "14px",
+          boxShadow: "0 6px 12px rgba(0, 0, 0, 0.1)",
+          fontFamily: "'Inter', 'Segoe UI', sans-serif",
+          transition: "all 0.3s ease",
+          border: "1px solid rgba(0, 0, 0, 0.05)",
+        }}
+      >
+        Present
+      </div>
+    ) : (
+      <button
+        onClick={() => openBox(order._id)}
+        style={styles.editOrderPopupBtn3}
+      >
+        Add Image
+      </button>
+    )
+  ) : (
+    <span style={{ color: "gray", fontStyle: "italic" }}>not able</span>
+  )}
+</td>
+                      {showBox && (
+                        <div
+                          style={{
+                            position: "fixed",
+                            top: "0",
+                            left: "0",
+                            width: "100%",
+                            height: "100%",
+                            backgroundColor: "rgba(0, 0, 0, 0.5)",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            zIndex: "9999",
+                          }}
+                        >
+                          <div
+                            style={{
+                              backgroundColor: "white",
+                              padding: "20px",
+                              borderRadius: "8px",
+                              width: "400px",
+                              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+                            }}
+                          >
+                            <h3
+                              style={{
+                                fontSize: "18px",
+                                fontWeight: "bold",
+                                marginBottom: "15px",
+                                color: "#333",
+                              }}
+                            >
+                              Pick Pictures for Order: {bigId}
+                            </h3>
+
+                            <button
+                              onClick={clickPickButton}
+                              style={{
+                                padding: "10px 20px",
+                                backgroundColor: "#007BFF",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "5px",
+                                cursor: "pointer",
+                                fontSize: "16px",
+                                marginBottom: "15px",
+                                transition: "background-color 0.3s ease",
+                              }}
+                            >
+                              Pick Picture(s)
+                            </button>
+
+                            <input
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              style={{ display: "none" }}
+                              ref={filePicker}
+                              onChange={whenPicturePicked}
+                            />
+
+                            {pictureList.length > 0 && (
+                              <div style={{ marginTop: "20px" }}>
+                                <p style={{ marginBottom: "10px" }}>
+                                  Uploaded Pictures:
+                                </p>
+                                <ul
+                                  style={{
+                                    listStyleType: "none",
+                                    padding: "0",
+                                  }}
+                                >
+                                  {pictureList.map((pic, index) => (
+                                    <li
+                                      key={index}
+                                      style={{
+                                        marginBottom: "5px",
+                                        color: "#555",
+                                      }}
+                                    >
+                                      {pic}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                marginTop: "20px",
+                              }}
+                            >
+                              <button
+                                onClick={closeBox}
+                                style={{
+                                  padding: "10px 20px",
+                                  backgroundColor: "#f44336",
+                                  color: "white",
+                                  border: "none",
+                                  borderRadius: "5px",
+                                  cursor: "pointer",
+                                  fontSize: "16px",
+                                  transition: "background-color 0.3s ease",
+                                }}
+                              >
+                                Cancel
+                              </button>
+
+                              <button
+                                onClick={() => {
+                                  console.log("Add button clicked");
+                                  sendImagesToBackend(order);
+                                }}
+                                style={{
+                                  padding: "10px 20px",
+                                  backgroundColor: "#28a745",
+                                  color: "white",
+                                  border: "none",
+                                  borderRadius: "5px",
+                                  cursor: "pointer",
+                                  fontSize: "16px",
+                                  transition: "background-color 0.3s ease",
+                                }}
+                              >
+                                Add
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </>
                   </tr>
                 ))
               ) : (
@@ -1256,6 +1828,17 @@ const OrderList = () => {
 
 export default OrderList;
 
+const popupStyle = {
+  position: "fixed",
+  top: "30%",
+  left: "40%",
+  padding: "20px",
+  backgroundColor: "white",
+  border: "1px solid #ccc",
+  boxShadow: "0px 0px 10px rgba(0,0,0,0.25)",
+  zIndex: 1000,
+};
+
 const styles = {
   container: {
     display: "flex",
@@ -1321,6 +1904,41 @@ const styles = {
     height: "40px",
     backgroundColor: "transparent",
     backgroundImage: "linear-gradient(135deg, #ff6b6b,rgb(148, 140, 124))",
+    border: "none",
+    borderRadius: "10px",
+    cursor: "pointer",
+    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    color: "white",
+    fontSize: "10px",
+    fontWeight: "bold",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  editOrderPopupBtn2: {
+    width: "85px",
+    height: "40px",
+    backgroundColor: "transparent",
+    backgroundImage: "linear-gradient(135deg, #2e7d32, #9ccc65)",
+    border: "none",
+    borderRadius: "10px",
+    cursor: "pointer",
+    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    color: "white",
+    fontSize: "10px",
+    fontWeight: "bold",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  editOrderPopupBtn3: {
+    width: "85px",
+    height: "40px",
+    backgroundColor: "transparent",
+    backgroundImage: "linear-gradient(135deg, #008080, #a0d6b4)"
+,
     border: "none",
     borderRadius: "10px",
     cursor: "pointer",

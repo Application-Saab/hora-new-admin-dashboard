@@ -50,6 +50,11 @@ const menuItems = [
         icon: <FaPen />,
         url: "/dashboard/edit-decoration-product",
       },
+      {
+        label: "Decoration-Order-Report",
+        icon: <FaCamera />,
+        url: "/dashboard/Decoration-Order-Report"
+      },
     ],
   },
 

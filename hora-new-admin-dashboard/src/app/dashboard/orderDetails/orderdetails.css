@@ -39,7 +39,7 @@
 
 /* Table styling */
 .order-table {
-  width: 200%;
+  width: 220%;
   border-collapse: collapse;
 }
 
@@ -73,7 +73,7 @@ th.order-type-header span {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 .scroll-arrow {
