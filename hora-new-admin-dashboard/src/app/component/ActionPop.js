@@ -32,8 +32,6 @@ const ActionPopup = ({
   const [error, setError] = useState(null);
   let apiUrl = "";
 
-  const [photographyProductName, setPhotographyProductName] = useState("");
-
   console.log(actionPopupOrderId, "actionPopupOrderId");
   console.log(actionPopupChefOrderId, "actionPopupChefOrderId");
   console.log(actionPopupOrderType, "actionPopupOrderType");
@@ -475,7 +473,7 @@ const ActionPopup = ({
                 className="startbutton"
                 onClick={() => createdCsvFileOfVendorFood(orderDetails)}
               >
-                vendor bro
+                Vendor Food Report 
               </button>
             </div>
           </div>
@@ -931,7 +929,7 @@ const ActionPopup = ({
     const ws = XLSX.utils.aoa_to_sheet(sheetData);
 
     // Style headers
-    const headerRange = XLSX.utils.decode_range(ws["!ref"]);
+    // const headerRange = XLSX.utils.decode_range(ws["!ref"]);
     for (let C = 0; C < headers.length; C++) {
       const cellAddress = XLSX.utils.encode_cell({ r: orderInfo.length, c: C });
       if (!ws[cellAddress]) continue;

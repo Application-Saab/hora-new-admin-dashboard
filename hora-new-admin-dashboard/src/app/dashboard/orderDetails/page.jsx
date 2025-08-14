@@ -550,7 +550,7 @@ const OrderList = () => {
   const filePicker = useRef(null);
 
   const openBox = (id) => {
-    console.log("id", "bro", id)
+    console.log("id", "bro", id);
     setBigId(id);
     setShowBox(true);
   };
@@ -1158,7 +1158,7 @@ const OrderList = () => {
                                 Dating Anniversary
                               </option>
                               <option value="Valentine's Day Party">
-                                Valentine's Day Party
+                                Valentine Day Party
                               </option>
                               <option value="Pre-Engagement">
                                 Pre-Engagement
@@ -1291,37 +1291,41 @@ const OrderList = () => {
                     {/* <td>s</td> */}
                     <>
                       <td>
-  {order.type === 1 ? (
-    order.userOrderDishImageArray && order.userOrderDishImageArray.length > 0 ? (
-      <div
-        style={{
-          display: "inline-block",
-          background: "linear-gradient(135deg, #fdfcfb, #e2d1c3)",
-          color: "#3e3e3e",
-          fontWeight: "600",
-          padding: "8px 16px",
-          borderRadius: "30px",
-          fontSize: "14px",
-          boxShadow: "0 6px 12px rgba(0, 0, 0, 0.1)",
-          fontFamily: "'Inter', 'Segoe UI', sans-serif",
-          transition: "all 0.3s ease",
-          border: "1px solid rgba(0, 0, 0, 0.05)",
-        }}
-      >
-        Present
-      </div>
-    ) : (
-      <button
-        onClick={() => openBox(order._id)}
-        style={styles.editOrderPopupBtn3}
-      >
-        Add Image
-      </button>
-    )
-  ) : (
-    <span style={{ color: "gray", fontStyle: "italic" }}>not able</span>
-  )}
-</td>
+                        {order.type === 1 ? (
+                          order.userOrderDishImageArray &&
+                          order.userOrderDishImageArray.length > 0 ? (
+                            <div
+                              style={{
+                                display: "inline-block",
+                                background:
+                                  "linear-gradient(135deg, #fdfcfb, #e2d1c3)",
+                                color: "#3e3e3e",
+                                fontWeight: "600",
+                                padding: "8px 16px",
+                                borderRadius: "30px",
+                                fontSize: "14px",
+                                boxShadow: "0 6px 12px rgba(0, 0, 0, 0.1)",
+                                fontFamily: "'Inter', 'Segoe UI', sans-serif",
+                                transition: "all 0.3s ease",
+                                border: "1px solid rgba(0, 0, 0, 0.05)",
+                              }}
+                            >
+                              Present
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => openBox(order._id)}
+                              style={styles.editOrderPopupBtn3}
+                            >
+                              Add Image
+                            </button>
+                          )
+                        ) : (
+                          <span style={{ color: "gray", fontStyle: "italic" }}>
+                            not able
+                          </span>
+                        )}
+                      </td>
                       {showBox && (
                         <div
                           style={{
@@ -1828,16 +1832,16 @@ const OrderList = () => {
 
 export default OrderList;
 
-const popupStyle = {
-  position: "fixed",
-  top: "30%",
-  left: "40%",
-  padding: "20px",
-  backgroundColor: "white",
-  border: "1px solid #ccc",
-  boxShadow: "0px 0px 10px rgba(0,0,0,0.25)",
-  zIndex: 1000,
-};
+// const popupStyle = {
+//   position: "fixed",
+//   top: "30%",
+//   left: "40%",
+//   padding: "20px",
+//   backgroundColor: "white",
+//   border: "1px solid #ccc",
+//   boxShadow: "0px 0px 10px rgba(0,0,0,0.25)",
+//   zIndex: 1000,
+// };
 
 const styles = {
   container: {
@@ -1937,8 +1941,7 @@ const styles = {
     width: "85px",
     height: "40px",
     backgroundColor: "transparent",
-    backgroundImage: "linear-gradient(135deg, #008080, #a0d6b4)"
-,
+    backgroundImage: "linear-gradient(135deg, #008080, #a0d6b4)",
     border: "none",
     borderRadius: "10px",
     cursor: "pointer",
