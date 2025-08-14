@@ -47,6 +47,7 @@ const AddProductForm = () => {
     },
   ]);
   const [executionPrice, setExecutionPrice] = useState(0);
+  const [advancePercent, setAdvancePercent] = useState(0);
   const [nextId, setNextId] = useState(2);
   const [loading, setLoading] = useState(true);
 
@@ -140,6 +141,12 @@ const AddProductForm = () => {
     console.log("Execution Price:", executionPrice);
     console.log("Final Price:", finalPrice);
 
+    const customerPrice =
+      (totalPrice + executionPrice) / (1 - advancePercent / 100);
+    console.log(customerPrice, "customerPrice");
+    const advanceAmountHora = customerPrice * (advancePercent / 100);
+    console.log("advanceAmountHora", advanceAmountHora);
+
     const productData = {
       name: productName,
       dish_rate: productRate,
@@ -196,6 +203,7 @@ const AddProductForm = () => {
         preperationtext: formattedSummary,
         vendorMaterialPrice: totalPrice,
         executionPrice: executionPrice,
+        horaAdvance: advanceAmountHora,
       };
     } else {
       payload = {
@@ -757,6 +765,7 @@ const AddProductForm = () => {
                 <strong>Hora Vendor Material Price:</strong> ₹
                 {totalPrice.toFixed(2)}
               </div>
+
               <div>
                 <strong>Execution Price:</strong>{" "}
                 <input
@@ -768,10 +777,81 @@ const AddProductForm = () => {
                   style={input}
                 />
               </div>
+
+              <div>
+                <strong>Advance %:</strong>{" "}
+                <input
+                  type="number"
+                  value={advancePercent}
+                  onChange={(e) =>
+                    setAdvancePercent(parseFloat(e.target.value) || 0)
+                  }
+                  style={input}
+                  placeholder="e.g. 20"
+                />
+              </div>
+
+              {/* Customer Price Calculation */}
+              <div>
+                <strong>Customer Price:</strong> ₹
+                {advancePercent >= 100
+                  ? "Invalid %"
+                  : (
+                      (totalPrice + executionPrice) /
+                      (1 - advancePercent / 100)
+                    ).toFixed(2)}
+              </div>
+
+              {/* Advance Amount Calculation */}
+              <div>
+                <strong>Advance Hora Amount:</strong> ₹
+                {advancePercent >= 100
+                  ? "Invalid %"
+                  : (
+                      ((totalPrice + executionPrice) /
+                        (1 - advancePercent / 100)) *
+                      (advancePercent / 100)
+                    ).toFixed(2)}
+              </div>
+            </div>
+
+            {/* <div style={totalsBox}>
+              <div>
+                <strong>Hora Vendor Material Price:</strong> ₹
+                {totalPrice.toFixed(2)}
+              </div>
+              <div>
+                <strong>Execution Price:</strong>{" "}
+                <input
+                  type="number"
+                  value={executionPrice}
+                  onChange={(e) =>
+                    setExecutionPrice(parseFloat(e.target.value) || 0)
+                  }
+                  style={input}
+                />
+              </div>
+               <div>
+    <strong>Advance %:</strong>{" "}
+    <input
+      type="number"
+      value={advancePercent}
+      onChange={(e) => setAdvancePercent(parseFloat(e.target.value) || 0)}
+      style={input}
+      placeholder="e.g. 20"
+    />
+  </div>
+
+  <div>
+    <strong>Customer Price:</strong> ₹
+    {advancePercent >= 100
+      ? "Invalid %"
+      : ((totalPrice + executionPrice) / (1 - advancePercent / 100)).toFixed(2)}
+  </div>
               <div>
                 <strong>Final Price:</strong> ₹{finalPrice.toFixed(2)}
               </div>
-            </div>
+            </div> */}
 
             <h4 style={{ marginTop: "30px", marginBottom: "8px" }}>
               📝 Inclusion Summary
