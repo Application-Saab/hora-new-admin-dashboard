@@ -4,7 +4,6 @@ import axios from "axios";
 import { BASE_URL, ADMIN_USER_LIST } from "../../../utils/apiconstant";
 
 const CheckCustomer = ({ onCustomerIdChange , setEnteredNum }) => {
-  console.log(setEnteredNum, "CheckCustomer component rendered", onCustomerIdChange);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
     const [messageColor, setMessageColor] = useState("");

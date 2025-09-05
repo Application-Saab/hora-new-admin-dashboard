@@ -5,7 +5,7 @@ import Image from "next/image";
 
 const MAX_CONCURRENT_UPLOADS = 5;
 
-const ImageUpload = ({ folderTitle, customerId, enteredNum }) => {
+const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages }) => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [showThumbnailComp, setShowThumbnailComp] = useState(false);
   const [updatedImg, setUpdatedImg] = useState(true);
@@ -14,7 +14,13 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum }) => {
   const [uploadSummary, setUploadSummary] = useState({ success: 0, failed: 0 });
   const [progress, setProgress] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
-  
+
+  useEffect(() => {
+    if(refetchDriveImages){
+      setShowThumbnailComp(true);
+      setShowLink(true);
+    }
+  }, [refetchDriveImages])
 
   useEffect(() => {
     selectedImages.forEach((image) => {
@@ -47,7 +53,7 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum }) => {
     formData.append("folderName", folderTitle);
     formData.append("customerId", customerId);
     formData.append("files", image.file, image.name);
-    formData.append('phoneNo', enteredNum);
+    formData.append("phoneNo", enteredNum);
 
     try {
       const response = await fetch("https://horaservices.com:3000/api/photo/upload", {
@@ -77,7 +83,10 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum }) => {
             const completed = results.filter((r) => r !== undefined).length;
             setProgress(Math.round((completed / tasks.length) * 100));
             next();
-            if (results.length === tasks.length && !results.includes(undefined)) {
+            if (
+              results.length === tasks.length &&
+              !results.includes(undefined)
+            ) {
               resolve(results);
             }
           });
@@ -95,7 +104,10 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum }) => {
     setUploadSummary({ success: 0, failed: 0 });
 
     // Set all to pending initially
-    const pendingImages = selectedImages.map((img) => ({ ...img, status: "pending" }));
+    const pendingImages = selectedImages.map((img) => ({
+      ...img,
+      status: "pending",
+    }));
     setSelectedImages(pendingImages);
 
     // Prepare upload tasks
@@ -126,7 +138,9 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum }) => {
   };
 
   const retryFailedUploads = async () => {
-    const failedImages = selectedImages.filter((img) => img.status === "failed");
+    const failedImages = selectedImages.filter(
+      (img) => img.status === "failed"
+    );
     if (failedImages.length === 0) return;
 
     setIsUploading(true);
@@ -144,7 +158,7 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum }) => {
     });
 
     const results = await limitConcurrency(uploadTasks, MAX_CONCURRENT_UPLOADS);
-  console.log("Retry results:", results);
+    console.log("Retry results:", results);
     const success = retryImages.filter((x) => x.status === "success").length;
     const failed = retryImages.length - success;
     setUploadSummary({ success, failed });
@@ -154,50 +168,45 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum }) => {
     setTimeout(() => setUpdatedImg(true), 100);
   };
 
-  
   const handleImageUpload = async (event) => {
-  const files = event.target.files;
-  if (!files || files.length === 0) return;
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
 
-  const fileArray = Array.from(files);
+    const fileArray = Array.from(files);
 
-  console.log(`You selected ${fileArray.length} image(s):`);
-  fileArray.forEach((file, index) => {
-    console.log(`Image ${index + 1}: ${file.name}`);
-  });
+    console.log(`You selected ${fileArray.length} image(s):`);
+    fileArray.forEach((file, index) => {
+      console.log(`Image ${index + 1}: ${file.name}`);
+    });
 
-  // Show loading
-  setIsUploading(true);
+    // Show loading
+    setIsUploading(true);
 
-  for (let file of fileArray) {
-    const formData = new FormData();
-    formData.append('files', file); 
-    formData.append('customerId', customerId);
-    formData.append('folderName', folderTitle);
-    formData.append('phoneNo', enteredNum);
+    for (let file of fileArray) {
+      const formData = new FormData();
+      formData.append("files", file);
+      formData.append("customerId", customerId);
+      formData.append("folderName", folderTitle);
+      formData.append("phoneNo", enteredNum);
 
-
-    try {
-      const res = await fetch(
-        "https://horaservices.com:3000/api/photo/upload",
-        {
+      try {
+        const res = await fetch("http://localhost:5000/api/photo/upload", {
           method: "POST",
           body: formData,
-        }
-      );
+        });
 
-      const data = await res.json();
-      console.log(`Uploaded ${file.name}:`, data);
-    } catch (error) {
-      console.error(`Upload failed for ${file.name}:`, error);
-      alert(`Failed to upload ${file.name}`);
+        const data = await res.json();
+        console.log(`Uploaded ${file.name}:`, data);
+      } catch (error) {
+        console.error(`Upload failed for ${file.name}:`, error);
+        alert(`Failed to upload ${file.name}`);
+      }
     }
-  }
 
-  // All uploads completed
-  setIsUploading(false);
-  setRefreshKey(prev => prev + 1);
-};
+    // All uploads completed
+    setIsUploading(false);
+    setRefreshKey((prev) => prev + 1);
+  };
 
   return (
     <>
@@ -210,7 +219,8 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum }) => {
             target="_blank"
             rel="noreferrer"
           >
-            https://horaservices.com/photo-gallery?folderName={folderTitle}&customerId={customerId}
+            https://horaservices.com/photo-gallery?folderName={folderTitle}
+            &customerId={customerId}
           </a>
         </div>
       )}
@@ -238,8 +248,8 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum }) => {
           <>
             <div className="mt-4">
               <p>
-                ✅ Uploaded: {uploadSummary.success} | ❌ Failed: {uploadSummary.failed} | 📷 Total:{" "}
-                {selectedImages.length}
+                ✅ Uploaded: {uploadSummary.success} | ❌ Failed:{" "}
+                {uploadSummary.failed} | 📷 Total: {selectedImages.length}
               </p>
 
               <div
@@ -265,16 +275,28 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum }) => {
             {/* Image Grid */}
             <div
               className="selectedImages masonryGrid"
-              style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginTop: "20px" }}
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "10px",
+                marginTop: "20px",
+              }}
             >
               {selectedImages.map((image, index) => (
-                <div key={index} style={{ position: "relative", width: "150px" }}>
+                <div
+                  key={index}
+                  style={{ position: "relative", width: "150px" }}
+                >
                   <Image
                     src={image.preview}
                     alt={image.name}
-                      width={100}
-                      height={100}
-                    style={{ width: "100%", borderRadius: "8px", border: "2px solid #ccc" }}
+                    width={100}
+                    height={100}
+                    style={{
+                      width: "100%",
+                      borderRadius: "8px",
+                      border: "2px solid #ccc",
+                    }}
                   />
                   <span
                     style={{
@@ -339,41 +361,43 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum }) => {
       </div>
 
       {/* Thumbnail Preview */}
-       {isUploading && <p style={{ color: 'green' }}>Uploading images, please wait...</p>}
+      {isUploading && (
+        <p style={{ color: "green" }}>Uploading images, please wait...</p>
+      )}
 
       {updatedImg && folderTitle && customerId && showThumbnailComp && (
         <>
-        <div style={{ marginTop: '30px' }}>
-        <label
-  htmlFor="imageUpload"
-  style={{
-    display: 'inline-block',
-    cursor: 'pointer',
-    padding: '10px 20px',
-    backgroundColor: '#007bff',
-    color: '#fff',
-    borderRadius: '4px',
-    textAlign: 'center',
-  }}
->
-  Add More Images
-</label>
+          <div style={{ marginTop: "30px" }}>
+            <label
+              htmlFor="imageUpload"
+              style={{
+                display: "inline-block",
+                cursor: "pointer",
+                padding: "10px 20px",
+                backgroundColor: "#007bff",
+                color: "#fff",
+                borderRadius: "4px",
+                textAlign: "center",
+              }}
+            >
+              Add More Images
+            </label>
 
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            multiple
-            style={{
-              cursor: 'pointer',
-              padding: '10px',
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-              backgroundColor: '#007bff',
-              color: '#fff',
-            }}
-          />
-</div>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              multiple
+              style={{
+                cursor: "pointer",
+                padding: "10px",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+                backgroundColor: "#007bff",
+                color: "#fff",
+              }}
+            />
+          </div>
           <ThumbnailGallery
             key={refreshKey}
             folderName={folderTitle}
