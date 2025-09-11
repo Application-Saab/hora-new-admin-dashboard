@@ -190,7 +190,7 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages }
       formData.append("phoneNo", enteredNum);
 
       try {
-        const res = await fetch("http://localhost:5000/api/photo/upload", {
+        const res = await fetch("https://horaservices.com:3000/api/photo/upload", {
           method: "POST",
           body: formData,
         });
