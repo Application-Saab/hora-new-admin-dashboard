@@ -112,7 +112,7 @@ const PhotoCreateProject = () => {
         googleResp
       );
 
-      alert(`Images uploaded successfully for ${driveVendorId}:`);
+      alert(`Images are uploading in background, will reflect on link in less then 1 hour for : ${driveVendorId}:`);
       console.log("........", data);
       setFolderTitle(data?.folderDetails?.folderName);
       setCustomerId(data?.folderDetails?.customerId);

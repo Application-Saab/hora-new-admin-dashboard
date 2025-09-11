@@ -7,11 +7,13 @@ import {
   BASE_URL,
   ADMIN_ORDER_LIST,
   ORDER_EDIT,
+  UPLOAD_DRIVE_TO_ORDER,
 } from "../../../utils/apiconstant";
 // import * as XLSX from "xlsx";
 import CheckSupplier from "../../component/createsupplier/CheckSupplier";
 import axios from "axios";
 import DownloadCSVFile from "../downloadCsv/page";
+import { IoMdOpen } from "react-icons/io";
 
 const OrderList = () => {
   const [orders, setOrders] = useState([]);
@@ -544,10 +546,13 @@ const OrderList = () => {
   };
 
   const [showBox, setShowBox] = useState(false);
+  const [showDriveLinkModal, setShowDriveLinkModal] = useState(false);
+  const [driveLink, setDriveLink] = useState("");
   const [bigId, setBigId] = useState(null);
   const [pictureList, setPictureList] = useState([]);
   const [uploadedNames, setUploadedNames] = useState([]); // <-- store filenames from "data"
   const filePicker = useRef(null);
+  const [selectedOrderData, setSelectedOrderData] = useState({});
 
   const openBox = (id) => {
     console.log("id", "bro", id);
@@ -565,6 +570,11 @@ const OrderList = () => {
     if (filePicker.current) {
       filePicker.current.click();
     }
+  };
+
+  const clickUploadDrive = (data) => {
+    setSelectedOrderData(data);
+    setShowDriveLinkModal(true);
   };
 
   const whenPicturePicked = async (e) => {
@@ -642,6 +652,81 @@ const OrderList = () => {
       }
     } catch (err) {
       console.error("❌ Failed to send request:", err);
+    }
+  };
+
+  const handleOnchangeDriveLink = (e) => {
+    setDriveLink(e.target.value);
+  };
+
+  const handleUploadDriveUrl = async () => {
+    console.log(
+      "%c [ selectedOrderData ]-650",
+      "font-size:13px; background:pink; color:#bf2c9f;",
+      selectedOrderData
+    );
+    try {
+      // Make API call to create folder
+      const response = await fetch(`${BASE_URL}${UPLOAD_DRIVE_TO_ORDER}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          order_id: selectedOrderData?.order_id,
+          folderUrl: driveLink,
+        }),
+      });
+      const data = await response.json();
+      console.log(
+        "%c [ data ]-663",
+        "font-size:13px; background:pink; color:#bf2c9f;",
+        data
+      );
+
+      if (!response.ok) {
+        // alert(data?.error)
+        throw new Error(data.error || "Failed to create folder");
+      }
+
+      const googleResp = await fetch(
+        `${BASE_URL}/api/photo/drive/update-google-sheet`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderIdDb: selectedOrderData?.order_id,
+            orderIdCustomer: selectedOrderData?.order_id + 10800,
+            phone: selectedOrderData?.phone_no,
+            fulfillmentDate: selectedOrderData.order_date
+              ? new Date(selectedOrderData?.order_date).toLocaleDateString(
+                  "en-GB"
+                )
+              : "N/A",
+            services: "Photography",
+            driveLink: driveLink,
+            horaWebLink: "N/A",
+          }),
+        }
+      );
+      console.log(
+        "%c [ googleResp ]-95",
+        "font-size:13px; background:pink; color:#bf2c9f;",
+        googleResp
+      );
+
+      alert(
+        `Drive link are added for order_id : ${
+          selectedOrderData?.order_id + 10800
+        }`
+      );
+      console.log("........", data);
+      setShowDriveLinkModal(false);
+      fetchOrders();
+      // setRefetchDriveImages(true);
+    } catch (error) {
+      console.error("Error creating folder:", error);
+      alert(error.message);
     }
   };
 
@@ -1320,6 +1405,22 @@ const OrderList = () => {
                               Add Image
                             </button>
                           )
+                        ) : order.type === 8 ? (
+                          !order.orderDriveLink ? (
+                            <button
+                              onClick={() => clickUploadDrive(order)}
+                              style={styles.editOrderPopupBtn3}
+                            >
+                              Add Drive Link
+                            </button>
+                          ) : (
+                            <span
+                              style={{ textAlign: "center", cursor: "pointer" }}
+                              onClick={() =>  window.open(order.orderDriveLink, '_blank')}
+                            >
+                              <IoMdOpen size={30} />
+                            </span>
+                          )
                         ) : (
                           <span style={{ color: "gray", fontStyle: "italic" }}>
                             not able
@@ -1448,6 +1549,99 @@ const OrderList = () => {
                                   border: "none",
                                   borderRadius: "5px",
                                   cursor: "pointer",
+                                  fontSize: "16px",
+                                  transition: "background-color 0.3s ease",
+                                }}
+                              >
+                                Add
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      {showDriveLinkModal && (
+                        <div
+                          style={{
+                            position: "fixed",
+                            top: "0",
+                            left: "0",
+                            width: "100%",
+                            height: "100%",
+                            backgroundColor: "rgba(0, 0, 0, 0.5)",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            zIndex: "9999",
+                          }}
+                        >
+                          <div
+                            style={{
+                              backgroundColor: "white",
+                              padding: "20px",
+                              borderRadius: "8px",
+                              width: "600px",
+                              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+                            }}
+                          >
+                            <h3
+                              style={{
+                                fontSize: "18px",
+                                fontWeight: "bold",
+                                marginBottom: "15px",
+                                color: "#333",
+                              }}
+                            >
+                              Upload Drive Link
+                            </h3>
+
+                            <input
+                              type="text"
+                              placeholder="Paste drive link"
+                              onChange={handleOnchangeDriveLink}
+                              style={{
+                                height: "40px",
+                                width: "100%",
+                                paddingInline: "5px",
+                              }}
+                            />
+
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                marginTop: "20px",
+                              }}
+                            >
+                              <button
+                                onClick={() => setShowDriveLinkModal(false)}
+                                style={{
+                                  padding: "10px 20px",
+                                  backgroundColor: "#f44336",
+                                  color: "white",
+                                  border: "none",
+                                  borderRadius: "5px",
+                                  cursor: "pointer",
+                                  fontSize: "16px",
+                                  transition: "background-color 0.3s ease",
+                                }}
+                              >
+                                Cancel
+                              </button>
+
+                              <button
+                                onClick={() => {
+                                  handleUploadDriveUrl(order);
+                                }}
+                                disabled={!driveLink}
+                                style={{
+                                  padding: "10px 20px",
+                                  backgroundColor: "#28a745",
+                                  color: "white",
+                                  border: "none",
+                                  borderRadius: "5px",
+                                  cursor: !driveLink
+                                    ? "not-allowed"
+                                    : "pointer",
                                   fontSize: "16px",
                                   transition: "background-color 0.3s ease",
                                 }}
