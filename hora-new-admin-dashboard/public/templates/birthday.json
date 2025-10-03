@@ -1,0 +1,36 @@
+{
+  "id": "birthday",
+  "name": "Birthday Celebration",
+  "pages": [
+    {
+      "id": "page-1",
+      "layout": "3-large",
+      "frames": [
+        { "id": "f1", "x": 100, "y": 200, "width": 400, "height": 300 },
+        { "id": "f2", "x": 600, "y": 200, "width": 400, "height": 300 },
+        { "id": "f3", "x": 350, "y": 600, "width": 400, "height": 300 }
+      ]
+    },
+    {
+      "id": "page-2",
+      "layout": "5-small",
+      "frames": [
+        { "id": "f4", "x": 100, "y": 150, "width": 200, "height": 150 },
+        { "id": "f5", "x": 350, "y": 150, "width": 200, "height": 150 },
+        { "id": "f6", "x": 600, "y": 150, "width": 200, "height": 150 },
+        { "id": "f7", "x": 225, "y": 350, "width": 200, "height": 150 },
+        { "id": "f8", "x": 475, "y": 350, "width": 200, "height": 150 }
+      ]
+    },
+    {
+      "id": "page-3",
+      "layout": "4-small",
+      "frames": [
+        { "id": "f4", "x": 100, "y": 150, "width": 200, "height": 150 },
+        { "id": "f5", "x": 350, "y": 150, "width": 200, "height": 150 },
+        { "id": "f6", "x": 600, "y": 150, "width": 200, "height": 150 },
+        { "id": "f7", "x": 225, "y": 350, "width": 200, "height": 150 }
+      ]
+    }
+  ]
+}
