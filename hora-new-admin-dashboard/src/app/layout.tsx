@@ -67,6 +67,11 @@ const menuItems = [
         icon: <FaCamera />,
         url: "/dashboard/photography-create-order",
       },
+        {
+        label: "Add Product",
+        icon: <FaCartPlus />,
+        url: "/dashboard/add-photography-product",
+      },
       {
         label: "Create Folder",
         icon: <FaCamera />,
