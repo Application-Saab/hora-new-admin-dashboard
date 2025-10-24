@@ -11,6 +11,8 @@ import {
 const AddProductForm = () => {
   const [productName, setProductName] = useState("");
   const [productRate, setProductRate] = useState("");
+   const [duration, setDuration] = useState(""); // ✅ new state
+  const [advanceAmount, setAdvanceAmount] = useState("");
   const [selectedMealTypes, setSelectedMealTypes] = useState([]);
   const [mealProductTypes, setMealProductTypes] = useState([]);
   const [uploadedImage, setUploadedImage] = useState(null);
@@ -101,6 +103,8 @@ const handleCheckboxChange = (id) => {
   const resetForm = () => {
     setProductName("");
     setProductRate("");
+     setDuration(""); 
+    setAdvanceAmount("");
     setSelectedMealTypes([]);
     setUploadedImage(null);
     setPreviewImage(null);
@@ -139,6 +143,8 @@ const handleCheckboxChange = (id) => {
       mealId: selectedMealTypes,
       categoryIds: [],
       catId: [],
+      duration: duration || "", 
+      advance_amount: advanceAmount || "",
     };
 
     try {
@@ -250,7 +256,31 @@ const handleCheckboxChange = (id) => {
             onChange={(e) => setProductRate(e.target.value)}
           />
         </div>
+
+         
       </div>
+       <div className="form-group">
+          <label>Duration</label>
+          <input
+            className="input"
+            type="text"
+            placeholder="e.g. 2 Hours"
+            value={duration}
+            onChange={(e) => setDuration(e.target.value)}
+          />
+        </div>
+
+        {/* ✅ Advance Amount Field */}
+        <div className="form-group">
+          <label>Advance Amount</label>
+          <input
+            className="input"
+            type="text"
+            placeholder="e.g. 500"
+            value={advanceAmount}
+            onChange={(e) => setAdvanceAmount(e.target.value)}
+          />
+        </div>
 
       {/* Inclusion Textarea */}
       <div className="form-group" style={{ marginTop: "20px" }}>

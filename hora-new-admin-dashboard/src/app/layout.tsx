@@ -72,6 +72,11 @@ const menuItems = [
         icon: <FaCartPlus />,
         url: "/dashboard/add-photography-product",
       },
+          {
+        label: "Edit Product",
+        icon: <FaPen />,
+        url: "/dashboard/edit-photography-product",
+      },
       {
         label: "Create Folder",
         icon: <FaCamera />,
