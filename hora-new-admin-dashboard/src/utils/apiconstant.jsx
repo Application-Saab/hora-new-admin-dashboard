@@ -22,6 +22,6 @@ export const ORDER_EDIT = "/api/order/edit";
 export const DRIVE_FOLDER_UPLOAD="/api/photo/drive/import-drive-folder"
 export const UPLOAD_DRIVE_TO_ORDER="/api/photo/drive/add-order-drive-link"
 
-// http://localhost:5000/api/admin/admin_user_list
-// http://localhost:5000/api/decoration_image_upload
+// https://horaservices.com:3000/api/admin/admin_user_list
+// https://horaservices.com:3000/api/decoration_image_upload
 // api/decoration/edit
