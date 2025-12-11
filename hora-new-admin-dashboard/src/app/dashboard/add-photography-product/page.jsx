@@ -122,7 +122,6 @@ const handleCheckboxChange = (id) => {
         .map((item) => `<div>- ${item}</div>`);
 
     const formattedInclusions = formatText(option2Text);
-    const formattedOption2Text = formatText(option2Text);
 
     // Create full data object as required by backend
     const productData = {
