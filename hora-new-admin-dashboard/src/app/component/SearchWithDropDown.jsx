@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useMemo } from "react";
 
 const SearchWithDropDown = ({
     options = [],
@@ -9,27 +10,29 @@ const SearchWithDropDown = ({
     const [search, setSearch] = useState("");
     const [open, setOpen] = useState(false);
 
-    // Display value logic
-    const displayValue = open ? search : selectedValue || "";
+    // Filtered Options using useMemo
+    const filteredOptions = useMemo(() => {
+        return options.filter((opt) =>
+            opt.toLowerCase().includes(search.toLowerCase())
+        );
+    }, [options, search]);
 
-    // Filtered Options
-    const filteredOptions = options.filter((opt) =>
-        opt.toLowerCase().includes(search.toLowerCase())
-    );
+    const handleOpen = () => {
+        setOpen(true);
+    };
+
 
     return (
         <div style={{ width: "90%", position: "relative" }}>
 
             {/* Visible Box / Search Box */}
             <input
-                value={displayValue}
+                value={open ? search : selectedValue || ""}
                 placeholder={placeholder}
-                onClick={() => {
-                    setOpen(true);
-                }}
+                onClick={handleOpen}
                 onChange={(e) => {
                     setSearch(e.target.value);
-                    setOpen(true);
+                    handleOpen();
                 }}
                 style={{
                     width: "100%",
