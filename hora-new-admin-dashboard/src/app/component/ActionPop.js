@@ -32,12 +32,6 @@ const ActionPopup = ({
   const [error, setError] = useState(null);
   let apiUrl = "";
 
-  console.log(actionPopupOrderId, "actionPopupOrderId");
-  console.log(actionPopupChefOrderId, "actionPopupChefOrderId");
-  console.log(actionPopupOrderType, "actionPopupOrderType");
-
-  console.log(actionPopupChefOrder_Id, "actionPopupChefOrder_Id");
-
   let foodDeliveryInclusions = [
     "Complementary - Green salad, Mint Chutney, Achar",
     "Doorstep Delivery",
@@ -84,8 +78,6 @@ const ActionPopup = ({
       return;
     }
 
-    console.log(orderDetails, "sorry");
-
     // Fetch data from the API
     const fetchOrderapi = async () => {
       setLoading(true);
@@ -93,8 +85,6 @@ const ActionPopup = ({
         const response = await fetch(apiUrl);
         const data = await response.json();
         setLoading(false);
-
-        console.log(data.data.items[0], "data.data");
         // setPhotographyProductName(data.data.items[0].photography.name);
 
         if (!data.error && data.status === 200) {
@@ -145,7 +135,6 @@ const ActionPopup = ({
   };
 
   const getItemInclusion = (inclusion) => {
-    console.log(inclusion);
     if (!Array.isArray(inclusion) || inclusion.length === 0) {
       return null;
     }
@@ -184,9 +173,7 @@ const ActionPopup = ({
   // fetch orderdetails
   const FetchOrderDetails = ({ orderDetails }) => {
     // console.log(getOrderType(orderDetails?.type), JSON.stringify(orderDetails))
-    console.log(orderDetails, "orderDetails in FetchOrderDetails");
 
-    console.log(orderDetails.selecteditems[0]?.ingredientUsed, "dfsdfdsf");
     return (
       <div>
         <div className="order-details-container">
@@ -300,12 +287,8 @@ const ActionPopup = ({
                 ) : orderDetails?.type === 7 ? (
                   <ul className="order-items-list">
                     {orderDetails?.selecteditems?.map((item) => {
-                      console.log(item, "tieek");
-                      // by aarti
-                      console.log(orderDetails.items, "items");
 
                       const d2 = orderDetails.items;
-                      console.log(d2);
                       const dishDetails =
                         orderDetails?.userOrderDishImageArray[0]?.[item.name] ||
                         null;
@@ -484,7 +467,6 @@ const ActionPopup = ({
 
   // share on whatsapp========================
   const sendOrderDetailsToWhatsAppDoc = () => {
-    console.log(JSON.stringify(orderDetails.items));
 
     // Extract order details
     const orderId = getOrderId(orderDetails.order_id) || "N/A";
@@ -558,7 +540,6 @@ const ActionPopup = ({
     try {
       setLoading(true);
 
-      console.log(JSON.stringify(orderDetails.items));
 
       const orderId = getOrderId(orderDetails.order_id) || "N/A";
       const orderDate =
@@ -608,7 +589,6 @@ const ActionPopup = ({
               const formattedName = dec.name.split(" ").join("-");
               const finalUrl = `https://horaservices.com/balloon-decoration/${categoryName}/product/${formattedName}`;
               message += `*Product Page:* ${finalUrl}\n`;
-              console.log("📌 Product URL:", finalUrl);
             } else {
               console.warn("❌ No matching tag found for:", dec.name);
             }
@@ -713,7 +693,6 @@ const ActionPopup = ({
   };
 
   const sendOrderDetailsToWhatsAppchef = (orderDetails) => {
-    console.log(orderDetails);
 
     // Extract details
     const orderId = getOrderId(orderDetails?.order_id) || "N/A";
@@ -756,7 +735,6 @@ const ActionPopup = ({
   };
 
   const sendOrderDetailsToWhatsAppFood = (orderDetails) => {
-    console.log(orderDetails, "123456u");
 
     // Extract details
     const orderId = getOrderId(orderDetails?.order_id) || "N/A";
