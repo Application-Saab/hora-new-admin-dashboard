@@ -3,6 +3,7 @@ import "./Actionpopup.css";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import * as XLSX from "xlsx";
+import { BASE_URL } from "@/utils/apiconstant";
 
 const categoryMap = {
   "65a92271ae1586258ccd0628": "anniversary-decoration",
@@ -604,7 +605,7 @@ const ActionPopup = ({
               if (matchedTag) {
                 const categoryName = categoryMap[matchedTag];
                 const formattedName = dec.name.split(" ").join("-");
-                const finalUrl = `https://horaservices.com/balloon-decoration/${categoryName}/product/${formattedName}`;
+                const finalUrl = `${BASE_URL}/balloon-decoration/${categoryName}/product/${formattedName}`;
                 message += `*Product Page:* ${finalUrl}\n`;
                 console.log("📌 Product URL:", finalUrl);
               } else {
