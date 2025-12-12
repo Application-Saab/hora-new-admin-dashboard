@@ -469,23 +469,23 @@ const ActionPopup = ({
   const sendOrderDetailsToWhatsAppDoc = () => {
 
     // Extract order details
-    const orderId = getOrderId(orderDetails.order_id) || "N/A";
+    const orderId = getOrderId(orderDetails?.order_id) || "N/A";
     const orderDate =
-      new Date(orderDetails.order_date).toLocaleDateString() || "N/A";
+      new Date(orderDetails?.order_date).toLocaleDateString() || "N/A";
     // const orderType = getOrderType(orderDetails.type) || "N/A";
-    const address = orderDetails.addressId?.address1 || "N/A";
-    const googleMapLocation = orderDetails.addressId?.address2 || "N/A";
-    const orderTime = orderDetails.order_time || "N/A";
-    const decorationComments = orderDetails.decoration_comments || "N/A";
-    const addOnItems = orderDetails.add_on || [];
+    const address = orderDetails?.addressId?.address1 || "N/A";
+    const googleMapLocation = orderDetails?.addressId?.address2 || "N/A";
+    const orderTime = orderDetails?.order_time || "N/A";
+    const decorationComments = orderDetails?.decoration_comments || "N/A";
+    const addOnItems = orderDetails?.add_on || [];
     // Create a Google Maps link
     const googleMapUrl = `https://www.google.com/maps/search/?q=${encodeURIComponent(
       googleMapLocation
     )}`;
     // Calculate balance amount
     let balanceAmount = 0;
-    if (orderDetails.phone_no) {
-      balanceAmount = orderDetails.total_amount - orderDetails.advance_amount;
+    if (orderDetails?.phone_no) {
+      balanceAmount = orderDetails?.total_amount - orderDetails?.advance_amount;
     } else {
       if ([2, 3, 4, 5].includes(orderDetails?.type)) {
         balanceAmount = Math.round((orderDetails?.payable_amount * 4) / 5);
@@ -503,7 +503,7 @@ const ActionPopup = ({
     // Add Add-On Items
     message += `\n*Add-On Items:*\n`;
 
-    if (addOnItems && addOnItems.length > 0) {
+    if (addOnItems && addOnItems?.length > 0) {
       addOnItems.forEach((item, index) => {
         const itemLabel = [item.name, item.title].filter(Boolean).join(" ");
         message += `\n${index + 1}. ${itemLabel}: ₹${item.price}`;
@@ -513,12 +513,12 @@ const ActionPopup = ({
     }
 
     // Add Decoration Items
-    orderDetails.items.forEach((item) => {
-      const dec = item.decoration;
+    orderDetails?.items.forEach((item) => {
+      const dec = item?.decoration;
       if (dec) {
         // check if decoration exists
-        message += `\n\n*Product Name:* ${dec.name}\n*Image URL:* https://horaservices.com/api/uploads/${dec.featured_image}\n`;
-        const inclusionText = getCleanInclusionText(dec.inclusion); // format inclusion text
+        message += `\n\n*Product Name:* ${dec?.name}\n*Image URL:* https://horaservices.com/api/uploads/${dec?.featured_image}\n`;
+        const inclusionText = getCleanInclusionText(dec?.inclusion); // format inclusion text
         message += `\n*Inclusion:* \n${inclusionText}`;
       }
     });
@@ -541,14 +541,14 @@ const ActionPopup = ({
       setLoading(true);
 
 
-      const orderId = getOrderId(orderDetails.order_id) || "N/A";
+      const orderId = getOrderId(orderDetails?.order_id) || "N/A";
       const orderDate =
-        new Date(orderDetails.order_date).toLocaleDateString() || "N/A";
-      const address = orderDetails.addressId?.address1 || "N/A";
-      const googleMapLocation = orderDetails.addressId?.address2 || "N/A";
-      const orderTime = orderDetails.order_time || "N/A";
-      const decorationComments = orderDetails.decoration_comments || "N/A";
-      const addOnItems = orderDetails.add_on || [];
+        new Date(orderDetails?.order_date).toLocaleDateString() || "N/A";
+      const address = orderDetails?.addressId?.address1 || "N/A";
+      const googleMapLocation = orderDetails?.addressId?.address2 || "N/A";
+      const orderTime = orderDetails?.order_time || "N/A";
+      const decorationComments = orderDetails?.decoration_comments || "N/A";
+      const addOnItems = orderDetails?.add_on || [];
       const googleMapUrl = `https://www.google.com/maps/search/?q=${encodeURIComponent(
         googleMapLocation
       )}`;
@@ -558,10 +558,10 @@ const ActionPopup = ({
 
       message += `\n*Add-On Items:*\n`;
 
-      if (addOnItems && addOnItems.length > 0) {
+      if (addOnItems && addOnItems?.length > 0) {
         addOnItems.forEach((item, index) => {
-          const itemLabel = [item.name, item.title].filter(Boolean).join(" ");
-          message += `\n${index + 1}. ${itemLabel}: ₹${item.price}`;
+          const itemLabel = [item?.name, item?.title].filter(Boolean).join(" ");
+          message += `\n${index + 1}. ${itemLabel}: ₹${item?.price}`;
         });
       } else {
         message += ` None`;
@@ -569,7 +569,7 @@ const ActionPopup = ({
 
       // Loop through decorations and append dynamic URL info
       for (const item of orderDetails.items) {
-        const dec = item.decoration; // single object
+        const dec = item?.decoration; // single object
         if (!dec) continue; // skip if no decoration
 
         message += `\n\n*Product Name:* ${dec.name}\n`;
@@ -613,14 +613,14 @@ const ActionPopup = ({
   };
 
   const sendOrderDetailsToWhatsAppPhoto = () => {
-    const orderId = getOrderId(orderDetails.order_id) || "N/A";
+    const orderId = getOrderId(orderDetails?.order_id) || "N/A";
     const orderDate =
-      new Date(orderDetails.order_date).toLocaleDateString() || "N/A";
-    const address = orderDetails.addressId?.address1 || "N/A";
-    const googleMapLocation = orderDetails.addressId?.address2 || "N/A";
-    const orderTime = orderDetails.order_time || "N/A";
-    const decorationComments = orderDetails.decoration_comments || "N/A";
-    const addOnItems = orderDetails.add_on || [];
+      new Date(orderDetails?.order_date).toLocaleDateString() || "N/A";
+    const address = orderDetails?.addressId?.address1 || "N/A";
+    const googleMapLocation = orderDetails?.addressId?.address2 || "N/A";
+    const orderTime = orderDetails?.order_time || "N/A";
+    const decorationComments = orderDetails?.decoration_comments || "N/A";
+    const addOnItems = orderDetails?.add_on || [];
 
     // Format Inclusion Section
     let inclusionText = "None";
