@@ -15,6 +15,8 @@ import {
 } from "../../../utils/apiconstant";
 import { pincodes } from '../../../utils/pincodes.js';
 import {itemsData} from "../../../utils/itemData";
+import SearchWithDropDown from "../../component/SearchWithDropDown";
+import { eventList } from "../../../constants/eventList";
 
 
 const AddDecOrder = () => {
@@ -685,7 +687,7 @@ const AddDecOrder = () => {
 
 
             <div className="cityPincode-box" style={{ marginTop: "10px", width: "100%", display: "flex",alignItems: "flex-start", gap: "10px" , alignItems: "flex-start", flexWrap: "nowrap",}}>
-              <div className="city-box" style={{ flex: 1,  maxWidth: "33%"  }}>
+              <div className="city-box" style={{ flex: 1}}>
                 <label
                   htmlFor="city"
                   style={{
@@ -719,157 +721,26 @@ const AddDecOrder = () => {
                 </select>
 
               </div>
-              <div className="pincode-box" style={{ flex: 1, maxWidth: "33%"  }}>
+               <div className="pincode-box" style={{ flex: 1}}>
                 <label htmlFor="pincode">Pincode *</label>
                 <input
                   type="text"
                   id="pincode"
                   value={pincode}
                   
-                  style={{ padding: "11px", borderRadius: "5px", fontSize: "16px", marginTop: "0px",width: "100%", }}
+                  style={{ padding: "11px", borderRadius: "5px", fontSize: "16px", marginTop: "0px", width: "100%", boxSizing: "border-box" }}
                   onChange={(e) => setPincode(e.target.value)}
                 />
                 <p style={{ fontWeight: "bold", marginTop: "5px", marginBottom: "5px", fontSize: "15px", color: pincodeMessageColor }}>{pincodeMessage}</p>
               </div>
-              <div className="event-box" style={{ flex: 1,  maxWidth: "33%"  }}>
+              <div className="event-box" style={{ flex: 1}}>
                 <label htmlFor="pincode">Add Event</label>
-                   <select
-                              value={selectedEvent}
-                              onChange={(e) => setSelectedEvent(e.target.value)}
-                              style={{
-                                padding: "12px",
-                                width: "100%",
-                                borderRadius: "4px",
-                                border: "1px solid #ccc",
-                              }}
-                            >
-                              <option value="">--Select--</option>
-                              <option value="Birthday">Birthday</option>
-                              <option value="Baby Shower">Baby Shower</option>
-                              <option value="Seemantham">Seemantham</option>
-                              <option value="Dohale Jevan">Dohale Jevan</option>
-                              <option value="Godh Bharai">Godh Bharai</option>
-                              <option value="Chatti">Chatti</option>
-                              <option value="Naming Ceremony">
-                                Naming Ceremony
-                              </option>
-                              <option value="Namkaran">Namkaran</option>
-                              <option value="Annaprashan">Annaprashan</option>
-                              <option value="Choroonu">Choroonu</option>
-                              <option value="Hatey Khori">Hatey Khori</option>
-                              <option value="Vidyarambham">Vidyarambham</option>
-                              <option value="First Birthday">
-                                First Birthday
-                              </option>
-                              <option value="Half Birthday">
-                                Half Birthday
-                              </option>
-                              <option value="First Tooth Celebration">
-                                First Tooth Celebration
-                              </option>
-                              <option value="First Walk Ceremony">
-                                First Walk Ceremony
-                              </option>
-                              <option value="Ayush Homam">Ayush Homam</option>
-                              <option value="Pet Birthday">Pet Birthday</option>
-                              <option value="Proposal Party">
-                                Proposal Party
-                              </option>
-                              <option value="Dating Anniversary">
-                                Dating Anniversary
-                              </option>
-                              <option value="Valentine's Day Party">
-                                Valentine Day Party
-                              </option>
-                              <option value="Pre-Engagement">
-                                Pre-Engagement
-                              </option>
-                              <option value="Engagement">Engagement</option>
-                              <option value="Roka Ceremony">
-                                Roka Ceremony
-                              </option>
-                              <option value="Haldi">Haldi</option>
-                              <option value="Mehendi">Mehendi</option>
-                              <option value="Sangeet">Sangeet</option>
-                              <option value="Tilak Ceremony">
-                                Tilak Ceremony
-                              </option>
-                              <option value="Bou Bhaat">Bou Bhaat</option>
-                              <option value="Mameru">Mameru</option>
-                              <option value="Wedding">Wedding</option>
-                              <option value="Reception">Reception</option>
-                              <option value="Post-Wedding Party">
-                                Post-Wedding Party
-                              </option>
-                              <option value="Gender Reveal">
-                                Gender Reveal
-                              </option>
-                              <option value="Housewarming">Housewarming</option>
-                              <option value="Griha Pravesh">
-                                Griha Pravesh
-                              </option>
-                              <option value="Satyanarayan Puja">
-                                Satyanarayan Puja
-                              </option>
-                              <option value="Ramayan Katha">
-                                Ramayan Katha
-                              </option>
-                              <option value="Vrat Udyapan">Vrat Udyapan</option>
-                              <option value="Thread Ceremony (Upanayan)">
-                                Thread Ceremony (Upanayan)
-                              </option>
-                              <option value="Thread Ceremony for Girls">
-                                Thread Ceremony for Girls
-                              </option>
-                              <option value="Baptism">Baptism</option>
-                              <option value="Christening">Christening</option>
-                              <option value="Eid">Eid</option>
-                              <option value="Iftar">Iftar</option>
-                              <option value="Diwali">Diwali</option>
-                              <option value="Holi">Holi</option>
-                              <option value="Karva Chauth Udyapan">
-                                Karva Chauth Udyapan
-                              </option>
-                              <option value="Kitty Party">Kitty Party</option>
-                              <option value="Farewell Party">
-                                Farewell Party
-                              </option>
-                              <option value="Raksha Bandhan">
-                                Raksha Bandhan
-                              </option>
-                              <option value="Navratri">Navratri</option>
-                              <option value="Dussehra">Dussehra</option>
-                              <option value="Ganesh Chaturthi">
-                                Ganesh Chaturthi
-                              </option>
-                              <option value="Onam">Onam</option>
-                              <option value="Durga Puja">Durga Puja</option>
-                              <option value="Pongal">Pongal</option>
-                              <option value="Makar Sankranti">
-                                Makar Sankranti
-                              </option>
-                              <option value="Lohri">Lohri</option>
-                              <option value="Bihu">Bihu</option>
-                              <option value="Ugadi">Ugadi</option>
-                              <option value="Gudi Padwa">Gudi Padwa</option>
-                              <option value="Vishu">Vishu</option>
-                              <option value="Mahavir Jayanti">
-                                Mahavir Jayanti
-                              </option>
-                              <option value="Guru Nanak Jayanti">
-                                Guru Nanak Jayanti
-                              </option>
-                              <option value="Janmashtami">Janmashtami</option>
-                              <option value="Baisakhi">Baisakhi</option>
-                              <option value="Karva Chauth">Karva Chauth</option>
-                              <option value="Chhath Puja">Chhath Puja</option>
-                              <option value="Game Night">Game Night</option>
-                              <option value="Tambola">Tambola</option>
-                              <option value="Housie Party">Housie Party</option>
-                              <option value="Poker Night">Poker Night</option>
-                              <option value="Retirement">Retirement</option>
-                              <option value="Pet Welcome">Pet Welcome</option>
-                   </select>
+                  <SearchWithDropDown
+                  options={eventList}
+                  selectedValue={selectedEvent}
+                  onChange={(val) => setSelectedEvent(val)}
+                  placeholder="Search event..."
+                  />
               </div>     
             </div>
             <div className='checkoutInputType border-1 rounded-4'>

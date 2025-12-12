@@ -36,8 +36,8 @@ const SearchWithDropDown = ({
                 }}
                 style={{
                     width: "100%",
-                    padding: "10px",
-                    borderRadius: "6px",
+                    padding: "12px",
+                    borderRadius: "5px",
                     border: "1px solid #ccc",
                     cursor: "pointer"
                 }}
