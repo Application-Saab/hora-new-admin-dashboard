@@ -605,7 +605,7 @@ const ActionPopup = ({
               if (matchedTag) {
                 const categoryName = categoryMap[matchedTag];
                 const formattedName = dec.name.split(" ").join("-");
-                const finalUrl = ``https://horaservices.com/balloon-decoration/${categoryName}/product/${formattedName}`;
+                const finalUrl = `https://horaservices.com/balloon-decoration/${categoryName}/product/${formattedName}`;
                 message += `*Product Page:* ${finalUrl}\n`;
                 console.log("📌 Product URL:", finalUrl);
               } else {
