@@ -15,6 +15,8 @@ import {
 } from "../../../utils/apiconstant";
 import { pincodes } from '../../../utils/pincodes.js';
 import {itemsData} from "../../../utils/itemData";
+import SearchWithDropDown from "../../component/SearchWithDropDown";
+import { eventList } from "../../../constants/eventList";
 
 
 const AddDecOrder = () => {
@@ -22,6 +24,7 @@ const AddDecOrder = () => {
   const [productid, setProductID] = useState("");
   const [productprice, setProductPrice] = useState("");
   const [date, setDate] = useState("");
+  const [selectedEvent, setSelectedEvent] = useState("");
   const [customerNumber, setCustomerNumber] = useState("");
   const [address, setAddress] = useState("");
   const [googleLocation, setGoogleLocation] = useState("");
@@ -313,6 +316,7 @@ const AddDecOrder = () => {
       status: 1,
       balance_amount: balanceamount,
       order_taken_by: orderTakenBy,
+      eventName: selectedEvent
     };
 
     console.log(requestData, "requestData decoration");
@@ -486,15 +490,6 @@ const AddDecOrder = () => {
         {message === "Customer exists."
           ?
           (<div className='orderDeatils'>
-            <label htmlFor="orderTakenBy">Order Taken By*</label>
-            <input
-              type="text"
-              id="orderTakenBy"
-              value={orderTakenBy}
-              onChange={(e) => setOrderTakenBy(e.target.value)}
-              placeholder="Order Taken By"
-              required
-            />
 
             <div
               className="date-time-container"
@@ -504,7 +499,19 @@ const AddDecOrder = () => {
                 gap: "2%",
               }}
             >
-              <div style={{ marginRight: "10px" }}>
+              <div style={{ marginRight: "18px" }}>
+                <label htmlFor="orderTakenBy">Order Taken By*</label>
+            <input
+              type="text"
+              id="orderTakenBy"
+              value={orderTakenBy}
+              onChange={(e) => setOrderTakenBy(e.target.value)}
+              placeholder="Order Taken By"
+              required
+            />
+              </div>
+              
+              <div style={{ marginRight: "18px" }}>
                 <label
                   htmlFor="date"
                 >
@@ -520,12 +527,12 @@ const AddDecOrder = () => {
                 />
               </div>
 
-              <div style={{ marginLeft: "10px" }}>
+              <div style={{ marginRight: "18px" }}>
                 <label
                   htmlFor="timeSlot"
                   style={{
-                    marginBottom: "5px",
                     display: "block",
+                    marginBottom: "10px",
                   }}
                 >
                   Time Slot*
@@ -679,12 +686,12 @@ const AddDecOrder = () => {
 
 
 
-            <div className="cityPincode-box" style={{ margin: "10px 0", width: "100%" }}>
-              <div className="city-box">
+            <div className="cityPincode-box" style={{ marginTop: "10px", width: "100%", display: "flex",alignItems: "flex-start", gap: "10px" , alignItems: "flex-start", flexWrap: "nowrap",}}>
+              <div className="city-box" style={{ flex: 1}}>
                 <label
                   htmlFor="city"
                   style={{
-
+                    width: "100%",
                     marginBottom: "5px",
                     display: "block",
                   }}
@@ -714,17 +721,27 @@ const AddDecOrder = () => {
                 </select>
 
               </div>
-              <div className="pincode-box">
+               <div className="pincode-box" style={{ flex: 1}}>
                 <label htmlFor="pincode">Pincode *</label>
                 <input
                   type="text"
                   id="pincode"
                   value={pincode}
+                  
+                  style={{ padding: "11px", borderRadius: "5px", fontSize: "16px", marginTop: "0px", width: "100%", boxSizing: "border-box" }}
                   onChange={(e) => setPincode(e.target.value)}
                 />
-                <p style={{ fontWeight: "bold", fontSize: "15px", color: pincodeMessageColor }}>{pincodeMessage}</p>
+                <p style={{ fontWeight: "bold", marginTop: "5px", marginBottom: "5px", fontSize: "15px", color: pincodeMessageColor }}>{pincodeMessage}</p>
               </div>
-
+              <div className="event-box" style={{ flex: 1}}>
+                <label htmlFor="pincode">Add Event</label>
+                  <SearchWithDropDown
+                  options={eventList}
+                  selectedValue={selectedEvent}
+                  onChange={(val) => setSelectedEvent(val)}
+                  placeholder="Search event..."
+                  />
+              </div>     
             </div>
             <div className='checkoutInputType border-1 rounded-4'>
               <h4>Share your comments (if any)</h4>

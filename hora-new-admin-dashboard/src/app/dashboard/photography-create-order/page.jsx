@@ -16,6 +16,8 @@ import {
 import { timeSlotOptions } from "../../../utils/timeSlots";
 import { pincodes } from "../../../utils/pincodes";
 import { addOnProductsById } from '../../../utils/addOnProducts';
+import SearchWithDropDown from "../../component/SearchWithDropDown";
+import { eventList } from "../../../constants/eventList";
 
 const tagIds = {
 Intimate_Moments: "66c96b4e22ed47b72117e09a",
@@ -26,6 +28,7 @@ Intimate_Moments: "66c96b4e22ed47b72117e09a",
 const AddPhotoOrder = () => {
   const [selectedTag, setSelectedTag] = useState('');
   const [products, setProducts] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState("");
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const [dishName, setDishName] = useState("");
   const [productid, setProductID] = useState("");
@@ -384,6 +387,7 @@ const AddPhotoOrder = () => {
       status: 1,
       balance_amount: balanceamount,
       order_taken_by: orderTakenBy,
+      eventName: selectedEvent
     };
 
     try {
@@ -557,17 +561,8 @@ const AddPhotoOrder = () => {
         )}
         {message === "Customer exists."
           ?
-          (<div className='orderDeatils'>
-            <label htmlFor="orderTakenBy">Order Taken By*</label>
-            <input
-              type="text"
-              id="orderTakenBy"
-              value={orderTakenBy}
-              onChange={(e) => setOrderTakenBy(e.target.value)}
-              placeholder="Order Taken By"
-              required
-            />
-
+          (
+          <div className='orderDeatils'>
             <div
               className="date-time-container"
               style={{
@@ -576,7 +571,18 @@ const AddPhotoOrder = () => {
                 gap: "2%",
               }}
             >
-              <div style={{ marginRight: "10px" }}>
+              <div style={{ marginRight: "18px" }}>
+              <label htmlFor="orderTakenBy">Order Taken By*</label>
+            <input
+              type="text"
+              id="orderTakenBy"
+              value={orderTakenBy}
+              onChange={(e) => setOrderTakenBy(e.target.value)}
+              placeholder="Order Taken By"
+              required
+            />
+              </div>
+              <div style={{ marginRight: "18px" }}>
                 <label
                   htmlFor="date"
                 >
@@ -590,12 +596,11 @@ const AddPhotoOrder = () => {
                   required
                 />
               </div>
-              <div style={{ marginLeft: "10px" }}>
+              <div style={{ marginRight: "18px" }}>
                 <label
                   htmlFor="timeSlot"
                   style={{
-
-                    marginBottom: "5px",
+                    marginBottom: "10px",
                     display: "block",
                   }}
                 >
@@ -761,8 +766,12 @@ const AddPhotoOrder = () => {
         )}
 
 
-            <div className="cityPincode-box" style={{ margin: "10px 0", width: "100%" }}>
-              <div className="city-box">
+            <div className="cityPincode-box" style={{ margin: "10px 0",
+    width: "100%",
+    display: "flex",
+    alignItems: "flex-start",
+    gap: "12px",}}>
+              <div className="city-box" style={{ flex: 1 }}>
                 <label
                   htmlFor="city"
                   style={{
@@ -796,16 +805,26 @@ const AddPhotoOrder = () => {
                 </select>
 
               </div>
-              <div className="pincode-box">
+              <div className="pincode-box" style={{ flex: 1 }}>
                 <label htmlFor="pincode">Pincode *</label>
                 <input
                   type="text"
                   id="pincode"
                   value={pincode}
                   onChange={(e) => setPincode(e.target.value)}
+                  style={{ padding: "11px", borderRadius: "5px", fontSize: "16px", width: "100%", marginTop: "0px", boxSizing: "border-box" }}
                 />
                 <p style={{ fontWeight: "bold", fontSize: "15px", color: pincodeMessageColor }}>{pincodeMessage}</p>
               </div>
+               <div className="event-box" style={{ flex: 1 }}>
+                <label htmlFor="pincode">Add Event</label>
+                 <SearchWithDropDown
+                  options={eventList}
+                  selectedValue={selectedEvent}
+                  onChange={(val) => setSelectedEvent(val)}
+                  placeholder="Search event..."
+                  />
+              </div> 
             </div>
             <div className='checkoutInputType border-1 rounded-4'>
               <h4>Share your comments (if any)</h4>
