@@ -32,12 +32,6 @@ const ActionPopup = ({
   const [error, setError] = useState(null);
   let apiUrl = "";
 
-  console.log(actionPopupOrderId, "actionPopupOrderId");
-  console.log(actionPopupChefOrderId, "actionPopupChefOrderId");
-  console.log(actionPopupOrderType, "actionPopupOrderType");
-
-  console.log(actionPopupChefOrder_Id, "actionPopupChefOrder_Id");
-
   let foodDeliveryInclusions = [
     "Complementary - Green salad, Mint Chutney, Achar",
     "Doorstep Delivery",
@@ -84,8 +78,6 @@ const ActionPopup = ({
       return;
     }
 
-    console.log(orderDetails, "sorry");
-
     // Fetch data from the API
     const fetchOrderapi = async () => {
       setLoading(true);
@@ -93,9 +85,7 @@ const ActionPopup = ({
         const response = await fetch(apiUrl);
         const data = await response.json();
         setLoading(false);
-
-        console.log(data.data.items[0], "data.data");
-        // setPhotographyProductName(data.data.items[0].photography[0].name);
+        // setPhotographyProductName(data.data.items[0].photography.name);
 
         if (!data.error && data.status === 200) {
           setOrderDetails(data.data);
@@ -145,7 +135,6 @@ const ActionPopup = ({
   };
 
   const getItemInclusion = (inclusion) => {
-    console.log(inclusion);
     if (!Array.isArray(inclusion) || inclusion.length === 0) {
       return null;
     }
@@ -179,14 +168,12 @@ const ActionPopup = ({
     );
   };
 
-  // console.log(orderDetails.items[0].photography[0].name, "orderdetailssorry");
-  // setPhotographyProductName(orderDetails.items[0].photography[0].name);
+  // console.log(orderDetails.items[0].photography.name, "orderdetailssorry");
+  // setPhotographyProductName(orderDetails.items[0].photography.name);
   // fetch orderdetails
   const FetchOrderDetails = ({ orderDetails }) => {
     // console.log(getOrderType(orderDetails?.type), JSON.stringify(orderDetails))
-    console.log(orderDetails, "orderDetails in FetchOrderDetails");
 
-    console.log(orderDetails.selecteditems[0].ingredientUsed, "dfsdfdsf");
     return (
       <div>
         <div className="order-details-container">
@@ -300,12 +287,8 @@ const ActionPopup = ({
                 ) : orderDetails?.type === 7 ? (
                   <ul className="order-items-list">
                     {orderDetails?.selecteditems?.map((item) => {
-                      console.log(item, "tieek");
-                      // by aarti
-                      console.log(orderDetails.items, "items");
 
                       const d2 = orderDetails.items;
-                      console.log(d2);
                       const dishDetails =
                         orderDetails?.userOrderDishImageArray[0]?.[item.name] ||
                         null;
@@ -473,7 +456,7 @@ const ActionPopup = ({
                 className="startbutton"
                 onClick={() => createdCsvFileOfVendorFood(orderDetails)}
               >
-                Vendor Food Report 
+                Vendor Food Report
               </button>
             </div>
           </div>
@@ -484,34 +467,32 @@ const ActionPopup = ({
 
   // share on whatsapp========================
   const sendOrderDetailsToWhatsAppDoc = () => {
-    console.log(JSON.stringify(orderDetails.items));
 
     // Extract order details
-    const orderId = getOrderId(orderDetails._doc.order_id) || "N/A";
+    const orderId = getOrderId(orderDetails?.order_id) || "N/A";
     const orderDate =
-      new Date(orderDetails._doc.order_date).toLocaleDateString() || "N/A";
-    // const orderType = getOrderType(orderDetails._doc.type) || "N/A";
-    const address = orderDetails._doc.addressId?.address1 || "N/A";
-    const googleMapLocation = orderDetails._doc.addressId?.address2 || "N/A";
-    const orderTime = orderDetails._doc.order_time || "N/A";
-    const decorationComments = orderDetails._doc.decoration_comments || "N/A";
-    const addOnItems = orderDetails._doc.add_on || [];
+      new Date(orderDetails?.order_date).toLocaleDateString() || "N/A";
+    // const orderType = getOrderType(orderDetails.type) || "N/A";
+    const address = orderDetails?.addressId?.address1 || "N/A";
+    const googleMapLocation = orderDetails?.addressId?.address2 || "N/A";
+    const orderTime = orderDetails?.order_time || "N/A";
+    const decorationComments = orderDetails?.decoration_comments || "N/A";
+    const addOnItems = orderDetails?.add_on || [];
     // Create a Google Maps link
     const googleMapUrl = `https://www.google.com/maps/search/?q=${encodeURIComponent(
       googleMapLocation
     )}`;
     // Calculate balance amount
     let balanceAmount = 0;
-    if (orderDetails._doc.phone_no) {
-      balanceAmount =
-        orderDetails._doc.total_amount - orderDetails._doc.advance_amount;
+    if (orderDetails?.phone_no) {
+      balanceAmount = orderDetails?.total_amount - orderDetails?.advance_amount;
     } else {
-      if ([2, 3, 4, 5].includes(orderDetails._doc?.type)) {
-        balanceAmount = Math.round((orderDetails._doc?.payable_amount * 4) / 5);
-      } else if ([6, 7].includes(orderDetails._doc?.type)) {
-        balanceAmount = Math.round(orderDetails._doc?.payable_amount * 0.35);
+      if ([2, 3, 4, 5].includes(orderDetails?.type)) {
+        balanceAmount = Math.round((orderDetails?.payable_amount * 4) / 5);
+      } else if ([6, 7].includes(orderDetails?.type)) {
+        balanceAmount = Math.round(orderDetails?.payable_amount * 0.35);
       } else {
-        balanceAmount = Math.round(orderDetails._doc?.payable_amount * 0.65);
+        balanceAmount = Math.round(orderDetails?.payable_amount * 0.65);
       }
     }
 
@@ -522,7 +503,7 @@ const ActionPopup = ({
     // Add Add-On Items
     message += `\n*Add-On Items:*\n`;
 
-    if (addOnItems && addOnItems.length > 0) {
+    if (addOnItems && addOnItems?.length > 0) {
       addOnItems.forEach((item, index) => {
         const itemLabel = [item.name, item.title].filter(Boolean).join(" ");
         message += `\n${index + 1}. ${itemLabel}: ₹${item.price}`;
@@ -532,13 +513,14 @@ const ActionPopup = ({
     }
 
     // Add Decoration Items
-    orderDetails.items.forEach((item) => {
-      // \n*Product Price:* ₹${dec.price}
-      item.decoration.forEach((dec) => {
-        message += `\n\n*Product Name:* ${dec.name}\n*Image URL:* https://horaservices.com/api/uploads/${dec.featured_image}\n`;
-        const inclusionText = getCleanInclusionText(dec.inclusion); // Assuming this function formats the inclusion text
+    orderDetails?.items.forEach((item) => {
+      const dec = item?.decoration;
+      if (dec) {
+        // check if decoration exists
+        message += `\n\n*Product Name:* ${dec?.name}\n*Image URL:* https://horaservices.com/api/uploads/${dec?.featured_image}\n`;
+        const inclusionText = getCleanInclusionText(dec?.inclusion); // format inclusion text
         message += `\n*Inclusion:* \n${inclusionText}`;
-      });
+      }
     });
 
     // Open WhatsApp with the pre-filled message
@@ -558,29 +540,28 @@ const ActionPopup = ({
     try {
       setLoading(true);
 
-      console.log(JSON.stringify(orderDetails.items));
 
-      const orderId = getOrderId(orderDetails._doc.order_id) || "N/A";
+      const orderId = getOrderId(orderDetails?.order_id) || "N/A";
       const orderDate =
-        new Date(orderDetails._doc.order_date).toLocaleDateString() || "N/A";
-      const address = orderDetails._doc.addressId?.address1 || "N/A";
-      const googleMapLocation = orderDetails._doc.addressId?.address2 || "N/A";
-      const orderTime = orderDetails._doc.order_time || "N/A";
-      const decorationComments = orderDetails._doc.decoration_comments || "N/A";
-      const addOnItems = orderDetails._doc.add_on || [];
+        new Date(orderDetails?.order_date).toLocaleDateString() || "N/A";
+      const address = orderDetails?.addressId?.address1 || "N/A";
+      const googleMapLocation = orderDetails?.addressId?.address2 || "N/A";
+      const orderTime = orderDetails?.order_time || "N/A";
+      const decorationComments = orderDetails?.decoration_comments || "N/A";
+      const addOnItems = orderDetails?.add_on || [];
       const googleMapUrl = `https://www.google.com/maps/search/?q=${encodeURIComponent(
         googleMapLocation
       )}`;
 
-      let balanceAmount = orderDetails._doc.total_amount;
+      let balanceAmount = orderDetails.total_amount;
       let message = `Order Details:\n\nOrder ID: ${orderId}\nOrder Date: ${orderDate}\nAddress: ${address}\nGoogleMapLocation: ${googleMapUrl}\nArrival Time: ${orderTime}\n\n*Amount: ₹${balanceAmount}*\n\n*Comments*:\n ${decorationComments}\n`;
 
       message += `\n*Add-On Items:*\n`;
 
-      if (addOnItems && addOnItems.length > 0) {
+      if (addOnItems && addOnItems?.length > 0) {
         addOnItems.forEach((item, index) => {
-          const itemLabel = [item.name, item.title].filter(Boolean).join(" ");
-          message += `\n${index + 1}. ${itemLabel}: ₹${item.price}`;
+          const itemLabel = [item?.name, item?.title].filter(Boolean).join(" ");
+          message += `\n${index + 1}. ${itemLabel}: ₹${item?.price}`;
         });
       } else {
         message += ` None`;
@@ -588,38 +569,38 @@ const ActionPopup = ({
 
       // Loop through decorations and append dynamic URL info
       for (const item of orderDetails.items) {
-        for (const dec of item.decoration) {
-          message += `\n\n*Product Name:* ${dec.name}\n`;
+        const dec = item?.decoration; // single object
+        if (!dec) continue; // skip if no decoration
 
-          // 🔄 Dynamic URL based on API response
-          const encodedName = encodeURIComponent(dec.name);
-          try {
-            const response = await axios.get(
-              `https://horaservices.com:3000/api/Decoration/searchByName/${encodedName}`
-            );
-            const product = response.data.data[0];
+        message += `\n\n*Product Name:* ${dec.name}\n`;
 
-            if (product && product.tag && product.tag.length > 0) {
-              const matchedTag = product.tag.find((tag) => categoryMap[tag]);
-              if (matchedTag) {
-                const categoryName = categoryMap[matchedTag];
-                const formattedName = dec.name.split(" ").join("-");
-                const finalUrl = `https://horaservices.com/balloon-decoration/${categoryName}/product/${formattedName}`;
-                message += `*Product Page:* ${finalUrl}\n`;
-                console.log("📌 Product URL:", finalUrl);
-              } else {
-                console.warn("❌ No matching tag found for:", dec.name);
-              }
+        // 🔄 Dynamic URL based on API response
+        const encodedName = encodeURIComponent(dec.name);
+        try {
+          const response = await axios.get(
+            `https://horaservices.com:3000/api/Decoration/searchByName/${encodedName}`
+          );
+          const product = response.data.data?.[0];
+
+          if (product && product.tag?.length > 0) {
+            const matchedTag = product.tag.find((tag) => categoryMap[tag]);
+            if (matchedTag) {
+              const categoryName = categoryMap[matchedTag];
+              const formattedName = dec.name.split(" ").join("-");
+              const finalUrl = `https://horaservices.com/balloon-decoration/${categoryName}/product/${formattedName}`;
+              message += `*Product Page:* ${finalUrl}\n`;
             } else {
-              console.warn("❌ Product not found in API for:", dec.name);
+              console.warn("❌ No matching tag found for:", dec.name);
             }
-          } catch (apiErr) {
-            console.error("❌ API call failed for:", dec.name, apiErr);
+          } else {
+            console.warn("❌ Product not found in API for:", dec.name);
           }
-
-          const inclusionText = getCleanInclusionText(dec.inclusion);
-          message += `\n*Inclusion:* \n${inclusionText}`;
+        } catch (apiErr) {
+          console.error("❌ API call failed for:", dec.name, apiErr);
         }
+
+        const inclusionText = getCleanInclusionText(dec.inclusion);
+        message += `\n*Inclusion:* \n${inclusionText}`;
       }
 
       await navigator.clipboard.writeText(message);
@@ -632,19 +613,19 @@ const ActionPopup = ({
   };
 
   const sendOrderDetailsToWhatsAppPhoto = () => {
-    const orderId = getOrderId(orderDetails._doc.order_id) || "N/A";
+    const orderId = getOrderId(orderDetails?.order_id) || "N/A";
     const orderDate =
-      new Date(orderDetails._doc.order_date).toLocaleDateString() || "N/A";
-    const address = orderDetails._doc.addressId?.address1 || "N/A";
-    const googleMapLocation = orderDetails._doc.addressId?.address2 || "N/A";
-    const orderTime = orderDetails._doc.order_time || "N/A";
-    const decorationComments = orderDetails._doc.decoration_comments || "N/A";
-    const addOnItems = orderDetails._doc.add_on || [];
+      new Date(orderDetails?.order_date).toLocaleDateString() || "N/A";
+    const address = orderDetails?.addressId?.address1 || "N/A";
+    const googleMapLocation = orderDetails?.addressId?.address2 || "N/A";
+    const orderTime = orderDetails?.order_time || "N/A";
+    const decorationComments = orderDetails?.decoration_comments || "N/A";
+    const addOnItems = orderDetails?.add_on || [];
 
     // Format Inclusion Section
     let inclusionText = "None";
     const inclusionRaw =
-      orderDetails.items?.[0]?.photography?.[0]?.inclusion?.[0] || "";
+      orderDetails.items?.[0]?.photography?.inclusion?.[0] || "";
 
     if (inclusionRaw) {
       const cleaned = inclusionRaw
@@ -665,16 +646,15 @@ const ActionPopup = ({
     )}`;
 
     let balanceAmount = 0;
-    if (orderDetails._doc.phone_no) {
-      balanceAmount =
-        orderDetails._doc.total_amount - orderDetails._doc.advance_amount;
+    if (orderDetails.phone_no) {
+      balanceAmount = orderDetails.total_amount - orderDetails.advance_amount;
     } else {
-      if ([2, 3, 4, 5].includes(orderDetails?._doc.type)) {
-        balanceAmount = Math.round((orderDetails?._doc.payable_amount * 4) / 5);
-      } else if ([6, 7].includes(orderDetails?._doc.type)) {
-        balanceAmount = Math.round(orderDetails?._doc.payable_amount * 0.35);
+      if ([2, 3, 4, 5].includes(orderDetails?.type)) {
+        balanceAmount = Math.round((orderDetails?.payable_amount * 4) / 5);
+      } else if ([6, 7].includes(orderDetails?.type)) {
+        balanceAmount = Math.round(orderDetails?.payable_amount * 0.35);
       } else {
-        balanceAmount = Math.round(orderDetails?._doc.payable_amount * 0.65);
+        balanceAmount = Math.round(orderDetails?.payable_amount * 0.65);
       }
     }
 
@@ -713,7 +693,6 @@ const ActionPopup = ({
   };
 
   const sendOrderDetailsToWhatsAppchef = (orderDetails) => {
-    console.log(orderDetails);
 
     // Extract details
     const orderId = getOrderId(orderDetails?.order_id) || "N/A";
@@ -756,7 +735,6 @@ const ActionPopup = ({
   };
 
   const sendOrderDetailsToWhatsAppFood = (orderDetails) => {
-    console.log(orderDetails, "123456u");
 
     // Extract details
     const orderId = getOrderId(orderDetails?.order_id) || "N/A";
@@ -873,47 +851,32 @@ const ActionPopup = ({
     ];
 
     // Build items table headers
-    const headers = [
-      "Item Name",
-      "Quantity(Customer)",
-      "Price",
-      "Packaging Material",
-      "Amount",
-    ];
+    const headers = ["Item Name", "Quantity(Customer)", "Price", "Amount"];
     const rows = [];
 
-    orderDetails.items.forEach((item) => {
-      const selectedItem = orderDetails.selecteditems.find(
-        (sel) => sel._id === item._id
-      );
-
-      if (
-        selectedItem &&
-        Array.isArray(selectedItem.cuisineArray) &&
-        selectedItem.cuisineArray.length >= 4
-      ) {
-        const pieces = parseFloat(selectedItem.cuisineArray[1]);
-        const price = parseFloat(selectedItem.cuisineArray[3]);
-        const packagingMaterial =
-          selectedItem.cuisineArray[selectedItem.cuisineArray.length - 1];
-
-        let quantity = parseFloat(item.quantity);
-        let displayQuantity = `${item.quantity} ${item.unit}`;
-        if (item.unit && item.unit.toLowerCase() === "kg") {
-          quantity *= 1000;
-          displayQuantity = `${quantity} g`;
+    // Map selecteditems array (array of IDs) to actual items
+    const selectedItemsMap = {};
+    if (Array.isArray(orderDetails.selecteditems)) {
+      orderDetails.items.forEach((item) => {
+        if (orderDetails.selecteditems.includes(item.itemId)) {
+          selectedItemsMap[item.itemId] = item;
         }
+      });
+    }
 
-        const amount = (quantity / pieces) * price;
+    // Loop through items
+    orderDetails.items.forEach((item) => {
+      const matchedItem = selectedItemsMap[item.itemId] || item;
 
-        rows.push([
-          item.name,
-          displayQuantity,
-          price,
-          packagingMaterial,
-          amount.toFixed(2),
-        ]);
-      }
+      let itemName = matchedItem.photography?.name || matchedItem.name || "N/A";
+      let quantity = matchedItem.quantity || 1;
+      let unit = matchedItem.unit || "";
+      let price = matchedItem.photography?.price || matchedItem.price || 0;
+      let displayQuantity = unit ? `${quantity} ${unit}` : quantity;
+
+      const amount = price * quantity;
+
+      rows.push([itemName, displayQuantity, price, amount.toFixed(2)]);
     });
 
     if (rows.length === 0) {
@@ -929,7 +892,6 @@ const ActionPopup = ({
     const ws = XLSX.utils.aoa_to_sheet(sheetData);
 
     // Style headers
-    // const headerRange = XLSX.utils.decode_range(ws["!ref"]);
     for (let C = 0; C < headers.length; C++) {
       const cellAddress = XLSX.utils.encode_cell({ r: orderInfo.length, c: C });
       if (!ws[cellAddress]) continue;
@@ -941,13 +903,7 @@ const ActionPopup = ({
     }
 
     // Set column widths
-    ws["!cols"] = [
-      { wch: 25 },
-      { wch: 20 },
-      { wch: 10 },
-      { wch: 35 },
-      { wch: 12 },
-    ];
+    ws["!cols"] = [{ wch: 25 }, { wch: 20 }, { wch: 15 }, { wch: 15 }];
 
     // Add sheet to workbook
     XLSX.utils.book_append_sheet(wb, ws, "Vendor Food Report");
@@ -1139,41 +1095,41 @@ const ActionPopup = ({
                       <div className="order-detail-row">
                         <p>
                           <strong> Order Id:</strong>{" "}
-                          {getOrderId(orderDetails._doc.order_id)}
+                          {getOrderId(orderDetails.order_id)}
                         </p>
-                        {/* <p><strong>Order Id:</strong> {orderDetails._doc.otp}</p> */}
+                        {/* <p><strong>Order Id:</strong> {orderDetails.otp}</p> */}
                         <p>
                           <strong>Order Date:</strong>{" "}
                           {new Date(
-                            orderDetails._doc.order_date
+                            orderDetails.order_date
                           ).toLocaleDateString()}
                         </p>
                         <p>
                           <strong>Order Type:</strong>{" "}
-                          {getOrderType(orderDetails._doc.type)}
+                          {getOrderType(orderDetails.type)}
                         </p>
                         <p>
                           <strong>Order City:</strong>{" "}
-                          {orderDetails._doc.order_locality || "N/A"}
+                          {orderDetails.order_locality || "N/A"}
                         </p>
                         <p>
                           <strong>Order Address:</strong>{" "}
-                          {orderDetails._doc.addressId?.address1 || "N/A"}
+                          {orderDetails.addressId?.address1 || "N/A"}
                         </p>
                         <p>
                           <strong>Order Google Map Location:</strong>{" "}
-                          {orderDetails._doc.addressId?.address2 || "N/A"}
+                          {orderDetails.addressId?.address2 || "N/A"}
                         </p>
                         <p>
                           <strong>Order Time:</strong>{" "}
-                          {orderDetails._doc.order_time || "N/A"}
+                          {orderDetails.order_time || "N/A"}
                         </p>
 
                         <p>
                           <strong>Order Add On:</strong>{" "}
-                          {orderDetails._doc.add_on.length > 0 ? (
+                          {orderDetails.add_on.length > 0 ? (
                             <ul>
-                              {orderDetails._doc.add_on.map((item, index) => (
+                              {orderDetails.add_on.map((item, index) => (
                                 <li key={index}>
                                   <strong>
                                     {item.name} {item.title}
@@ -1189,21 +1145,20 @@ const ActionPopup = ({
 
                         <p>
                           <strong>Order decoration_comments:</strong>{" "}
-                          {orderDetails._doc.decoration_comments || "N/A"}
+                          {orderDetails.decoration_comments || "N/A"}
                         </p>
                         <p>
-                          {orderDetails.items.map((item) =>
-                            item.decoration.map((dec, index) => (
-                              <div key={`${index}-${dec.name}`}>
-                                {" "}
-                                {/* Unique key for each decoration */}
+                          {orderDetails.items.map((item, itemIndex) => {
+                            const dec = item.decoration; // single object
+                            if (!dec) return null; // skip if no decoration
+
+                            return (
+                              <div key={`item-${itemIndex}-${dec.name}`}>
                                 <p>
-                                  <strong>Product Name:</strong>
-                                  {dec.name}
+                                  <strong>Product Name:</strong> {dec.name}
                                 </p>
                                 <p>
-                                  <strong>Product Price: </strong>
-                                  {dec.price}
+                                  <strong>Product Price:</strong> {dec.price}
                                 </p>
                                 <p>
                                   <Image
@@ -1217,13 +1172,13 @@ const ActionPopup = ({
                                 </p>
                                 <div>{getItemInclusion(dec.inclusion)}</div>
                               </div>
-                            ))
-                          )}
+                            );
+                          })}
                         </p>
                         {/* <p>Decoration Order Images</p> */}
                         <strong>Decoration Order Images</strong>
                         <p>
-                          {/* {orderDetails._doc.userOrderDishImageArray[0]} */}
+                          {/* {orderDetails.userOrderDishImageArray[0]} */}
 
                           <div
                             style={{
@@ -1233,7 +1188,7 @@ const ActionPopup = ({
                               justifyContent: "flex-start", // align items to the left (can be adjusted)
                             }}
                           >
-                            {orderDetails._doc.userOrderDishImageArray.map(
+                            {orderDetails.userOrderDishImageArray.map(
                               (image, index) => {
                                 const imageUrl = `https://horaservices.com/api/uploads/${image}`;
                                 return (
@@ -1270,21 +1225,21 @@ const ActionPopup = ({
                       <ul style={{ listStyleType: "none", padding: 0 }}>
                         <li className="priceList">
                           <strong>Total Amount:</strong>{" "}
-                          <span>₹{orderDetails._doc.total_amount}</span>
+                          <span>₹{orderDetails.total_amount}</span>
                         </li>
                         <li className="priceList">
                           <strong>Advance Amount:</strong>{" "}
-                          <span>₹{orderDetails._doc.advance_amount || 0}</span>
+                          <span>₹{orderDetails.advance_amount || 0}</span>
                         </li>
 
                         <li className="priceList">
                           <span>Balance Amount</span>
                           <span>
-                            {orderDetails._doc?.total_amount &&
-                            orderDetails._doc?.advance_amount
+                            {orderDetails?.total_amount &&
+                            orderDetails?.advance_amount
                               ? `₹ ${
-                                  orderDetails._doc.total_amount -
-                                  orderDetails._doc.advance_amount
+                                  orderDetails.total_amount -
+                                  orderDetails.advance_amount
                                 }`
                               : "N/A"}
                           </span>
@@ -1292,15 +1247,15 @@ const ActionPopup = ({
 
                         <li className="priceList">
                           <strong>Discount:</strong>{" "}
-                          <span>₹{orderDetails._doc.discount || 0}</span>
+                          <span>₹{orderDetails.discount || 0}</span>
                         </li>
                         <li className="priceList">
                           <strong>GST:</strong>{" "}
-                          <span>₹{orderDetails._doc.gst || 0}</span>
+                          <span>₹{orderDetails.gst || 0}</span>
                         </li>
                         <li className="priceList">
                           <strong>Per person cost:</strong>{" "}
-                          <span>₹{orderDetails._doc.per_person_cost || 0}</span>
+                          <span>₹{orderDetails.per_person_cost || 0}</span>
                         </li>
                       </ul>
                       <button
@@ -1347,41 +1302,41 @@ const ActionPopup = ({
                       <div className="order-detail-row">
                         <p>
                           <strong>Product Name:</strong>{" "}
-                          {orderDetails.items[0].photography[0].name}
+                          {orderDetails.items[0].photography.name}
                         </p>
                         <p>
                           <strong>Order Id:</strong>{" "}
-                          {getOrderId(orderDetails._doc.order_id)}
+                          {getOrderId(orderDetails.order_id)}
                         </p>
                         <p>
                           <strong>Order Date:</strong>{" "}
                           {new Date(
-                            orderDetails._doc.order_date
+                            orderDetails.order_date
                           ).toLocaleDateString()}
                         </p>
                         <p>
                           <strong>Order Type:</strong>{" "}
-                          {getOrderType(orderDetails._doc.type)}
+                          {getOrderType(orderDetails.type)}
                         </p>
                         <p>
                           <strong>Order City:</strong>{" "}
-                          {orderDetails._doc.order_locality || "N/A"}
+                          {orderDetails.order_locality || "N/A"}
                         </p>
                         <p>
                           <strong>Order Address:</strong>{" "}
-                          {orderDetails._doc.addressId?.address1 || "N/A"}
+                          {orderDetails.addressId?.address1 || "N/A"}
                         </p>
                         <p>
                           <strong>Order Google Map Location:</strong>{" "}
-                          {orderDetails._doc.addressId?.address2 || "N/A"}
+                          {orderDetails.addressId?.address2 || "N/A"}
                         </p>
                         <p>
                           <strong>Order Time:</strong>{" "}
-                          {orderDetails._doc.order_time || "N/A"}
+                          {orderDetails.order_time || "N/A"}
                         </p>
                         <p>
                           <strong>Order Comments:</strong>{" "}
-                          {orderDetails._doc.decoration_comments || "N/A"}
+                          {orderDetails.decoration_comments || "N/A"}
                         </p>
 
                         <div
@@ -1408,13 +1363,13 @@ const ActionPopup = ({
                           </p>
                           {orderDetails.items[0].photography &&
                           orderDetails.items[0].photography.length > 0 &&
-                          orderDetails.items[0].photography[0].inclusion &&
-                          orderDetails.items[0].photography[0].inclusion
-                            .length > 0 ? (
+                          orderDetails.items[0].photography.inclusion &&
+                          orderDetails.items[0].photography.inclusion.length >
+                            0 ? (
                             <div
                               dangerouslySetInnerHTML={{
                                 __html:
-                                  orderDetails.items[0].photography[0]
+                                  orderDetails.items[0].photography
                                     .inclusion[0],
                               }}
                             />
@@ -1453,8 +1408,8 @@ const ActionPopup = ({
 
                             {(() => {
                               const addOns =
-                                Array.isArray(orderDetails._doc.add_on) &&
-                                orderDetails._doc.add_on.filter(
+                                Array.isArray(orderDetails.add_on) &&
+                                orderDetails.add_on.filter(
                                   (item) =>
                                     item &&
                                     typeof item === "object" &&
@@ -1572,30 +1527,30 @@ const ActionPopup = ({
                       <ul style={{ listStyleType: "none", padding: 0 }}>
                         <li className="priceList">
                           <strong>Total Amount:</strong>{" "}
-                          <span>₹{orderDetails._doc.total_amount}</span>
+                          <span>₹{orderDetails.total_amount}</span>
                         </li>
                         <li className="priceList">
                           <strong>Advance Amount:</strong>{" "}
-                          <span>₹{orderDetails._doc.advance_amount || 0}</span>
+                          <span>₹{orderDetails.advance_amount || 0}</span>
                         </li>
                         <li className="priceList">
                           <span>Balance Amount</span>
                           <span>
-                            {orderDetails._doc.total_amount -
-                              orderDetails._doc.advance_amount}
+                            {orderDetails.total_amount -
+                              orderDetails.advance_amount}
                           </span>
                         </li>
                         <li className="priceList">
                           <strong>Discount:</strong>{" "}
-                          <span>₹{orderDetails._doc.discount || 0}</span>
+                          <span>₹{orderDetails.discount || 0}</span>
                         </li>
                         <li className="priceList">
                           <strong>GST:</strong>{" "}
-                          <span>₹{orderDetails._doc.gst || 0}</span>
+                          <span>₹{orderDetails.gst || 0}</span>
                         </li>
                         <li className="priceList">
                           <strong>Per person cost:</strong>{" "}
-                          <span>₹{orderDetails._doc.per_person_cost || 0}</span>
+                          <span>₹{orderDetails.per_person_cost || 0}</span>
                         </li>
                       </ul>
                       <button
