@@ -76,7 +76,7 @@ const ActualDecImage = () => {
             _id: img._id || null,
             image: img.image,
             is_tagged: img.is_tagged || false,
-            url: `https://horaservices.com:3000/images/${img.image}`,
+            url: `https://horaservices.com/api/uploads/${img.image}`,
           }));
 
           return { orderId: order.order_id, images };
