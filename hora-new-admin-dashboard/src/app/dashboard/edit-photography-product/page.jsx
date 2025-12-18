@@ -1,38 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./PhotographyEditor.css";
-import { BASE_URL, EDIT_PHOTOGRAPHY_PRODUCT } from "../../../utils/apiconstant";
+import { BASE_URL, EDIT_PHOTOGRAPHY_PRODUCT, PRODUCT_MEAL_TYPE } from "../../../utils/apiconstant";
 import Image from "next/image";
 import axios from "axios";
-
-const decCat = [
-
-    { id: "2", subCategory: "Engagement-Photography" },
-    { id: "3", subCategory: "Wedding-Photography" },
-    { id: "4", subCategory: "Anniversary-Photography" },
-    { id: "5", subCategory: "Birthday-Photography" },
-    { id: "6", subCategory: "House-warming-Photography" },
-    { id: "7", subCategory: "Naming-ceremony-Photography" },
-    { id: "8", subCategory: "Baby-Shower-Photography" },
-    { id: "9", subCategory: "Bachelorette-Photography" },
-    { id: "10", subCategory: "Maternity-Photography" },
-    { id: "11", subCategory: "New-Born-Baby-Photography" },
-];
-
-const tagMapping = {
-
-    "68c3ab87c9c67cc47cedbf93": "Engagement-Photography",
-    "68c3abc3c9c67cc47cedc01b": "Wedding-Photography",
-    "68c3aae9c9c67cc47cedbe6d": "Anniversary-Photography",
-    "68c3aa8ac9c67cc47cedbdec": "Birthday-Photography",
-    "68c3aaf1c9c67cc47cedbe76": "House-warming-Photography",
-    "68c3ab42c9c67cc47cedbefc": "Naming-ceremony-Photography",
-    "68c3ab2ec9c67cc47cedbede": "Baby-Shower-Photography",
-    "68c3abe5c9c67cc47cedc05c": "Bachelorette-Photography",
-    "68c3ab97c9c67cc47cedbfb4": "Maternity-Photography",
-    "68c3abd1c9c67cc47cedc044": "New-Born-Baby-Photography",
-};
 
 const DecorationEditor = () => {
     const [selectedSubCategory, setSelectedSubCategory] = useState("");
@@ -43,12 +15,38 @@ const DecorationEditor = () => {
     const [image, setImage] = useState(null);
     const [duration, setDuration] = useState("");
     const [advanceAmount, setAdvanceAmount] = useState("");
-
+const [mealProductTypes, setMealProductTypes] = useState([]);
     const [selectedTags, setSelectedTags] = useState([]);
     const [inclusion, setInclusion] = useState("");
     const [loading, setLoading] = useState(false);
     const [uploadingImage, setUploadingImage] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+
+     useEffect(() => {
+          fetchOptions(BASE_URL + PRODUCT_MEAL_TYPE, setMealProductTypes, {
+            per_page: "500",
+          });
+        }, []);
+    
+        const fetchOptions = async (url, setter, body) => {
+        try {
+          const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          });
+          const data = await response.json();
+          if (data.error === false && data.data) {
+            setter(
+              url.includes("admin_meals_list")
+                ? data.data.meal || []
+                : data.data.configuration || []
+            );
+          }
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      };
 
     const handleSelectChange = async (event) => {
         const subCategory = event.target.value;
@@ -218,14 +216,18 @@ const DecorationEditor = () => {
     };
 
     // Add this function to filter the data
-    const filteredData = responseData.filter(
-        (item) =>
-            item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item._id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.tag.some((tagId) =>
-                tagMapping[tagId]?.toLowerCase().includes(searchQuery.toLowerCase())
-            )
-    );
+    const filteredData = responseData.filter((item) => {
+  const lowerQuery = searchQuery.toLowerCase();
+
+  return (
+    item.name.toLowerCase().includes(lowerQuery) ||
+    item._id.toLowerCase().includes(lowerQuery) ||
+    item.tag.some((tagId) => {
+      const tag = mealProductTypes.find((t) => t._id === tagId);
+      return tag?.name.toLowerCase().includes(lowerQuery);
+    })
+  );
+});
 
     return (
         <div className="container">
@@ -243,11 +245,16 @@ const DecorationEditor = () => {
                         className="select-dropdown"
                     >
                         <option value="">Select SubCategory</option>
-                        {decCat.map((item) => (
-                            <option key={item.id} value={item.subCategory}>
-                                {item.subCategory}
-                            </option>
-                        ))}
+                        {mealProductTypes
+                .filter((type) =>
+                type.configurationId?.some(
+                (config) => config.name === "Photography"
+                )
+                ) .map((item) => (
+              <option key={item._id} value={item.name}>
+                {item.name}
+              </option>
+            ))}
                     </select>
                 </div>
 
@@ -300,11 +307,14 @@ const DecorationEditor = () => {
                                         <td>₹{item.price}</td>
                                         <td>
                                             <div className="chip-container">
-                                                {item.tag.map((tagId) => (
-                                                    <span key={tagId} className="chip">
-                                                        {tagMapping[tagId] || "Unknown"}
-                                                    </span>
-                                                ))}
+                                                {item.tag.map((tagId) => {
+                        const tag = mealProductTypes.find((t) => t._id === tagId);
+                        return (
+                       <span key={tagId} className="chip">
+                       {tag ? tag.name : "Unknown"}
+                       </span>
+                       );
+                        })}
                                             </div>
                                         </td>
                                         <td className="actions-cell">
@@ -452,17 +462,24 @@ const DecorationEditor = () => {
                                     <div className="modal-column">
                                         <h3 className="section-title">Tags</h3>
                                         <div className="tags-container">
-                                            {Object.entries(tagMapping).map(([tagId, tagName]) => (
-                                                <div key={tagId} className="checkbox-item">
-                                                    <input
-                                                        type="checkbox"
-                                                        id={`tag-${tagId}`}
-                                                        checked={selectedTags.includes(tagId)}
-                                                        onChange={() => handleTagChange(tagId)}
-                                                    />
-                                                    <label htmlFor={`tag-${tagId}`}>{tagName}</label>
-                                                </div>
-                                            ))}
+                                           
+                                            {mealProductTypes
+                .filter((type) =>
+                type.configurationId?.some(
+                (config) => config.name === "Photography"
+                )
+                ) 
+               .map((type) => (
+               <div key={type._id} className="checkbox-item">
+                <input
+                type="checkbox"
+                id={`tag-${type._id}`}
+                checked={selectedTags.includes(type._id)}
+                onChange={() => handleTagChange(type._id)}
+                />
+                <label htmlFor={`tag-${type._id}`}>{type.name}</label>
+                </div>
+                ))}
                                         </div>
                                     </div>
 

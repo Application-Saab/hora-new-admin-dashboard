@@ -1,40 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./DecorationEditor.css";
-import { BASE_URL, EDIT_DECORATION_PRODUCT } from "../../../utils/apiconstant";
+import { BASE_URL, EDIT_DECORATION_PRODUCT, PRODUCT_MEAL_TYPE } from "../../../utils/apiconstant";
 import Image from "next/image";
 import axios from "axios";
-
-const decCat = [
-  { id: "2", subCategory: "Birthday" },
-  { id: "3", subCategory: "FirstNight" },
-  { id: "4", subCategory: "Anniversary" },
-  { id: "5", subCategory: "KidsBirthday" },
-  { id: "6", subCategory: "BabyShower" },
-  { id: "7", subCategory: "WelcomeBaby" },
-  { id: "8", subCategory: "PremiumDecoration" },
-  { id: "9", subCategory: "BallonBouquets" },
-  { id: "10", subCategory: "Haldi-Mehandi" },
-  { id: "12", subCategory: "bachelorette" },
-  { id: "13", subCategory: "Proposal-Decoration" },
-  { id: "14", subCategory: "Wedding" },
-];
-
-const tagMapping = {
-  "65a91598ae1586258cccffd4": "Birthday",
-  "65a92085ae1586258ccd04ff": "FirstNight",
-  "65a92271ae1586258ccd0628": "Anniversary",
-  "65aeaf5147d5cb78ba19d4d3": "KidsBirthday",
-  "65a95dcb6995e7401e78c2ea": "BabyShower",
-  "65a2d129513d9389d34e31d4": "WelcomeBaby",
-  "65a92efbae1586258ccd0c6e": "PremiumDecoration",
-  "65aeaf3747d5cb78ba19d4b6": "BallonBouquets",
-  "66ad224731c3672040d8d32a": "Haldi-Mehandi",
-  "66c44baf8bd9c45aaa2c42b5": "Bachelorette",
-  "66c9df0922ed47b721180334": "Proposal-Decoration",
-  "68590e84ac7f23b432086de9": "Wedding-Decoration"
-};
 
 const DecorationEditor = () => {
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
@@ -48,6 +18,7 @@ const DecorationEditor = () => {
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [mealProductTypes, setMealProductTypes] = useState([]);
 
   const handleSelectChange = async (event) => {
     const subCategory = event.target.value;
@@ -91,6 +62,32 @@ const DecorationEditor = () => {
       }
     } catch (error) {
       console.error("Error fetching second API:", error);
+    }
+  };
+
+   useEffect(() => {
+      fetchOptions(BASE_URL + PRODUCT_MEAL_TYPE, setMealProductTypes, {
+        per_page: "500",
+      });
+    }, []);
+
+    const fetchOptions = async (url, setter, body) => {
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await response.json();
+      if (data.error === false && data.data) {
+        setter(
+          url.includes("admin_meals_list")
+            ? data.data.meal || []
+            : data.data.configuration || []
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
     }
   };
 
@@ -213,14 +210,18 @@ const DecorationEditor = () => {
   };
 
   // Add this function to filter the data
-  const filteredData = responseData.filter(
-    (item) =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item._id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.tag.some((tagId) =>
-        tagMapping[tagId]?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+  const filteredData = responseData.filter((item) => {
+  const lowerQuery = searchQuery.toLowerCase();
+
+  return (
+    item.name.toLowerCase().includes(lowerQuery) ||
+    item._id.toLowerCase().includes(lowerQuery) ||
+    item.tag.some((tagId) => {
+      const tag = mealProductTypes.find((t) => t._id === tagId);
+      return tag?.name.toLowerCase().includes(lowerQuery);
+    })
   );
+});
 
   return (
     <div className="container">
@@ -238,9 +239,14 @@ const DecorationEditor = () => {
             className="select-dropdown"
           >
             <option value="">Select SubCategory</option>
-            {decCat.map((item) => (
-              <option key={item.id} value={item.subCategory}>
-                {item.subCategory}
+            {mealProductTypes
+                .filter((type) =>
+                type.configurationId?.some(
+                (config) => config.name === "Decoration"
+                )
+                ) .map((item) => (
+              <option key={item._id} value={item.name}>
+                {item.name}
               </option>
             ))}
           </select>
@@ -296,11 +302,16 @@ const DecorationEditor = () => {
                     <td>₹{item.price}</td>
                     <td>
                       <div className="chip-container">
-                        {item.tag.map((tagId) => (
-                          <span key={tagId} className="chip">
-                            {tagMapping[tagId] || "Unknown"}
-                          </span>
-                        ))}
+                        
+                        {item.tag.map((tagId) => {
+                        const tag = mealProductTypes.find((t) => t._id === tagId);
+                        return (
+                       <span key={tagId} className="chip">
+                       {tag ? tag.name : "Unknown"}
+                       </span>
+                       );
+                        })}
+
                       </div>
                     </td>
                     <td className="actions-cell">
@@ -424,18 +435,24 @@ const DecorationEditor = () => {
                   <div className="modal-column">
                     <h3 className="section-title">Tags</h3>
                     <div className="tags-container">
-                      {Object.entries(tagMapping).map(([tagId, tagName]) => (
-                        <div key={tagId} className="checkbox-item">
-                          <input
-                            type="checkbox"
-                            id={`tag-${tagId}`}
-                            checked={selectedTags.includes(tagId)}
-                            onChange={() => handleTagChange(tagId)}
-                          />
-                          <label htmlFor={`tag-${tagId}`}>{tagName}</label>
-                        </div>
-                      ))}
-                    </div>
+                {mealProductTypes
+                .filter((type) =>
+                type.configurationId?.some(
+                (config) => config.name === "Decoration"
+                )
+                ) 
+               .map((type) => (
+               <div key={type._id} className="checkbox-item">
+                <input
+                type="checkbox"
+                id={`tag-${type._id}`}
+                checked={selectedTags.includes(type._id)}
+                onChange={() => handleTagChange(type._id)}
+                />
+                <label htmlFor={`tag-${type._id}`}>{type.name}</label>
+                </div>
+                ))}
+                  </div>
                   </div>
 
                   <div className="modal-full-width">
