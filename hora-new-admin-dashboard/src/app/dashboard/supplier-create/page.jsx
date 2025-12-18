@@ -43,7 +43,7 @@ const Testing = () => {
 
     try {
       await axios.post(
-        'https://horaservices.com:3000/api/users/supplier_personal_details_update',
+        `https://horaservices.com:3000/api/users/supplier_personal_details_update/${userId}`,
         {
           _id: userId,
           city: city,
