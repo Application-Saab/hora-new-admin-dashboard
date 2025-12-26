@@ -24,6 +24,6 @@ export const UPLOAD_DRIVE_TO_ORDER="/api/photo/drive/add-order-drive-link"
 export const SAVE_CALL_CHECKLIST = '/api/order/save-call-checklist';
 export const UPDATE_CALL_CHECKLIST = '/api/order/edit-call-checklist';
 export const MULTI_IMAGE_UPLOAD = '/api/multiple_image_upload'
-export const DELETE_IMAGE =  '/api/order/delete-callchecklist-image'
+export const DELETE_CHECKLIST_IMAGE =  '/api/order/delete-callchecklist-image'
 
 // api/decoration/edit

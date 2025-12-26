@@ -8,7 +8,7 @@ import {
   SAVE_CALL_CHECKLIST,
   UPDATE_CALL_CHECKLIST,
   MULTI_IMAGE_UPLOAD,
-  DELETE_IMAGE,
+  DELETE_CHECKLIST_IMAGE,
 } from "@/utils/apiconstant";
 import Image from "next/image";
 
@@ -116,7 +116,7 @@ const CallChecklist = ({ open, onClose, data = null }) => {
   // Backend delete
   if (typeof image === "string") {
     try {
-      await axios.post(`${BASE_URL}${DELETE_IMAGE}`, {
+      await axios.post(`${BASE_URL}${DELETE_CHECKLIST_IMAGE}`, {
         orderId: data._id,
         itemKey: item,
         imageName: image
