@@ -6,7 +6,9 @@ import axios from "axios";
 import {
   BASE_URL,
   SAVE_CALL_CHECKLIST,
-  UPDATE_CALL_CHECKLIST
+  UPDATE_CALL_CHECKLIST,
+  MULTI_IMAGE_UPLOAD,
+  DELETE_IMAGE,
 } from "@/utils/apiconstant";
 import Image from "next/image";
 
@@ -55,6 +57,81 @@ const CallChecklist = ({ open, onClose, data = null }) => {
       }
     }));
   };
+
+  const handleUploadAllImages = async () => {
+    try {
+      const finalImagesObject = {};
+
+      for (const item in callChecklist.itemsVerifiedImages) {
+        const images = callChecklist.itemsVerifiedImages[item];
+
+        if (!images || images.length === 0) continue;
+
+        const formData = new FormData();
+        images.forEach(file => formData.append("files", file));
+
+        // optional: item name bhejna (debug/log ke liye)
+        formData.append("item", item);
+
+        const res = await axios.post(
+          `${BASE_URL}${MULTI_IMAGE_UPLOAD}`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+
+        // 👇 yahin mapping ho rahi hai
+        finalImagesObject[item] = res.data.data;
+      }
+
+      // Replace File objects with uploaded filenames
+      setCallChecklist(prev => ({
+        ...prev,
+        itemsVerifiedImages: finalImagesObject
+      }));
+
+      alert("All item images uploaded successfully");
+    } catch (error) {
+      console.error(error);
+      alert("Upload failed");
+    }
+  };
+
+ const handleDeleteImage = async (item, index) => {
+  const image = callChecklist.itemsVerifiedImages[item][index];
+
+  // UI se remove
+  setCallChecklist(prev => {
+    const updatedImages = [...prev.itemsVerifiedImages[item]];
+    updatedImages.splice(index, 1);
+
+    return {
+      ...prev,
+      itemsVerifiedImages: {
+        ...prev.itemsVerifiedImages,
+        [item]: updatedImages
+      }
+    };
+  });
+
+  // Backend delete
+  if (typeof image === "string") {
+    try {
+      await axios.post(`${BASE_URL}${DELETE_IMAGE}`, {
+        orderId: data._id,
+        itemKey: item,
+        imageName: image
+      });
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete image from server");
+    }
+  }
+};
+
+
+
+
+
 
   const hasAnyImages = () => {
     return Object.values(callChecklist.itemsVerifiedImages || {}).some(
@@ -287,16 +364,31 @@ const CallChecklist = ({ open, onClose, data = null }) => {
                   {/* Preview Images (BOTTOM) */}
                   {imageCount > 0 && (
                     <div className="preview-container">
-                      {callChecklist.itemsVerifiedImages[item].map((file, index) => (
-                        <Image
-                          width={111}
-                          height={111}
-                          key={index}
-                          src={URL.createObjectURL(file)}
-                          alt={`${item}-${index}`}
-                          className="preview-image"
-                        />
-                      ))}
+                      {callChecklist.itemsVerifiedImages[item].map((file, index) => {
+                        const imageSrc =
+                          typeof file === "string"
+                            ? `https://horaservices.com/api/uploads/${file}`
+                            : URL.createObjectURL(file);
+
+                        return (
+                          <div className="preview-wrapper" key={index}>
+                            <span
+                              className="delete-icon"
+                              onClick={() => handleDeleteImage(item, index)}
+                            >
+                              ✕
+                            </span>
+
+                            <Image
+                              width={111}
+                              height={111}
+                              src={imageSrc}
+                              alt={`${item}-${index}`}
+                              className="preview-image"
+                            />
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
 
@@ -307,12 +399,13 @@ const CallChecklist = ({ open, onClose, data = null }) => {
 
           {/* Upload All Button */}
           <button
-            className={`upload-all-btn ${!hasAnyImages() ? "disabled-btn" : ""
-              }`}
+            className={`upload-all-btn ${!hasAnyImages() ? "disabled-btn" : ""}`}
             disabled={!hasAnyImages()}
+            onClick={handleUploadAllImages}
           >
             Upload All
           </button>
+
           {/* Lights */}
           <div className="label-heading">
             Power supply should be near the decoration spot or extensions should be arranged by customer
@@ -380,26 +473,6 @@ const CallChecklist = ({ open, onClose, data = null }) => {
             />
           </div>
 
-          {/* Bottom Checkboxes */}
-          {/* {[
-            "Explain the inclusions and comments",
-            "Verify the time slot",
-            "Verify the address",
-            "Verify the Google map location",
-            "Inform about cancellation policy",
-            "The slot cannot be changed on the day in order.",
-            "The executor will reach your location between XX-YY timeslot"
-          ].map(key => (
-            <label key={key}>
-              <input
-                type="checkbox"
-                className="checkbox-size"
-                checked={callChecklist[key] || false}
-                onChange={() => handleSingleCheck(key)}
-              />
-              <div className="label-heading">{key}</div>
-            </label>
-          ))} */}
           {/* Bottom Checkboxes */}
           {Object.entries(keyMap).map(([label, stateKey]) => (
             <label key={label}>
