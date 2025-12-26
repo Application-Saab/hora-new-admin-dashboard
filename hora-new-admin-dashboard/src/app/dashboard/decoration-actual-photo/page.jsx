@@ -55,7 +55,7 @@ const ActualDecImage = () => {
     try {
       const url = `${BASE_URL}${ACTUAL_IMAGE_BY_NAME}${encodeURIComponent(
         productName
-      )}`;
+      )}/orders`;
       const response = await axios.get(url);
       const data = response.data?.data;
 
