@@ -8,6 +8,7 @@ import {
   SAVE_CALL_CHECKLIST,
   UPDATE_CALL_CHECKLIST
 } from "@/utils/apiconstant";
+import Image from "next/image";
 
 const CallChecklist = ({ open, onClose, data = null }) => {
   const isEditMode = data?.call_checklist_exists === true;
@@ -27,6 +28,7 @@ const CallChecklist = ({ open, onClose, data = null }) => {
     designType: {},
     rentalPolicy: {},
     itemsVerified: {},
+    itemsVerifiedImages: {},
     lights: {},
     cakeTable: {},
     locationType: {},
@@ -41,6 +43,27 @@ const CallChecklist = ({ open, onClose, data = null }) => {
 
   const [originalChecklist, setOriginalChecklist] = useState({});
 
+  const handleItemImageChange = (item, files) => {
+    setCallChecklist(prev => ({
+      ...prev,
+      itemsVerifiedImages: {
+        ...(prev.itemsVerifiedImages || {}), // ✅ safety
+        [item]: [
+          ...((prev.itemsVerifiedImages || {})[item] || []),
+          ...Array.from(files)
+        ]
+      }
+    }));
+  };
+
+  const hasAnyImages = () => {
+    return Object.values(callChecklist.itemsVerifiedImages || {}).some(
+      images => images && images.length > 0
+    );
+  };
+
+
+
   useEffect(() => {
     if (!data) return;
 
@@ -48,6 +71,7 @@ const CallChecklist = ({ open, onClose, data = null }) => {
       designType: {},
       rentalPolicy: {},
       itemsVerified: {},
+      itemsVerifiedImages: {},
       lights: {},
       cakeTable: {},
       locationType: {},
@@ -214,19 +238,81 @@ const CallChecklist = ({ open, onClose, data = null }) => {
 
           {/* Items Verified */}
           <div className="label-heading">Get the items verified</div>
+
           <div className="checkbox-container">
-            {["Welcome Board", "Flex Design", "Cutouts", "Sequined Color"].map(item => (
-              <label key={item} className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={callChecklist.itemsVerified[item] || false}
-                  onChange={() => handleCheckboxChange("itemsVerified", item)}
-                />
-                {item}
-              </label>
-            ))}
+            {["Welcome Board", "Flex Design", "Cutouts", "Sequined Color"].map(item => {
+              const imageCount = callChecklist.itemsVerifiedImages?.[item]?.length || 0;
+
+              return (
+                <div key={item} className="item-verify-wrapper">
+
+                  {/* Checkbox Row */}
+                  <div className="item-verify-row">
+                    <label className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={callChecklist.itemsVerified[item] || false}
+                        onChange={() => handleCheckboxChange("itemsVerified", item)}
+                      />
+                      {item}
+                    </label>
+
+                    {/* Hidden file input */}
+                    <label
+                      className={`add-image-btn ${!callChecklist.itemsVerified[item] ? "disabled-btn" : ""
+                        }`}
+                    >
+                      Add Image
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        hidden
+                        disabled={!callChecklist.itemsVerified[item]}
+                        onChange={(e) =>
+                          handleItemImageChange(item, e.target.files)
+                        }
+                      />
+                    </label>
+
+
+                    {/* Image Count */}
+                    {imageCount > 0 && (
+                      <span className="image-count">
+                        {imageCount} image{imageCount > 1 ? "s" : ""}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Preview Images (BOTTOM) */}
+                  {imageCount > 0 && (
+                    <div className="preview-container">
+                      {callChecklist.itemsVerifiedImages[item].map((file, index) => (
+                        <Image
+                          width={111}
+                          height={111}
+                          key={index}
+                          src={URL.createObjectURL(file)}
+                          alt={`${item}-${index}`}
+                          className="preview-image"
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                </div>
+              );
+            })}
           </div>
 
+          {/* Upload All Button */}
+          <button
+            className={`upload-all-btn ${!hasAnyImages() ? "disabled-btn" : ""
+              }`}
+            disabled={!hasAnyImages()}
+          >
+            Upload All
+          </button>
           {/* Lights */}
           <div className="label-heading">
             Power supply should be near the decoration spot or extensions should be arranged by customer
