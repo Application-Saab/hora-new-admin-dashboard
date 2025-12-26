@@ -21,5 +21,7 @@ export const ADD_PHOTOGRAPHY_PRODUCT = "/api/photography/add";
 export const ORDER_EDIT = "/api/order/edit";
 export const DRIVE_FOLDER_UPLOAD="/api/photo/drive/import-drive-folder"
 export const UPLOAD_DRIVE_TO_ORDER="/api/photo/drive/add-order-drive-link"
+export const SAVE_CALL_CHECKLIST = '/api/order/save-call-checklist';
+export const UPDATE_CALL_CHECKLIST = '/api/order/edit-call-checklist';
 
 // api/decoration/edit
