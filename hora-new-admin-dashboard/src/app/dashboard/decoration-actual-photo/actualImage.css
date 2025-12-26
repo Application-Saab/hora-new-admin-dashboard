@@ -1,0 +1,180 @@
+* {
+  box-sizing: border-box;
+}
+
+.container {
+  max-width: 65%;
+  margin: auto;
+  background: #fff;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.pageHeading {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+label {
+  font-weight: bold;
+  display: block;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.productCheck-btn {
+  margin-top: 15px;
+  padding: 10px;
+  width: 100%;
+  background: #5cb85c;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.productCheck-btn:disabled {
+  background: grey;
+}
+
+.error {
+  color: red;
+  margin-top: 10px;
+}
+
+/* Main Image */
+.mainImageContainer {
+  display: flex;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.mainImageBox {
+  text-align: center;
+}
+
+.main-image-head {
+  font-size: 18px;
+  margin-bottom: 8px;
+  margin-top: 8px;
+}
+
+.modeButtonsBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mode-btn {
+  background: #fff;
+  cursor: pointer;
+  padding: 8px 14px;
+  color: #97538c;
+  border: 1px solid #97538c;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.mode-btn.active {
+  padding: 8px 14px;
+  background: #97538c;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* ===== GRID ===== */
+.actualImagesGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-top: 25px;
+}
+
+.orderIdBadge {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.orderImage {
+  width: 140px;
+  height: 140px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.checkboxLabel {
+  margin-top: 6px;
+  font-size: 13px;
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  align-items: center;
+  cursor: pointer;
+}
+
+.tagBadge {
+  margin-top: 6px;
+  font-size: 16px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: #b3b0b0;
+}
+.image-selecter {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tagBadge.tagged {
+  background: #4caf50;
+  color: white;
+}
+
+.tagSelectedBtn {
+  margin-top: 20px;
+  padding: 8px 14px;
+  background: #97538c;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.imageCard {
+  position: relative;
+  width: fit-content;
+}
+
+/* Tagged / Not Tagged Badge */
+.tagBadge {
+  position: absolute;
+  top: 15px;
+  left: 6px;
+  background-color: #dc3545; 
+  color: #fff;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  z-index: 2;
+  font-weight: 600;
+}
+
+/* Tagged state */
+.tagBadge.tagged {
+  background-color: #28a745; 
+}

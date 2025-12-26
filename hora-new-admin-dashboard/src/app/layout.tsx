@@ -51,6 +51,11 @@ const menuItems = [
         url: "/dashboard/edit-decoration-product",
       },
       {
+        label: "Decoration Actual Photo",
+        icon: <FaCamera />,
+        url: "/dashboard/decoration-actual-photo",
+      },
+      {
         label: "Decoration-Order-Report",
         icon: <FaCamera />,
         url: "/dashboard/Decoration-Order-Report"
