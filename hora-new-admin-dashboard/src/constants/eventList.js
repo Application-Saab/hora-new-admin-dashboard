@@ -1,4 +1,8 @@
 export const eventList = [
+    "New year party",
+    "Annual function",
+    "Dhoti ceremony",
+    "Half Saree",
     "First night",
     "Oh baby ",
     "Welcome Baby",
