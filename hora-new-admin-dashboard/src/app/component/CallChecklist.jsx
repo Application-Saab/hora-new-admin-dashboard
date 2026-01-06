@@ -11,6 +11,24 @@ import {
   DELETE_CHECKLIST_IMAGE,
 } from "@/utils/apiconstant";
 import Image from "next/image";
+import CheckboxGroup from "./CheckboxGroup";
+
+const DEFAULT_CHECKLIST = {
+  designType: {},
+  rentalPolicy: {},
+  itemsVerified: {},
+  itemsVerifiedImages: {},
+  lights: {},
+  cakeTable: {},
+  locationType: {},
+  inclusionsExplained: false,
+  timeSlotVerified: false,
+  addressVerified: false,
+  mapVerified: false,
+  cancellationPolicy: false,
+  slotNotChangeable: false,
+  executorTimeInformed: false
+};
 
 const CallChecklist = ({ open, onClose, data = null }) => {
   const isEditMode = data?.call_checklist_exists === true;
@@ -26,24 +44,8 @@ const CallChecklist = ({ open, onClose, data = null }) => {
     "The executor will reach your location between XX-YY timeslot": "executorTime"
   };
 
-  const [callChecklist, setCallChecklist] = useState({
-    designType: {},
-    rentalPolicy: {},
-    itemsVerified: {},
-    itemsVerifiedImages: {},
-    lights: {},
-    cakeTable: {},
-    locationType: {},
-    inclusionsExplained: false,
-    timeSlotVerified: false,
-    addressVerified: false,
-    mapVerified: false,
-    cancellationPolicy: false,
-    slotNotChangeable: false,
-    executorTimeInformed: false
-  });
-
-  const [originalChecklist, setOriginalChecklist] = useState({});
+  const [callChecklist, setCallChecklist] = useState(DEFAULT_CHECKLIST);
+  const [originalChecklist, setOriginalChecklist] = useState(DEFAULT_CHECKLIST);
 
   const handleItemImageChange = (item, files) => {
     setCallChecklist(prev => ({
@@ -96,37 +98,37 @@ const CallChecklist = ({ open, onClose, data = null }) => {
     }
   };
 
- const handleDeleteImage = async (item, index) => {
-  const image = callChecklist.itemsVerifiedImages[item][index];
+  const handleDeleteImage = async (item, index) => {
+    const image = callChecklist.itemsVerifiedImages[item][index];
 
-  // UI se remove
-  setCallChecklist(prev => {
-    const updatedImages = [...prev.itemsVerifiedImages[item]];
-    updatedImages.splice(index, 1);
+    // UI se remove
+    setCallChecklist(prev => {
+      const updatedImages = [...prev.itemsVerifiedImages[item]];
+      updatedImages.splice(index, 1);
 
-    return {
-      ...prev,
-      itemsVerifiedImages: {
-        ...prev.itemsVerifiedImages,
-        [item]: updatedImages
+      return {
+        ...prev,
+        itemsVerifiedImages: {
+          ...prev.itemsVerifiedImages,
+          [item]: updatedImages
+        }
+      };
+    });
+
+    // Backend delete
+    if (typeof image === "string") {
+      try {
+        await axios.post(`${BASE_URL}${DELETE_CHECKLIST_IMAGE}`, {
+          orderId: data._id,
+          itemKey: item,
+          imageName: image
+        });
+      } catch (err) {
+        console.error(err);
+        alert("Failed to delete image from server");
       }
-    };
-  });
-
-  // Backend delete
-  if (typeof image === "string") {
-    try {
-      await axios.post(`${BASE_URL}${DELETE_CHECKLIST_IMAGE}`, {
-        orderId: data._id,
-        itemKey: item,
-        imageName: image
-      });
-    } catch (err) {
-      console.error(err);
-      alert("Failed to delete image from server");
     }
-  }
-};
+  };
 
 
 
@@ -144,22 +146,7 @@ const CallChecklist = ({ open, onClose, data = null }) => {
   useEffect(() => {
     if (!data) return;
 
-    let initialChecklist = {
-      designType: {},
-      rentalPolicy: {},
-      itemsVerified: {},
-      itemsVerifiedImages: {},
-      lights: {},
-      cakeTable: {},
-      locationType: {},
-      inclusionsExplained: false,
-      timeSlotVerified: false,
-      addressVerified: false,
-      mapVerified: false,
-      cancellationPolicy: false,
-      slotNotChangeable: false,
-      executorTimeInformed: false,
-    };
+    let initialChecklist = { ...DEFAULT_CHECKLIST };
 
     if (data.call_checklist_exists && data.call_checklist) {
       initialChecklist = {
@@ -282,36 +269,24 @@ const CallChecklist = ({ open, onClose, data = null }) => {
         <div className="checklist-body">
 
           {/* Design Type */}
-          <div className="label-heading">Explain the type of design</div>
-          <div className="checkbox-container">
-            {["Wall", "Ring", "Sequined", "U Shape", "Square Stand"].map(item => (
-              <label key={item} className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={callChecklist.designType[item] || false}
-                  onChange={() => handleCheckboxChange("designType", item)}
-                />
-                {item}
-              </label>
-            ))}
-          </div>
+          <CheckboxGroup
+            title="Explain the type of design"
+            items={["Wall", "Ring", "Sequined", "U Shape", "Square Stand"]}
+            section="designType"
+            checklist={callChecklist}
+            onChange={handleCheckboxChange}
+          />
+
 
           {/* Rental Policy */}
-          <div className="label-heading">
-            Explain rental policy (items returned after 24 hours)
-          </div>
-          <div className="checkbox-container">
-            {["Ring", "Flex", "Artificial Flowers", "Balloons Foil", "Cutout"].map(item => (
-              <label key={item} className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={callChecklist.rentalPolicy[item] || false}
-                  onChange={() => handleCheckboxChange("rentalPolicy", item)}
-                />
-                {item}
-              </label>
-            ))}
-          </div>
+          <CheckboxGroup
+            title="Explain rental policy (items returned after 24 hours)"
+            items={["Ring", "Flex", "Artificial Flowers", "Balloons Foil", "Cutout"]}
+            section="rentalPolicy"
+            checklist={callChecklist}
+            onChange={handleCheckboxChange}
+          />
+
 
           {/* Items Verified */}
           <div className="label-heading">Get the items verified</div>
@@ -407,60 +382,41 @@ const CallChecklist = ({ open, onClose, data = null }) => {
           </button>
 
           {/* Lights */}
-          <div className="label-heading">
-            Power supply should be near the decoration spot or extensions should be arranged by customer
-          </div>
-          <div className="checkbox-container">
-            {["Neon", "Focus"].map(item => (
-              <label key={item} className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={callChecklist.lights[item] || false}
-                  onChange={() => handleCheckboxChange("lights", item)}
-                />
-                {item}
-              </label>
-            ))}
-          </div>
+          <CheckboxGroup
+            title="Power supply should be near the decoration spot or extensions should be arranged by customer"
+            items={["Neon", "Focus"]}
+            section="lights"
+            checklist={callChecklist}
+            onChange={handleCheckboxChange}
+          />
+
 
           {/* Cake Table */}
-          <div className="label-heading">Verify Cake Tables and neon light</div>
-          <div className="checkbox-container">
-            {[
+          <CheckboxGroup
+            title="Verify Cake Tables and neon light"
+            items={[
               "Paper cake table",
               "Golden stand cake table",
               "Transparent stand cake table",
               "Solid stand cake table with flex",
               "Neon Light 8 inch",
               "Neon light 12 inch"
-            ].map(item => (
-              <label key={item} className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={callChecklist.cakeTable[item] || false}
-                  onChange={() => handleCheckboxChange("cakeTable", item)}
-                />
-                {item}
-              </label>
-            ))}
-          </div>
+            ]}
+            section="cakeTable"
+            checklist={callChecklist}
+            onChange={handleCheckboxChange}
+          />
+
 
           {/* Location */}
-          <div className="label-heading">
-            Check if the decoration is happening at hotel or Home etc.
-          </div>
-          <div className="checkbox-container">
-            {["Home", "Society Hall", "Restaurant", "other"].map(item => (
-              <label key={item} className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={callChecklist.locationType[item] || false}
-                  onChange={() => handleCheckboxChange("locationType", item)}
-                />
-                {item}
-              </label>
-            ))}
-          </div>
+          <CheckboxGroup
+            title="Check if the decoration is happening at hotel or Home etc."
+            items={["Home", "Society Hall", "Restaurant", "other"]}
+            section="locationType"
+            checklist={callChecklist}
+            onChange={handleCheckboxChange}
+          />
+
 
           {/* Event */}
           <div className="add-event">

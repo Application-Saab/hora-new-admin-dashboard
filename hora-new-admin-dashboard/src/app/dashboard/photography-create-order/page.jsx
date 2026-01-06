@@ -20,11 +20,6 @@ import { addOnProductsById } from '../../../utils/addOnProducts';
 import SearchWithDropDown from "../../component/SearchWithDropDown";
 import { eventList } from "../../../constants/eventList";
 
-// const tagIds = {
-// Intimate_Moments: "66c96b4e22ed47b72117e09a",
-//   Grand_Celebrations: "66c96b5922ed47b72117e0a7",
-//   Mega_Occasions: "66c96b6922ed47b72117e0b4",
-// };
 
 const AddPhotoOrder = () => {
   const [selectedTag, setSelectedTag] = useState('');
