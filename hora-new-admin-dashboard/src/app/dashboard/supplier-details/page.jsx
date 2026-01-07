@@ -27,8 +27,8 @@ const fetchAdminUsers = async (page, phone, setUsers, setLastPage) => {
 
     const data = await response.json();
     if (data && data.data && data.data.users) {
-      setUsers(data.data.users);
-      setLastPage(data.data.paginate.last_page);
+      setUsers(data?.data?.users);
+      setLastPage(data?.data?.paginate?.last_page);
     }
     return data;
   } catch (error) {
@@ -134,31 +134,31 @@ const AdminUsers = () => {
             </tr>
           </thead>
           <tbody>
-            {users.length > 0 ? (
-              users.map((user) => (
+            {users?.length > 0 ? (
+              users?.map((user) => (
                 <tr
-                  key={user._id}
+                  key={user?._id}
                   style={{ backgroundColor: "#f9f9f9", textAlign: "center" }}
                 >
                   <td style={{ padding: "10px", border: "1px solid #ddd" }}>
-                    {user._id}
+                    {user?._id}
                   </td>
                   <td style={{ padding: "10px", border: "1px solid #ddd" }}>
-                    {user.name.length > 22
-                      ? user.name.substring(0, 22) + "..."
-                      : user.name}
+                    {user?.name?.length > 22
+                      ? user?.name?.substring(0, 22) + "..."
+                      : user?.name}
                   </td>
                   <td style={{ padding: "10px", border: "1px solid #ddd" }}>
-                    {user.city}
+                    {user?.city}
                   </td>
                   <td style={{ padding: "10px", border: "1px solid #ddd" }}>
-                    {user.phone}
+                    {user?.phone}
                   </td>
                   <td style={{ padding: "10px", border: "1px solid #ddd" }}>
-                    {user.job_profile}
+                    {user?.job_profile}
                   </td>
                   <td style={{ padding: "10px", border: "1px solid #ddd" }}>
-                    {new Date(user.createdAt).toLocaleDateString()}
+                    {new Date(user?.createdAt).toLocaleDateString()}
                   </td>
                 </tr>
               ))
