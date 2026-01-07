@@ -653,3 +653,24 @@ h3 {
 .submit-btn:hover {
   background: #218838;
 }
+.order-links {
+  display: flex;
+  flex-direction: row;
+  gap: 30px;               /* icons ke beech space */
+  align-items: center;
+}
+
+.link-item {
+  display: flex;
+  flex-direction: column;  /* icon ke neeche text */
+  align-items: center;
+  cursor: pointer;
+  color: #333;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.link-item span {
+  margin-top: 6px;
+  font-size: 14px;
+  text-transform: capitalize;
+}
