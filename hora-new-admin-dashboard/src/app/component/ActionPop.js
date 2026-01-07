@@ -1190,7 +1190,10 @@ const ActionPopup = ({
                           >
                             {orderDetails.userOrderDishImageArray.map(
                               (image, index) => {
-                                const imageUrl = `https://horaservices.com/api/uploads/${image}`;
+                                const imageName = typeof image === "string" ? image : image?.image;
+                                const imageUrl = imageName
+                                ? `https://horaservices.com/api/uploads/${imageName}`
+                                 : "";             
                                 return (
                                   <div
                                     key={index}

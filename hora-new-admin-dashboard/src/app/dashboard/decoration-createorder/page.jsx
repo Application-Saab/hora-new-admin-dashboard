@@ -268,7 +268,7 @@ const AddDecOrder = () => {
     const add_on = Object.keys(selectedItems).map((id) => {
       const item = itemsData.find((i) => i.id === parseInt(id));
       return {
-        name: item.title + ' Quantity ' + selectedItems[id].quantity,
+        name: item.title + ' - Quantity ' + selectedItems[id].quantity,
         price: item.price,
       };
     });
