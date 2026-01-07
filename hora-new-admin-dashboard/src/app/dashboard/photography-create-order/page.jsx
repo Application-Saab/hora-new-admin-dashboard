@@ -12,6 +12,7 @@ import {
   ADMIN_USER_LIST,
   ADMIN_USER_SIGNUP,
   API_SUCCESS_CODE,
+  PRODUCT_MEAL_TYPE,
 } from "../../../utils/apiconstant";
 import { timeSlotOptions } from "../../../utils/timeSlots";
 import { pincodes } from "../../../utils/pincodes";
@@ -19,11 +20,6 @@ import { addOnProductsById } from '../../../utils/addOnProducts';
 import SearchWithDropDown from "../../component/SearchWithDropDown";
 import { eventList } from "../../../constants/eventList";
 
-const tagIds = {
-Intimate_Moments: "66c96b4e22ed47b72117e09a",
-  Grand_Celebrations: "66c96b5922ed47b72117e0a7",
-  Mega_Occasions: "66c96b6922ed47b72117e0b4",
-};
 
 const AddPhotoOrder = () => {
   const [selectedTag, setSelectedTag] = useState('');
@@ -51,7 +47,7 @@ const AddPhotoOrder = () => {
   const [advanceamount, setAdvanceAmount] = useState("");
   const [balanceamount, setBalanceAmount] = useState("");
   const [orderTakenBy, setOrderTakenBy] = useState("");
-
+const [mealProductTypes, setMealProductTypes] = useState([]);
   const [comment, setComment] = useState("");
 
   const [loading, setLoading] = useState(false);
@@ -80,7 +76,7 @@ const AddPhotoOrder = () => {
       const fetchProductsByTag = async () => {
         setIsLoadingProducts(true);
         try {
-          const url = `${BASE_URL}/api/photography/searchByTag/${tagIds[selectedTag]}`;
+          const url = `${BASE_URL}/api/photography/searchByTag/${selectedTag}`;
           const response = await axios.get(url);
           
           if (response.data?.data?.length > 0) {
@@ -89,7 +85,7 @@ const AddPhotoOrder = () => {
             setProducts([]);
           }
           // Set add-on products for the selected tag
-          const tagId = tagIds[selectedTag];
+          const tagId = selectedTag;
           setAddOnProducts(addOnProductsById[tagId] || []);
         } catch (error) {
           console.error("Error fetching products:", error);
@@ -104,6 +100,32 @@ const AddPhotoOrder = () => {
       setProducts([]);
     }
   }, [selectedTag]);
+
+  useEffect(() => {
+          fetchOptions(BASE_URL + PRODUCT_MEAL_TYPE, setMealProductTypes, {
+            per_page: "500",
+          });
+        }, []);
+    
+        const fetchOptions = async (url, setter, body) => {
+        try {
+          const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          });
+          const data = await response.json();
+          if (data.error === false && data.data) {
+            setter(
+              url.includes("admin_meals_list")
+                ? data.data.meal || []
+                : data.data.configuration || []
+            );
+          }
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      };
 
   // Handle product selection and fetch details
   useEffect(() => {
@@ -459,7 +481,7 @@ const AddPhotoOrder = () => {
       <form onSubmit={handleSubmit}>
         {/* Tag Selection */}
         <label htmlFor="tagSelect">Select Category *</label>
-        <select
+        {/* <select
           id="tagSelect"
           value={selectedTag}
           onChange={(e) => {
@@ -484,7 +506,42 @@ const AddPhotoOrder = () => {
               {tag.charAt(0).toUpperCase() + tag.slice(1)}
             </option>
           ))}
-        </select>
+        </select> */}
+
+        <select
+  id="tagSelect"
+  value={selectedTag}
+  onChange={(e) => {
+    setSelectedTag(e.target.value);
+    setDishName(""); 
+    setShowProductDetails(false);
+    setIsFetched(false);
+  }}
+  required
+  style={{
+    width: "100%",
+    padding: "10px",
+    borderRadius: "5px",
+    fontSize: "16px",
+    marginBottom: "10px",
+    border: "1px solid #ccc",
+  }}
+>
+  <option value="">Select Photography Category</option>
+
+  {mealProductTypes
+    .filter((type) =>
+      type.configurationId?.some(
+        (config) => config.name === "Photography"
+      )
+    )
+    .map((type) => (
+      <option key={type._id} value={type._id}>
+        {type.name}
+      </option>
+    ))}
+</select>
+
 
         {isLoadingProducts && <p>Loading products...</p>}
 

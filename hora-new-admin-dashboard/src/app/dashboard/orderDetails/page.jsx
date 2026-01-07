@@ -16,6 +16,7 @@ import DownloadCSVFile from "../downloadCsv/page";
 import { IoMdOpen } from "react-icons/io";
 import SearchWithDropDown from "../../component/SearchWithDropDown";
 import { eventList } from '../../../constants/eventList'
+import CallChecklist from '../../component/CallChecklist'
 
 const OrderList = () => {
   const [orders, setOrders] = useState([]);
@@ -51,8 +52,16 @@ const OrderList = () => {
   const [createdAtDate, setCreatedAtDate] = useState("");
 
   const [orderTypeShow, setOrderTypeShow] = useState(null);
+  const [callChecklistData,setCallChecklistData ] = useState(null);
 
   console.log(isSupplierAssigned);
+
+   const [showChecklist, setShowChecklist] = useState(false);
+
+  const handleCallClick = (order) => {
+    setCallChecklistData(order);
+    setShowChecklist(true); 
+  };
 
 
   const fetchOrders = async (
@@ -1030,10 +1039,22 @@ const OrderList = () => {
                     <td>
                       <div style={styles.container}>
                         {/* Call Icon */}
-                        <div onClick={() => handleCallClick(order.phone_no)}>
-                          N/A
-                          {/* <FaPhone /> */}
-                        </div>
+                        {order?.type === 1 ? 
+                        <>
+                        {order?.call_checklist_exists === true ? 
+                        <button className="view-btn call-btn" onClick={() => handleCallClick(order)}>
+                          View Call Checklist
+                        </button>
+                        :
+                        <button className="call-btn add-btn" onClick={() => handleCallClick(order)}>
+                          Call Checklist
+                        </button>
+                        }
+                        </>
+                        :
+                        <div style={{display : 'flex', justifyContent: 'center', width : 'full', flex: '1' }}>_</div>
+                        }
+                        
                         <div style={styles.btnGroup}></div>
                       </div>
                     </td>
@@ -1890,6 +1911,11 @@ const OrderList = () => {
       </div>
 
       {/* </>} */}
+      <CallChecklist
+        open={showChecklist}
+        data={callChecklistData}
+        onClose={() => setShowChecklist(false)}
+      />
     </div>
   );
 };

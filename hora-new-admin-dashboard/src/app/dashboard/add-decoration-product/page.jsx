@@ -574,7 +574,14 @@ const AddProductForm = () => {
               : "Select categories"}
             {showCategoryItems && (
               <div className="category-items">
-                {mealProductTypes.map((type) => (
+                {mealProductTypes
+                 .filter((type) =>
+                  Array.isArray(type.configurationId) &&
+                  type.configurationId.some(
+                  (config) => config.name === "Decoration"
+                  )
+                  )
+                .map((type) => (
                   <label key={type._id} className="checkbox-label">
                     <input
                       type="checkbox"

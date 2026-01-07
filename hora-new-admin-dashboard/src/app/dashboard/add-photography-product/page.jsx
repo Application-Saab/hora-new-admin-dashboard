@@ -218,21 +218,29 @@ const handleCheckboxChange = (id) => {
 <div className="form-group">
   <label>Product Category Type *</label>
   <div
-    className="category-dropdown"
-    onClick={() => setShowCategoryItems(!showCategoryItems)}
-  >
-    {selectedMealTypes.length > 0
+  className="category-dropdown"
+  onClick={() => setShowCategoryItems(!showCategoryItems)}
+>
+  {selectedMealTypes.length > 0
       ? mealProductTypes
           .filter((t) => selectedMealTypes.includes(t._id))
           .map((t) => t.name)
           .join(", ")
       : "Select categories"}
 
-    {showCategoryItems && (
-      <div className="category-items">
-        {mealProductTypes.map((type) => (
+  {showCategoryItems && (
+    <div className="category-items">
+      {mealProductTypes
+       .filter(
+      (type) =>
+        Array.isArray(type.configurationId) &&
+        type.configurationId.some(
+          (config) => config.name === "Photography"
+        )
+    )
+        .map((type) => (
           <label key={type._id} className="checkbox-label">
-            <input
+          <input
               type="checkbox"
               checked={selectedMealTypes.includes(type._id)}
               onChange={() => handleCheckboxChange(type._id)}
@@ -240,9 +248,10 @@ const handleCheckboxChange = (id) => {
             {type.name}
           </label>
         ))}
-      </div>
-    )}
-  </div>
+    </div>
+  )}
+</div>
+
 </div>
 
         <div className="form-group">

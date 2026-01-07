@@ -21,6 +21,10 @@ export const ADD_PHOTOGRAPHY_PRODUCT = "/api/photography/add";
 export const ORDER_EDIT = "/api/order/edit";
 export const DRIVE_FOLDER_UPLOAD="/api/photo/drive/import-drive-folder"
 export const UPLOAD_DRIVE_TO_ORDER="/api/photo/drive/add-order-drive-link"
+export const SAVE_CALL_CHECKLIST = '/api/order/save-call-checklist';
+export const UPDATE_CALL_CHECKLIST = '/api/order/edit-call-checklist';
+export const MULTI_IMAGE_UPLOAD = '/api/multiple_image_upload'
+export const DELETE_CHECKLIST_IMAGE =  '/api/order/delete-callchecklist-image'
 export const ACTUAL_IMAGE_BY_NAME="/api/decoration/decorations/"
 
 // api/decoration/edit

@@ -18,7 +18,7 @@ const SearchWithDropDown = ({
     }, [options, search]);
 
     const handleOpen = () => {
-        setOpen(true);
+        setOpen(!open);
     };
 
 
