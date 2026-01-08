@@ -140,6 +140,12 @@ const CallChecklist = ({ open, onClose, data = null }) => {
       images => images && images.length > 0
     );
   };
+  const hasPendingImageUpload = () => {
+    return Object.values(callChecklist.itemsVerifiedImages || {}).some(images =>
+      images?.some(img => img instanceof File || img instanceof Blob)
+    );
+  };
+
 
 
 
@@ -340,11 +346,16 @@ const CallChecklist = ({ open, onClose, data = null }) => {
                   {imageCount > 0 && (
                     <div className="preview-container">
                       {callChecklist.itemsVerifiedImages[item].map((file, index) => {
-                        const imageSrc =
-                          typeof file === "string"
-                            ? `https://horaservices.com/api/uploads/${file}`
-                            : URL.createObjectURL(file);
 
+                        let imageSrc = "";
+
+                        if (typeof file === "string") {
+                          imageSrc = `https://horaservices.com/api/uploads/${file}`;
+                        } else if (file instanceof File || file instanceof Blob) {
+                          imageSrc = URL.createObjectURL(file);
+                        } else {
+                          return null;
+                        }
                         return (
                           <div className="preview-wrapper" key={index}>
                             <span
@@ -447,7 +458,11 @@ const CallChecklist = ({ open, onClose, data = null }) => {
 
         <div className="checklist-footer">
           <button className="modal-btn" onClick={onClose}>Cancel</button>
-          <button className="save-btn" onClick={handleSave}>
+          <button
+            className={`save-btn ${hasPendingImageUpload() ? "disabled-btn" : ""}`}
+            onClick={handleSave}
+            disabled={hasPendingImageUpload()}
+          >
             {isEditMode ? "Edit" : "Save"}
           </button>
         </div>
