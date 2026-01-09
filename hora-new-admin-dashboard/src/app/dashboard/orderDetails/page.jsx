@@ -911,7 +911,7 @@ const OrderList = () => {
                   </span>
                 </th>
                 <th>Created</th>
-                <th>Calling Status</th>
+               
                 <th className="order-type-header">
                   Status
                   {/* <select
@@ -925,6 +925,7 @@ const OrderList = () => {
                   </select> */}
                 </th>
                 <th>Action</th>
+                 <th>Calling Status</th>
                 <th>Rating</th>
                 <th>Extra Pay</th>
                 <th>Edit Order</th>
@@ -1036,28 +1037,7 @@ const OrderList = () => {
                         {new Date(order.createdAt).toLocaleTimeString()}
                       </div>{" "}
                     </td>
-                    <td>
-                      <div style={styles.container}>
-                        {/* Call Icon */}
-                        {order?.type === 1 ? 
-                        <>
-                        {order?.call_checklist_exists === true ? 
-                        <button className="view-btn call-btn" onClick={() => handleCallClick(order)}>
-                          View Call Checklist
-                        </button>
-                        :
-                        <button className="call-btn add-btn" onClick={() => handleCallClick(order)}>
-                          Call Checklist
-                        </button>
-                        }
-                        </>
-                        :
-                        <div style={{display : 'flex', justifyContent: 'center', width : 'full', flex: '1' }}>_</div>
-                        }
-                        
-                        <div style={styles.btnGroup}></div>
-                      </div>
-                    </td>
+                   
                     <td>
                       <button
                         className={`status-button ${
@@ -1083,6 +1063,28 @@ const OrderList = () => {
                       >
                         View Details
                       </button>
+                    </td>
+                     <td>
+                      <div style={styles.container}>
+                        {/* Call Icon */}
+                        {order?.type === 1 ? 
+                        <>
+                        {order?.call_checklist_exists === true ? 
+                        <button className="view-btn call-btn" onClick={() => handleCallClick(order)}>
+                          View Call Checklist
+                        </button>
+                        :
+                        <button className="call-btn add-btn" onClick={() => handleCallClick(order)}>
+                          Call Checklist
+                        </button>
+                        }
+                        </>
+                        :
+                        <div style={{display : 'flex', justifyContent: 'center', width : 'full', flex: '1' }}>_</div>
+                        }
+                        
+                        <div style={styles.btnGroup}></div>
+                      </div>
                     </td>
                     <td style={{ width: "100px", paddingLeft: "16px" }}>
                       <ul style={{ paddingLeft: "0" }}>
