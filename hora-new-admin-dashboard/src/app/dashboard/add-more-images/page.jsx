@@ -124,42 +124,42 @@ const AddMoreImages = () => {
       setUploadStatuses({ ...newStatuses });
 
       try {
-        await axios.post(
+       await axios.post(
           "https://horaservices.com:3000/api/photo/upload",
           formData
         );
-        newStatuses[file.name] = "Uploaded ✅";
+        newStatuses[file.name] = "Uploaded";
       } catch (error) {
         console.error(`Failed to upload ${file.name}:`, error);
-        newStatuses[file.name] = "Failed ❌";
+        newStatuses[file.name] = "Failed";
       }
 
       setUploadStatuses({ ...newStatuses });
     });
 
     await Promise.all(uploadPromises);
+    fetchImages();
   };
 
   //  useEffect(() => {
   //   const fetchCustomerData = async () => {
   //     if (customerId) {
 
+  const fetchImages = async () => {
+  if (customerId) {
+    try {
+      const response = await axios.get(`https://horaservices.com:3000/api/photo/thumbnailsWithinProject?folderName=${folderName}&customerId=${customerId}`);
+      setImages(response.data.thumbnails);
+    } catch (error) {
+      console.error('Error fetching images:', error);
+    }
+  }
+};
 
-  useEffect(() => {
-      const fetchImages = async () => {
-        if (customerId) {
-        try {
-          const response = await axios.get(`https://horaservices.com:3000/api/photo/thumbnailsWithinProject?folderName=${folderName}&customerId=${customerId}`);
-          setImages(response.data.thumbnails);
-        } catch (error) {
-          console.error('Error fetching images:', error);
-        }
-         }
-      };
-  
-      fetchImages();
-   
-    }, [customerId]);
+useEffect(() => {
+  fetchImages();
+}, [customerId, folderName]); 
+
   
     // Delete image
     const deleteImage = async (key) => {
@@ -216,15 +216,15 @@ const AddMoreImages = () => {
             multiple
             accept="image/*"
             onChange={handleFileChange}
+            style={{
+            padding: "10px 20px",
+            backgroundColor: "#007BFF",
+            color: "#fff",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
           />
-          <button
-            onClick={handleUpload}
-            disabled={selectedFiles.length === 0}
-            style={{ marginLeft: "10px", padding: "8px 16px" }}
-          >
-            Upload Images
-          </button>
-
           {/* Image Preview */}
           <div style={{ display: "flex", flexWrap: "wrap", marginTop: "20px" }}>
             {selectedFiles.map((file, index) => (
@@ -237,6 +237,8 @@ const AddMoreImages = () => {
                   border: "1px solid #ddd",
                   padding: "5px",
                   borderRadius: "8px",
+                  position: "relative",
+                  width: "150px"
                 }}
               >
                 <img
@@ -244,17 +246,56 @@ const AddMoreImages = () => {
                   alt={`preview-${index}`}
                   style={{
                     width: "100%",
-                    height: "80px",
+                    height: "90px",
                     objectFit: "cover",
                     borderRadius: "4px",
                   }}
                 />
-                <p style={{ fontSize: "12px" }}>
+                {/* <p style={{ fontSize: "12px" }}>
                   {uploadStatuses[file.name] || "Pending"}
-                </p>
+                </p> */}
+                <span
+                    style={{
+                      position: "absolute",
+                      top: "8px",
+                      right: "8px",
+                      background:
+                        uploadStatuses[file.name] === "Uploaded"
+                          ? "green"
+                          :  uploadStatuses[file.name] === "Failed"
+                          ? "red"
+                          :
+                          "#555",
+                      color: "white",
+                      padding: "2px 6px",
+                      fontSize: "12px",
+                      borderRadius: "5px",
+                    }}
+                  >
+                    {uploadStatuses[file.name] || "Pending"}
+                  </span>
               </div>
             ))}
           </div>
+
+           {selectedFiles.length > 0 &&
+          <button
+            onClick={handleUpload}
+            disabled={selectedFiles.length === 0}
+            style={{
+            marginLeft: "10px",
+            padding: "10px 16px",
+            border: "none",
+            background: "#007BFF",
+            color: "#FAFAFA",
+            borderRadius: "5px",
+            opacity: selectedFiles.length === 0 ? 0.85 : 1,
+            cursor: selectedFiles.length === 0 ? "not-allowed" : "pointer",
+          }}
+          >
+         Upload All Images
+          </button>
+          }
         </div>
       )}
     </div>

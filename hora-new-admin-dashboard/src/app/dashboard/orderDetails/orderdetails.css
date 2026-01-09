@@ -674,3 +674,17 @@ h3 {
   font-size: 14px;
   text-transform: capitalize;
 }
+.call-btn{
+  padding: 8px 10px;
+  border: none;
+  border-radius: 5px;
+  color: #fafafa;
+  cursor: pointer;
+  font-size: 12px;
+}
+.view-btn{
+  background: #4CAF50;
+}
+.add-btn{
+  background: #007bff;
+}
