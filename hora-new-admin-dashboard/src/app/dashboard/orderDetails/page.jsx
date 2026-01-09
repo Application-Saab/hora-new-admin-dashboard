@@ -712,12 +712,12 @@ const OrderList = () => {
             phone: selectedOrderData?.phone_no,
             fulfillmentDate: selectedOrderData.order_date
               ? new Date(selectedOrderData?.order_date).toLocaleDateString(
-                  "en-GB"
-                )
+                "en-GB"
+              )
               : "N/A",
             services: "Photography",
             driveLink: driveLink,
-            horaWebLink: "N/A",
+            horaWebLink: data?.webLink,
           }),
         }
       );
@@ -728,8 +728,7 @@ const OrderList = () => {
       );
 
       alert(
-        `Drive link are added for order_id : ${
-          selectedOrderData?.order_id + 10800
+        `Drive link are added for order_id : ${selectedOrderData?.order_id + 10800
         }`
       );
       console.log("........", data);
@@ -950,8 +949,8 @@ const OrderList = () => {
                       {order?.order_time
                         ? `${order.order_time}` // If `order_time` is available, show it
                         : order?.order_date
-                        ? `${order.order_date.split("T")[1].slice(0, 8)}`
-                        : "N/A"}
+                          ? `${order.order_date.split("T")[1].slice(0, 8)}`
+                          : "N/A"}
                     </td>
                     <td>{order.otp}</td>
                     <td>{order.order_taken_by || "N/A"}</td>
@@ -1008,9 +1007,8 @@ const OrderList = () => {
 
                     <td>
                       <span
-                        className={`status ${
-                          getOrderStatus(order.order_status).className
-                        }`}
+                        className={`status ${getOrderStatus(order.order_status).className
+                          }`}
                       >
                         {getOrderStatus(order.order_status).status}
                       </span>
@@ -1040,9 +1038,8 @@ const OrderList = () => {
                    
                     <td>
                       <button
-                        className={`status-button ${
-                          order.status === 0 ? "active" : "inactive"
-                        }`}
+                        className={`status-button ${order.status === 0 ? "active" : "inactive"
+                          }`}
                         onClick={() =>
                           handleStatusUpdate(order._id, order.status)
                         }
@@ -1131,23 +1128,23 @@ const OrderList = () => {
                         // Show button only if order date is in the future
                         return orderDate > now;
                       })() && (
-                        <button
-                          style={styles.editOrderPopupBtn}
-                          onClick={() =>
-                            handleOpenEditOrderPopup(
-                              order._id,
-                              order.decoration_comments,
-                              order.add_on,
-                              order.total_amount,
-                              order.balance_amount,
-                              order.advance_amount,
-                              order.type
-                            )
-                          }
-                        >
-                          Edit Order
-                        </button>
-                      )}
+                          <button
+                            style={styles.editOrderPopupBtn}
+                            onClick={() =>
+                              handleOpenEditOrderPopup(
+                                order._id,
+                                order.decoration_comments,
+                                order.add_on,
+                                order.total_amount,
+                                order.balance_amount,
+                                order.advance_amount,
+                                order.type
+                              )
+                            }
+                          >
+                            Edit Order
+                          </button>
+                        )}
                     </td>
                     <td style={{ padding: "10px" }}>
                       {/* <button
@@ -1216,16 +1213,16 @@ const OrderList = () => {
                               boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
                             }}
                           >
-                          <h3>Selected Event</h3>
-                         <div style={{ marginBottom: "16px" }}>
-                          <SearchWithDropDown
-                          options={eventList}
-                           selectedValue={selectedEvent}
-                           onChange={(val) => setSelectedEvent(val)}
-                          placeholder="Search event..."
-      />
+                            <h3>Selected Event</h3>
+                            <div style={{ marginBottom: "16px" }}>
+                              <SearchWithDropDown
+                                options={eventList}
+                                selectedValue={selectedEvent}
+                                onChange={(val) => setSelectedEvent(val)}
+                                placeholder="Search event..."
+                              />
 
-    </div>
+                            </div>
 
 
                             <div
@@ -1271,7 +1268,7 @@ const OrderList = () => {
                       <td>
                         {order.type === 1 ? (
                           order.userOrderDishImageArray &&
-                          order.userOrderDishImageArray.length > 0 ? (
+                            order.userOrderDishImageArray.length > 0 ? (
                             <div
                               style={{
                                 display: "inline-block",
@@ -1306,14 +1303,43 @@ const OrderList = () => {
                             >
                               Add Drive Link
                             </button>
-                          ) : (
-                            <span
-                              style={{ textAlign: "center", cursor: "pointer" }}
-                              onClick={() =>  window.open(order.orderDriveLink, '_blank')}
-                            >
-                              <IoMdOpen size={30} />
-                            </span>
                           )
+                            // : 
+                            // (
+                            //   <span
+                            //     style={{ textAlign: "center", cursor: "pointer" }}
+                            //     onClick={() =>  window.open(order.orderDriveLink, '_blank')}
+                            //   >
+                            //     <IoMdOpen size={30} />
+                            //   </span>
+                            // )
+                            : (
+                              <div className="order-links">
+
+                                {/* Drive Link */}
+                                <div
+                                  className="link-item"
+                                  onClick={() => window.open(order.orderDriveLink, "_blank")}
+                                >
+                                  <IoMdOpen size={30} />
+                                  <span>drivelink</span>
+                                </div>
+
+                                {/* Web Link */}
+                                {order?.orderWebLink ? (
+                                  <div
+                                    className="link-item"
+                                    onClick={() => window.open(order.orderWebLink, "_blank")}
+                                  >
+                                    <IoMdOpen size={30} />
+                                    <span>weblink</span>
+                                  </div>
+                                ) : null}
+
+                              </div>
+
+
+                            )
                         ) : (
                           <span style={{ color: "gray", fontStyle: "italic" }}>
                             not able
