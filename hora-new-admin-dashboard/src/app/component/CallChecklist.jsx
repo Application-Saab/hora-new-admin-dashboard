@@ -29,6 +29,42 @@ const DEFAULT_CHECKLIST = {
   slotNotChangeable: false,
   executorTimeInformed: false
 };
+const CHECKBOX_GROUP_CONFIG = [
+  {
+    title: "Explain the type of design",
+    section: "designType",
+    items: ["Wall", "Ring", "Sequined", "U Shape", "Square Stand"]
+  },
+  {
+    title: "Explain rental policy (items returned after 24 hours)",
+    section: "rentalPolicy",
+    items: ["Ring", "Flex", "Artificial Flowers", "Balloons Foil", "Cutout"]
+  },
+  {
+    title:
+      "Power supply should be near the decoration spot or extensions should be arranged by customer",
+    section: "lights",
+    items: ["Neon", "Focus"]
+  },
+  {
+    title: "Verify Cake Tables and neon light",
+    section: "cakeTable",
+    items: [
+      "Paper cake table",
+      "Golden stand cake table",
+      "Transparent stand cake table",
+      "Solid stand cake table with flex",
+      "Neon Light 8 inch",
+      "Neon light 12 inch"
+    ]
+  },
+  {
+    title: "Check if the decoration is happening at hotel or Home etc.",
+    section: "locationType",
+    items: ["Home", "Society Hall", "Restaurant", "Other"]
+  }
+];
+
 
 const CallChecklist = ({ open, onClose, data = null }) => {
   const isEditMode = data?.call_checklist_exists === true;
@@ -61,42 +97,47 @@ const CallChecklist = ({ open, onClose, data = null }) => {
   };
 
   const handleUploadAllImages = async () => {
-    try {
-      const finalImagesObject = {};
+  try {
+    const finalImagesObject = { ...callChecklist.itemsVerifiedImages };
 
-      for (const item in callChecklist.itemsVerifiedImages) {
-        const images = callChecklist.itemsVerifiedImages[item];
+    for (const item in callChecklist.itemsVerifiedImages) {
+      const images = callChecklist.itemsVerifiedImages[item];
 
-        if (!images || images.length === 0) continue;
+      const newFiles = images.filter(
+        img => img instanceof File || img instanceof Blob
+      );
 
-        const formData = new FormData();
-        images.forEach(file => formData.append("files", file));
+      if (newFiles.length === 0) continue;
 
-        // optional: item name bhejna (debug/log ke liye)
-        formData.append("item", item);
+      const formData = new FormData();
+      newFiles.forEach(file => formData.append("files", file));
+      formData.append("item", item);
 
-        const res = await axios.post(
-          `${BASE_URL}${MULTI_IMAGE_UPLOAD}`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
+      const res = await axios.post(
+        `${BASE_URL}${MULTI_IMAGE_UPLOAD}`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
 
-        // 👇 yahin mapping ho rahi hai
-        finalImagesObject[item] = res.data.data;
-      }
+      const oldImages = images.filter(img => typeof img === "string");
 
-      // Replace File objects with uploaded filenames
-      setCallChecklist(prev => ({
-        ...prev,
-        itemsVerifiedImages: finalImagesObject
-      }));
-
-      alert("All item images uploaded successfully");
-    } catch (error) {
-      console.error(error);
-      alert("Upload failed");
+      finalImagesObject[item] = [
+        ...oldImages,
+        ...res.data.data
+      ];
     }
-  };
+
+    setCallChecklist(prev => ({
+      ...prev,
+      itemsVerifiedImages: finalImagesObject
+    }));
+
+    alert("Images uploaded successfully");
+  } catch (error) {
+    console.error(error);
+    alert("Upload failed");
+  }
+};
 
   const handleDeleteImage = async (item, index) => {
     const image = callChecklist.itemsVerifiedImages[item][index];
@@ -274,24 +315,16 @@ const CallChecklist = ({ open, onClose, data = null }) => {
 
         <div className="checklist-body">
 
-          {/* Design Type */}
-          <CheckboxGroup
-            title="Explain the type of design"
-            items={["Wall", "Ring", "Sequined", "U Shape", "Square Stand"]}
-            section="designType"
-            checklist={callChecklist}
-            onChange={handleCheckboxChange}
-          />
-
-
-          {/* Rental Policy */}
-          <CheckboxGroup
-            title="Explain rental policy (items returned after 24 hours)"
-            items={["Ring", "Flex", "Artificial Flowers", "Balloons Foil", "Cutout"]}
-            section="rentalPolicy"
-            checklist={callChecklist}
-            onChange={handleCheckboxChange}
-          />
+        {CHECKBOX_GROUP_CONFIG.map(group => (
+        <CheckboxGroup
+        key={group.section}
+        title={group.title}
+        items={group.items}
+        section={group.section}
+        checklist={callChecklist}
+        onChange={handleCheckboxChange}
+        />
+        ))}
 
 
           {/* Items Verified */}
@@ -391,42 +424,6 @@ const CallChecklist = ({ open, onClose, data = null }) => {
           >
             Upload All
           </button>
-
-          {/* Lights */}
-          <CheckboxGroup
-            title="Power supply should be near the decoration spot or extensions should be arranged by customer"
-            items={["Neon", "Focus"]}
-            section="lights"
-            checklist={callChecklist}
-            onChange={handleCheckboxChange}
-          />
-
-
-          {/* Cake Table */}
-          <CheckboxGroup
-            title="Verify Cake Tables and neon light"
-            items={[
-              "Paper cake table",
-              "Golden stand cake table",
-              "Transparent stand cake table",
-              "Solid stand cake table with flex",
-              "Neon Light 8 inch",
-              "Neon light 12 inch"
-            ]}
-            section="cakeTable"
-            checklist={callChecklist}
-            onChange={handleCheckboxChange}
-          />
-
-
-          {/* Location */}
-          <CheckboxGroup
-            title="Check if the decoration is happening at hotel or Home etc."
-            items={["Home", "Society Hall", "Restaurant", "other"]}
-            section="locationType"
-            checklist={callChecklist}
-            onChange={handleCheckboxChange}
-          />
 
 
           {/* Event */}
