@@ -61,42 +61,47 @@ const CallChecklist = ({ open, onClose, data = null }) => {
   };
 
   const handleUploadAllImages = async () => {
-    try {
-      const finalImagesObject = {};
+  try {
+    const finalImagesObject = { ...callChecklist.itemsVerifiedImages };
 
-      for (const item in callChecklist.itemsVerifiedImages) {
-        const images = callChecklist.itemsVerifiedImages[item];
+    for (const item in callChecklist.itemsVerifiedImages) {
+      const images = callChecklist.itemsVerifiedImages[item];
 
-        if (!images || images.length === 0) continue;
+      const newFiles = images.filter(
+        img => img instanceof File || img instanceof Blob
+      );
 
-        const formData = new FormData();
-        images.forEach(file => formData.append("files", file));
+      if (newFiles.length === 0) continue;
 
-        // optional: item name bhejna (debug/log ke liye)
-        formData.append("item", item);
+      const formData = new FormData();
+      newFiles.forEach(file => formData.append("files", file));
+      formData.append("item", item);
 
-        const res = await axios.post(
-          `${BASE_URL}${MULTI_IMAGE_UPLOAD}`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
+      const res = await axios.post(
+        `${BASE_URL}${MULTI_IMAGE_UPLOAD}`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
 
-        // 👇 yahin mapping ho rahi hai
-        finalImagesObject[item] = res.data.data;
-      }
+      const oldImages = images.filter(img => typeof img === "string");
 
-      // Replace File objects with uploaded filenames
-      setCallChecklist(prev => ({
-        ...prev,
-        itemsVerifiedImages: finalImagesObject
-      }));
-
-      alert("All item images uploaded successfully");
-    } catch (error) {
-      console.error(error);
-      alert("Upload failed");
+      finalImagesObject[item] = [
+        ...oldImages,
+        ...res.data.data
+      ];
     }
-  };
+
+    setCallChecklist(prev => ({
+      ...prev,
+      itemsVerifiedImages: finalImagesObject
+    }));
+
+    alert("Images uploaded successfully");
+  } catch (error) {
+    console.error(error);
+    alert("Upload failed");
+  }
+};
 
   const handleDeleteImage = async (item, index) => {
     const image = callChecklist.itemsVerifiedImages[item][index];
