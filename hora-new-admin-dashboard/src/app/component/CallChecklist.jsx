@@ -38,7 +38,7 @@ const CHECKBOX_GROUP_CONFIG = [
   {
     title: "Explain rental policy (items returned after 24 hours)",
     section: "rentalPolicy",
-    items: ["Ring", "Flex", "Artificial Flowers", "Balloons Foil", "Cutout"]
+    items: ["Ring", "Flex", "Artificial Flowers", "Balloons Foil", "Cutout", "Marquee light"]
   },
   {
     title:
@@ -55,7 +55,9 @@ const CHECKBOX_GROUP_CONFIG = [
       "Transparent stand cake table",
       "Solid stand cake table with flex",
       "Neon Light 8 inch",
-      "Neon light 12 inch"
+      "Neon light 12 inch",
+      "Marquee light 9 inch",
+      "Marquee light 32 inch",
     ]
   },
   {
@@ -331,7 +333,7 @@ const CallChecklist = ({ open, onClose, data = null }) => {
           <div className="label-heading">Get the items verified</div>
 
           <div className="checkbox-container">
-            {["Welcome Board", "Flex Design", "Cutouts", "Sequined Color"].map(item => {
+            {["Welcome Board", "Flex Design", "Cutouts", "Sequined Color", "Cake Table flex"].map(item => {
               const imageCount = callChecklist.itemsVerifiedImages?.[item]?.length || 0;
 
               return (

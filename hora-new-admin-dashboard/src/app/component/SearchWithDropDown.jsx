@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 
 const SearchWithDropDown = ({
     options = [],
@@ -9,6 +8,7 @@ const SearchWithDropDown = ({
 }) => {
     const [search, setSearch] = useState("");
     const [open, setOpen] = useState(false);
+    const wrapperRef = useRef(null);
 
     // Filtered Options using useMemo
     const filteredOptions = useMemo(() => {
@@ -18,12 +18,28 @@ const SearchWithDropDown = ({
     }, [options, search]);
 
     const handleOpen = () => {
-        setOpen(!open);
+        setOpen(true);
     };
+
+    useEffect(() => {
+    const handleClickOutside = (event) => {
+        if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+            setOpen(false);
+            setSearch("");
+        }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+    };
+}, []);
+
 
 
     return (
-        <div style={{ width: "90%", position: "relative" }}>
+        <div ref={wrapperRef} style={{ width: "90%", position: "relative" }}>
 
             {/* Visible Box / Search Box */}
             <input
@@ -32,7 +48,7 @@ const SearchWithDropDown = ({
                 onClick={handleOpen}
                 onChange={(e) => {
                     setSearch(e.target.value);
-                    handleOpen();
+                    setOpen(true);
                 }}
                 style={{
                     width: "100%",

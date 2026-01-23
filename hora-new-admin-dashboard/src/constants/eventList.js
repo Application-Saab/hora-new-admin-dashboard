@@ -104,4 +104,10 @@ export const eventList = [
     "Poker Night",
     "Retirement",
     "Pet Welcome",
+    "Hawan pooja",
+    "Saraswati Pooja",
+    "Devi Pooja",
+    "Saari Function",
+    "Mate Portfolio Shoot",
+    "Opening Shops Shoot ( Petrol pump, Shoowroom, Shops )",
   ];
