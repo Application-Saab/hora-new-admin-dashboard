@@ -25,6 +25,9 @@ const menuItems = [
 
   { label: "Analysis", icon: <FaClipboardList />, url: "/dashboard/analysis" },
 
+  
+  { label: "User Analysis", icon: <FaClipboardList />, url: "/dashboard/user-analysis" },
+
   {
     label: "Order Details",
     icon: <FaClipboardList />,
