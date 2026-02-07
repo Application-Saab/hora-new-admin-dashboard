@@ -73,8 +73,8 @@ export default function UserAnalysisPage() {
 
   // 🔹 Summary calculations (SAFE)
   const totalUsers = data.reduce((sum, d) => sum + d.users, 0);
-  const maxUsers =
-    data.length > 0 ? Math.max(...data.map(d => d.users)) : 0;
+  // const maxUsers =
+  //   data.length > 0 ? Math.max(...data.map(d => d.users)) : 0;
 
   return (
     <div style={{ maxWidth: "82%", margin: "10px auto" }}>
