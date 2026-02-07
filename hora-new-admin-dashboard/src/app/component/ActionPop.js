@@ -1079,7 +1079,7 @@ const ActionPopup = ({
       {isOpen && (
         <div className="popup-overlay">
           <div className="popup-content">
-            <button onClick={onClose} className="close-btn">
+            <button onClick={onClose} className="close-btn-popup">
               ✖
             </button>
 
@@ -1365,7 +1365,6 @@ const ActionPopup = ({
                             Order Included:
                           </p>
                           {orderDetails.items[0].photography &&
-                          orderDetails.items[0].photography.length > 0 &&
                           orderDetails.items[0].photography.inclusion &&
                           orderDetails.items[0].photography.inclusion.length >
                             0 ? (

@@ -23,7 +23,7 @@
     overflow-y: auto;
   }
   
-  .close-btn {
+  .close-btn-popup {
     position: absolute;
     top: 10px;
     right: 10px;
