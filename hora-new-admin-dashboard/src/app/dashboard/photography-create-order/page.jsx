@@ -16,7 +16,6 @@ import {
 } from "../../../utils/apiconstant";
 import { timeSlotOptions } from "../../../utils/timeSlots";
 import { pincodes } from "../../../utils/pincodes";
-import { addOnProductsById } from '../../../utils/addOnProducts';
 import SearchWithDropDown from "../../component/SearchWithDropDown";
 import { eventList } from "../../../constants/eventList";
 
@@ -47,7 +46,7 @@ const AddPhotoOrder = () => {
   const [advanceamount, setAdvanceAmount] = useState("");
   const [balanceamount, setBalanceAmount] = useState("");
   const [orderTakenBy, setOrderTakenBy] = useState("");
-const [mealProductTypes, setMealProductTypes] = useState([]);
+  const [mealProductTypes, setMealProductTypes] = useState([]);
   const [comment, setComment] = useState("");
 
   const [loading, setLoading] = useState(false);
@@ -62,8 +61,11 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
   const [lloading, setlLoading] = useState(false);
   const [showButton, setShowButton] = useState(false);
 
- const [selectedAddOns, setSelectedAddOns] = useState([]);
+  const [selectedAddOns, setSelectedAddOns] = useState([]);
   const [addOnProducts, setAddOnProducts] = useState([]);
+  const [selectedItems, setSelectedItems] = useState({});
+  const [addonIds, setAddonIds] = useState([]);
+  
   // const [addOnsTotalPrice, setAddOnsTotalPrice] = useState(0);
 
   const handleComment = (e) => {
@@ -72,21 +74,47 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
   };
 
   useEffect(() => {
+  if (!addonIds || addonIds.length === 0) return; // wait until addonIds is available
+
+  const getAddons = async () => {
+    try {
+      const query = new URLSearchParams();
+      addonIds.forEach(id => {
+        if (id) query.append("ids", id);
+      });
+
+      if ([...query].length === 0) return; // no valid IDs
+
+      const url = `${BASE_URL}/api/addon/get?${query.toString()}`;
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (!response.ok || data.error) {
+        throw new Error(data.message || "Failed to fetch addons");
+      }
+
+      setAddOnProducts(data.data || []);
+    } catch (error) {
+      console.error("Error fetching addons:", error);
+    }
+  };
+
+  getAddons();
+}, [addonIds]);
+
+  useEffect(() => {
     if (selectedTag) {
       const fetchProductsByTag = async () => {
         setIsLoadingProducts(true);
         try {
           const url = `${BASE_URL}/api/photography/searchByTag/${selectedTag}`;
           const response = await axios.get(url);
-          
+
           if (response.data?.data?.length > 0) {
             setProducts(response.data.data);
           } else {
             setProducts([]);
           }
-          // Set add-on products for the selected tag
-          const tagId = selectedTag;
-          setAddOnProducts(addOnProductsById[tagId] || []);
         } catch (error) {
           console.error("Error fetching products:", error);
           setProducts([]);
@@ -102,30 +130,30 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
   }, [selectedTag]);
 
   useEffect(() => {
-          fetchOptions(BASE_URL + PRODUCT_MEAL_TYPE, setMealProductTypes, {
-            per_page: "500",
-          });
-        }, []);
-    
-        const fetchOptions = async (url, setter, body) => {
-        try {
-          const response = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-          });
-          const data = await response.json();
-          if (data.error === false && data.data) {
-            setter(
-              url.includes("admin_meals_list")
-                ? data.data.meal || []
-                : data.data.configuration || []
-            );
-          }
-        } catch (error) {
-          console.error("Error fetching data:", error);
-        }
-      };
+    fetchOptions(BASE_URL + PRODUCT_MEAL_TYPE, setMealProductTypes, {
+      per_page: "500",
+    });
+  }, []);
+
+  const fetchOptions = async (url, setter, body) => {
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await response.json();
+      if (data.error === false && data.data) {
+        setter(
+          url.includes("admin_meals_list")
+            ? data.data.meal || []
+            : data.data.configuration || []
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
   // Handle product selection and fetch details
   useEffect(() => {
@@ -138,19 +166,20 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
         console.log(selectedProduct, "productdata");
         setProduct(selectedProduct);
         setProductID(selectedProduct._id);
+        setAddonIds(selectedProduct.addons || []);
         setCategory(selectedProduct.price);
 
         const inclusions =
           selectedProduct?.inclusion?.length > 0
             ? selectedProduct.inclusion[0]
-                .split(/<\/div><div>/)
-                .map((item) =>
-                  item
-                    .replace(/<\/?div>/g, "")
-                    .replace(/<\/?span>/g, "")
-                    .replace(/<br\s*\/?>/g, "")
-                    .trim()
-                )
+              .split(/<\/div><div>/)
+              .map((item) =>
+                item
+                  .replace(/<\/?div>/g, "")
+                  .replace(/<\/?span>/g, "")
+                  .replace(/<br\s*\/?>/g, "")
+                  .trim()
+              )
             : [];
 
         setInclusion(inclusions);
@@ -226,65 +255,65 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
   // };
 
   const handleCheckCustomer = async (e) => {
-  e.preventDefault();
-  setMessage("");
-  setLoading(true);
+    e.preventDefault();
+    setMessage("");
+    setLoading(true);
 
-  try {
-    const response = await axios.post(`${BASE_URL}${ADMIN_USER_LIST}`, {
-      phone: customerNumber,
-      per_page: 1,
-      role: "customer",
-    });
+    try {
+      const response = await axios.post(`${BASE_URL}${ADMIN_USER_LIST}`, {
+        phone: customerNumber,
+        per_page: 1,
+        role: "customer",
+      });
 
-    console.log("API response:", response?.data);
+      console.log("API response:", response?.data);
 
-    const users = response?.data?.data?.users;
+      const users = response?.data?.data?.users;
 
-    if (Array.isArray(users) && users.length > 0) {
-      const customer = users.find((user) => user.phone === customerNumber);
+      if (Array.isArray(users) && users.length > 0) {
+        const customer = users.find((user) => user.phone === customerNumber);
 
-      console.log("Matched customer:", customer);
+        console.log("Matched customer:", customer);
 
-      if (customer) {
-        setMessage("Customer exists.");
-        setMessageColor("green");
-        setShowButton(true);
-        setShowPopup(false);
-        setCustomerId(customer);
+        if (customer) {
+          setMessage("Customer exists.");
+          setMessageColor("green");
+          setShowButton(true);
+          setShowPopup(false);
+          setCustomerId(customer);
+        } else {
+          // User list returned but phone not matched
+          setMessage("Customer does not exist.");
+          setMessageColor("red");
+          setShowPopup(true);
+          setShowButton(false);
+          setCustomerId(null);
+        }
       } else {
-        // User list returned but phone not matched
+        // Users array is empty or undefined
         setMessage("Customer does not exist.");
         setMessageColor("red");
         setShowPopup(true);
         setShowButton(false);
         setCustomerId(null);
       }
-    } else {
-      // Users array is empty or undefined
-      setMessage("Customer does not exist.");
+
+    } catch (err) {
+      console.error("API error:", err);
+
+      // Try to get backend message
+      const apiMessage =
+        err?.response?.data?.message || "An error occurred while checking the customer.";
+
+      setMessage(apiMessage);
       setMessageColor("red");
-      setShowPopup(true);
+      setShowPopup(true);   // ✅ always show popup on error
       setShowButton(false);
       setCustomerId(null);
+    } finally {
+      setLoading(false);
     }
-
-  } catch (err) {
-    console.error("API error:", err);
-
-    // Try to get backend message
-    const apiMessage =
-      err?.response?.data?.message || "An error occurred while checking the customer.";
-
-    setMessage(apiMessage);
-    setMessageColor("red");
-    setShowPopup(true);   // ✅ always show popup on error
-    setShowButton(false);
-    setCustomerId(null);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
   const handleAddCustomer = async () => {
@@ -381,9 +410,23 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
       console.error("Address ID is missing");
       return;
     }
+    const add_on = Object.keys(selectedItems).map((id) => {
+
+      const item = addOnProducts.find((i) => i._id === id);
+
+    if (!item) return null;
+
+      return {
+  addOnId: item._id,
+  priceAtPurchase: item.price,
+  quantity: selectedItems[id]?.quantity || 1,
+  totalPrice: item.price * (selectedItems[id]?.quantity || 1)
+};
+
+    }).filter(Boolean);
 
     const requestData = {
-      add_on: selectedAddOns,
+      add_on: add_on,
       inclusion: inclusion,
       selecteditems: dishName,
       phone_no: customerNumber,
@@ -466,12 +509,38 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
 
   // Handle add-on selection
   const handleAddOnChange = (addOn, isChecked) => {
-    setSelectedAddOns(prev => {
-      if (isChecked) {
-        return [...prev, addOn];
-      } else {
-        return prev.filter(item => item.title !== addOn.title);
-      }
+  // selectedAddOns update
+  setSelectedAddOns(prev => {
+    if (isChecked) {
+      return [...prev, addOn];
+    } else {
+      return prev.filter(item => item._id !== addOn._id);
+    }
+  });
+
+  // selectedItems bhi update karo (VERY IMPORTANT)
+  setSelectedItems(prev => {
+    const updated = { ...prev };
+
+    if (isChecked) {
+      updated[addOn._id] = { quantity: 1 };
+    } else {
+      delete updated[addOn._id];
+    }
+
+    return updated;
+  });
+};
+
+
+  const changeQuantity = (id, delta) => {
+    setSelectedItems((prev) => {
+      const qty = prev[id]?.quantity || 1;
+      const newQty = Math.max(1, qty + delta);
+      return {
+        ...prev,
+        [id]: { quantity: newQty }
+      };
     });
   };
 
@@ -509,43 +578,43 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
         </select> */}
 
         <select
-  id="tagSelect"
-  value={selectedTag}
-  onChange={(e) => {
-    setSelectedTag(e.target.value);
-    setDishName(""); 
-    setShowProductDetails(false);
-    setIsFetched(false);
-  }}
-  required
-  style={{
-    width: "100%",
-    padding: "10px",
-    borderRadius: "5px",
-    fontSize: "16px",
-    marginBottom: "10px",
-    border: "1px solid #ccc",
-  }}
->
-  <option value="">Select Photography Category</option>
+          id="tagSelect"
+          value={selectedTag}
+          onChange={(e) => {
+            setSelectedTag(e.target.value);
+            setDishName("");
+            setShowProductDetails(false);
+            setIsFetched(false);
+          }}
+          required
+          style={{
+            width: "100%",
+            padding: "10px",
+            borderRadius: "5px",
+            fontSize: "16px",
+            marginBottom: "10px",
+            border: "1px solid #ccc",
+          }}
+        >
+          <option value="">Select Photography Category</option>
 
-  {mealProductTypes
-    .filter((type) =>
-      type.configurationId?.some(
-        (config) => config.name === "Photography"
-      )
-    )
-    .map((type) => (
-      <option key={type._id} value={type._id}>
-        {type.name}
-      </option>
-    ))}
-</select>
+          {mealProductTypes
+            .filter((type) =>
+              type.configurationId?.some(
+                (config) => config.name === "Photography"
+              )
+            )
+            .map((type) => (
+              <option key={type._id} value={type._id}>
+                {type.name}
+              </option>
+            ))}
+        </select>
 
 
         {isLoadingProducts && <p>Loading products...</p>}
 
-      
+
         {/* Product Selection */}
         {products.length > 0 && (
           <>
@@ -584,9 +653,9 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
             <input type="text" id="productid" value={productid} readOnly />
             <label htmlFor="category">Product Price</label>
             <input type="text" id="category" value={category} readOnly />
-            <div className="ProductInclusions" style={{border:"1px solid black" ,marginTop:"10px", padding:"10px"}}>
+            <div className="ProductInclusions" style={{ border: "1px solid black", marginTop: "10px", padding: "10px" }}>
               <label htmlFor="productid">Product Inclusions:</label>
-              <ul style={{listStyle:"disc", paddingLeft:"10px"}}>
+              <ul style={{ listStyle: "disc", paddingLeft: "10px" }}>
                 {inclusion.length > 0 ? (
                   inclusion.map((item, index) => <li key={index}>{item}</li>)
                 ) : (
@@ -619,197 +688,218 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
         {message === "Customer exists."
           ?
           (
-          <div className='orderDeatils'>
-            <div
-              className="date-time-container"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "2%",
-              }}
-            >
-              <div style={{ marginRight: "18px" }}>
-              <label htmlFor="orderTakenBy">Order Taken By*</label>
-            <input
-              type="text"
-              id="orderTakenBy"
-              value={orderTakenBy}
-              onChange={(e) => setOrderTakenBy(e.target.value)}
-              placeholder="Order Taken By"
-              required
-            />
-              </div>
-              <div style={{ marginRight: "18px" }}>
-                <label
-                  htmlFor="date"
-                >
-                  Date *
-                </label>
-                <input
-                  type="date"
-                  id="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  required
-                />
-              </div>
-              <div style={{ marginRight: "18px" }}>
-                <label
-                  htmlFor="timeSlot"
-                  style={{
-                    marginBottom: "10px",
-                    display: "block",
-                  }}
-                >
-                  Time Slot*
-                </label>
-                <Select
-                  options={timeSlotOptions}
-                  value={timeSlot}
-                  onChange={(selectedOption) => setTimeSlot(selectedOption)}
-                  placeholder="Select Time Slot"
-                  required
-                />
-              </div>
-            </div>
-            <div className="address-box">
-              <label htmlFor="address">Address*</label>
-              <textarea
-                type="text"
-                id="address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="Address"
-                required
-              />
-            </div>
-            <div className="googleLocation-box">
-              <label htmlFor="googleLocation">Google Location</label>
-              <textarea
-                type="text"
-                id="googleLocation"
-                value={googleLocation}
-                onChange={(e) => setGoogleLocation(e.target.value)}
-                placeholder="googleLocation"
-              />
-            </div>
-            <div className="amount-box">
-              <label htmlFor="totalamount">Total Amount*</label>
-              <input
-                type="text"
-                id="totalamount"
-                value={totalamount}
-                onChange={(e) => setTotalAmount(e.target.value)}
-                placeholder="Total Amount"
-                required
-              />
-
-              <label htmlFor="advanceamount">Advance Amount</label>
-              <input
-                type="text"
-                id="advanceamount"
-                value={advanceamount}
-                onChange={(e) => setAdvanceAmount(e.target.value)}
-                placeholder="Advance Amount"
-              />
-              <label htmlFor="balanceamount">Balance Amount</label>
-              <input
-                type="text"
-                id="balanceamount"
-                value={balanceamount}
-                placeholder="Balance Amount"
-                disabled
-              />
-            </div>
-
-    {/* Add-On Products */}
-        {addOnProducts.length > 0 && (
-          <div className="add-on-section" style={{ 
-            border: "1px solid #ccc", 
-            padding: "15px", 
-            borderRadius: "5px", 
-            marginBottom: "20px",
-            backgroundColor: "#f9f9f9"
-          }}>
-            <h3>Add-On Products</h3>
-            <div className="add-on-grid" style={{ 
-              display: "grid", 
-              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", 
-              gap: "15px" 
-            }}>
-              {addOnProducts.map((addOn, index) => (
-                <div key={index} className="add-on-card" style={{ 
-                  border: "1px solid #ddd", 
-                  borderRadius: "8px", 
-                  padding: "12px",
-                  backgroundColor: "white",
+            <div className='orderDeatils'>
+              <div
+                className="date-time-container"
+                style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "10px"
-                }}>
+                  gap: "2%",
+                }}
+              >
+                <div style={{ marginRight: "18px" }}>
+                  <label htmlFor="orderTakenBy">Order Taken By*</label>
                   <input
-                    type="checkbox"
-                    id={`addon-${index}`}
-                    checked={selectedAddOns.some(item => item.title === addOn.title)}
-                    onChange={(e) => handleAddOnChange(addOn, e.target.checked)}
-                    style={{ transform: "scale(1.2)" }}
+                    type="text"
+                    id="orderTakenBy"
+                    value={orderTakenBy}
+                    onChange={(e) => setOrderTakenBy(e.target.value)}
+                    placeholder="Order Taken By"
+                    required
                   />
-                  <img 
-                    src={addOn.image} 
-                    alt={addOn.title}
-                    style={{ 
-                      width: "60px", 
-                      height: "60px", 
-                      objectFit: "cover", 
-                      borderRadius: "4px" 
-                    }}
-                  />
-                  <div style={{ flex: 1 }}>
-                    <label htmlFor={`addon-${index}`} style={{ 
-                      fontWeight: "bold", 
-                      cursor: "pointer",
-                      display: "block",
-                      marginBottom: "4px"
-                    }}>
-                      {addOn.title}
-                    </label>
-                    <p style={{ 
-                      margin: "0", 
-                      fontSize: "12px", 
-                      color: "#666",
-                      marginBottom: "4px"
-                    }}>
-                      {addOn.description}
-                    </p>
-                    <p style={{ 
-                      margin: "0", 
-                      fontWeight: "bold", 
-                      color: "#28a745",
-                      fontSize: "14px"
-                    }}>
-                      ₹{addOn.price}
-                    </p>
-                  </div>
                 </div>
-              ))}
-            </div>
-            {selectedAddOns.length > 0 && (
-              <div style={{ 
-                marginTop: "15px", 
-                padding: "10px", 
-                backgroundColor: "#e8f5e8", 
-                borderRadius: "5px",
-                border: "1px solid #28a745"
-              }}>
-                <h4 style={{ margin: "0 0 10px 0", color: "#28a745" }}>Selected Add-Ons:</h4>
-                <ul style={{ margin: "0", paddingLeft: "20px" }}>
-                  {selectedAddOns.map((addOn, index) => (
+                <div style={{ marginRight: "18px" }}>
+                  <label
+                    htmlFor="date"
+                  >
+                    Date *
+                  </label>
+                  <input
+                    type="date"
+                    id="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    required
+                  />
+                </div>
+                <div style={{ marginRight: "18px" }}>
+                  <label
+                    htmlFor="timeSlot"
+                    style={{
+                      marginBottom: "10px",
+                      display: "block",
+                    }}
+                  >
+                    Time Slot*
+                  </label>
+                  <Select
+                    options={timeSlotOptions}
+                    value={timeSlot}
+                    onChange={(selectedOption) => setTimeSlot(selectedOption)}
+                    placeholder="Select Time Slot"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="address-box">
+                <label htmlFor="address">Address*</label>
+                <textarea
+                  type="text"
+                  id="address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="Address"
+                  required
+                />
+              </div>
+              <div className="googleLocation-box">
+                <label htmlFor="googleLocation">Google Location</label>
+                <textarea
+                  type="text"
+                  id="googleLocation"
+                  value={googleLocation}
+                  onChange={(e) => setGoogleLocation(e.target.value)}
+                  placeholder="googleLocation"
+                />
+              </div>
+              <div className="amount-box">
+                <label htmlFor="totalamount">Total Amount*</label>
+                <input
+                  type="text"
+                  id="totalamount"
+                  value={totalamount}
+                  onChange={(e) => setTotalAmount(e.target.value)}
+                  placeholder="Total Amount"
+                  required
+                />
+
+                <label htmlFor="advanceamount">Advance Amount</label>
+                <input
+                  type="text"
+                  id="advanceamount"
+                  value={advanceamount}
+                  onChange={(e) => setAdvanceAmount(e.target.value)}
+                  placeholder="Advance Amount"
+                />
+                <label htmlFor="balanceamount">Balance Amount</label>
+                <input
+                  type="text"
+                  id="balanceamount"
+                  value={balanceamount}
+                  placeholder="Balance Amount"
+                  disabled
+                />
+              </div>
+
+              {/* Add-On Products */}
+              {addOnProducts.length > 0 && (
+
+
+                <div className="add-on-section" style={{
+                  border: "1px solid #ccc",
+                  padding: "15px",
+                  borderRadius: "5px",
+                  marginBottom: "20px",
+                  backgroundColor: "#f9f9f9"
+                }}>
+                  <h3>Add-On Products</h3>
+                  <div className="add-on-grid" style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                    gap: "15px"
+                  }}>
+                    {addOnProducts.map((addOn, index) => {
+                      const selected = selectedItems[addOn._id];
+                      return (
+                        <div key={index} className="add-on-card" style={{
+                          border: "1px solid #ddd",
+                          borderRadius: "8px",
+                          padding: "12px",
+                          backgroundColor: "white",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px"
+                        }}>
+                          <input
+                            type="checkbox"
+                            id={`addon-${index}`}
+                            checked={selectedAddOns.some(item => item.title === addOn.title)}
+                            onChange={(e) => handleAddOnChange(addOn, e.target.checked)}
+                            style={{ transform: "scale(1.2)" }}
+                          />
+                          <img
+                            src={`https://horaservices.com/api/uploads/compressed_webp/${addOn.image}`}
+                            alt={addOn.title}
+                            style={{
+                              width: "60px",
+                              height: "60px",
+                              objectFit: "cover",
+                              borderRadius: "4px"
+                            }}
+                          />
+                          <div style={{ flex: 1 }}>
+                            <label htmlFor={`addon-${index}`} style={{
+                              fontWeight: "bold",
+                              cursor: "pointer",
+                              display: "block",
+                              marginBottom: "4px"
+                            }}>
+                              {addOn.title}
+                            </label>
+                            <p style={{
+                              margin: "0",
+                              fontSize: "12px",
+                              color: "#666",
+                              marginBottom: "4px"
+                            }}>
+                              {addOn.description}
+                            </p>
+                            <p style={{
+                              margin: "0",
+                              fontWeight: "bold",
+                              color: "#28a745",
+                              fontSize: "14px"
+                            }}>
+                              ₹{addOn.price}
+                            </p>
+                          </div>
+                          <div className="right-section">
+                            <button onClick={() => changeQuantity(addOn._id, -1)} className="qty-btn">−</button>
+                            <span className="qty">{selected?.quantity || 1}</span>
+                            <button onClick={() => changeQuantity(addOn._id, 1)} className="qty-btn">+</button>
+                            <div className="total-price">₹{addOn.price * (selected?.quantity || 1)}</div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  {selectedAddOns.length > 0 && (
+                    <div style={{
+                      marginTop: "15px",
+                      padding: "10px",
+                      backgroundColor: "#e8f5e8",
+                      borderRadius: "5px",
+                      border: "1px solid #28a745"
+                    }}>
+                      <h4 style={{ margin: "0 0 10px 0", color: "#28a745" }}>Selected Add-Ons:</h4>
+                      <ul style={{ margin: "0", paddingLeft: "20px" }}>
+                        {/* {selectedAddOns.map((addOn, index) => (
                     <li key={index} style={{ marginBottom: "5px" }}>
                       {addOn.title} - ₹{addOn.price}
                     </li>
-                  ))}
-                </ul>
-                {/* <p style={{ 
+                  ))} */}
+                        {selectedAddOns.map((addOn, index) => {
+                          const qty = selectedItems[addOn._id]?.quantity || 1;
+
+                          return (
+                            <li key={index} style={{ marginBottom: "5px" }}>
+                              {addOn.title} - ₹{addOn.price} × {qty}
+                            </li>
+                          );
+                        })}
+
+                      </ul>
+                      {/* <p style={{ 
                   margin: "10px 0 0 0", 
                   fontWeight: "bold", 
                   fontSize: "16px",
@@ -817,88 +907,90 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
                 }}>
                   Total Add-Ons: ₹{addOnsTotalPrice}
                 </p> */}
-              </div>
-            )}
-          </div>
-        )}
+                    </div>
+                  )}
+                </div>
+              )}
 
 
-            <div className="cityPincode-box" style={{ margin: "10px 0",
-    width: "100%",
-    display: "flex",
-    alignItems: "flex-start",
-    gap: "12px",}}>
-              <div className="city-box" style={{ flex: 1 }}>
-                <label
-                  htmlFor="city"
-                  style={{
+              <div className="cityPincode-box" style={{
+                margin: "10px 0",
+                width: "100%",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "12px",
+              }}>
+                <div className="city-box" style={{ flex: 1 }}>
+                  <label
+                    htmlFor="city"
+                    style={{
 
-                    marginBottom: "5px",
-                    display: "block",
-                  }}
-                >
-                  City *
-                </label>
-                <select
-                  id="city"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  required
-                  style={{
-                    width: "100%",
-                    padding: "10px",
-                    borderRadius: "5px",
-                    fontSize: "16px",
-                    transition: "border-color 0.3s",
-                  }}
-                >
-                  <option value="" style={{ color: "#aaa" }}>
-                    Select City
-                  </option>
-                  <option value="Bangalore">Bangalore</option>
-                  <option value="Delhi">Delhi</option>
-                  <option value="Mumbai">Mumbai</option>
-                  <option value="Hyderabad">Hyderabad</option>
-                </select>
+                      marginBottom: "5px",
+                      display: "block",
+                    }}
+                  >
+                    City *
+                  </label>
+                  <select
+                    id="city"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    required
+                    style={{
+                      width: "100%",
+                      padding: "10px",
+                      borderRadius: "5px",
+                      fontSize: "16px",
+                      transition: "border-color 0.3s",
+                    }}
+                  >
+                    <option value="" style={{ color: "#aaa" }}>
+                      Select City
+                    </option>
+                    <option value="Bangalore">Bangalore</option>
+                    <option value="Delhi">Delhi</option>
+                    <option value="Mumbai">Mumbai</option>
+                    <option value="Hyderabad">Hyderabad</option>
+                  </select>
 
-              </div>
-              <div className="pincode-box" style={{ flex: 1 }}>
-                <label htmlFor="pincode">Pincode *</label>
-                <input
-                  type="text"
-                  id="pincode"
-                  value={pincode}
-                  onChange={(e) => setPincode(e.target.value)}
-                  style={{ padding: "11px", borderRadius: "5px", fontSize: "16px", width: "100%", marginTop: "0px", boxSizing: "border-box" }}
-                />
-                <p style={{ fontWeight: "bold", fontSize: "15px", color: pincodeMessageColor }}>{pincodeMessage}</p>
-              </div>
-               <div className="event-box" style={{ flex: 1 }}>
-                <label htmlFor="pincode">Add Event</label>
-                 <SearchWithDropDown
-                  options={eventList}
-                  selectedValue={selectedEvent}
-                  onChange={(val) => setSelectedEvent(val)}
-                  placeholder="Search event..."
+                </div>
+                <div className="pincode-box" style={{ flex: 1 }}>
+                  <label htmlFor="pincode">Pincode *</label>
+                  <input
+                    type="text"
+                    id="pincode"
+                    value={pincode}
+                    onChange={(e) => setPincode(e.target.value)}
+                    style={{ padding: "11px", borderRadius: "5px", fontSize: "16px", width: "100%", marginTop: "0px", boxSizing: "border-box" }}
                   />
-              </div> 
-            </div>
-            <div className='checkoutInputType border-1 rounded-4'>
-              <h4>Share your comments (if any)</h4>
-              <textarea className='rounded border border-1 p-1 bg-white text-black'
-                value={comment}
-                onChange={handleComment}
-                cols={90}
-                rows={4}
-                placeholder="Enter your comment."
-              />
-            </div>
-           
-            {/* Create Order */}
-            <button className="orderCheck-btn" type="submit" >
-              {lloading ? "Creating Order..." : "Create Order"}
-            </button>
-          </div>)
+                  <p style={{ fontWeight: "bold", fontSize: "15px", color: pincodeMessageColor }}>{pincodeMessage}</p>
+                </div>
+                <div className="event-box" style={{ flex: 1 }}>
+                  <label htmlFor="pincode">Add Event</label>
+                  <SearchWithDropDown
+                    options={eventList}
+                    selectedValue={selectedEvent}
+                    onChange={(val) => setSelectedEvent(val)}
+                    placeholder="Search event..."
+                  />
+                </div>
+              </div>
+              <div className='checkoutInputType border-1 rounded-4'>
+                <h4>Share your comments (if any)</h4>
+                <textarea className='rounded border border-1 p-1 bg-white text-black'
+                  value={comment}
+                  onChange={handleComment}
+                  cols={90}
+                  rows={4}
+                  placeholder="Enter your comment."
+                />
+              </div>
+
+              {/* Create Order */}
+              <button className="orderCheck-btn" type="submit" >
+                {lloading ? "Creating Order..." : "Create Order"}
+              </button>
+            </div>)
           :
           <> {lloading && <div className="loader">Loading...</div>}
             {showPopup && (
