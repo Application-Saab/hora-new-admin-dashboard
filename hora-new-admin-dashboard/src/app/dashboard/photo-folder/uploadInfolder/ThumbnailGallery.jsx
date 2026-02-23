@@ -10,7 +10,6 @@ const ThumbnailGallery = ({ folderName, customerId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedIndex, setSelectedIndex] = useState(null);
-  const [originalImages, setOriginalImages] = useState({});
 
   useEffect(() => {
     const fetchThumbnails = async () => {
@@ -32,27 +31,6 @@ const ThumbnailGallery = ({ folderName, customerId }) => {
     fetchThumbnails();
   }, [folderName, customerId]);
 
-  useEffect(() => {
-    const fetchOriginalImages = async () => {
-      const newOriginals = {};
-      for (let thumbnail of thumbnails) {
-        try {
-          const response = await fetch(
-            `https://horaservices.com:3000/api/photo/originalImage?thumbnailKey=${thumbnail.key}`
-          );
-          const data = await response.json();
-          newOriginals[thumbnail.key] = data.originalImageUrl;
-        } catch (error) {
-          console.error("Failed to fetch original image:", error);
-        }
-      }
-      setOriginalImages(newOriginals);
-    };
-    if (thumbnails.length > 0) {
-      fetchOriginalImages();
-    }
-  }, [thumbnails]);
-
   const handleImageClick = (index) => {
     setSelectedIndex(index);
   };
@@ -68,7 +46,7 @@ const ThumbnailGallery = ({ folderName, customerId }) => {
     slidesToShow: 1,
     slidesToScroll: 1,
     initialSlide: selectedIndex,
-    
+
   };
 
   return (
@@ -78,57 +56,95 @@ const ThumbnailGallery = ({ folderName, customerId }) => {
       {error && <p className="text-red-500">Error: {error}</p>}
       <div className="masonryGrid">
         {thumbnails.length > 0 ? (
-          thumbnails.map((thumbnail, index) => (
-            <img
-              key={index}
-              src={thumbnail.url}
-              alt={`Thumbnail ${index + 1}`}
-              className="thumbnail"
-              onClick={() => handleImageClick(index)}
-            />
-          ))
+          thumbnails.map((thumbnail, index) => {
+            const isVideo = thumbnail.type == "video"
+
+            return (
+              <div key={index}>
+                {isVideo ? (
+                  <video
+                    src={thumbnail.videoClipUrl}
+                    className="selectedImages thumbnail"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    controls
+                    onClick={() => handleImageClick(index)}
+                    style={{
+                      width: "100%",
+                      borderRadius: "8px",
+                      border: "2px solid #ccc",
+                    }}
+                  />
+                ) : (
+                  <img
+                    src={thumbnail.thumbnailImageUrl}
+                    alt={`Thumbnail ${index + 1}`}
+                    className="thumbnail"
+                    onClick={() => handleImageClick(index)}
+                  />
+                )}
+              </div>
+            );
+          })
         ) : (
           !loading && <p>No thumbnails found.</p>
         )}
       </div>
       {selectedIndex !== null && (
-  <div className="popupOverlay" onClick={closePopup}>
-    <div className="popupContent" onClick={(e) => e.stopPropagation()}>
-      <button className="closeButton" onClick={closePopup}>X</button>
-      <Slider {...sliderSettings} initialSlide={selectedIndex}>
-        {thumbnails.map((thumbnail, index) => {
-          const imageUrl = originalImages[thumbnail.key] || thumbnail.url;
-          
-          const copyToClipboard = () => {
-            navigator.clipboard.writeText(imageUrl).then(() => {
-              alert("Link copied to clipboard!");
-            }).catch((err) => {
-              console.error("Failed to copy:", err);
-            });
-          };
+        <div className="popupOverlay" onClick={closePopup}>
+          <div className="popupContent" onClick={(e) => e.stopPropagation()}>
+            <button className="closeButton" onClick={closePopup}>X</button>
+            <Slider {...sliderSettings} initialSlide={selectedIndex}>
+              {thumbnails.map((thumbnail, index) => {
+                const imageUrl = thumbnail.originalUrl || thumbnail.thumbnailImageUrl;
+                const isVideo = thumbnail.type == "video";
 
-          return (
-            <div key={index}>
-              <img src={imageUrl} alt="Original" className="popupImage" />
-              
-              <div className="buttonContainer">
-                {/* Download Button */}
-                <a href={imageUrl} download={`image-${index}.jpg`} className="downloadButton">
-                  Download Original Image
-                </a>
+                const copyToClipboard = () => {
+                  navigator.clipboard.writeText(imageUrl).then(() => {
+                    alert("Link copied to clipboard!");
+                  }).catch((err) => {
+                    console.error("Failed to copy:", err);
+                  });
+                };
 
-                {/* Copy Link Button */}
-                <button onClick={copyToClipboard} className="buttonSecondary">
-                  Copy Link
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </Slider>
-    </div>
-  </div>
-)}
+                return (
+                  <div key={index}>
+                    {isVideo ? (
+                      <video
+                        src={imageUrl}
+                        className="popupImage"
+                        controls
+                        autoPlay
+                        playsInline
+                      />
+                    ) : (
+                      <img
+                        src={imageUrl}
+                        alt="Original"
+                        className="popupImage"
+                      />
+                    )}
+
+                    <div className="buttonContainer">
+                      {/* Download Button */}
+                      <a href={imageUrl} download={`image-${index}.jpg`} className="downloadButton">
+                        Download Original Image
+                      </a>
+
+                      {/* Copy Link Button */}
+                      <button onClick={copyToClipboard} className="buttonSecondary">
+                        Copy Link
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </Slider>
+          </div>
+        </div>
+      )}
 
     </div>
   );
