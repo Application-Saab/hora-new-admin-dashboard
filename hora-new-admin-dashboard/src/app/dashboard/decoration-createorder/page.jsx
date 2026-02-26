@@ -279,7 +279,7 @@ const AddDecOrder = () => {
 
     
     
-     const add_on2 = Object.keys(selectedItems).map((id) => {
+     const add_on = Object.keys(selectedItems).map((id) => {
 
       const item = addonData.find((i) => i._id === id);
 
@@ -301,7 +301,7 @@ const addOnProduct = products.map((product) => ({
       quantity: 1,
     }));
     
-    const combinedAddOns = [...add_on2, ...addOnProduct];
+    const combinedAddOns = [...add_on, ...addOnProduct];
 
     const requestData = {
       add_on: combinedAddOns,

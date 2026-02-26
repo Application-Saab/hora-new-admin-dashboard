@@ -144,11 +144,7 @@ const AddPhotoOrder = () => {
       });
       const data = await response.json();
       if (data.error === false && data.data) {
-        setter(
-          url.includes("admin_meals_list")
-            ? data.data.meal || []
-            : data.data.configuration || []
-        );
+        setter(data.data.meal || []);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -518,7 +514,6 @@ const AddPhotoOrder = () => {
     }
   });
 
-  // selectedItems bhi update karo (VERY IMPORTANT)
   setSelectedItems(prev => {
     const updated = { ...prev };
 

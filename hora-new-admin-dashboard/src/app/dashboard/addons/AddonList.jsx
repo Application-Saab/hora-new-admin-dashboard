@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { BASE_URL, DELETE_ADDON, EDIT_ADDON, IMAGE_UPLOAD } from "../../../utils/apiconstant";
 import { FaPen, FaTrash } from "react-icons/fa";
 import "./addon.css";
+import CommonPopup from '../../component/CommonPopup'
 
 const AddonList = () => {
   const [addons, setAddons] = useState([]);
@@ -51,7 +52,7 @@ const AddonList = () => {
 
       const data = await res.json();
 
-      if (!data.error) {
+      if (data?.success) {
         setAddons((prev) =>
           prev.filter((a) => a._id !== selectedAddon._id)
         );
@@ -122,7 +123,7 @@ const AddonList = () => {
 
       const result = await res.json();
 
-      if (!result.error) {
+      if (result.success) {
         setAddons((prev) =>
           prev.map((item) =>
             item._id === selectedAddon._id
@@ -161,28 +162,27 @@ const AddonList = () => {
         <div className="addon-list">
           {addons.map((addon) => (
             <div key={addon._id} className="addon-item">
-             <div className="image-wrapper">
-               <img
-               key={addon._id}
-                src={`https://horaservices.com/api/uploads/compressed_webp/${addon.image}`}
-                alt={addon.title}
-                className="addon-image"
-              />
-             </div>
+              <div className="image-wrapper">
+                <img
+                  src={`https://horaservices.com/api/uploads/compressed_webp/${addon.image}`}
+                  alt={addon.title}
+                  className="addon-image"
+                />
+              </div>
               <h3 className="addonlist-title">{addon.title}</h3>
               <p className="addonlist-discription">
                 {addon.description}
               </p>
-               <div>
-                  <strong className="addon-label">Category :</strong> {addon?.categoryType[0]}
-                </div>
+              <div>
+                <strong className="addon-label">Category :</strong> {addon?.categoryType?.[0]}
+              </div>
 
               <div className="addonCard-footer">
-                 
+
                 <div>
                   <strong className="addon-label">Price :</strong> {addon?.price}
                 </div>
-              
+
                 <div className="action-buttons">
                   <div
                     onClick={() => handleEditClick(addon)}
@@ -205,94 +205,74 @@ const AddonList = () => {
       )}
 
       {/* EDIT MODAL */}
-      {editModel && (
-        <div className="edit-model-container">
+      <CommonPopup
+        isOpen={editModel}
+        onClose={() => setEditModel(false)}
+        heading="Edit Addon"
+        buttonText={isLoading ? "Updating.." : "Update"}
+        mainButtonAction={handleUpdate}
+        disabled={!isChanged || isLoading}
+        popupBody={
           <div className="edit-box">
 
-            {isLoading && (
-              <div className="loading-overlay">Updating...</div>
-            )}
-
-            <h2>Edit Addon</h2>
-
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-            />
-
-            <input
-              type="number"
-              name="price"
-              value={formData.price}
-              onChange={handleChange}
-            />
-
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows={3}
-            />
-
-            <input type="file" onChange={handleImageChange} />
-
-            <div className="modal-buttons">
-              <button
-                className="update-btn"
-                onClick={handleUpdate}
-                disabled={!isChanged || isLoading}
-              >
-                Update
-              </button>
-
-              <button
-                className="cancel-btn"
-                onClick={() => setEditModel(false)}
-                disabled={isLoading}
-              >
-                Cancel
-              </button>
+            <div className="popup-form-group">
+              <label>Name</label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+              />
             </div>
+
+            <div className="popup-form-group">
+              <label>Price</label>
+              <input
+                type="number"
+                name="price"
+                value={formData.price}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="popup-form-group">
+              <label>Description</label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                rows={3}
+              />
+            </div>
+
+            <div className="popup-form-group">
+              <label>Upload Image</label>
+              <input
+                type="file"
+                onChange={handleImageChange}
+              />
+            </div>
+
           </div>
-        </div>
-      )}
+        }
+      />
 
       {/* DELETE MODAL */}
       {deleteModal && (
-        <div className="delete-modal-container">
-          <div className="delete-box">
-
-            {isLoading && (
-              <div className="loading-overlay">Deleting...</div>
-            )}
-
-            <h2 className="confrim-text">Confirm Delete</h2>
+        <CommonPopup
+          isOpen={deleteModal}
+          onClose={() => setDeleteModal(false)}
+          heading="Confirm Delete"
+          buttonText={isLoading ? "Deleting.." : "Delete"}
+          mainButtonAction={() => handleDeleteConfirm()}
+          disabled={isLoading}
+          popupBody={
             <p>
               Are you sure you want to delete{" "}
               <strong>{selectedAddon?.title}</strong>?
             </p>
-
-            <div className="modal-buttons">
-              <button
-                className="update-btn"
-                onClick={handleDeleteConfirm}
-                disabled={isLoading}
-              >
-                Yes, Delete
-              </button>
-
-              <button
-                className="cancel-btn"
-                onClick={() => setDeleteModal(false)}
-                disabled={isLoading}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
+          }
+        />
       )}
     </div>
   );

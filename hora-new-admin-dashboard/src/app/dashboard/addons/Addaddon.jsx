@@ -95,37 +95,6 @@ const handleSubmit = async (e) => {
   e.preventDefault();
   setIsLoading(true);
 
-  // ---------------- VALIDATION ----------------
-  if (!selectedCategoryType) {
-    alert("Please select category");
-    setIsLoading(false);
-    return;
-  }
-
-  if (!selectAllEvents && !selectedSubCategory) {
-    alert("Please select an event");
-    setIsLoading(false);
-    return;
-  }
-
-  if (!title.trim()) {
-    alert("Please enter title");
-    setIsLoading(false);
-    return;
-  }
-
-  if (!price) {
-    alert("Please enter price");
-    setIsLoading(false);
-    return;
-  }
-
-  if (!imageFile) {
-    alert("Please upload image");
-    setIsLoading(false);
-    return;
-  }
-
   try {
     // ---------------- STEP 1: UPLOAD IMAGE ----------------
     const imageForm = new FormData();
@@ -142,7 +111,7 @@ const handleSubmit = async (e) => {
       throw new Error(uploadData.message || "Image upload failed");
     }
 
-    const uploadedImageName = uploadData.data; // <-- just the filename
+    const uploadedImageName = uploadData.data; 
 
     // ---------------- STEP 2: SEND ADDON DATA ----------------
     const payload = {
@@ -153,7 +122,7 @@ const handleSubmit = async (e) => {
       categoryType: selectAllEvents || selectedSubCategory ? selectedCategoryType : "",
       productType: !selectAllEvents && !selectAllProducts ? selectedCategoryType : "",
       productId: !selectAllEvents && !selectAllProducts ? selectedProduct : "",
-      eventType: !selectAllEvents && selectAllProducts ? selectedSubCategory : "",        // only filename
+      eventType: !selectAllEvents && selectAllProducts ? selectedSubCategory : "",       
     };
 
     const response = await fetch(`${BASE_URL}${ADD_ADDON}`, {
@@ -164,11 +133,11 @@ const handleSubmit = async (e) => {
 
     const data = await response.json();
 
-    if (!response.ok || data.error) {
+    if (!response.ok ) {
       throw new Error(data.message || "Something went wrong");
     }
 
-    alert("Addon created successfully ✅");
+    alert("Addon created successfully");
 
     // ---------------- RESET ----------------
     setTitle("");
@@ -194,7 +163,7 @@ const handleSubmit = async (e) => {
  
   return (
     <div>
-      <div className="d-flex">
+      <div className="d-flex mb-2">
         {/* CATEGORY */}
         <div style={{width: "35%"}} className="form-group">
           <label>Select Category</label>
@@ -316,7 +285,7 @@ const handleSubmit = async (e) => {
       {(selectedCategoryType && (selectAllEvents || selectedProduct || selectAllProducts)) && (
         <div className="formWrapper">
 
-         <div className="d-flex">
+         <div className="d-flex mb-2">
            <div className="form-group">
             <label>Addon Title</label>
             <input
@@ -336,7 +305,7 @@ const handleSubmit = async (e) => {
           </div>
          </div>
 
-         <div className="d-flex">
+         <div className="d-flex mb-2">
           <div className="form-group">
             <label>Description</label>
             <textarea
