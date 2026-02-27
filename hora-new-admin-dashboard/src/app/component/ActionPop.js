@@ -1128,19 +1128,51 @@ const ActionPopup = ({
                         <p>
                           <strong>Order Add On:</strong>{" "}
                           {orderDetails.add_on.length > 0 ? (
-                            <ul>
-                              {orderDetails.add_on.map((item, index) => (
-                                <li key={index}>
-                                  <strong>
-                                    {item.name} {item.title}
-                                  </strong>
-                                  : ₹{item.price}
-                                </li>
-                              ))}
-                            </ul>
-                          ) : (
-                            "N/A"
-                          )}
+  <ul>
+    {orderDetails.add_on.map((item, index) => {
+      
+      let rawTitle =
+        item?.addOnId?.title ||
+        item?.name ||
+        item?.title ||
+        "Addon";
+
+      const quantityMatch = rawTitle.match(/Quantity\s*(\d+)/i);
+
+      const extractedQuantity = quantityMatch
+        ? Number(quantityMatch[1])
+        : null;
+
+      const cleanedTitle = rawTitle.replace(
+        /\s*-\s*Quantity\s*\d+/i,
+        ""
+      ).trim();
+
+      const quantity =
+        extractedQuantity || Number(item?.quantity) || 1;
+
+      const price = Number(
+        item?.priceAtPurchase ||
+        item?.price ||
+        0
+      );
+
+      const total =
+        item?.totalPrice
+          ? Number(item.totalPrice)
+          : price * quantity;
+
+      return (
+        <li key={index}>
+          <strong>{cleanedTitle}</strong>
+          : ₹{price} x {quantity} = ₹{total}
+        </li>
+      );
+    })}
+  </ul>
+) : (
+  "N/A"
+)}
                         </p>
 
                         <p>
@@ -1409,15 +1441,15 @@ const ActionPopup = ({
                             </p>
 
                             {(() => {
-                              const addOns =
-                                Array.isArray(orderDetails.add_on) &&
-                                orderDetails.add_on.filter(
-                                  (item) =>
-                                    item &&
-                                    typeof item === "object" &&
-                                    Object.keys(item).length > 0 &&
-                                    item.title
-                                );
+                             const addOns =
+  Array.isArray(orderDetails?.add_on) &&
+  orderDetails.add_on.filter(
+    (item) =>
+      item?.addOnId?.title ||
+      item?.title ||
+      item?.name
+  );
+
 
                               if (!addOns || addOns.length === 0) {
                                 return (
@@ -1464,8 +1496,14 @@ const ActionPopup = ({
                                         }}
                                       >
                                         <Image
-                                          src={item.image}
-                                          alt={item.title}
+                                          src={
+  item?.image
+    ? item.image
+    : item?.addOnId?.image
+    ? `https://horaservices.com/api/uploads/compressed_webp/${item.addOnId.image}`
+    : "/placeholder.png"
+}
+                                          alt={item?.title || item?.addOnId?.title}
                                           width={240}
                                           height={120}
                                           style={{
@@ -1490,7 +1528,7 @@ const ActionPopup = ({
                                             color: "#059669",
                                           }}
                                         >
-                                          ₹{item.price}
+                                         {item?.priceAtPurchase || item?.price} x {item?.quantity || 1} = ₹{item?.totalPrice || item?.price}
                                         </p>
                                         <h3
                                           style={{
@@ -1500,7 +1538,7 @@ const ActionPopup = ({
                                             marginTop: "2px",
                                           }}
                                         >
-                                          {item.title}
+                                        Name :  {item?.addOnId?.title || item?.title}
                                         </h3>
                                         <p
                                           style={{
@@ -1509,7 +1547,16 @@ const ActionPopup = ({
                                             marginTop: "4px",
                                           }}
                                         >
-                                          {item.description}
+                                          Discription : {item?.addOnId?.description || item?.description || "N/A"}
+                                        </p>
+                                        <p
+                                          style={{
+                                            fontSize: "12px",
+                                            color: "#6b7280",
+                                            marginTop: "4px",
+                                          }}
+                                        >
+                                          quantity - {item?.quantity || 1}
                                         </p>
                                       </div>
                                     </div>

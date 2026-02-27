@@ -14,7 +14,6 @@ import {
   ADMIN_USER_LIST,
 } from "../../../utils/apiconstant";
 import { pincodes } from '../../../utils/pincodes.js';
-import {itemsData} from "../../../utils/itemData";
 import SearchWithDropDown from "../../component/SearchWithDropDown";
 import { eventList } from "../../../constants/eventList";
 
@@ -41,6 +40,7 @@ const AddDecOrder = () => {
   const [advanceamount, setAdvanceAmount] = useState("");
   const [balanceamount, setBalanceAmount] = useState("");
   const [orderTakenBy, setOrderTakenBy] = useState("");
+  const [addonIds, setAddonIds] = useState([]);
 
   const [products, setProducts] = useState([{ name: "", price: "" }]);
   const [comment, setComment] = useState("");
@@ -61,6 +61,7 @@ const AddDecOrder = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const [isOrderCreated, setIsOrderCreated] = useState(false);
+  const [addonData, setAddonData] = useState([]);
 
 
   const toggleItem = (id) => {
@@ -107,6 +108,7 @@ const AddDecOrder = () => {
           if (productData) {
             setProduct(productData);
             setProductID(productData._id);
+            setAddonIds(productData.addons || []);
             setProductPrice(productData.price);
             setShowProductDetails(true);
             setDishNameError('')
@@ -257,7 +259,7 @@ const AddDecOrder = () => {
       return null;
     }
   };
-
+ 
 
   const [lloading, setlLoading] = useState(false);
   const handleSubmit = async (e) => {
@@ -265,22 +267,6 @@ const AddDecOrder = () => {
     setlLoading(true);
     console.log('handlesubmit')
 
-    const add_on = Object.keys(selectedItems).map((id) => {
-      const item = itemsData.find((i) => i.id === parseInt(id));
-      return {
-        name: item.title + ' - Quantity ' + selectedItems[id].quantity,
-        price: item.price,
-      };
-    });
-    
-    const addOnProduct = products.map((product) => ({
-      name: product.name,
-      price: product.price,
-    }));
-    
-    const combinedAddOns = [...add_on, ...addOnProduct];
-    
-    console.log(combinedAddOns, "All Add-Ons Combined");
     
     const formattedDate = date ? formatDate(date) : null;
 
@@ -290,6 +276,32 @@ const AddDecOrder = () => {
       console.error("Address ID is missing");
       return;
     }
+
+    
+    
+     const add_on = Object.keys(selectedItems).map((id) => {
+
+      const item = addonData.find((i) => i._id === id);
+
+    if (!item) return null;
+
+      return {
+  addOnId: item._id,
+  priceAtPurchase: item.price,
+  quantity: selectedItems[id]?.quantity || 1,
+  totalPrice: item.price * (selectedItems[id]?.quantity || 1)
+};
+}).filter(Boolean);
+
+const addOnProduct = products.map((product) => ({
+      name: product.name,
+      price: product.price,
+      priceAtPurchase: product.price,
+      totalPrice: product.price,
+      quantity: 1,
+    }));
+    
+    const combinedAddOns = [...add_on, ...addOnProduct];
 
     const requestData = {
       add_on: combinedAddOns,
@@ -410,6 +422,37 @@ const AddDecOrder = () => {
     // Alert the user
     alert('Order summary copied!');
   };
+
+useEffect(() => {
+  if (!addonIds || addonIds.length === 0) return; // wait until addonIds is available
+
+  const getAddons = async () => {
+    try {
+      const query = new URLSearchParams();
+      addonIds.forEach(id => {
+        if (id) query.append("ids", id);
+      });
+
+      if ([...query].length === 0) return; // no valid IDs
+
+      const url = `${BASE_URL}/api/addon/get?${query.toString()}`;
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (!response.ok || data.error) {
+        throw new Error(data.message || "Failed to fetch addons");
+      }
+
+      setAddonData(data.data || []);
+    } catch (error) {
+      console.error("Error fetching addons:", error);
+    }
+  };
+
+  getAddons();
+}, [addonIds]);
+
+    
 
   return (
     <div className="container">
@@ -607,15 +650,16 @@ const AddDecOrder = () => {
   
             {dropdownOpen && (
             <div className="dropdown-menu">
-            {itemsData && itemsData.map((item) => {
-              const selected = selectedItems[item.id];
+            {addonData && addonData.map((item) => {
+
+              const selected = selectedItems[item._id];
               return (
-                <div className="item-row" key={item.id}>
+                <div className="item-row" key={item._id}>
                   <div className="left-section">
                     <input
                       type="checkbox"
                       checked={!!selected}
-                      onChange={() => toggleItem(item.id)}
+                      onChange={() => toggleItem(item._id)}
                     />
                     <div>
                       <div className="item-title">{item.title}</div>
@@ -625,9 +669,9 @@ const AddDecOrder = () => {
   
                   {selected && (
                     <div className="right-section">
-                      <button onClick={() => changeQuantity(item.id, -1)} className="qty-btn">−</button>
+                      <button type="button" onClick={() => changeQuantity(item._id, -1)} className="qty-btn">−</button>
                       <span className="qty">{selected.quantity}</span>
-                      <button onClick={() => changeQuantity(item.id, 1)} className="qty-btn">+</button>
+                      <button type="button" onClick={() => changeQuantity(item._id, 1)} className="qty-btn">+</button>
                       <div className="total-price">₹{item.price * selected.quantity}</div>
                     </div>
                   )}
@@ -642,7 +686,10 @@ const AddDecOrder = () => {
     <h4>Selected Add-ons</h4>
     <ul>
       {Object.keys(selectedItems).map((id) => {
-        const item = itemsData.find((i) => i.id === parseInt(id));
+          const item = addonData?.find((i) => String(i._id) === String(id));
+
+          if (!item) return null; 
+
         return (
           <li key={id}>
             {item.title} — ₹{item.price} × {selectedItems[id].quantity}
