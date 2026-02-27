@@ -1,4 +1,4 @@
-.popup-overlay {
+.commonpopup-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -11,7 +11,7 @@
   z-index: 1000;
 }
 
-.popup-content {
+.commonpopup-content {
   background: #fff;
   width: 400px;
   max-width: 90%;
@@ -20,19 +20,19 @@
   animation: fadeIn 0.2s ease-in-out;
 }
 
-.popup-heading {
+.commonpopup-heading {
   margin-bottom: 15px;
   font-size: 20px;
   font-weight: 600;
 }
 
-.popup-body {
+.commonpopup-body {
   margin-bottom: 20px;
   font-size: 14px;
   color: #444;
 }
 
-.popup-footer {
+.commonpopup-footer {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
