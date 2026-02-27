@@ -6,13 +6,13 @@ const Popup = ({ isOpen, onClose, heading, popupBody, buttonText, mainButtonActi
     if (!isOpen) return null;
 
     return (
-        <div className="popup-overlay">
-            <div className="popup-content">
-                <h2 className="popup-heading">{heading}</h2>
-                <div className='popup-body'>
+        <div className="commonpopup-overlay">
+            <div className="commonpopup-content">
+                <h2 className="commonpopup-heading">{heading}</h2>
+                <div className='commonpopup-body'>
                     {popupBody}
                 </div>
-                <div className='popup-footer'>
+                <div className='commonpopup-footer'>
                     <button
                         disabled={disabled}
                         onClick={mainButtonAction}
