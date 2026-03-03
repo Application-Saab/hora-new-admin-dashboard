@@ -4,6 +4,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import "../photoFolder.css";
+import {BASE_URL} from '../../../../utils/apiconstant'
 
 const ThumbnailGallery = ({ folderName, customerId }) => {
   const [thumbnails, setThumbnails] = useState([]);
@@ -15,7 +16,7 @@ const ThumbnailGallery = ({ folderName, customerId }) => {
     const fetchThumbnails = async () => {
       try {
         const response = await fetch(
-          `https://horaservices.com:3000/api/photo/thumbnailsWithinProject?folderName=${folderName}&customerId=${customerId}`
+          `${BASE_URL}/api/photo/thumbnailsWithinProject?folderName=${folderName}&customerId=${customerId}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch thumbnails");

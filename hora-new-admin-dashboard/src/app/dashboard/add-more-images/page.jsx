@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import {BASE_URL} from '../../../utils/apiconstant'
 
 const AddMoreImages = () => {
   const [url, setUrl] = useState("");
@@ -35,44 +36,12 @@ const AddMoreImages = () => {
     }
   };
 
-  // useEffect(() => {
-  //   const fetchCustomerData = async () => {
-  //     if (customerId) {
-  //       try {
-  //         const response = await axios.post(
-  //           "https://horaservices.com:3000/api/admin/admin_user_list",
-  //           {
-  //             role: "customer",
-  //             page: 1,
-  //             per_page: 3000,
-  //           }
-  //         );
-
-  //         const customers = response.data.data?.users || [];
-  //         const match = customers.find((user) => user._id === customerId);
-
-  //         if (match) {
-  //           setPhoneNumber(match.phone || "Phone number not found");
-  //         } else {
-  //           setPhoneNumber("");
-  //           setError("Customer ID not found.");
-  //         }
-  //       } catch (err) {
-  //         console.error("API call failed:", err);
-  //         setError("API call failed.");
-  //         setPhoneNumber("");
-  //       }
-  //     }
-  //   };
-
-  //   fetchCustomerData();
-  // }, [customerId]);
   useEffect(() => {
     const fetchCustomerData = async () => {
       if (customerId) {
         try {
           const response = await axios.post(
-            "https://horaservices.com:3000/api/admin/admin_user_list",
+            `${BASE_URL}/api/admin/admin_user_list`,
             {
               role: "customer",
               _id: customerId, // pass customerId as _id
@@ -148,7 +117,7 @@ const AddMoreImages = () => {
   const fetchImages = async () => {
     if (customerId) {
       try {
-        const response = await axios.get(`https://horaservices.com:3000/api/photo/thumbnailsWithinProject?folderName=${folderName}&customerId=${customerId}`);
+        const response = await axios.get(`${BASE_URL}/api/photo/thumbnailsWithinProject?folderName=${folderName}&customerId=${customerId}`);
         setImages(response.data.thumbnails);
       } catch (error) {
         console.error('Error fetching images:', error);
