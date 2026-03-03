@@ -1152,7 +1152,6 @@ const ActionPopup = ({
         extractedQuantity || Number(item?.quantity) || 1;
 
       const price = Number(
-        item?.priceAtPurchase ||
         item?.price ||
         0
       );
@@ -1499,8 +1498,6 @@ const ActionPopup = ({
                                           src={
   item?.image
     ? item.image
-    : item?.addOnId?.image
-    ? `https://horaservices.com/api/uploads/compressed_webp/${item.addOnId.image}`
     : "/placeholder.png"
 }
                                           alt={item?.title || item?.addOnId?.title}
@@ -1528,7 +1525,7 @@ const ActionPopup = ({
                                             color: "#059669",
                                           }}
                                         >
-                                         {item?.priceAtPurchase || item?.price} x {item?.quantity || 1} = ₹{item?.totalPrice || item?.price}
+                                         {item?.price} x {item?.quantity || 1} = ₹{item?.totalPrice || item?.price}
                                         </p>
                                         <h3
                                           style={{

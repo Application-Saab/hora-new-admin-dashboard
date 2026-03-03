@@ -164,7 +164,7 @@ const AddonList = () => {
             <div key={addon._id} className="addon-item">
               <div className="image-wrapper">
                 <img
-                  src={`https://horaservices.com/api/uploads/compressed_webp/${addon.image}`}
+                  src={addon.image}
                   alt={addon.title}
                   className="addon-image"
                 />

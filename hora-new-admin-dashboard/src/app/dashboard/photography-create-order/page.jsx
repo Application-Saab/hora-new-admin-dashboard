@@ -413,8 +413,7 @@ const AddPhotoOrder = () => {
     if (!item) return null;
 
       return {
-  addOnId: item._id,
-  priceAtPurchase: item.price,
+  ...item,
   quantity: selectedItems[id]?.quantity || 1,
   totalPrice: item.price * (selectedItems[id]?.quantity || 1)
 };
@@ -823,7 +822,7 @@ const AddPhotoOrder = () => {
                             style={{ transform: "scale(1.2)" }}
                           />
                           <img
-                            src={`https://horaservices.com/api/uploads/compressed_webp/${addOn.image}`}
+                            src={addOn.image}
                             alt={addOn.title}
                             style={{
                               width: "60px",
