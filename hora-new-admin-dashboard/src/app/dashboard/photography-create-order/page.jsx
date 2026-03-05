@@ -822,7 +822,7 @@ const AddPhotoOrder = () => {
                             style={{ transform: "scale(1.2)" }}
                           />
                           <img
-                            src={addOn.image}
+                            src={`https://horaservices.com/api/uploads/compressed_webp/${addOn.image}`}
                             alt={addOn.title}
                             style={{
                               width: "60px",
