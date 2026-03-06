@@ -1323,6 +1323,7 @@ const OrderList = () => {
                                 >
                                   <IoMdOpen size={30} />
                                   <span>drivelink</span>
+                                  <span>{order?.imageUploadCounts?.totalFromDrive || 0}</span>
                                 </div>
 
                                 {/* Web Link */}
@@ -1333,6 +1334,7 @@ const OrderList = () => {
                                   >
                                     <IoMdOpen size={30} />
                                     <span>weblink</span>
+                                    <span>{order?.imageUploadCounts?.totalWeblink || 0}</span>
                                   </div>
                                 ) : null}
 
