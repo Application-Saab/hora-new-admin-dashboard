@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import ThumbnailGallery from "./ThumbnailGallery";
 import Image from "next/image";
 
-const MAX_CONCURRENT_UPLOADS = 5;
 
 const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages }) => {
   const [selectedImages, setSelectedImages] = useState([]);
@@ -15,8 +14,11 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages }
   const [progress, setProgress] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  const MAX_CONCURRENT_UPLOADS = selectedImages.length;
+
+
   useEffect(() => {
-    if(refetchDriveImages){
+    if (refetchDriveImages) {
       setShowThumbnailComp(true);
       setShowLink(true);
     }
@@ -40,6 +42,7 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages }
     const images = files.map((file) => ({
       file,
       name: file.name,
+      type: file.type,
       preview: URL.createObjectURL(file),
       status: "pending",
     }));
@@ -56,7 +59,7 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages }
     formData.append("phoneNo", enteredNum);
 
     try {
-      const response = await fetch("https://horaservices.com:3000/api/photo/upload", {
+      const response = await fetch("https://mediaprocess.horaservices.com/upload", {
         method: "POST",
         body: formData,
       });
@@ -190,7 +193,7 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages }
       formData.append("phoneNo", enteredNum);
 
       try {
-        const res = await fetch("https://horaservices.com:3000/api/photo/upload", {
+        const res = await fetch("https://mediaprocess.horaservices.com/upload", {
           method: "POST",
           body: formData,
         });
@@ -231,7 +234,7 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages }
           type="file"
           multiple
           onChange={handleImageChange}
-          accept="image/*"
+          accept="image/*,video/*"
           disabled={isUploading}
           style={{
             padding: "10px 20px",
@@ -287,17 +290,32 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages }
                   key={index}
                   style={{ position: "relative", width: "150px" }}
                 >
-                  <Image
-                    src={image.preview}
-                    alt={image.name}
-                    width={100}
-                    height={100}
-                    style={{
-                      width: "100%",
-                      borderRadius: "8px",
-                      border: "2px solid #ccc",
-                    }}
-                  />
+                  {image.type.startsWith("image/") ? (
+                    <Image
+                      src={image.preview}
+                      alt={image.name}
+                      width={100}
+                      height={100}
+                      style={{
+                        width: "100%",
+                        borderRadius: "8px",
+                        border: "2px solid #ccc",
+                      }}
+                    />
+                  ) : image.type.startsWith("video/") ? (
+                    <video
+                      src={image.preview}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      style={{
+                        width: "100%",
+                        borderRadius: "8px",
+                        border: "2px solid #ccc",
+                      }}
+                    />
+                  ) : null}
                   <span
                     style={{
                       position: "absolute",
@@ -307,10 +325,10 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages }
                         image.status === "success"
                           ? "green"
                           : image.status === "failed"
-                          ? "red"
-                          : image.status === "uploading"
-                          ? "orange"
-                          : "#555",
+                            ? "red"
+                            : image.status === "uploading"
+                              ? "orange"
+                              : "#555",
                       color: "white",
                       padding: "2px 6px",
                       fontSize: "12px",
@@ -385,7 +403,7 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages }
 
             <input
               type="file"
-              accept="image/*"
+              accept="image/*,video/*"
               onChange={handleImageUpload}
               multiple
               style={{
