@@ -5,7 +5,7 @@ import CheckCustomer from "./CheckCustomer.jsx"; // Corrected import
 // import CheckExistFolder from './CheckExistFolder.jsx'; // Corrected import
 import ImageUpload from "./uploadInfolder/ImageUpload.jsx"; // Corrected import
 import "./photoFolder.css";
-import { BASE_URL, DRIVE_FOLDER_UPLOAD } from "@/utils/apiconstant.jsx";
+import { BASE_URL, DRIVE_FOLDER_UPLOAD } from "@/utils/apiconstant.jsx"; 
 
 const PhotoCreateProject = () => {
   const [folderTitle, setFolderTitle] = useState("");
@@ -19,6 +19,7 @@ const PhotoCreateProject = () => {
   const [driveFolderUrl, setDriveFolderUrl] = useState("");
   const [driveUploadLoading, setDriveUploadLoading] = useState(false);
   const [refetchDriveImages, setRefetchDriveImages] = useState(false);
+  const [weblink, setWeblink] = useState(null);
   // const [activeTab, setActiveTab] = useState('create'); // state to handle active tab ('create' or 'check')
 
   const handleCreateFolder = async (e) => {
@@ -121,6 +122,7 @@ const PhotoCreateProject = () => {
       setShowFolder(true);
       setShowForm(false);
       setRefetchDriveImages(true);
+      setWeblink(data?.webLink)
     } catch (error) {
       setDriveUploadLoading(false);
       console.error("Error creating folder:", error);
@@ -244,6 +246,8 @@ const PhotoCreateProject = () => {
           customerId={customerId}
           folderTitle={folderTitle}
           enteredNum={enteredNum}
+          isWeblink={true}
+          weblink={weblink}
         />
       )}
 

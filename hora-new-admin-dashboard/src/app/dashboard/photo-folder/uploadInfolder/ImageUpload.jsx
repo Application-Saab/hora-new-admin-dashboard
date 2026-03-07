@@ -2,9 +2,10 @@
 import React, { useState, useEffect } from "react";
 import ThumbnailGallery from "./ThumbnailGallery";
 import Image from "next/image";
+import {MEDIA_WORKER_URL} from '../../../../utils/apiconstant'
 
 
-const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages }) => {
+const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages, isWeblink, weblink }) => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [showThumbnailComp, setShowThumbnailComp] = useState(false);
   const [updatedImg, setUpdatedImg] = useState(true);
@@ -59,7 +60,7 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages }
     formData.append("phoneNo", enteredNum);
 
     try {
-      const response = await fetch("https://mediaprocess.horaservices.com/upload", {
+      const response = await fetch(`${MEDIA_WORKER_URL}/upload`, {
         method: "POST",
         body: formData,
       });
@@ -193,7 +194,7 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages }
       formData.append("phoneNo", enteredNum);
 
       try {
-        const res = await fetch("https://mediaprocess.horaservices.com/upload", {
+        const res = await fetch(`${MEDIA_WORKER_URL}/upload`, {
           method: "POST",
           body: formData,
         });
@@ -218,12 +219,15 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages }
         <div style={{ marginBottom: "1rem" }}>
           <h4>Folder link to share:</h4>
           <a
-            href={`https://horaservices.com/photo-gallery?folderName=${folderTitle}&customerId=${customerId}`}
+            href={
+              isWeblink? weblink :
+              `https://horaservices.com/photo-gallery?folderName=${folderTitle}&customerId=${customerId}`}
             target="_blank"
             rel="noreferrer"
           >
-            https://horaservices.com/photo-gallery?folderName={folderTitle}
-            &customerId={customerId}
+            {isWeblink? weblink :  `https://horaservices.com/photo-gallery?folderName=${folderTitle} 
+            &customerId=${customerId}`}
+            
           </a>
         </div>
       )}
