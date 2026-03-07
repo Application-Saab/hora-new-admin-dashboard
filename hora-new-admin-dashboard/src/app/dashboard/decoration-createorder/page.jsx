@@ -286,17 +286,17 @@ const AddDecOrder = () => {
     if (!item) return null;
 
       return {
-  ...item,
+  addOnId: item._id,
+  priceAtPurchase: item.price,
   quantity: selectedItems[id]?.quantity || 1,
   totalPrice: item.price * (selectedItems[id]?.quantity || 1)
 };
 }).filter(Boolean);
 
-const addOnProduct = products
-.filter(product => product.name && product.price)  
-.map((product) => ({ 
-      title: product.name,
+const addOnProduct = products.map((product) => ({
+      name: product.name,
       price: product.price,
+      priceAtPurchase: product.price,
       totalPrice: product.price,
       quantity: 1,
     }));
