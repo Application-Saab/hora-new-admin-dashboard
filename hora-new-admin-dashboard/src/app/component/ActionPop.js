@@ -1132,7 +1132,6 @@ const ActionPopup = ({
     {orderDetails.add_on.map((item, index) => {
       
       let rawTitle =
-        item?.addOnId?.title ||
         item?.name ||
         item?.title ||
         "Addon";
@@ -1152,7 +1151,6 @@ const ActionPopup = ({
         extractedQuantity || Number(item?.quantity) || 1;
 
       const price = Number(
-        item?.priceAtPurchase ||
         item?.price ||
         0
       );
@@ -1445,7 +1443,6 @@ const ActionPopup = ({
   Array.isArray(orderDetails?.add_on) &&
   orderDetails.add_on.filter(
     (item) =>
-      item?.addOnId?.title ||
       item?.title ||
       item?.name
   );
@@ -1498,12 +1495,10 @@ const ActionPopup = ({
                                         <Image
                                           src={
   item?.image
-    ? item.image
-    : item?.addOnId?.image
-    ? `https://horaservices.com/api/uploads/compressed_webp/${item.addOnId.image}`
+    ? `https://horaservices.com/api/uploads/compressed_webp/${item.image}`
     : "/placeholder.png"
 }
-                                          alt={item?.title || item?.addOnId?.title}
+                                          alt={item?.title}
                                           width={240}
                                           height={120}
                                           style={{
@@ -1528,7 +1523,7 @@ const ActionPopup = ({
                                             color: "#059669",
                                           }}
                                         >
-                                         {item?.priceAtPurchase || item?.price} x {item?.quantity || 1} = ₹{item?.totalPrice || item?.price}
+                                         {item?.price} x {item?.quantity || 1} = ₹{item?.totalPrice || item?.price}
                                         </p>
                                         <h3
                                           style={{
@@ -1538,7 +1533,7 @@ const ActionPopup = ({
                                             marginTop: "2px",
                                           }}
                                         >
-                                        Name :  {item?.addOnId?.title || item?.title}
+                                        Name :  {item?.title}
                                         </h3>
                                         <p
                                           style={{
@@ -1547,7 +1542,7 @@ const ActionPopup = ({
                                             marginTop: "4px",
                                           }}
                                         >
-                                          Discription : {item?.addOnId?.description || item?.description || "N/A"}
+                                          Discription : {item?.description || "N/A"}
                                         </p>
                                         <p
                                           style={{

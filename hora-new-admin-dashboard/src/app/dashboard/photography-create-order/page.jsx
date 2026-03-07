@@ -413,8 +413,7 @@ const AddPhotoOrder = () => {
     if (!item) return null;
 
       return {
-  addOnId: item._id,
-  priceAtPurchase: item.price,
+  ...item,
   quantity: selectedItems[id]?.quantity || 1,
   totalPrice: item.price * (selectedItems[id]?.quantity || 1)
 };
