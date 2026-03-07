@@ -157,6 +157,9 @@ const CheckSupplier = ({
   return (
     <div className="popup-overlay">
       <div className="popup-content">
+        <button onClick={handleClosePopup} className="close-btn-popup">
+              ✖
+            </button>
         <h3>Check Vendor is available or not:</h3>
         <input
           type="text"
@@ -196,13 +199,13 @@ const CheckSupplier = ({
         {supplierData && SelectedOrder && (
           <div className="supplier-info">
             <p>
-              <strong>Supplier ID:</strong> {supplierData._id}
+              <strong>Supplier Name:</strong> {supplierData?.name}
             </p>
             <p>
-              <strong>Token:</strong> {supplierData.device_token}
+              <strong>Supplier City:</strong> {supplierData?.city}
             </p>
             <p>
-              <strong>Order ID:</strong> {SelectedOrder._id}
+              <strong>Supplier Type:</strong> {supplierData?.job_profile}
             </p>
 
             {SelectedOrder.order_status === 6 ? (
@@ -216,7 +219,7 @@ const CheckSupplier = ({
             SelectedOrder.order_status !== 6 &&
               (SelectedOrder.toId ? (
                 <button className="assign-btn" onClick={handleReAssignPopup}>
-                  One-more time
+               Re-Assign
                 </button>
               ) : (
                 <button className="assign-btn" onClick={handleAssignPopup}>
