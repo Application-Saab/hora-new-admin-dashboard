@@ -16,7 +16,6 @@ import {
   FaUtensils,
   FaChevronDown,
   FaChevronRight,
-  FaPlus,
 } from "react-icons/fa";
 import { useRouter, usePathname } from "next/navigation";
 
@@ -155,7 +154,6 @@ const menuItems = [
     ],
   },
 
-  { label: "Addons", icon: <FaPlus />, url: "/dashboard/addons" },
 
   { label: "Dish List", icon: <FaUtensils />, url: "/dashboard/dish-list" },
 
