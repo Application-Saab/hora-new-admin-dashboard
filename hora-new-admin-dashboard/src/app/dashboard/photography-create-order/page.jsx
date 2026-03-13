@@ -49,7 +49,7 @@ const AddPhotoOrder = () => {
   const [orderTakenBy, setOrderTakenBy] = useState("");
   const [mealProductTypes, setMealProductTypes] = useState([]);
   const [comment, setComment] = useState("");
-
+  const [commentFields, setCommentFields] = useState([0]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [messageColor, setMessageColor] = useState("");
@@ -66,10 +66,15 @@ const AddPhotoOrder = () => {
   const [addOnProducts, setAddOnProducts] = useState([]);
   // const [addOnsTotalPrice, setAddOnsTotalPrice] = useState(0);
 
-  const handleComment = (e) => {
-    const commentText = e.target.value;
-    setComment(commentText);
-  };
+  const handleComment = (index, value) => {
+  const lines = comment.split("\n");
+  lines[index] = value;
+  setComment(lines.join("\n"));
+};
+
+const addCommentField = () => {
+  setCommentFields([...commentFields, commentFields.length]);
+};
 
   useEffect(() => {
     if (selectedTag) {
@@ -885,13 +890,27 @@ const AddPhotoOrder = () => {
               </div>
               <div className='checkoutInputType border-1 rounded-4'>
                 <h4>Share your comments (if any)</h4>
-                <textarea className='rounded border border-1 p-1 bg-white text-black'
-                  value={comment}
-                  onChange={handleComment}
-                  cols={90}
-                  rows={4}
-                  placeholder="Enter your comment."
-                />
+              <div className="addon-form">
+              {commentFields.map((field, index) => (
+              <div key={index} className="comment-container">
+      <input
+      style={{marginBottom : "8px"}}
+        className='comment-input'
+        value={comment.split("\n")[index] || ""}
+        onChange={(e) => handleComment(index, e.target.value)}
+        cols={90}
+        rows={4}
+        placeholder="Enter your comment."
+      />
+
+      <button 
+      style={{marginBottom : "8px"}}
+      type="button" className="add-new-btn" onClick={addCommentField}>
+        Add New
+      </button>
+    </div>
+  ))}
+  </div>    
               </div>
 
               {/* Create Order */}
