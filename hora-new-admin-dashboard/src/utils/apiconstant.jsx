@@ -27,4 +27,12 @@ export const MULTI_IMAGE_UPLOAD = '/api/multiple_image_upload'
 export const DELETE_CHECKLIST_IMAGE =  '/api/order/delete-callchecklist-image'
 export const ACTUAL_IMAGE_BY_NAME="/api/decoration/decorations/"
 
+// Food Packages APIs
+export const CREATE_FOOD_PACKAGE = "/api/food-package/createFoodPackage";
+export const GET_FOOD_PACKAGES = "/api/food-package/admin_food_packages_list";
+export const UPDATE_FOOD_PACKAGE = "/api/food-package/updateFoodPackage";
+export const ADD_DISH_TO_PACKAGE = "/api/food-package/addDishToPackage";
+export const GET_DISHES_FOR_PACKAGE ='/api/dish/getAllDishesList';
+export const REMOVE_DISH_FROM_PACKAGE = "/api/food-package/removeDishFromPackage";
+
 // api/decoration/edit

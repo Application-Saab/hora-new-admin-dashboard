@@ -151,6 +151,11 @@ const menuItems = [
         icon: <FaPlusCircle />,
         url: "/dashboard/chef-for-party-food-create",
       },
+      {
+        label : "Create Food Package",
+        icon : <FaPlusCircle />,
+        url : "/dashboard/create-food-package"
+      }
     ],
   },
 
