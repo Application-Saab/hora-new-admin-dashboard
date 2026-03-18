@@ -112,6 +112,11 @@ const menuItems = [
         icon: <FaClipboardList />,
         url: "/dashboard/vendor-orderReports",
       },
+      {
+        label: "Vendor Rating",
+        icon: <FaClipboardList />,
+        url: "/dashboard/vendor-rating",
+      },
     ],
   },
 
