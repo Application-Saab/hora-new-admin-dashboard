@@ -7,8 +7,8 @@ const CreatePackagePopup = ({ isOpen, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     name: "",
     image: "",
-    price: "",
-    actualPrice: "",
+    price: 0,
+    actualPrice: 0,
     foodType: "",
     packageType: "",
   });
@@ -99,7 +99,7 @@ const CreatePackagePopup = ({ isOpen, onClose, onSuccess }) => {
             </div>
             <div className="package-create-input-ctn">
               <input
-                type="text"
+                type="number"
                 name="price"
                 placeholder="Discounted Price"
                 value={formData.price}
@@ -109,7 +109,7 @@ const CreatePackagePopup = ({ isOpen, onClose, onSuccess }) => {
               />
 
               <input
-                type="text"
+                type="number"
                 name="actualPrice"
                 placeholder="Non-discounted Price"
                 value={formData.actualPrice}

@@ -93,6 +93,9 @@ const OrderList = () => {
       case "Photography":
         typeId = 8;
         break;
+      case "Boosters":
+        typeId = 9;
+        break;
       default:
         typeId = null; // or another default value if needed
     }
@@ -213,6 +216,7 @@ const OrderList = () => {
       6: "Food Delivery",
       7: "Live Catering",
       8: "Photography",
+      9: "Boosters",
     };
     return orderTypes[orderTypeValue] || "Unknown Order Type";
   };
@@ -403,9 +407,6 @@ const OrderList = () => {
     advanceAmount,
     type
   ) => {
-    console.log(orderId, "ordereditorder");
-    console.log(decoration_comments, "decoration_comments");
-    console.log(type, "type12");
     setSelectedOrderId(orderId);
     setDecorationComment(decoration_comments || "");
     setAddOnList(add_ons.length ? add_ons : [{ name: "", price: "" }]);
@@ -854,6 +855,7 @@ const OrderList = () => {
                       <option value="Food Delivery">Food Delivery</option>
                       <option value="Live Catering">Live Catering</option>
                       <option value="Photography">Photography</option>
+                      <option value="Boosters">Boosters</option>
                     </select>
                   </span>
                 </th>
