@@ -17,6 +17,7 @@ import {
   FaChevronDown,
   FaChevronRight,
 } from "react-icons/fa";
+import { GiFireworkRocket } from "react-icons/gi";
 import { useRouter, usePathname } from "next/navigation";
 
 //  MENU ITEMS WITH GROUPS
@@ -94,6 +95,23 @@ const menuItems = [
         label: "Add More Images",
         icon: <FaPlusCircle />,
         url: "/dashboard/add-more-images",
+      },
+    ],
+  },
+
+  {
+    label: "Celebration Boosters",
+    icon: <GiFireworkRocket />,
+    children: [
+      {
+        label: "Create Order",
+        icon: <FaPlusCircle />,
+        url: "/dashboard/booster-createorder",
+      },
+      {
+        label: "Boosters List",
+        icon: <GiFireworkRocket />,
+        url: "/dashboard/celebration-booster",
       },
     ],
   },
