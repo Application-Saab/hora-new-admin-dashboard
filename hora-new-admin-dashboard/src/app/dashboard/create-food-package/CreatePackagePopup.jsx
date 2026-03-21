@@ -7,8 +7,8 @@ const CreatePackagePopup = ({ isOpen, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     name: "",
     image: "",
-    price: "",
-    actualPrice: "",
+    price: 0,
+    actualPrice: 0,
     foodType: "",
     packageType: "",
   });
@@ -25,6 +25,7 @@ const CreatePackagePopup = ({ isOpen, onClose, onSuccess }) => {
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
+    if (!file) return;
 
     const form = new FormData();
     form.append("file", file);
@@ -54,7 +55,7 @@ const CreatePackagePopup = ({ isOpen, onClose, onSuccess }) => {
       });
 
       const data = await res.json();
-      if (data) {
+      if (res.ok && data.success) {
         setLoadingCreate(false);
         alert("Package Created Successfully");
       }
@@ -97,26 +98,51 @@ const CreatePackagePopup = ({ isOpen, onClose, onSuccess }) => {
                 required
               />
             </div>
-            <div className="package-create-input-ctn">
-              <input
-                type="text"
-                name="price"
-                placeholder="Discounted Price"
-                value={formData.price}
-                onChange={handleChange}
-                className="package-create-input"
-                required
-              />
+            <div
+              className="package-create-input-ctn"
+              style={{ width: "95%", marginTop: "20px" }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  width: "100%",
+                }}
+              >
+                <label htmlFor="price" style={{ marginBottom: "5px" }}>
+                  Discounted Price
+                </label>
+                <input
+                  type="number"
+                  name="price"
+                  placeholder="Discounted Price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  className="package-create-input"
+                  required
+                />
+              </div>
 
-              <input
-                type="text"
-                name="actualPrice"
-                placeholder="Non-discounted Price"
-                value={formData.actualPrice}
-                onChange={handleChange}
-                className="package-create-input"
-                required
-              />
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  width: "100%",
+                }}
+              >
+                <label htmlFor="actualPrice" style={{ marginBottom: "5px" }}>
+                  Non-Discounted Price
+                </label>
+                <input
+                  type="number"
+                  name="actualPrice"
+                  placeholder="Non-discounted Price"
+                  value={formData.actualPrice}
+                  onChange={handleChange}
+                  className="package-create-input"
+                  required
+                />
+              </div>
             </div>
             <div className="package-create-input-ctn">
               <select
@@ -159,7 +185,11 @@ const CreatePackagePopup = ({ isOpen, onClose, onSuccess }) => {
               >
                 Cancel
               </button>
-              <button type="submit" className="package-create-btn" disabled={loadingCreate}>
+              <button
+                type="submit"
+                className="package-create-btn"
+                disabled={loadingCreate}
+              >
                 {loadingCreate ? "Creating..." : "Create"}
               </button>
             </div>

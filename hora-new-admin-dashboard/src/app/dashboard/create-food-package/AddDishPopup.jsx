@@ -77,13 +77,18 @@ const AddDishToPackagePopup = ({ isOpen, onClose, packageData }) => {
 
   const addDishToPackage = async (dishId) => {
     try {
-      await axios.post(`${BASE_URL}${ADD_DISH_TO_PACKAGE}`, {
+      let resp = await axios.post(`${BASE_URL}${ADD_DISH_TO_PACKAGE}`, {
         packageId: packageData._id,
         dishIds: [dishId],
       });
 
-      // UI update
-      setSelectedDishes((prev) => [...prev, dishId]);
+      if (resp.status !== 200) {
+        alert("Error adding dish to package");
+        return;
+      }
+      if (resp.status === 200) {
+        setSelectedDishes((prev) => [...prev, dishId]);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -91,7 +96,7 @@ const AddDishToPackagePopup = ({ isOpen, onClose, packageData }) => {
 
   const removeDishFromPackage = async (dishId) => {
     try {
-      await axios.post(
+      let resp = await axios.post(
         `${BASE_URL}${REMOVE_DISH_FROM_PACKAGE}`,
         {
           packageId: packageData._id,
@@ -99,7 +104,13 @@ const AddDishToPackagePopup = ({ isOpen, onClose, packageData }) => {
         },
       );
 
-      setSelectedDishes((prev) => prev.filter((id) => id !== dishId));
+      if (resp.status !== 200) {
+        alert("Error removing dish from package");
+        return;
+      }
+      if (resp.status === 200) {
+        setSelectedDishes((prev) => prev.filter((id) => id !== dishId));
+      }
     } catch (error) {
       console.log(error);
     }

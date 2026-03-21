@@ -113,18 +113,20 @@ const DishTable = () => {
     const newStatus = currentStatus === 1 ? 0 : 1;
 
     try {
-      const response = await fetch(`${BASE_URL}${UPDATE_FOOD_PACKAGE}/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const response = await axios.patch(
+        `${BASE_URL}${UPDATE_FOOD_PACKAGE}/${id}`,
+        {
           _id: id,
           packageStatus: newStatus,
-        }),
-      });
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
 
-      if (response.ok) {
+      if (response.status === 200) {
         fetchData();
         console.log("Status updated successfully");
       } else {
