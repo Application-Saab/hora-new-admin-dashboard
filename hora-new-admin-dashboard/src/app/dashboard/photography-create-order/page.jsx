@@ -898,8 +898,6 @@ const addCommentField = () => {
         className='comment-input'
         value={comment.split("\n")[index] || ""}
         onChange={(e) => handleComment(index, e.target.value)}
-        cols={90}
-        rows={4}
         placeholder="Enter your comment."
       />
 
