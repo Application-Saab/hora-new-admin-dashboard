@@ -16,6 +16,7 @@ import {
   FaUtensils,
   FaChevronDown,
   FaChevronRight,
+  FaListUl 
 } from "react-icons/fa";
 import { GiFireworkRocket } from "react-icons/gi";
 import { useRouter, usePathname } from "next/navigation";
@@ -63,6 +64,11 @@ const menuItems = [
         label: "Decoration-Order-Report",
         icon: <FaCamera />,
         url: "/dashboard/Decoration-Order-Report"
+      },
+      {
+        label: "Material List",
+        icon: <FaListUl  />,
+        url: "/dashboard/decoration-material-list"
       },
     ],
   },
@@ -295,7 +301,7 @@ export default function RootLayout({
 
       try {
         const response = await axios.post(
-          "https://horaservices.com:3000/api/admin/admin_user_list",
+          "http://localhost:5000/api/admin/admin_user_list",
           {
             email: adminEmail,
             role: "admin",

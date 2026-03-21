@@ -59,7 +59,7 @@ const DishTable = () => {
       }
 
       const response = await axios.post(
-        "https://horaservices.com:3000/api/dish/admin_dish_list",
+        "http://localhost:5000/api/dish/admin_dish_list",
         payload
       );
 
@@ -114,7 +114,7 @@ const DishTable = () => {
     const newStatus = currentStatus === 1 ? 0 : 1;
   
     try {
-      const response = await fetch('https://horaservices.com:3000/api/dish/update_dish_status', {
+      const response = await fetch('http://localhost:5000/api/dish/update_dish_status', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

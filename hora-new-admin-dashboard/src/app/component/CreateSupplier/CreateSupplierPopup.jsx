@@ -49,7 +49,7 @@ const CreateSupplierPopup = ({ isOpen, onClose ,CustomerNumber}) => {
   
     try {
       const response = await axios.post(
-        "https://horaservices.com:3000/api/admin/user_signup",
+        "http://localhost:5000/api/admin/user_signup",
         supplierData,
         { headers: { "Content-Type": "application/json" } }
       );

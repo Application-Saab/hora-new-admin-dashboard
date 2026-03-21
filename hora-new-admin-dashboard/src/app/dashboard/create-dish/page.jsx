@@ -152,7 +152,7 @@ const DishManagementForm = () => {
   }, []);
 
   const fetchDropdownOptions = async (endpoint, payload = { per_page: "500" }) => {
-    const apiUrl = `https://horaservices.com:3000/api/${endpoint}`;
+    const apiUrl = `http://localhost:5000/api/${endpoint}`;
 
     try {
       const response = await fetch(apiUrl, {
@@ -213,7 +213,7 @@ const DishManagementForm = () => {
         const formData = new FormData();
         formData.append('file', file);
 
-        const response = await fetch('https://horaservices.com:3000/api/image_upload', {
+        const response = await fetch('http://localhost:5000/api/image_upload', {
           method: 'POST',
           body: formData
         });
@@ -399,7 +399,7 @@ const DishManagementForm = () => {
       console.log('Submitting data:', requestData);
 
       try {
-        const response = await fetch('https://horaservices.com:3000/api/dish/add', {
+        const response = await fetch('http://localhost:5000/api/dish/add', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

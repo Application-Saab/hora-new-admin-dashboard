@@ -78,7 +78,7 @@ const ReportDownloader = () => {
       ...(orderType !== 'All' && { type: Number(orderType) }),
     };
     try {
-      const res = await fetch('https://horaservices.com:3000/api/admin/adminOrderList', {
+      const res = await fetch('http://localhost:5000/api/admin/adminOrderList', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify(payload)
       });

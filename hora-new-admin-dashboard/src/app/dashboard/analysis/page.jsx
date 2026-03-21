@@ -238,7 +238,7 @@ const CityOrdersSummary = () => {
 
     try {
       const res = await fetch(
-        "https://horaservices.com:3000/api/admin/admin_user_list",
+        "http://localhost:5000/api/admin/admin_user_list",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

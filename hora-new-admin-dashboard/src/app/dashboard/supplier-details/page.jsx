@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 const fetchAdminUsers = async (page, phone, setUsers, setLastPage) => {
   try {
     const response = await fetch(
-      "https://horaservices.com:3000/api/admin/admin_user_list",
+      "http://localhost:5000/api/admin/admin_user_list",
       {
         method: "POST",
         headers: {

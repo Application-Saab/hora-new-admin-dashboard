@@ -1,4 +1,4 @@
-export const BASE_URL = 'https://horaservices.com:3000';
+export const BASE_URL = 'http://localhost:5000';
 export const GET_DECORATION_BY_NAME = '/api/Decoration/searchByName/';
 export const CONFIRM_ORDER_ENDPOINT = "/api/order/add";
 export const SAVE_LOCATION_ENDPOINT='/api/users/address/editByUserID';
@@ -40,3 +40,8 @@ export const CREATE_CELEBRATION_BOOSTER = '/api/celebration-booster/createCelebr
 export const UPDATE_CELEBRATION_BOOSTER = '/api/celebration-booster/updateCelebrationBooster';
 export const GET_CELEBRATION_BOOSTERS = '/api/celebration-booster/adminCelebrationBoosterList';
 export const GET_CELEBRATION_BOOSTERS_BY_NAME = '/api/celebration-booster/getCelebrationBoosterByName';
+
+// Decoration Material List APIs
+export const GET_DECORATION_MATERIALS = '/api/material-list/admin_material_list';
+export const CREATE_DECORATION_MATERIAL = '/api/material-list/createMaterial';
+export const UPDATE_DECORATION_MATERIAL = '/api/material-list/updateMaterial';
