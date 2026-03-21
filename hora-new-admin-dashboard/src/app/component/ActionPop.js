@@ -1145,7 +1145,18 @@ const ActionPopup = ({
 
                         <p>
                           <strong>Order decoration_comments:</strong>{" "}
-                          {orderDetails.decoration_comments || "N/A"}
+                          {orderDetails.decoration_comments ? (
+                         <ol style={{ paddingLeft: '20px', marginTop: '5px' }}>
+                         {orderDetails.decoration_comments
+                         .split('\n')
+                         .filter(comment => comment.trim() !== '')
+                         .map((comment, index) => (
+                        <li key={index}>{comment}</li>
+                      ))}
+                   </ol>
+                  ) : (
+                 <span>N/A</span>
+                )}
                         </p>
                         <p>
                           {orderDetails.items.map((item, itemIndex) => {
@@ -1339,7 +1350,18 @@ const ActionPopup = ({
                         </p>
                         <p>
                           <strong>Order Comments:</strong>{" "}
-                          {orderDetails.decoration_comments || "N/A"}
+                          {orderDetails.decoration_comments ? (
+                         <ol style={{ paddingLeft: '20px', marginTop: '5px' }}>
+                          {orderDetails.decoration_comments
+                          .split('\n')
+                          .filter(comment => comment.trim() !== '')
+                          .map((comment, index) => (
+                          <li key={index}>{comment}</li>
+                          ))}
+                        </ol>
+                      ) : (
+                     <span>N/A</span>
+                      )}
                         </p>
 
                         <div
