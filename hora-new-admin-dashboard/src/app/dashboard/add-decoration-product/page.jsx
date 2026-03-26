@@ -6,6 +6,7 @@ import {
   PRODUCT_MEAL_TYPE,
   IMAGE_UPLOAD,
   ADD_DECORATION_PRODUCT,
+  GET_MATERIAL_FILTER_DATA,
 } from "../../../utils/apiconstant";
 
 const AddProductForm = () => {
@@ -29,8 +30,8 @@ const AddProductForm = () => {
     specs: [],
     type: [],
     material: [],
-    rentedConsumable: [],
-    moqs: [],
+    // rentedConsumable: [],
+    // moqs: [],
   });
   const [inclusions, setInclusions] = useState([
     {
@@ -72,7 +73,7 @@ const AddProductForm = () => {
         setter(
           url.includes("admin_meals_list")
             ? data.data.meal || []
-            : data.data.configuration || []
+            : data.data.configuration || [],
         );
       }
     } catch (error) {
@@ -83,11 +84,11 @@ const AddProductForm = () => {
   const handleCheckboxChange = (id, type) => {
     if (type === "product") {
       setSelectedProductTypes((prev) =>
-        prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+        prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
       );
     } else if (type === "meal") {
       setSelectedMealTypes((prev) =>
-        prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+        prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
       );
     }
   };
@@ -226,7 +227,7 @@ const AddProductForm = () => {
       } else {
         showAlert(
           "Failed to create product: " + (data.message || "Unknown error"),
-          "error"
+          "error",
         );
       }
     } catch (error) {
@@ -237,134 +238,522 @@ const AddProductForm = () => {
   };
 
   // new inclustion style
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const res = await fetch(
+  //         "https://script.google.com/macros/s/AKfycbw4xPYuAXPztRz8fD5-txc-_zDlkZwXllmlQH_r5IAj855Xvr0ylEedJoIAJUVRMEzp/exec"
+  //       );
+  //       const data = await res.json();
+  //       setData(data);
+
+  //       const specs = [...new Set(data.map((r) => r.Specs).filter(Boolean))];
+  //       const type = [...new Set(data.map((r) => r.Type).filter(Boolean))];
+  //       const material = [
+  //         ...new Set(data.map((r) => r.Material).filter(Boolean)),
+  //       ];
+  //       const rented = [
+  //         ...new Set(data.map((r) => r["Rented/Consumable"]).filter(Boolean)),
+  //       ];
+  //       const moqs = [...new Set(data.map((r) => r.MOQ).filter(Boolean))];
+
+  //       setOptions({ specs, type, material, rentedConsumable: rented, moqs });
+  //     } catch (err) {
+  //       console.error("Error fetching data:", err);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchData();
+  // }, []);
+
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchMaterialFilterData = async () => {
       try {
-        const res = await fetch(
-          "https://script.google.com/macros/s/AKfycbw4xPYuAXPztRz8fD5-txc-_zDlkZwXllmlQH_r5IAj855Xvr0ylEedJoIAJUVRMEzp/exec"
-        );
-        const data = await res.json();
-        setData(data);
+        const res = await fetch(`${BASE_URL}${GET_MATERIAL_FILTER_DATA}`);
+        const result = await res.json();
 
-        const specs = [...new Set(data.map((r) => r.Specs).filter(Boolean))];
-        const type = [...new Set(data.map((r) => r.Type).filter(Boolean))];
-        const material = [
-          ...new Set(data.map((r) => r.Material).filter(Boolean)),
-        ];
-        const rented = [
-          ...new Set(data.map((r) => r["Rented/Consumable"]).filter(Boolean)),
-        ];
-        const moqs = [...new Set(data.map((r) => r.MOQ).filter(Boolean))];
+        if (
+          result?.error === false ||
+          result?.success === false ||
+          result?.data
+        ) {
+          const apiData = result.data || {};
 
-        setOptions({ specs, type, material, rentedConsumable: rented, moqs });
+          const specsData = Array.isArray(apiData.specs) ? apiData.specs : [];
+          const typeData = Array.isArray(apiData.type) ? apiData.type : [];
+          const materialData = Array.isArray(apiData.material)
+            ? apiData.material
+            : [];
+
+          setData(specsData);
+
+          setOptions({
+            specs: specsData.map((item) => item.value).filter(Boolean),
+            type: typeData.map((item) => item.value).filter(Boolean),
+            material: materialData.map((item) => item.value).filter(Boolean),
+          });
+        }
       } catch (err) {
-        console.error("Error fetching data:", err);
+        console.error("Error fetching material filter data:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
+
+    fetchMaterialFilterData();
   }, []);
 
-  const handleSelectChange = (id, field, value) => {
-    setInclusions((prev) =>
-      prev.map((inc) => {
-        if (inc.id === id) {
-          const updated = { ...inc, [field]: value };
+  // const handleSelectChange = (id, field, value) => {
+  //   setInclusions((prev) =>
+  //     prev.map((inc) => {
+  //       if (inc.id === id) {
+  //         const updated = { ...inc, [field]: value };
 
-          const {
-            specs,
-            type,
-            material,
-            rentedConsumable,
-            moq,
-            customQuantity,
-          } = updated;
+  //         const {
+  //           specs,
+  //           type,
+  //           material,
+  //           rentedConsumable,
+  //           moq,
+  //           customQuantity,
+  //         } = updated;
 
-          let matchedRow = null;
-          let price = 0;
+  //         let matchedRow = null;
+  //         let price = 0;
 
-          if (specs && type && material && rentedConsumable) {
-            matchedRow = data.find(
-              (row) =>
-                row.Specs === specs &&
-                row.Type === type &&
-                row.Material === material &&
-                row["Rented/Consumable"] === rentedConsumable
-            );
+  //         if (specs && type && material && rentedConsumable) {
+  //           matchedRow = data.find(
+  //             (row) =>
+  //               row.Specs === specs &&
+  //               row.Type === type &&
+  //               row.Material === material &&
+  //               row["Rented/Consumable"] === rentedConsumable
+  //           );
 
-            // if (matchedRow) {
-            //   if (rentedConsumable === "Consumable") {
-            //     const qty = parseFloat(customQuantity) || 0;
-            //     console.log(qty, "qty12");
-            //     price = (qty / 100) * matchedRow["Hora Vendor Material Price"];
-            //   } else {
-            //     price = matchedRow["Hora Vendor Material Price"];
-            //   }
-            // }
-            if (matchedRow) {
-              if (rentedConsumable === "Consumable") {
-                const qty = parseFloat(customQuantity) || 0;
-                const horaPrice = matchedRow["Hora Vendor Material Price"];
-                const moq = parseFloat(matchedRow["MOQ"]) || 1;
-                price = (qty * horaPrice) / moq;
-                console.log(qty, "qty123");
-                console.log(horaPrice, "horaprice");
-                console.log(moq, "moq");
-                console.log(price, "price");
-              } else {
-                price = matchedRow["Hora Vendor Material Price"];
-              }
-            }
-          }
+  //           // if (matchedRow) {
+  //           //   if (rentedConsumable === "Consumable") {
+  //           //     const qty = parseFloat(customQuantity) || 0;
+  //           //     console.log(qty, "qty12");
+  //           //     price = (qty / 100) * matchedRow["Hora Vendor Material Price"];
+  //           //   } else {
+  //           //     price = matchedRow["Hora Vendor Material Price"];
+  //           //   }
+  //           // }
+  //           if (matchedRow) {
+  //             if (rentedConsumable === "Consumable") {
+  //               const qty = parseFloat(customQuantity) || 0;
+  //               const horaPrice = matchedRow["Hora Vendor Material Price"];
+  //               const moq = parseFloat(matchedRow["MOQ"]) || 1;
+  //               price = (qty * horaPrice) / moq;
+  //               console.log(qty, "qty123");
+  //               console.log(horaPrice, "horaprice");
+  //               console.log(moq, "moq");
+  //               console.log(price, "price");
+  //             } else {
+  //               price = matchedRow["Hora Vendor Material Price"];
+  //             }
+  //           }
+  //         }
 
-          let previewText = `${specs || "-"} ${type || "-"} ${material || "-"}`;
-          if (rentedConsumable === "Rented") {
-            previewText += ` ${moq || "-"}`;
-          } else if (rentedConsumable === "Consumable") {
-            previewText += ` ${customQuantity || 1} PCS`;
-          }
-          // previewText += `, Price: $${price.toFixed(2)}`;
+  //         let previewText = `${specs || "-"} ${type || "-"} ${material || "-"}`;
+  //         if (rentedConsumable === "Rented") {
+  //           previewText += ` ${moq || "-"}`;
+  //         } else if (rentedConsumable === "Consumable") {
+  //           previewText += ` ${customQuantity || 1} PCS`;
+  //         }
+  //         // previewText += `, Price: $${price.toFixed(2)}`;
 
-          return { ...updated, matchedRow, price, previewText };
-        }
-        return inc;
-      })
-    );
+  //         return { ...updated, matchedRow, price, previewText };
+  //       }
+  //       return inc;
+  //     })
+  //   );
+  // };
+
+  // const buildPreviewText = (item) => {
+  //   let previewText = `${item.specs || "-"} ${item.type || "-"} ${item.material || "-"}`;
+
+  //   if (item.rentedConsumable === "Rented") {
+  //     previewText += ` ${item.moq || "-"}`;
+  //   } else if (item.rentedConsumable === "Consumable") {
+  //     previewText += ` ${item.customQuantity || item.moq || 1}`;
+  //   }
+
+  //   return previewText;
+  // };
+
+  // const getCalculatedPrice = (matchedRow, rentedConsumable, customQuantity) => {
+  //   if (!matchedRow) return 0;
+
+  //   const vendorPrice = parseFloat(matchedRow.vendorMaterialPrice) || 0;
+
+  //   if (rentedConsumable === "Consumable") {
+  //     const qty = parseFloat(customQuantity) || 0;
+  //     const moq =
+  //       parseFloat(
+  //         String(matchedRow.minimumOrderQuantity || "").replace(/[^\d.]/g, ""),
+  //       ) || 1;
+
+  //     return (qty * vendorPrice) / moq;
+  //   }
+
+  //   return vendorPrice;
+  // };
+
+  const buildPreviewText = (item) => {
+    let previewText = `${item.specs || "-"} ${item.type || "-"} ${item.material || "-"}`;
+
+    if (item.rentedConsumable === "Rented") {
+      previewText += ` ${item.moq || "-"}`;
+    } else if (item.rentedConsumable === "Consumable") {
+      previewText += ` ${item.customQuantity || item.moq || 1}`;
+    }
+
+    return previewText;
   };
+
+  const extractNumber = (value) => {
+    return parseFloat(String(value || "").replace(/[^\d.]/g, "")) || 0;
+  };
+
+  const getCalculatedPrice = (matchedRow, rentedConsumable, customQuantity) => {
+    if (!matchedRow) return 0;
+
+    const vendorPrice = parseFloat(matchedRow.vendorMaterialPrice) || 0;
+
+    if (rentedConsumable === "Consumable") {
+      const qty = parseFloat(customQuantity) || 0;
+      const moqNumber = extractNumber(matchedRow.minimumOrderQuantity) || 1;
+      return (qty * vendorPrice) / moqNumber;
+    }
+
+    return vendorPrice;
+  };
+
+//   const getFilteredTypes = (specs) => {
+//   if (!specs) return options.type;
+
+//   return [
+//     ...new Set(
+//       data
+//         .filter((row) => row.value === specs)
+//         .map((row) => row.type)
+//         .filter(Boolean)
+//     ),
+//   ];
+// };
+
+// const getFilteredMaterials = (specs, type) => {
+//   let filtered = data;
+
+//   if (specs) {
+//     filtered = filtered.filter((row) => row.value === specs);
+//   }
+
+//   if (type) {
+//     filtered = filtered.filter((row) => row.type === type);
+//   }
+
+//   return [...new Set(filtered.map((row) => row.material).filter(Boolean))];
+// };
+
+  // const handleSelectChange = (id, field, value) => {
+  //   setInclusions((prev) =>
+  //     prev.map((inc) => {
+  //       if (inc.id !== id) return inc;
+
+  //       const updated = {
+  //         ...inc,
+  //         [field]: value,
+  //       };
+
+  //       let matchedRow = null;
+  //       let rentedConsumable = updated.rentedConsumable;
+  //       let moq = updated.moq;
+  //       let price = updated.price;
+
+  //       if (updated.specs && updated.type && updated.material) {
+  //         matchedRow = data.find(
+  //           (row) =>
+  //             row.value === updated.specs &&
+  //             row.type === updated.type &&
+  //             row.material === updated.material,
+  //         );
+
+  //         if (matchedRow) {
+  //           rentedConsumable = matchedRow.materialCategory || "";
+  //           moq = matchedRow.minimumOrderQuantity || "";
+  //           price = getCalculatedPrice(
+  //             matchedRow,
+  //             rentedConsumable,
+  //             updated.customQuantity,
+  //           );
+  //         } else {
+  //           rentedConsumable = "";
+  //           moq = "";
+  //           price = 0;
+  //         }
+  //       } else {
+  //         rentedConsumable = "";
+  //         moq = "";
+  //         price = 0;
+  //       }
+
+  //       const finalItem = {
+  //         ...updated,
+  //         matchedRow,
+  //         rentedConsumable,
+  //         moq,
+  //         price,
+  //       };
+
+  //       return {
+  //         ...finalItem,
+  //         previewText: buildPreviewText(finalItem),
+  //       };
+  //     }),
+  //   );
+  // };
+
+  // const handleCustomQuantityChange = (id, value) => {
+  //   setInclusions((prev) =>
+  //     prev.map((inc) => {
+  //       if (inc.id === id) {
+  //         let price = inc.price;
+  //         let matchedRow = inc.matchedRow;
+  //         // if (inc.rentedConsumable === "Consumable" && matchedRow) {
+  //         //   const qty = parseFloat(value) || 0;
+  //         //   price = (qty / 100) * matchedRow["Hora Vendor Material Price"];
+  //         // }
+  //         if (inc.rentedConsumable === "Consumable" && matchedRow) {
+  //           const qty = parseFloat(value) || 0;
+  //           const horaPrice = matchedRow["Hora Vendor Material Price"];
+  //           const moq = parseFloat(matchedRow["MOQ"]) || 1;
+  //           price = (qty * horaPrice) / moq;
+  //         }
+  //         let previewText = `${inc.specs || "-"} ${inc.type || "-"}  ${
+  //           inc.material || "-"
+  //         }`;
+  //         if (inc.rentedConsumable === "Rented") {
+  //           previewText += ` ${inc.moq || "-"}`;
+  //         } else if (inc.rentedConsumable === "Consumable") {
+  //           previewText += ` ${value || 1} PCS`;
+  //         }
+  //         // previewText += `, Price: $${price.toFixed(2)}`;
+
+  //         return { ...inc, customQuantity: value, price, previewText };
+  //       }
+  //       return inc;
+  //     })
+  //   );
+  // };
+
+
+  const handleSelectChange = (id, field, value) => {
+  setInclusions((prev) =>
+    prev.map((inc) => {
+      if (inc.id !== id) return inc;
+
+      let updated = {
+        ...inc,
+        [field]: value,
+      };
+
+      // agar specs change hua hai to us specs ki first matched row auto-fill kar do
+      if (field === "specs") {
+        const firstMatch = data.find((row) => row.value === value);
+
+        if (firstMatch) {
+          updated = {
+            ...updated,
+            specs: firstMatch.value || "",
+            type: firstMatch.type || "",
+            material: firstMatch.material || "",
+            rentedConsumable: firstMatch.materialCategory || "",
+            moq: firstMatch.minimumOrderQuantity || "",
+            matchedRow: firstMatch,
+          };
+
+          // consumable me default qty blank ho to MOQ number ya 1 le sakte ho
+          const defaultQty =
+            updated.customQuantity || extractNumber(firstMatch.minimumOrderQuantity) || 1;
+
+          updated.customQuantity =
+            firstMatch.materialCategory === "Consumable"
+              ? updated.customQuantity || defaultQty
+              : "";
+
+          updated.price = getCalculatedPrice(
+            firstMatch,
+            firstMatch.materialCategory,
+            updated.customQuantity
+          );
+
+          updated.previewText = buildPreviewText(updated);
+          return updated;
+        } else {
+          updated = {
+            ...updated,
+            type: "",
+            material: "",
+            rentedConsumable: "",
+            moq: "",
+            customQuantity: "",
+            matchedRow: null,
+            price: 0,
+          };
+          updated.previewText = buildPreviewText(updated);
+          return updated;
+        }
+      }
+
+      // agar type change hua
+      if (field === "type") {
+        // pehle same specs + new type ka first material dhundo
+        let firstMatch = data.find(
+          (row) => row.value === updated.specs && row.type === value
+        );
+
+        if (firstMatch) {
+          updated = {
+            ...updated,
+            type: firstMatch.type || "",
+            material: firstMatch.material || "",
+            rentedConsumable: firstMatch.materialCategory || "",
+            moq: firstMatch.minimumOrderQuantity || "",
+            matchedRow: firstMatch,
+          };
+
+          if (firstMatch.materialCategory !== "Consumable") {
+            updated.customQuantity = "";
+          }
+
+          updated.price = getCalculatedPrice(
+            firstMatch,
+            firstMatch.materialCategory,
+            updated.customQuantity
+          );
+        } else {
+          updated = {
+            ...updated,
+            type: value,
+            material: "",
+            rentedConsumable: "",
+            moq: "",
+            customQuantity: "",
+            matchedRow: null,
+            price: 0,
+          };
+        }
+
+        updated.previewText = buildPreviewText(updated);
+        return updated;
+      }
+
+      // agar material change hua
+      if (field === "material") {
+        const exactMatch = data.find(
+          (row) =>
+            row.value === updated.specs &&
+            row.type === updated.type &&
+            row.material === value
+        );
+
+        if (exactMatch) {
+          updated = {
+            ...updated,
+            material: exactMatch.material || "",
+            rentedConsumable: exactMatch.materialCategory || "",
+            moq: exactMatch.minimumOrderQuantity || "",
+            matchedRow: exactMatch,
+          };
+
+          if (exactMatch.materialCategory !== "Consumable") {
+            updated.customQuantity = "";
+          }
+
+          updated.price = getCalculatedPrice(
+            exactMatch,
+            exactMatch.materialCategory,
+            updated.customQuantity
+          );
+        } else {
+          updated = {
+            ...updated,
+            material: value,
+            rentedConsumable: "",
+            moq: "",
+            customQuantity: "",
+            matchedRow: null,
+            price: 0,
+          };
+        }
+
+        updated.previewText = buildPreviewText(updated);
+        return updated;
+      }
+
+      return updated;
+    })
+  );
+};
+
+
+  // const handleCustomQuantityChange = (id, value) => {
+  //   setInclusions((prev) =>
+  //     prev.map((inc) => {
+  //       if (inc.id !== id) return inc;
+
+  //       const updated = {
+  //         ...inc,
+  //         customQuantity: value,
+  //       };
+
+  //       const price = getCalculatedPrice(
+  //         updated.matchedRow,
+  //         updated.rentedConsumable,
+  //         value,
+  //       );
+
+  //       const finalItem = {
+  //         ...updated,
+  //         price,
+  //       };
+
+  //       return {
+  //         ...finalItem,
+  //         previewText: buildPreviewText(finalItem),
+  //       };
+  //     }),
+  //   );
+  // };
+
 
   const handleCustomQuantityChange = (id, value) => {
-    setInclusions((prev) =>
-      prev.map((inc) => {
-        if (inc.id === id) {
-          let price = inc.price;
-          let matchedRow = inc.matchedRow;
-          // if (inc.rentedConsumable === "Consumable" && matchedRow) {
-          //   const qty = parseFloat(value) || 0;
-          //   price = (qty / 100) * matchedRow["Hora Vendor Material Price"];
-          // }
-          if (inc.rentedConsumable === "Consumable" && matchedRow) {
-            const qty = parseFloat(value) || 0;
-            const horaPrice = matchedRow["Hora Vendor Material Price"];
-            const moq = parseFloat(matchedRow["MOQ"]) || 1;
-            price = (qty * horaPrice) / moq;
-          }
-          let previewText = `${inc.specs || "-"} ${inc.type || "-"}  ${
-            inc.material || "-"
-          }`;
-          if (inc.rentedConsumable === "Rented") {
-            previewText += ` ${inc.moq || "-"}`;
-          } else if (inc.rentedConsumable === "Consumable") {
-            previewText += ` ${value || 1} PCS`;
-          }
-          // previewText += `, Price: $${price.toFixed(2)}`;
+  setInclusions((prev) =>
+    prev.map((inc) => {
+      if (inc.id !== id) return inc;
 
-          return { ...inc, customQuantity: value, price, previewText };
-        }
-        return inc;
-      })
-    );
-  };
+      const updated = {
+        ...inc,
+        customQuantity: value,
+      };
+
+      updated.price = getCalculatedPrice(
+        updated.matchedRow,
+        updated.rentedConsumable,
+        value
+      );
+
+      updated.previewText = buildPreviewText(updated);
+
+      return updated;
+    })
+  );
+};
+
+
 
   const handleMoqChange = (id, value) => {
     setInclusions((prev) =>
@@ -383,7 +772,7 @@ const AddProductForm = () => {
           return { ...inc, moq: value, previewText };
         }
         return inc;
-      })
+      }),
     );
   };
 
@@ -404,13 +793,13 @@ const AddProductForm = () => {
           return { ...i, price: num, previewText };
         }
         return i;
-      })
+      }),
     );
   };
 
   const handlePreviewChange = (id, value) => {
     setInclusions((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, previewText: value } : i))
+      prev.map((i) => (i.id === id ? { ...i, previewText: value } : i)),
     );
   };
 
@@ -575,22 +964,23 @@ const AddProductForm = () => {
             {showCategoryItems && (
               <div className="category-items">
                 {mealProductTypes
-                 .filter((type) =>
-                  Array.isArray(type.configurationId) &&
-                  type.configurationId.some(
-                  (config) => config.name === "Decoration"
+                  .filter(
+                    (type) =>
+                      Array.isArray(type.configurationId) &&
+                      type.configurationId.some(
+                        (config) => config.name === "Decoration",
+                      ),
                   )
-                  )
-                .map((type) => (
-                  <label key={type._id} className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={selectedMealTypes.includes(type._id)}
-                      onChange={() => handleCheckboxChange(type._id, "meal")}
-                    />
-                    {type.name}
-                  </label>
-                ))}
+                  .map((type) => (
+                    <label key={type._id} className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={selectedMealTypes.includes(type._id)}
+                        onChange={() => handleCheckboxChange(type._id, "meal")}
+                      />
+                      {type.name}
+                    </label>
+                  ))}
               </div>
             )}
           </div>
@@ -655,6 +1045,7 @@ const AddProductForm = () => {
                       </option>
                     ))}
                   </select>
+
                   <select
                     value={inc.type}
                     onChange={(e) =>
@@ -669,6 +1060,7 @@ const AddProductForm = () => {
                       </option>
                     ))}
                   </select>
+
                   <select
                     value={inc.material}
                     onChange={(e) =>
@@ -683,39 +1075,22 @@ const AddProductForm = () => {
                       </option>
                     ))}
                   </select>
-                  <select
-                    value={inc.rentedConsumable}
-                    onChange={(e) =>
-                      handleSelectChange(
-                        inc.id,
-                        "rentedConsumable",
-                        e.target.value
-                      )
-                    }
-                    style={select}
-                  >
-                    <option value="">Rented/Consumable</option>
-                    {options.rentedConsumable.map((o, i) => (
-                      <option key={i} value={o}>
-                        {o}
-                      </option>
-                    ))}
-                  </select>
 
-                  {inc.rentedConsumable === "Rented" && (
-                    <select
-                      value={inc.moq}
-                      onChange={(e) => handleMoqChange(inc.id, e.target.value)}
-                      style={select}
-                    >
-                      <option value="">MOQ</option>
-                      {options.moqs.map((o, i) => (
-                        <option key={i} value={o}>
-                          {o}
-                        </option>
-                      ))}
-                    </select>
-                  )}
+                  <input
+                    type="text"
+                    value={inc.rentedConsumable}
+                    placeholder="Rented/Consumable"
+                    readOnly
+                    style={{ ...select, backgroundColor: "#f5f5f5" }}
+                  />
+
+                  <input
+                    type="text"
+                    value={inc.moq}
+                    placeholder="MOQ"
+                    readOnly
+                    style={{ ...select, backgroundColor: "#f5f5f5" }}
+                  />
 
                   {inc.rentedConsumable === "Consumable" && (
                     <input
@@ -748,7 +1123,6 @@ const AddProductForm = () => {
                     Remove
                   </button>
                 </div>
-
                 <div
                   style={{
                     marginTop: "4px",
