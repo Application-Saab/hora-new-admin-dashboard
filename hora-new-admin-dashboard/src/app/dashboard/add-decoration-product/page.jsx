@@ -47,6 +47,11 @@ const AddProductForm = () => {
       previewText: "",
     },
   ]);
+  console.log(
+    "%c [ inclusions ]-38",
+    "font-size:13px; background:pink; color:#bf2c9f;",
+    inclusions,
+  );
   const [executionPrice, setExecutionPrice] = useState(0);
   const [advancePercent, setAdvancePercent] = useState(0);
   const [nextId, setNextId] = useState(2);
@@ -205,6 +210,7 @@ const AddProductForm = () => {
         vendorMaterialPrice: totalPrice,
         executionPrice: executionPrice,
         horaAdvance: advanceAmountHora,
+        inclusionVariables : inclusions
       };
     } else {
       payload = {
@@ -431,32 +437,32 @@ const AddProductForm = () => {
     return vendorPrice;
   };
 
-//   const getFilteredTypes = (specs) => {
-//   if (!specs) return options.type;
+  //   const getFilteredTypes = (specs) => {
+  //   if (!specs) return options.type;
 
-//   return [
-//     ...new Set(
-//       data
-//         .filter((row) => row.value === specs)
-//         .map((row) => row.type)
-//         .filter(Boolean)
-//     ),
-//   ];
-// };
+  //   return [
+  //     ...new Set(
+  //       data
+  //         .filter((row) => row.value === specs)
+  //         .map((row) => row.type)
+  //         .filter(Boolean)
+  //     ),
+  //   ];
+  // };
 
-// const getFilteredMaterials = (specs, type) => {
-//   let filtered = data;
+  // const getFilteredMaterials = (specs, type) => {
+  //   let filtered = data;
 
-//   if (specs) {
-//     filtered = filtered.filter((row) => row.value === specs);
-//   }
+  //   if (specs) {
+  //     filtered = filtered.filter((row) => row.value === specs);
+  //   }
 
-//   if (type) {
-//     filtered = filtered.filter((row) => row.type === type);
-//   }
+  //   if (type) {
+  //     filtered = filtered.filter((row) => row.type === type);
+  //   }
 
-//   return [...new Set(filtered.map((row) => row.material).filter(Boolean))];
-// };
+  //   return [...new Set(filtered.map((row) => row.material).filter(Boolean))];
+  // };
 
   // const handleSelectChange = (id, field, value) => {
   //   setInclusions((prev) =>
@@ -549,156 +555,156 @@ const AddProductForm = () => {
   //   );
   // };
 
-
   const handleSelectChange = (id, field, value) => {
-  setInclusions((prev) =>
-    prev.map((inc) => {
-      if (inc.id !== id) return inc;
+    setInclusions((prev) =>
+      prev.map((inc) => {
+        if (inc.id !== id) return inc;
 
-      let updated = {
-        ...inc,
-        [field]: value,
-      };
+        let updated = {
+          ...inc,
+          [field]: value,
+        };
 
-      // agar specs change hua hai to us specs ki first matched row auto-fill kar do
-      if (field === "specs") {
-        const firstMatch = data.find((row) => row.value === value);
+        // agar specs change hua hai to us specs ki first matched row auto-fill kar do
+        if (field === "specs") {
+          const firstMatch = data.find((row) => row.value === value);
 
-        if (firstMatch) {
-          updated = {
-            ...updated,
-            specs: firstMatch.value || "",
-            type: firstMatch.type || "",
-            material: firstMatch.material || "",
-            rentedConsumable: firstMatch.materialCategory || "",
-            moq: firstMatch.minimumOrderQuantity || "",
-            matchedRow: firstMatch,
-          };
+          if (firstMatch) {
+            updated = {
+              ...updated,
+              specs: firstMatch.value || "",
+              type: firstMatch.type || "",
+              material: firstMatch.material || "",
+              rentedConsumable: firstMatch.materialCategory || "",
+              moq: firstMatch.minimumOrderQuantity || "",
+              matchedRow: firstMatch,
+            };
 
-          // consumable me default qty blank ho to MOQ number ya 1 le sakte ho
-          const defaultQty =
-            updated.customQuantity || extractNumber(firstMatch.minimumOrderQuantity) || 1;
+            // consumable me default qty blank ho to MOQ number ya 1 le sakte ho
+            const defaultQty =
+              updated.customQuantity ||
+              extractNumber(firstMatch.minimumOrderQuantity) ||
+              1;
 
-          updated.customQuantity =
-            firstMatch.materialCategory === "Consumable"
-              ? updated.customQuantity || defaultQty
-              : "";
+            updated.customQuantity =
+              firstMatch.materialCategory === "Consumable"
+                ? updated.customQuantity || defaultQty
+                : "";
 
-          updated.price = getCalculatedPrice(
-            firstMatch,
-            firstMatch.materialCategory,
-            updated.customQuantity
+            updated.price = getCalculatedPrice(
+              firstMatch,
+              firstMatch.materialCategory,
+              updated.customQuantity,
+            );
+
+            updated.previewText = buildPreviewText(updated);
+            return updated;
+          } else {
+            updated = {
+              ...updated,
+              type: "",
+              material: "",
+              rentedConsumable: "",
+              moq: "",
+              customQuantity: "",
+              matchedRow: null,
+              price: 0,
+            };
+            updated.previewText = buildPreviewText(updated);
+            return updated;
+          }
+        }
+
+        // agar type change hua
+        if (field === "type") {
+          // pehle same specs + new type ka first material dhundo
+          let firstMatch = data.find(
+            (row) => row.value === updated.specs && row.type === value,
           );
+
+          if (firstMatch) {
+            updated = {
+              ...updated,
+              type: firstMatch.type || "",
+              material: firstMatch.material || "",
+              rentedConsumable: firstMatch.materialCategory || "",
+              moq: firstMatch.minimumOrderQuantity || "",
+              matchedRow: firstMatch,
+            };
+
+            if (firstMatch.materialCategory !== "Consumable") {
+              updated.customQuantity = "";
+            }
+
+            updated.price = getCalculatedPrice(
+              firstMatch,
+              firstMatch.materialCategory,
+              updated.customQuantity,
+            );
+          } else {
+            updated = {
+              ...updated,
+              type: value,
+              material: "",
+              rentedConsumable: "",
+              moq: "",
+              customQuantity: "",
+              matchedRow: null,
+              price: 0,
+            };
+          }
 
           updated.previewText = buildPreviewText(updated);
           return updated;
-        } else {
-          updated = {
-            ...updated,
-            type: "",
-            material: "",
-            rentedConsumable: "",
-            moq: "",
-            customQuantity: "",
-            matchedRow: null,
-            price: 0,
-          };
+        }
+
+        // agar material change hua
+        if (field === "material") {
+          const exactMatch = data.find(
+            (row) =>
+              row.value === updated.specs &&
+              row.type === updated.type &&
+              row.material === value,
+          );
+
+          if (exactMatch) {
+            updated = {
+              ...updated,
+              material: exactMatch.material || "",
+              rentedConsumable: exactMatch.materialCategory || "",
+              moq: exactMatch.minimumOrderQuantity || "",
+              matchedRow: exactMatch,
+            };
+
+            if (exactMatch.materialCategory !== "Consumable") {
+              updated.customQuantity = "";
+            }
+
+            updated.price = getCalculatedPrice(
+              exactMatch,
+              exactMatch.materialCategory,
+              updated.customQuantity,
+            );
+          } else {
+            updated = {
+              ...updated,
+              material: value,
+              rentedConsumable: "",
+              moq: "",
+              customQuantity: "",
+              matchedRow: null,
+              price: 0,
+            };
+          }
+
           updated.previewText = buildPreviewText(updated);
           return updated;
         }
-      }
 
-      // agar type change hua
-      if (field === "type") {
-        // pehle same specs + new type ka first material dhundo
-        let firstMatch = data.find(
-          (row) => row.value === updated.specs && row.type === value
-        );
-
-        if (firstMatch) {
-          updated = {
-            ...updated,
-            type: firstMatch.type || "",
-            material: firstMatch.material || "",
-            rentedConsumable: firstMatch.materialCategory || "",
-            moq: firstMatch.minimumOrderQuantity || "",
-            matchedRow: firstMatch,
-          };
-
-          if (firstMatch.materialCategory !== "Consumable") {
-            updated.customQuantity = "";
-          }
-
-          updated.price = getCalculatedPrice(
-            firstMatch,
-            firstMatch.materialCategory,
-            updated.customQuantity
-          );
-        } else {
-          updated = {
-            ...updated,
-            type: value,
-            material: "",
-            rentedConsumable: "",
-            moq: "",
-            customQuantity: "",
-            matchedRow: null,
-            price: 0,
-          };
-        }
-
-        updated.previewText = buildPreviewText(updated);
         return updated;
-      }
-
-      // agar material change hua
-      if (field === "material") {
-        const exactMatch = data.find(
-          (row) =>
-            row.value === updated.specs &&
-            row.type === updated.type &&
-            row.material === value
-        );
-
-        if (exactMatch) {
-          updated = {
-            ...updated,
-            material: exactMatch.material || "",
-            rentedConsumable: exactMatch.materialCategory || "",
-            moq: exactMatch.minimumOrderQuantity || "",
-            matchedRow: exactMatch,
-          };
-
-          if (exactMatch.materialCategory !== "Consumable") {
-            updated.customQuantity = "";
-          }
-
-          updated.price = getCalculatedPrice(
-            exactMatch,
-            exactMatch.materialCategory,
-            updated.customQuantity
-          );
-        } else {
-          updated = {
-            ...updated,
-            material: value,
-            rentedConsumable: "",
-            moq: "",
-            customQuantity: "",
-            matchedRow: null,
-            price: 0,
-          };
-        }
-
-        updated.previewText = buildPreviewText(updated);
-        return updated;
-      }
-
-      return updated;
-    })
-  );
-};
-
+      }),
+    );
+  };
 
   // const handleCustomQuantityChange = (id, value) => {
   //   setInclusions((prev) =>
@@ -729,31 +735,28 @@ const AddProductForm = () => {
   //   );
   // };
 
-
   const handleCustomQuantityChange = (id, value) => {
-  setInclusions((prev) =>
-    prev.map((inc) => {
-      if (inc.id !== id) return inc;
+    setInclusions((prev) =>
+      prev.map((inc) => {
+        if (inc.id !== id) return inc;
 
-      const updated = {
-        ...inc,
-        customQuantity: value,
-      };
+        const updated = {
+          ...inc,
+          customQuantity: value,
+        };
 
-      updated.price = getCalculatedPrice(
-        updated.matchedRow,
-        updated.rentedConsumable,
-        value
-      );
+        updated.price = getCalculatedPrice(
+          updated.matchedRow,
+          updated.rentedConsumable,
+          value,
+        );
 
-      updated.previewText = buildPreviewText(updated);
+        updated.previewText = buildPreviewText(updated);
 
-      return updated;
-    })
-  );
-};
-
-
+        return updated;
+      }),
+    );
+  };
 
   const handleMoqChange = (id, value) => {
     setInclusions((prev) =>
@@ -906,6 +909,33 @@ const AddProductForm = () => {
     fontSize: "16px",
   };
 
+  const getFilteredTypes = (specs) => {
+    if (!specs) return options.type;
+
+    return [
+      ...new Set(
+        data
+          .filter((row) => row.value === specs)
+          .map((row) => row.type)
+          .filter(Boolean),
+      ),
+    ];
+  };
+
+  const getFilteredMaterials = (specs, type) => {
+    let filtered = data;
+
+    if (specs) {
+      filtered = filtered.filter((row) => row.value === specs);
+    }
+
+    if (type) {
+      filtered = filtered.filter((row) => row.type === type);
+    }
+
+    return [...new Set(filtered.map((row) => row.material).filter(Boolean))];
+  };
+
   if (loading) return <div style={{ padding: "40px" }}>Loading...</div>;
 
   return (
@@ -1028,71 +1058,77 @@ const AddProductForm = () => {
             >
               + Add Inclusion
             </button>
-            {inclusions.map((inc) => (
-              <div key={inc.id} style={inclusionBox}>
-                <div style={row}>
-                  <select
-                    value={inc.specs}
-                    onChange={(e) =>
-                      handleSelectChange(inc.id, "specs", e.target.value)
-                    }
-                    style={select}
-                  >
-                    <option value="">Specs</option>
-                    {options.specs.map((o, i) => (
-                      <option key={i} value={o}>
-                        {o}
-                      </option>
-                    ))}
-                  </select>
+            {inclusions.map((inc) => {
+              const filteredTypes = getFilteredTypes(inc.specs);
+              const filteredMaterials = getFilteredMaterials(
+                inc.specs,
+                inc.type,
+              );
+              return (
+                <div key={inc.id} style={inclusionBox}>
+                  <div style={row}>
+                    <select
+                      value={inc.specs}
+                      onChange={(e) =>
+                        handleSelectChange(inc.id, "specs", e.target.value)
+                      }
+                      style={select}
+                    >
+                      <option value="">Specs</option>
+                      {options.specs.map((o, i) => (
+                        <option key={i} value={o}>
+                          {o}
+                        </option>
+                      ))}
+                    </select>
 
-                  <select
-                    value={inc.type}
-                    onChange={(e) =>
-                      handleSelectChange(inc.id, "type", e.target.value)
-                    }
-                    style={select}
-                  >
-                    <option value="">Type</option>
-                    {options.type.map((o, i) => (
-                      <option key={i} value={o}>
-                        {o}
-                      </option>
-                    ))}
-                  </select>
+                    <select
+                      value={inc.type}
+                      onChange={(e) =>
+                        handleSelectChange(inc.id, "type", e.target.value)
+                      }
+                      style={select}
+                    >
+                      <option value="">Type</option>
+                      {filteredTypes?.map((o, i) => (
+                        <option key={i} value={o}>
+                          {o}
+                        </option>
+                      ))}
+                    </select>
 
-                  <select
-                    value={inc.material}
-                    onChange={(e) =>
-                      handleSelectChange(inc.id, "material", e.target.value)
-                    }
-                    style={select}
-                  >
-                    <option value="">Material</option>
-                    {options.material.map((o, i) => (
-                      <option key={i} value={o}>
-                        {o}
-                      </option>
-                    ))}
-                  </select>
+                    <select
+                      value={inc.material}
+                      onChange={(e) =>
+                        handleSelectChange(inc.id, "material", e.target.value)
+                      }
+                      style={select}
+                    >
+                      <option value="">Material</option>
+                      {filteredMaterials?.map((o, i) => (
+                        <option key={i} value={o}>
+                          {o}
+                        </option>
+                      ))}
+                    </select>
 
-                  <input
-                    type="text"
-                    value={inc.rentedConsumable}
-                    placeholder="Rented/Consumable"
-                    readOnly
-                    style={{ ...select, backgroundColor: "#f5f5f5" }}
-                  />
+                    <input
+                      type="text"
+                      value={inc.rentedConsumable}
+                      placeholder="Rented/Consumable"
+                      readOnly
+                      style={{ ...select, backgroundColor: "#f5f5f5" }}
+                    />
 
-                  <input
-                    type="text"
-                    value={inc.moq}
-                    placeholder="MOQ"
-                    readOnly
-                    style={{ ...select, backgroundColor: "#f5f5f5" }}
-                  />
+                    <input
+                      type="text"
+                      value={inc.moq}
+                      placeholder="MOQ"
+                      readOnly
+                      style={{ ...select, backgroundColor: "#f5f5f5" }}
+                    />
 
-                  {inc.rentedConsumable === "Consumable" && (
+                    {inc.rentedConsumable === "Consumable" && (
                     <input
                       type="number"
                       placeholder="Qty"
@@ -1100,46 +1136,52 @@ const AddProductForm = () => {
                       onChange={(e) =>
                         handleCustomQuantityChange(inc.id, e.target.value)
                       }
+                      // readOnly
                       style={input}
                     />
                   )}
 
-                  <input
-                    type="number"
-                    placeholder="Price"
-                    value={inc.price}
-                    onChange={(e) => handlePriceChange(inc.id, e.target.value)}
-                    style={input}
-                  />
+                    <input
+                      type="number"
+                      placeholder="Price"
+                      value={inc.price}
+                      onChange={(e) =>
+                        handlePriceChange(inc.id, e.target.value)
+                      }
+                      style={input}
+                    />
 
-                  <button
-                    onClick={() => handleRemoveInclusion(inc.id)}
+                    <button
+                      onClick={() => handleRemoveInclusion(inc.id)}
+                      style={{
+                        ...button,
+                        backgroundColor: "#e74c3c",
+                        color: "#fff",
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <div
                     style={{
-                      ...button,
-                      backgroundColor: "#e74c3c",
-                      color: "#fff",
+                      marginTop: "4px",
+                      fontWeight: "bold",
+                      color: inc.matchedRow ? "#27ae60" : "#c0392b",
                     }}
                   >
-                    Remove
-                  </button>
-                </div>
-                <div
-                  style={{
-                    marginTop: "4px",
-                    fontWeight: "bold",
-                    color: inc.matchedRow ? "#27ae60" : "#c0392b",
-                  }}
-                >
-                  {inc.matchedRow ? "✅ Matched" : "❌ Not Matched"}
-                </div>
+                    {inc.matchedRow ? "✅ Matched" : "❌ Not Matched"}
+                  </div>
 
-                <textarea
-                  value={inc.previewText}
-                  onChange={(e) => handlePreviewChange(inc.id, e.target.value)}
-                  style={preview}
-                />
-              </div>
-            ))}
+                  <textarea
+                    value={inc.previewText}
+                    onChange={(e) =>
+                      handlePreviewChange(inc.id, e.target.value)
+                    }
+                    style={preview}
+                  />
+                </div>
+              );
+            })}
 
             <div style={totalsBox}>
               <div>
