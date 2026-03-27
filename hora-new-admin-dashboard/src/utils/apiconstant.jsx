@@ -26,6 +26,7 @@ export const UPDATE_CALL_CHECKLIST = '/api/order/edit-call-checklist';
 export const MULTI_IMAGE_UPLOAD = '/api/multiple_image_upload'
 export const DELETE_CHECKLIST_IMAGE =  '/api/order/delete-callchecklist-image'
 export const ACTUAL_IMAGE_BY_NAME="/api/decoration/decorations/"
+export const SUPPLIER_PERSONALDETAILS_UPDATE = "api/users/supplier_personal_details_update";
 
 // Food Packages APIs
 export const CREATE_FOOD_PACKAGE = "/api/food-package/createFoodPackage";

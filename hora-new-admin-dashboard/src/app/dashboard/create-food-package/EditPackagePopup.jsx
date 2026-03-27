@@ -42,6 +42,7 @@ const EditPackagePopup = ({ isOpen, onClose, packageData, onSuccess }) => {
   // Image Upload
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
+    if (!file) return;
 
     const form = new FormData();
     form.append("file", file);
