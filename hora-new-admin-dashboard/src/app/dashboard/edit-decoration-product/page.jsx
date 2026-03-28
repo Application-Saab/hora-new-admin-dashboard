@@ -447,7 +447,7 @@ const DecorationEditor = () => {
                 type="checkbox"
                 id={`tag-${type._id}`}
                 checked={selectedTags.includes(type._id)}
-                onChange={() => handleTagChange(type._id)}
+                onChange={() => handleTagChange(type._id)} 
                 />
                 <label htmlFor={`tag-${type._id}`}>{type.name}</label>
                 </div>
