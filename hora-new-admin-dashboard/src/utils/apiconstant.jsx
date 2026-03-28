@@ -36,4 +36,8 @@ export const ADD_DISH_TO_PACKAGE = "/api/food-package/addDishToPackage";
 export const GET_DISHES_FOR_PACKAGE ='/api/dish/getAllDishesList';
 export const REMOVE_DISH_FROM_PACKAGE = "/api/food-package/removeDishFromPackage";
 
-// api/decoration/edit
+// Celebration Boosters APIs
+export const CREATE_CELEBRATION_BOOSTER = '/api/celebration-booster/createCelebrationBooster';
+export const UPDATE_CELEBRATION_BOOSTER = '/api/celebration-booster/updateCelebrationBooster';
+export const GET_CELEBRATION_BOOSTERS = '/api/celebration-booster/adminCelebrationBoosterList';
+export const GET_CELEBRATION_BOOSTERS_BY_NAME = '/api/celebration-booster/getCelebrationBoosterByName';
