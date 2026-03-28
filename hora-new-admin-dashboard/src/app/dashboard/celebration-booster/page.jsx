@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import './boosters-listing.css';
+import "./boosters-listing.css";
 import Image from "next/image";
 import CreateBoosterPopup from "./CreateCelebrationBoosterPopup";
 import EditBoosterPopup from "./EditCelebrationBoosterPopup";
@@ -47,8 +47,6 @@ const DishTable = () => {
         page: page,
         per_page: 10,
         name: searchName,
-        mealId: "",
-        cuisineId: "",
       };
 
       // Add status filter if selected
@@ -93,25 +91,21 @@ const DishTable = () => {
     const newStatus = currentStatus === 1 ? 0 : 1;
 
     try {
-      const response = await fetch(`${BASE_URL}${UPDATE_CELEBRATION_BOOSTER}/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const response = await axios.put(
+        `${BASE_URL}${UPDATE_CELEBRATION_BOOSTER}/${id}`,
+        {
           _id: id,
           status: newStatus,
-        }),
-      });
-
-      if (response.ok) {
+        },
+      );
+      if (response.status === 200) {
         fetchData();
-        console.log("Status updated successfully");
-      } else {
-        console.error("Failed to update status");
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error(
+        "Error updating status:",
+        error.response?.data || error.message,
+      );
     }
   };
 
@@ -178,9 +172,7 @@ const DishTable = () => {
                   <td>{new Date(dish.createdAt).toLocaleDateString()}</td>
                   <td>
                     <button
-                      onClick={() =>
-                        handleStatusToggle(dish._id, dish.status)
-                      }
+                      onClick={() => handleStatusToggle(dish._id, dish.status)}
                       className={`status-button ${dish.status === 1 ? "active" : "inactive"}`}
                     >
                       {dish.status === 1 ? "Active" : "Inactive"}
