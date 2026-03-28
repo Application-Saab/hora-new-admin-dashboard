@@ -14,7 +14,6 @@ import {
   ADMIN_USER_LIST,
 } from "../../../utils/apiconstant";
 import { pincodes } from "../../../utils/pincodes.js";
-// import {itemsData} from "../../../utils/itemData";
 import SearchWithDropDown from "../../component/SearchWithDropDown";
 import { eventList } from "../../../constants/eventList";
 
@@ -40,11 +39,8 @@ const AddDecOrder = () => {
   const [advanceamount, setAdvanceAmount] = useState("");
   const [balanceamount, setBalanceAmount] = useState("");
   const [orderTakenBy, setOrderTakenBy] = useState("");
-
-  // const [products, setProducts] = useState([{ name: "", price: "" }]);
   const [comment, setComment] = useState("");
   const [dishNameError, setDishNameError] = useState("");
-  // const [error, setError] = useState(null);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -52,42 +48,10 @@ const AddDecOrder = () => {
 
   const [customerId, setCustomerId] = useState(null);
 
-  const [showPopup, setShowPopup] = useState(false); // For toggling the popup
-  const [newCustomerName, setNewCustomerName] = useState(""); // For name input
+  const [showPopup, setShowPopup] = useState(false);
+  const [newCustomerName, setNewCustomerName] = useState("");
   const [newCustomerPhone, setNewCustomerPhone] = useState("");
-
-  // const [selectedItems, setSelectedItems] = useState({});
-  // const [dropdownOpen, setDropdownOpen] = useState(false);
-
   const [isOrderCreated, setIsOrderCreated] = useState(false);
-
-  const toggleItem = (id) => {
-    setSelectedItems((prev) => ({
-      ...prev,
-      [id]: prev[id] ? undefined : { quantity: 1 },
-    }));
-  };
-
-  const changeQuantity = (id, delta) => {
-    setSelectedItems((prev) => {
-      const qty = prev[id]?.quantity || 1;
-      const newQty = Math.max(1, qty + delta);
-      return {
-        ...prev,
-        [id]: { quantity: newQty },
-      };
-    });
-  };
-
-  const handleInputChange = (index, field, value) => {
-    const newProducts = [...products];
-    newProducts[index][field] = value;
-    setProducts(newProducts);
-  };
-
-  const addProduct = () => {
-    setProducts([...products, { name: "", price: "" }]);
-  };
 
   const handleComment = (e) => {
     const commentText = e.target.value;
@@ -100,10 +64,7 @@ const AddDecOrder = () => {
         try {
           const url = `${BASE_URL}${GET_CELEBRATION_BOOSTERS_BY_NAME}/${encodeURIComponent(dishName)}`;
           const response = await axios.get(url);
-          console.log('%c [ response ]-103', 'font-size:13px; background:pink; color:#bf2c9f;', response)
           const productData = response.data?.data;
-          console.log('%c [ productData ]-105', 'font-size:13px; background:pink; color:#bf2c9f;', productData)
-          console.log(response.data?.data?.[0]);
           if (productData?._id) {
             setProduct(productData);
             setProductID(productData._id);
@@ -138,7 +99,6 @@ const AddDecOrder = () => {
     }
   }, [pincode]);
 
-  // by aarti-----
   const handleCheckCustomer = async (e) => {
     e.preventDefault();
     setMessage("");
@@ -146,8 +106,8 @@ const AddDecOrder = () => {
 
     try {
       const response = await axios.post(`${BASE_URL}${ADMIN_USER_LIST}`, {
-        phone: customerNumber, // Filter by phone directly
-        per_page: 1, // Fetch only 1 result
+        phone: customerNumber,
+        per_page: 1,
         role: "customer",
       });
 
@@ -156,7 +116,7 @@ const AddDecOrder = () => {
       if (users.length > 0) {
         setMessage("Customer exists.");
         setMessageColor("green");
-        setCustomerId(users[0]); // Store the first matching user
+        setCustomerId(users[0]);
       } else {
         setMessage("Customer does not exist.");
         setMessageColor("red");
@@ -177,18 +137,14 @@ const AddDecOrder = () => {
       email: "",
       role: "customer",
     };
-    console.log(requestData, "requestion data");
     try {
       const response = await axios.post(
         "https://horaservices.com:3000/api/admin/user_signup",
         requestData,
       );
-
-      console.log("Customer added:", response.data.dataToSave._id);
       setCustomerId(response.data.dataToSave);
       setMessage("Customer successfully added.");
       window.location.reload();
-      // window.location.reload(false);
       setMessageColor("green");
       setShowPopup(false);
     } catch (err) {
@@ -218,7 +174,6 @@ const AddDecOrder = () => {
       const url = BASE_URL + SAVE_LOCATION_ENDPOINT;
 
       const address2 = address + pincode;
-      console.log(address2, "address2");
       const requestDataa = {
         address1: address2,
         address2: googleLocation,
@@ -226,8 +181,6 @@ const AddDecOrder = () => {
         city: city,
         userId: customerId,
       };
-
-      console.log(requestDataa, "requestdataa");
       const token =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OGMxMGQxY2M5YzY3Y2M0N2NlYWU5MGEiLCJuYW1lIjoiIiwiZW1haWwiOiIiLCJwaG9uZSI6IjExMDAxMjMyNTIiLCJyb2xlIjoiY3VzdG9tZXIiLCJpYXQiOjE3NTc0ODIyODAsImV4cCI6MTc4OTAxODI4MH0.pQYGg7IKV36-5p-ko2FNksYZ9JvoIjkXmAl1snlXALs";
 
@@ -268,7 +221,7 @@ const AddDecOrder = () => {
     const requestData = {
       phone_no: customerNumber,
       order_time: timeSlot.value,
-      type: 9, // ✅ booster type (optional change)
+      type: 9,
       fromId: customerId,
       addressId: addressID,
       order_pincode: pincode,
@@ -278,7 +231,7 @@ const AddDecOrder = () => {
       payable_amount: totalamount,
       advance_amount: advanceamount,
       balance_amount: balanceamount,
-      items: [product._id], // ya boosterId (API ke hisab se)
+      items: [product._id],
       decoration_comments: comment,
       status: 1,
       order_taken_by: orderTakenBy,
@@ -286,11 +239,10 @@ const AddDecOrder = () => {
     };
 
     try {
-      const response = await axios.post(
+      await axios.post(
         `${BASE_URL}${CONFIRM_ORDER_ENDPOINT}`,
         requestData,
       );
-
       alert("Booster Order created successfully");
     } catch (error) {
       console.error("Error creating order:", error);
@@ -313,61 +265,7 @@ const AddDecOrder = () => {
     setBalanceAmount(balance);
   }, [totalamount, advanceamount]);
 
-  // const proDuctInclusions = (product) => {
-  //   if (!product.inclusion || product.inclusion.length === 0) {
-  //     return "No inclusion details available"; // Return plain text for inclusion summary
-  //   }
-
-  //   const inclusionItems = product.inclusion[0]
-  //     .replace(/<[^>]*>/g, "") // Remove HTML tags
-  //     .replace(/&#[^;]*;/g, " ") // Replace special characters
-  //     .split("-") // Split by "-"
-  //     .map((item) => item.trim())
-  //     .filter((item) => item); // Remove empty items
-
-  //   return inclusionItems.map((item) => `- ${item}`).join("\n"); // Format inclusion items as a list for text
-  // };
-
   const copyOrderSummary = () => {
-    let addons = "";
-    // const inclusionSummary = proDuctInclusions(product);
-
-    // Check if products exist and loop over them
-    if (products && products.length > 0) {
-      products.forEach((item, index) => {
-        addons += `\n  ${index + 1}. ${item.name}: ₹${item.price}`;
-      });
-    } else {
-      addons += " None"; // Show "None" directly if there are no add-ons
-    }
-
-    // Create the order summary string
-    //   const orderSummary = `
-    // *Decoration Order Details*
-
-    // Date: ${date}
-    // Time Slot: ${timeSlot?.label || ""}
-    // Contact Number: ${customerNumber}
-    // Address: ${address}
-    // Google Map Location: ${googleLocation}
-
-    // Total Amount: ₹${totalamount || "N/A"}
-    // Advance Amount: ₹${advanceamount || "N/A"}
-    // Balance Amount: ₹${balanceamount || "N/A"}
-
-    // *Product Name*: ${dishName}
-    // Product Image URL: https://horaservices.com/api/uploads/${product.featured_image}
-
-    // *Add-On Items*:
-    // ${addons}
-
-    // *Inclusions*:
-    // ${inclusionSummary}
-
-    // Comment: ${comment}
-    // Order Taken By: ${orderTakenBy}
-    //   `;
-
     const orderSummary = `
 *Celebration Booster Order*
 
@@ -464,12 +362,12 @@ Order Taken By: ${orderTakenBy}
               value={customerNumber}
               onInput={(e) =>
                 setCustomerNumber(e.target.value.replace(/\D/g, ""))
-              } // Remove non-digits as the user types
+              }
               placeholder="Customer Number"
               required
-              maxLength={10} // Limit to 10 digits
-              pattern="\d{10}" // Enforce exactly 10 digits
-              inputMode="numeric" // Optimize for numeric input on mobile devices
+              maxLength={10}
+              pattern="\d{10}"
+              inputMode="numeric"
             />
             <button
               className="orderCheck-btn"
@@ -512,7 +410,6 @@ Order Taken By: ${orderTakenBy}
                   id="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  // min={new Date().toISOString().split("T")[0]} // Directly setting min date is this need?
                   required
                 />
               </div>
@@ -558,89 +455,6 @@ Order Taken By: ${orderTakenBy}
                 placeholder="googleLocation"
               />
             </div>
-            {/* <div className="addon-container">
-              <label htmlFor="addOn">Add On</label>
-
-              <div className="addon-form">
-                {products.map((product, index) => (
-                  <div className="addon-row" key={index}>
-                    <input
-                      type="text"
-                      className="addon-input name-input"
-                      placeholder="Name"
-                      value={product.name}
-                      onChange={(e) => handleInputChange(index, "name", e.target.value)}
-                    />
-                    <input
-                      type="number"
-                      className="addon-input price-input"
-                      placeholder="Price"
-                      value={product.price}
-                      onChange={(e) => handleInputChange(index, "price", e.target.value)}
-                    />
-                    <button type="button" className="add-new-btn" onClick={addProduct}>
-                      Add New
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="dropdown-container">
-            <button onClick={() => setDropdownOpen(!dropdownOpen)} className="orderCheck-btn">
-            Select AddOn ▼
-            </button>
-  
-            {dropdownOpen && (
-            <div className="dropdown-menu">
-            {itemsData && itemsData.map((item) => {
-
-              const selected = selectedItems[item.id];
-              return (
-                <div className="item-row" key={item.id}>
-                  <div className="left-section">
-                    <input
-                      type="checkbox"
-                      checked={!!selected}
-                      onChange={() => toggleItem(item.id)}
-                    />
-                    <div>
-                      <div className="item-title">{item.title}</div>
-                      <div className="item-price">₹{item.price}</div>
-                    </div>
-                  </div>
-  
-                  {selected && (
-                    <div className="right-section">
-                      <button type="button" onClick={() => changeQuantity(item.id, -1)} className="qty-btn">−</button>
-                      <span className="qty">{selected.quantity}</span>
-                      <button type="button" onClick={() => changeQuantity(item.id, 1)} className="qty-btn">+</button>
-                      <div className="total-price">₹{item.price * selected.quantity}</div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-      {Object.keys(selectedItems).length > 0 && (
-  <div className="selected-summary">
-    <h4>Selected Add-ons</h4>
-    <ul>
-      {Object.keys(selectedItems).map((id) => {
-        const item = itemsData.find((i) => i.id === parseInt(id));
-
-        return (
-          <li key={id}>
-            {item.title} — ₹{item.price} × {selectedItems[id].quantity}
-          </li>
-        );
-      })}
-    </ul>
-  </div>
-)} */}
-
             <div className="amount-box">
               <label htmlFor="totalamount">Total Amount*</label>
               <input
