@@ -14,7 +14,7 @@ import {
   Legend
 } from "chart.js";
 
-import { Line, Bar } from "react-chartjs-2";
+import { Line } from "react-chartjs-2";
 
 ChartJS.register(
   CategoryScale,
@@ -139,25 +139,25 @@ export default function UserAnalysisPage() {
   */
   const topPages = sortedPages.slice(0, 5);
 
-  const pageChartData = {
-    labels: topPages.map(([page]) =>
-      page.split("/").pop() || "home"
-    ),
-    datasets: [
-      {
-        label: "Page Views",
-        data: topPages.map(([, count]) => count),
-        borderWidth: 2
-      }
-    ]
-  };
+  // const pageChartData = {
+  //   labels: topPages.map(([page]) =>
+  //     page.split("/").pop() || "home"
+  //   ),
+  //   datasets: [
+  //     {
+  //       label: "Page Views",
+  //       data: topPages.map(([, count]) => count),
+  //       borderWidth: 2
+  //     }
+  //   ]
+  // };
 
   /*
   --------------------------------
   🔥 PAGE TREND LINE CHART
   --------------------------------
   */
-  const pageTrendDatasets = topPages.map(([page], index) => ({
+  const pageTrendDatasets = topPages.map(([page]) => ({
     label: page.split("/").pop() || "home",
     data: data.map(day => {
       const allPages = (day.pages || []).flat(Infinity);
