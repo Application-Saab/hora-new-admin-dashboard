@@ -33,7 +33,7 @@ const CHECKBOX_GROUP_CONFIG = [
   {
     title: "Explain the type of design",
     section: "designType",
-    items: ["Wall", "Ring", "Ring + Flex", "Sequined", "U Shape", "Square Stand"]
+    items: ["Wall", "Ring", "Ring + Flex", "Sequined", "U Shape", "Square Stand", "Room Decor", "Cradle", "Flex", "Artificial Flower", "Real Flower"]
   },
   {
     title: "Explain rental policy (items returned after 24 hours)",
