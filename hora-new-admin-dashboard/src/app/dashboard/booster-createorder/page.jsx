@@ -2,22 +2,20 @@
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import "react-datepicker/dist/react-datepicker.css";
-import "./createorder.css";
+import "./booster-createorder.css";
 import Image from "next/image";
 import axios from "axios";
 import {
   BASE_URL,
-  GET_DECORATION_BY_NAME,
+  GET_CELEBRATION_BOOSTERS_BY_NAME,
   CONFIRM_ORDER_ENDPOINT,
   SAVE_LOCATION_ENDPOINT,
   API_SUCCESS_CODE,
   ADMIN_USER_LIST,
 } from "../../../utils/apiconstant";
-import { pincodes } from '../../../utils/pincodes.js';
-import {itemsData} from "../../../utils/itemData";
+import { pincodes } from "../../../utils/pincodes.js";
 import SearchWithDropDown from "../../component/SearchWithDropDown";
-import { eventList } from "../../../constants/eventList"; 
-
+import { eventList } from "../../../constants/eventList";
 
 const AddDecOrder = () => {
   const [dishName, setDishName] = useState("");
@@ -41,12 +39,8 @@ const AddDecOrder = () => {
   const [advanceamount, setAdvanceAmount] = useState("");
   const [balanceamount, setBalanceAmount] = useState("");
   const [orderTakenBy, setOrderTakenBy] = useState("");
-
-  const [products, setProducts] = useState([{ name: "", price: "" }]);
   const [comment, setComment] = useState("");
-  const [commentFields, setCommentFields] = useState([0]);
-  const [dishNameError, setDishNameError] = useState('')
-  // const [error, setError] = useState(null);
+  const [dishNameError, setDishNameError] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -54,71 +48,32 @@ const AddDecOrder = () => {
 
   const [customerId, setCustomerId] = useState(null);
 
-  const [showPopup, setShowPopup] = useState(false); // For toggling the popup
-  const [newCustomerName, setNewCustomerName] = useState(""); // For name input
+  const [showPopup, setShowPopup] = useState(false);
+  const [newCustomerName, setNewCustomerName] = useState("");
   const [newCustomerPhone, setNewCustomerPhone] = useState("");
-
-  const [selectedItems, setSelectedItems] = useState({});
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-
   const [isOrderCreated, setIsOrderCreated] = useState(false);
 
-
-  const toggleItem = (id) => {
-    setSelectedItems((prev) => ({
-      ...prev,
-      [id]: prev[id] ? undefined : { quantity: 1 }
-    }));
+  const handleComment = (e) => {
+    const commentText = e.target.value;
+    setComment(commentText);
   };
-
-  const changeQuantity = (id, delta) => {
-    setSelectedItems((prev) => {
-      const qty = prev[id]?.quantity || 1;
-      const newQty = Math.max(1, qty + delta);
-      return {
-        ...prev,
-        [id]: { quantity: newQty }
-      };
-    });
-  };
-
-  const handleInputChange = (index, field, value) => {
-    const newProducts = [...products];
-    newProducts[index][field] = value;
-    setProducts(newProducts);
-  };
-
-  const addProduct = () => {
-    setProducts([...products, { name: "", price: "" }]);
-  };
-
- const handleComment = (index, value) => {
-  const lines = comment.split("\n");
-  lines[index] = value;
-  setComment(lines.join("\n"));
-};
-
-const addCommentField = () => {
-  setCommentFields([...commentFields, commentFields.length]);
-};
 
   useEffect(() => {
     if (dishName && isContinueClicked && !isFetched) {
       const fetchProductDetails = async () => {
         try {
-          const url = `${BASE_URL}${GET_DECORATION_BY_NAME}${encodeURIComponent(dishName)}`;
+          const url = `${BASE_URL}${GET_CELEBRATION_BOOSTERS_BY_NAME}/${encodeURIComponent(dishName)}`;
           const response = await axios.get(url);
-          const productData = response.data?.data?.[0];
-          console.log(response.data?.data?.[0])
-          if (productData) {
+          const productData = response.data?.data;
+          if (productData?._id) {
             setProduct(productData);
             setProductID(productData._id);
             setProductPrice(productData.price);
             setShowProductDetails(true);
-            setDishNameError('')
+            setDishNameError("");
           } else {
             setShowProductDetails(false);
-            setDishNameError('No product found')
+            setDishNameError("No product found");
           }
         } catch (error) {
           console.error("Error fetching product:", error.message);
@@ -132,7 +87,6 @@ const addCommentField = () => {
   useEffect(() => {
     if (pincode) {
       if (pincodes.includes(pincode)) {
-
         setPincodeMessage("Pincode available");
         setPincodeMessageColor("green");
       } else {
@@ -145,7 +99,6 @@ const addCommentField = () => {
     }
   }, [pincode]);
 
-// by aarti-----
   const handleCheckCustomer = async (e) => {
     e.preventDefault();
     setMessage("");
@@ -153,18 +106,17 @@ const addCommentField = () => {
 
     try {
       const response = await axios.post(`${BASE_URL}${ADMIN_USER_LIST}`, {
-          phone: customerNumber,  // Filter by phone directly
-          per_page: 1,            // Fetch only 1 result
-          role: "customer",
-        }
-      );
+        phone: customerNumber,
+        per_page: 1,
+        role: "customer",
+      });
 
       const users = response?.data?.data?.users || [];
 
       if (users.length > 0) {
         setMessage("Customer exists.");
         setMessageColor("green");
-        setCustomerId(users[0]);  // Store the first matching user
+        setCustomerId(users[0]);
       } else {
         setMessage("Customer does not exist.");
         setMessageColor("red");
@@ -176,9 +128,7 @@ const addCommentField = () => {
     } finally {
       setLoading(false);
     }
-};
-
-
+  };
 
   const handleAddCustomer = async () => {
     const requestData = {
@@ -187,18 +137,14 @@ const addCommentField = () => {
       email: "",
       role: "customer",
     };
-    console.log(requestData, "requestion data");
     try {
       const response = await axios.post(
         "https://horaservices.com:3000/api/admin/user_signup",
-        requestData
+        requestData,
       );
-
-      console.log("Customer added:", response.data.dataToSave._id);
       setCustomerId(response.data.dataToSave);
       setMessage("Customer successfully added.");
       window.location.reload();
-      // window.location.reload(false);
       setMessageColor("green");
       setShowPopup(false);
     } catch (err) {
@@ -207,7 +153,6 @@ const addCommentField = () => {
       setMessageColor("red");
     }
   };
-
 
   const handleContinueClick = () => {
     setIsContinueClicked(true);
@@ -224,14 +169,11 @@ const addCommentField = () => {
     return date.toLocaleDateString("en-US", options);
   };
 
-
-
   const saveAddress = async () => {
     try {
       const url = BASE_URL + SAVE_LOCATION_ENDPOINT;
 
       const address2 = address + pincode;
-      console.log(address2, "address2");
       const requestDataa = {
         address1: address2,
         address2: googleLocation,
@@ -239,8 +181,6 @@ const addCommentField = () => {
         city: city,
         userId: customerId,
       };
-
-      console.log(requestDataa, "requestdataa");
       const token =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OGMxMGQxY2M5YzY3Y2M0N2NlYWU5MGEiLCJuYW1lIjoiIiwiZW1haWwiOiIiLCJwaG9uZSI6IjExMDAxMjMyNTIiLCJyb2xlIjoiY3VzdG9tZXIiLCJpYXQiOjE3NTc0ODIyODAsImV4cCI6MTc4OTAxODI4MH0.pQYGg7IKV36-5p-ko2FNksYZ9JvoIjkXmAl1snlXALs";
 
@@ -252,7 +192,7 @@ const addCommentField = () => {
       });
 
       if (response.status === API_SUCCESS_CODE) {
-          setIsOrderCreated(true);
+        setIsOrderCreated(true);
         return response.data.data._id;
       } else {
         console.error("Failed to save address", response.status);
@@ -263,31 +203,12 @@ const addCommentField = () => {
       return null;
     }
   };
- 
 
   const [lloading, setlLoading] = useState(false);
   const handleSubmit = async (e) => {
     e.preventDefault();
     setlLoading(true);
-    console.log('handlesubmit')
 
-      const add_on = Object.keys(selectedItems).map((id) => {
-      const item = itemsData.find((i) => i.id === parseInt(id));
-      return {
-        name: item.title + ' - Quantity ' + selectedItems[id].quantity,
-        price: item.price,
-      };
-    });
-    
-    const addOnProduct = products.map((product) => ({
-      name: product.name,
-      price: product.price,
-    }));
-    
-    const combinedAddOns = [...add_on, ...addOnProduct];
-    
-    console.log(combinedAddOns, "All Add-Ons Combined");
-    
     const formattedDate = date ? formatDate(date) : null;
 
     const addressID = await saveAddress();
@@ -298,47 +219,38 @@ const addCommentField = () => {
     }
 
     const requestData = {
-      add_on: combinedAddOns,
       phone_no: customerNumber,
-      toId: "",
       order_time: timeSlot.value,
-      no_of_people: 0,
-      type: 1,
+      type: 9,
       fromId: customerId,
-      is_discount: "0",
       addressId: addressID,
-      order_pincode : pincode,
+      order_pincode: pincode,
       order_date: formattedDate,
-      no_of_burner: 0,
       order_locality: city,
       total_amount: totalamount,
-      orderApplianceIds: [],
       payable_amount: totalamount,
       advance_amount: advanceamount,
-      is_gst: "0",
-      order_type: true,
+      balance_amount: balanceamount,
       items: [product._id],
       decoration_comments: comment,
       status: 1,
-      balance_amount: balanceamount,
       order_taken_by: orderTakenBy,
-      eventName: selectedEvent
+      eventName: selectedEvent,
     };
 
-    console.log(requestData, "requestData decoration");
-
     try {
-      const response = await axios.post(`${BASE_URL}${CONFIRM_ORDER_ENDPOINT}`, requestData);
-      alert("Order created successfully:", response.data);
-    
+      await axios.post(
+        `${BASE_URL}${CONFIRM_ORDER_ENDPOINT}`,
+        requestData,
+      );
+      alert("Booster Order created successfully");
     } catch (error) {
       console.error("Error creating order:", error);
-      alert("There was an error creating the order. Please try again.");
-    }
-    finally {
+      alert("Error creating order");
+    } finally {
       setlLoading(false);
     }
-  }
+  };
 
   const timeSlotOptions = [
     { value: "7:00 AM - 10:00 AM", label: "7:00 AM - 10:00 AM" },
@@ -348,79 +260,42 @@ const addCommentField = () => {
     { value: "7:00 PM - 10:00 PM", label: "7:00 PM - 10:00 PM" },
   ];
 
-
   useEffect(() => {
     const balance = totalamount - advanceamount;
     setBalanceAmount(balance);
   }, [totalamount, advanceamount]);
 
-  const proDuctInclusions = (product) => {
-    if (!product.inclusion || product.inclusion.length === 0) {
-      return "No inclusion details available"; // Return plain text for inclusion summary
-    }
-
-    const inclusionItems = product.inclusion[0]
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
-      .replace(/&#[^;]*;/g, ' ') // Replace special characters
-      .split('-') // Split by "-"
-      .map(item => item.trim())
-      .filter(item => item); // Remove empty items
-
-    return inclusionItems.map(item => `- ${item}`).join('\n'); // Format inclusion items as a list for text
-  };
-
   const copyOrderSummary = () => {
-    let addons = '';
-    const inclusionSummary = proDuctInclusions(product);
-
-    // Check if products exist and loop over them
-    if (products && products.length > 0) {
-      products.forEach((item, index) => {
-        addons += `\n  ${index + 1}. ${item.name}: ₹${item.price}`;
-      });
-    } else {
-      addons += ' None'; // Show "None" directly if there are no add-ons
-    }
-
-
-    // Create the order summary string
     const orderSummary = `
-  *Decoration Order Details*
-  
-  Date: ${date}
-  Time Slot: ${timeSlot?.label || ""}
-  Contact Number: ${customerNumber}
-  Address: ${address}
-  Google Map Location: ${googleLocation}
-  
-  Total Amount: ₹${totalamount || "N/A"}
-  Advance Amount: ₹${advanceamount || "N/A"}
-  Balance Amount: ₹${balanceamount || "N/A"}
-  
-  *Product Name*: ${dishName}
-  Product Image URL: https://horaservices.com/api/uploads/${product.featured_image}
-  
-  *Add-On Items*:
-  ${addons}
-  
-  *Inclusions*:
-  ${inclusionSummary}
-  
-  Comment: ${comment}
-  Order Taken By: ${orderTakenBy}
-    `;
+*Celebration Booster Order*
+
+Date: ${date}
+Time Slot: ${timeSlot?.label || ""}
+Contact Number: ${customerNumber}
+Address: ${address}
+
+Total Amount: ₹${totalamount || "N/A"}
+Advance Amount: ₹${advanceamount || "N/A"}
+Balance Amount: ₹${balanceamount || "N/A"}
+
+*Booster Name*: ${dishName}
+Image: https://horaservices.com/api/uploads/${product.featured_image}
+
+Comment: ${comment}
+Order Taken By: ${orderTakenBy}
+`;
 
     // Copy the order summary to clipboard
     navigator.clipboard.writeText(orderSummary.trim());
 
     // Alert the user
-    alert('Order summary copied!');
+    alert("Order summary copied!");
   };
 
   return (
     <div className="container">
       <h1 className="createOrder pageHeading">Create Decoration Order</h1>
-      <form className='orderCreation form' onSubmit={handleSubmit}>
+      <form className="orderCreation form" onSubmit={handleSubmit}>
         {/* product check */}
         <label htmlFor="dishName">Product Name *</label>
         <input
@@ -443,13 +318,16 @@ const addCommentField = () => {
             className="orderCheck-btn"
             onClick={handleContinueClick}
             style={{ marginTop: "10px" }}
-            disabled={dishName === '' ? true : false}
+            disabled={dishName === "" ? true : false}
           >
             Continue
           </button>
-
         )}
-        {<p className='error-msg' style={{ color: " red" }}>{dishName && isContinueClicked ? dishNameError : ''}</p>}
+        {
+          <p className="error-msg" style={{ color: " red" }}>
+            {dishName && isContinueClicked ? dishNameError : ""}
+          </p>
+        }
 
         {/* product details =================================================*/}
 
@@ -458,7 +336,12 @@ const addCommentField = () => {
             <label htmlFor="productid">Product ID</label>
             <input type="text" id="productid" value={productid} readOnly />
             <label htmlFor="productprice">Product Price</label>
-            <input type="text" id="productprice" value={productprice} readOnly />
+            <input
+              type="text"
+              id="productprice"
+              value={productprice}
+              readOnly
+            />
             <div style={{ marginTop: "10px" }}>
               <label htmlFor="featuredImage">Product Image</label>
               <div>
@@ -470,7 +353,6 @@ const addCommentField = () => {
                   onError={(e) => (e.target.style.display = "none")}
                 />
               </div>
-          
             </div>
             {/* costumer chcek======================== */}
             <label htmlFor="customerNumber">Customer Number*</label>
@@ -478,14 +360,20 @@ const addCommentField = () => {
               type="text"
               id="customerNumber"
               value={customerNumber}
-              onInput={(e) => setCustomerNumber(e.target.value.replace(/\D/g, ''))} // Remove non-digits as the user types
+              onInput={(e) =>
+                setCustomerNumber(e.target.value.replace(/\D/g, ""))
+              }
               placeholder="Customer Number"
               required
-              maxLength={10}  // Limit to 10 digits
-              pattern="\d{10}" // Enforce exactly 10 digits
-              inputMode="numeric" // Optimize for numeric input on mobile devices
+              maxLength={10}
+              pattern="\d{10}"
+              inputMode="numeric"
             />
-            <button className="orderCheck-btn" onClick={handleCheckCustomer} disabled={loading || customerNumber.length !== 10}>
+            <button
+              className="orderCheck-btn"
+              onClick={handleCheckCustomer}
+              disabled={loading || customerNumber.length !== 10}
+            >
               {loading ? "Checking..." : "Check Customer"}
             </button>
             {loading && <p>Loading...</p>} {/* Loader */}
@@ -493,10 +381,8 @@ const addCommentField = () => {
           </>
         )}
         {/* order details ==========================.Customer does not exist */}
-        {message === "Customer exists."
-          ?
-          (<div className='orderDeatils'>
-
+        {message === "Customer exists." ? (
+          <div className="orderDeatils">
             <div
               className="date-time-container"
               style={{
@@ -507,28 +393,23 @@ const addCommentField = () => {
             >
               <div style={{ marginRight: "18px" }}>
                 <label htmlFor="orderTakenBy">Order Taken By*</label>
-            <input
-              type="text"
-              id="orderTakenBy"
-              value={orderTakenBy}
-              onChange={(e) => setOrderTakenBy(e.target.value)}
-              placeholder="Order Taken By"
-              required
-            />
+                <input
+                  type="text"
+                  id="orderTakenBy"
+                  value={orderTakenBy}
+                  onChange={(e) => setOrderTakenBy(e.target.value)}
+                  placeholder="Order Taken By"
+                  required
+                />
               </div>
-              
+
               <div style={{ marginRight: "18px" }}>
-                <label
-                  htmlFor="date"
-                >
-                  Date *
-                </label>
+                <label htmlFor="date">Date *</label>
                 <input
                   type="date"
                   id="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  // min={new Date().toISOString().split("T")[0]} // Directly setting min date is this need?
                   required
                 />
               </div>
@@ -553,8 +434,6 @@ const addCommentField = () => {
               </div>
             </div>
 
-
-
             <div className="address-box">
               <label htmlFor="address">Address*</label>
               <textarea
@@ -574,94 +453,8 @@ const addCommentField = () => {
                 value={googleLocation}
                 onChange={(e) => setGoogleLocation(e.target.value)}
                 placeholder="googleLocation"
-
-
               />
             </div>
-            <div className="addon-container">
-              <label htmlFor="addOn">Add On</label>
-
-              <div className="addon-form">
-                {products.map((product, index) => (
-                  <div className="addon-row" key={index}>
-                    <input
-                      type="text"
-                      className="addon-input name-input"
-                      placeholder="Name"
-                      value={product.name}
-                      onChange={(e) => handleInputChange(index, "name", e.target.value)}
-                    />
-                    <input
-                      type="number"
-                      className="addon-input price-input"
-                      placeholder="Price"
-                      value={product.price}
-                      onChange={(e) => handleInputChange(index, "price", e.target.value)}
-                    />
-                    <button type="button" className="add-new-btn" onClick={addProduct}>
-                      Add New
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="dropdown-container">
-            <button onClick={() => setDropdownOpen(!dropdownOpen)} className="orderCheck-btn">
-            Select AddOn ▼
-            </button>
-  
-            {dropdownOpen && (
-            <div className="dropdown-menu">
-            {itemsData && itemsData.map((item) => {
-
-              const selected = selectedItems[item.id];
-              return (
-                <div className="item-row" key={item.id}>
-                  <div className="left-section">
-                    <input
-                      type="checkbox"
-                      checked={!!selected}
-                      onChange={() => toggleItem(item.id)}
-                    />
-                    <div>
-                      <div className="item-title">{item.title}</div>
-                      <div className="item-price">₹{item.price}</div>
-                    </div>
-                  </div>
-  
-                  {selected && (
-                    <div className="right-section">
-                      <button type="button" onClick={() => changeQuantity(item.id, -1)} className="qty-btn">−</button>
-                      <span className="qty">{selected.quantity}</span>
-                      <button type="button" onClick={() => changeQuantity(item.id, 1)} className="qty-btn">+</button>
-                      <div className="total-price">₹{item.price * selected.quantity}</div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-      {Object.keys(selectedItems).length > 0 && (
-  <div className="selected-summary">
-    <h4>Selected Add-ons</h4>
-    <ul>
-      {Object.keys(selectedItems).map((id) => {
-        const item = itemsData.find((i) => i.id === parseInt(id));
-
-        return (
-          <li key={id}>
-            {item.title} — ₹{item.price} × {selectedItems[id].quantity}
-          </li>
-        );
-      })}
-    </ul>
-  </div>
-)}
-
-
             <div className="amount-box">
               <label htmlFor="totalamount">Total Amount*</label>
               <input
@@ -692,10 +485,19 @@ const addCommentField = () => {
               />
             </div>
 
-
-
-            <div className="cityPincode-box" style={{ marginTop: "10px", width: "100%", display: "flex",alignItems: "flex-start", gap: "10px" , alignItems: "flex-start", flexWrap: "nowrap",}}>
-              <div className="city-box" style={{ flex: 1}}>
+            <div
+              className="cityPincode-box"
+              style={{
+                marginTop: "10px",
+                width: "100%",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "10px",
+                alignItems: "flex-start",
+                flexWrap: "nowrap",
+              }}
+            >
+              <div className="city-box" style={{ flex: 1 }}>
                 <label
                   htmlFor="city"
                   style={{
@@ -727,65 +529,71 @@ const addCommentField = () => {
                   <option value="Mumbai">Mumbai</option>
                   <option value="Hyderabad">Hyderabad</option>
                 </select>
-
               </div>
-               <div className="pincode-box" style={{ flex: 1}}>
+              <div className="pincode-box" style={{ flex: 1 }}>
                 <label htmlFor="pincode">Pincode *</label>
                 <input
                   type="text"
                   id="pincode"
                   value={pincode}
-                  
-                  style={{ padding: "11px", borderRadius: "5px", fontSize: "16px", marginTop: "0px", width: "100%", boxSizing: "border-box" }}
+                  style={{
+                    padding: "11px",
+                    borderRadius: "5px",
+                    fontSize: "16px",
+                    marginTop: "0px",
+                    width: "100%",
+                    boxSizing: "border-box",
+                  }}
                   onChange={(e) => setPincode(e.target.value)}
                 />
-                <p style={{ fontWeight: "bold", marginTop: "5px", marginBottom: "5px", fontSize: "15px", color: pincodeMessageColor }}>{pincodeMessage}</p>
+                <p
+                  style={{
+                    fontWeight: "bold",
+                    marginTop: "5px",
+                    marginBottom: "5px",
+                    fontSize: "15px",
+                    color: pincodeMessageColor,
+                  }}
+                >
+                  {pincodeMessage}
+                </p>
               </div>
-              <div className="event-box" style={{ flex: 1}}>
+              <div className="event-box" style={{ flex: 1 }}>
                 <label htmlFor="pincode">Add Event</label>
-                  <SearchWithDropDown
+                <SearchWithDropDown
                   options={eventList}
                   selectedValue={selectedEvent}
                   onChange={(val) => setSelectedEvent(val)}
                   placeholder="Search event..."
-                  />
-              </div>     
+                />
+              </div>
             </div>
-            <div className='checkoutInputType border-1 rounded-4 '>
+            <div className="checkoutInputType border-1 rounded-4">
               <h4>Share your comments (if any)</h4>
-              <div className="addon-form">
-              {commentFields.map((field, index) => (
-    <div key={index} className="comment-container">
-      <input
-      style={{marginBottom : "8px"}}
-        className='comment-input'
-        value={comment.split("\n")[index] || ""}
-        onChange={(e) => handleComment(index, e.target.value)}
-        cols={90}
-        rows={4}
-        placeholder="Enter your comment."
-      />
-
-      <button 
-      style={{marginBottom : "8px"}}
-      type="button" className="add-new-btn" onClick={addCommentField}>
-        Add New
-      </button>
-    </div>
-  ))}
-  </div>
+              <textarea
+                className="rounded border border-1 p-1 bg-white text-black"
+                value={comment}
+                onChange={handleComment}
+                cols={90}
+                rows={4}
+                placeholder="Enter your comment."
+              />
             </div>
 
-{!isOrderCreated && (
-  <button className="orderCheck-btn" type="submit" disabled={lloading}>
-    {lloading ? "Creating Order..." : "Create Order"}
-  </button>
-)}
-
-
-          </div>)
-          :
-          <> {lloading && <div className="loader">Loading...</div>}
+            {!isOrderCreated && (
+              <button
+                className="orderCheck-btn"
+                type="submit"
+                disabled={lloading}
+              >
+                {lloading ? "Creating Order..." : "Create Order"}
+              </button>
+            )}
+          </div>
+        ) : (
+          <>
+            {" "}
+            {lloading && <div className="loader">Loading...</div>}
             {showPopup && (
               <div className="popup">
                 <h2>Add New Customer</h2>
@@ -800,15 +608,16 @@ const addCommentField = () => {
                 <br />
                 <label>
                   Phone:
-
                   <input
                     type="text"
                     id="customerNumber"
                     value={newCustomerPhone}
-                    onInput={(e) => setNewCustomerPhone(e.target.value.replace(/\D/g, ''))} // Remove non-digits as the user types
+                    onInput={(e) =>
+                      setNewCustomerPhone(e.target.value.replace(/\D/g, ""))
+                    } // Remove non-digits as the user types
                     placeholder="Customer Number"
                     required
-                    maxLength={10}  // Limit to 10 digits
+                    maxLength={10} // Limit to 10 digits
                     pattern="\d{10}" // Enforce exactly 10 digits
                     inputMode="numeric" // Optimize for numeric input on mobile devices
                   />
@@ -818,20 +627,18 @@ const addCommentField = () => {
                 <button onClick={() => setShowPopup(false)}>Cancel</button>
               </div>
             )}
-
           </>
-        }
-
+        )}
       </form>
       {message === "Customer exists." && (
-      <button onClick={copyOrderSummary}
-        style={style.buttonPrimary}>Copy Order Summary(For Customer)
-      </button>
-)}
+        <button onClick={copyOrderSummary} style={style.buttonPrimary}>
+          Copy Order Summary(For Customer)
+        </button>
+      )}
     </div>
   );
 };
-const style= {
+const style = {
   buttonSecondary: {
     padding: "10px 20px",
     backgroundColor: "#9252AA",
@@ -839,16 +646,16 @@ const style= {
     border: "none",
     borderRadius: "5px",
     cursor: "pointer",
-},
-buttonPrimary: {
-  padding: "10px 20px",
-  backgroundColor: "#9252AA",
-  color: "#fff",
-  border: "none",
-  borderRadius: "5px",
-  cursor: "pointer",
-  marginTop:"10px",
-  width:"100%"
-},
-}
+  },
+  buttonPrimary: {
+    padding: "10px 20px",
+    backgroundColor: "#9252AA",
+    color: "#fff",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    marginTop: "10px",
+    width: "100%",
+  },
+};
 export default AddDecOrder;

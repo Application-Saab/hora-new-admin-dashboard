@@ -472,14 +472,3 @@ button[disabled] {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-.comment-container{
-display: flex;
-gap: 5px;
-}
-.comment-input{
-   padding: 8px;
-  margin-right: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  width: 80%;
-}

@@ -47,9 +47,9 @@ const AddPhotoOrder = () => {
   const [advanceamount, setAdvanceAmount] = useState("");
   const [balanceamount, setBalanceAmount] = useState("");
   const [orderTakenBy, setOrderTakenBy] = useState("");
-const [mealProductTypes, setMealProductTypes] = useState([]);
+  const [mealProductTypes, setMealProductTypes] = useState([]);
   const [comment, setComment] = useState("");
-
+  const [commentFields, setCommentFields] = useState([0]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [messageColor, setMessageColor] = useState("");
@@ -62,14 +62,19 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
   const [lloading, setlLoading] = useState(false);
   const [showButton, setShowButton] = useState(false);
 
- const [selectedAddOns, setSelectedAddOns] = useState([]);
+  const [selectedAddOns, setSelectedAddOns] = useState([]);
   const [addOnProducts, setAddOnProducts] = useState([]);
   // const [addOnsTotalPrice, setAddOnsTotalPrice] = useState(0);
 
-  const handleComment = (e) => {
-    const commentText = e.target.value;
-    setComment(commentText);
-  };
+  const handleComment = (index, value) => {
+  const lines = comment.split("\n");
+  lines[index] = value;
+  setComment(lines.join("\n"));
+};
+
+const addCommentField = () => {
+  setCommentFields([...commentFields, commentFields.length]);
+};
 
   useEffect(() => {
     if (selectedTag) {
@@ -78,7 +83,7 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
         try {
           const url = `${BASE_URL}/api/photography/searchByTag/${selectedTag}`;
           const response = await axios.get(url);
-          
+
           if (response.data?.data?.length > 0) {
             setProducts(response.data.data);
           } else {
@@ -102,30 +107,26 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
   }, [selectedTag]);
 
   useEffect(() => {
-          fetchOptions(BASE_URL + PRODUCT_MEAL_TYPE, setMealProductTypes, {
-            per_page: "500",
-          });
-        }, []);
-    
-        const fetchOptions = async (url, setter, body) => {
-        try {
-          const response = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-          });
-          const data = await response.json();
-          if (data.error === false && data.data) {
-            setter(
-              url.includes("admin_meals_list")
-                ? data.data.meal || []
-                : data.data.configuration || []
-            );
-          }
-        } catch (error) {
-          console.error("Error fetching data:", error);
-        }
-      };
+    fetchOptions(BASE_URL + PRODUCT_MEAL_TYPE, setMealProductTypes, {
+      per_page: "500",
+    });
+  }, []);
+
+  const fetchOptions = async (url, setter, body) => {
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await response.json();
+      if (data.error === false && data.data) {
+        setter(data.data.meal || []);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
   // Handle product selection and fetch details
   useEffect(() => {
@@ -143,14 +144,14 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
         const inclusions =
           selectedProduct?.inclusion?.length > 0
             ? selectedProduct.inclusion[0]
-                .split(/<\/div><div>/)
-                .map((item) =>
-                  item
-                    .replace(/<\/?div>/g, "")
-                    .replace(/<\/?span>/g, "")
-                    .replace(/<br\s*\/?>/g, "")
-                    .trim()
-                )
+              .split(/<\/div><div>/)
+              .map((item) =>
+                item
+                  .replace(/<\/?div>/g, "")
+                  .replace(/<\/?span>/g, "")
+                  .replace(/<br\s*\/?>/g, "")
+                  .trim()
+              )
             : [];
 
         setInclusion(inclusions);
@@ -226,65 +227,65 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
   // };
 
   const handleCheckCustomer = async (e) => {
-  e.preventDefault();
-  setMessage("");
-  setLoading(true);
+    e.preventDefault();
+    setMessage("");
+    setLoading(true);
 
-  try {
-    const response = await axios.post(`${BASE_URL}${ADMIN_USER_LIST}`, {
-      phone: customerNumber,
-      per_page: 1,
-      role: "customer",
-    });
+    try {
+      const response = await axios.post(`${BASE_URL}${ADMIN_USER_LIST}`, {
+        phone: customerNumber,
+        per_page: 1,
+        role: "customer",
+      });
 
-    console.log("API response:", response?.data);
+      console.log("API response:", response?.data);
 
-    const users = response?.data?.data?.users;
+      const users = response?.data?.data?.users;
 
-    if (Array.isArray(users) && users.length > 0) {
-      const customer = users.find((user) => user.phone === customerNumber);
+      if (Array.isArray(users) && users.length > 0) {
+        const customer = users.find((user) => user.phone === customerNumber);
 
-      console.log("Matched customer:", customer);
+        console.log("Matched customer:", customer);
 
-      if (customer) {
-        setMessage("Customer exists.");
-        setMessageColor("green");
-        setShowButton(true);
-        setShowPopup(false);
-        setCustomerId(customer);
+        if (customer) {
+          setMessage("Customer exists.");
+          setMessageColor("green");
+          setShowButton(true);
+          setShowPopup(false);
+          setCustomerId(customer);
+        } else {
+          // User list returned but phone not matched
+          setMessage("Customer does not exist.");
+          setMessageColor("red");
+          setShowPopup(true);
+          setShowButton(false);
+          setCustomerId(null);
+        }
       } else {
-        // User list returned but phone not matched
+        // Users array is empty or undefined
         setMessage("Customer does not exist.");
         setMessageColor("red");
         setShowPopup(true);
         setShowButton(false);
         setCustomerId(null);
       }
-    } else {
-      // Users array is empty or undefined
-      setMessage("Customer does not exist.");
+
+    } catch (err) {
+      console.error("API error:", err);
+
+      // Try to get backend message
+      const apiMessage =
+        err?.response?.data?.message || "An error occurred while checking the customer.";
+
+      setMessage(apiMessage);
       setMessageColor("red");
-      setShowPopup(true);
+      setShowPopup(true);   // ✅ always show popup on error
       setShowButton(false);
       setCustomerId(null);
+    } finally {
+      setLoading(false);
     }
-
-  } catch (err) {
-    console.error("API error:", err);
-
-    // Try to get backend message
-    const apiMessage =
-      err?.response?.data?.message || "An error occurred while checking the customer.";
-
-    setMessage(apiMessage);
-    setMessageColor("red");
-    setShowPopup(true);   // ✅ always show popup on error
-    setShowButton(false);
-    setCustomerId(null);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
   const handleAddCustomer = async () => {
@@ -370,7 +371,7 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => { 
     e.preventDefault();
     setlLoading(true);
     const formattedDate = date ? formatDate(date) : null;
@@ -509,43 +510,43 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
         </select> */}
 
         <select
-  id="tagSelect"
-  value={selectedTag}
-  onChange={(e) => {
-    setSelectedTag(e.target.value);
-    setDishName(""); 
-    setShowProductDetails(false);
-    setIsFetched(false);
-  }}
-  required
-  style={{
-    width: "100%",
-    padding: "10px",
-    borderRadius: "5px",
-    fontSize: "16px",
-    marginBottom: "10px",
-    border: "1px solid #ccc",
-  }}
->
-  <option value="">Select Photography Category</option>
+          id="tagSelect"
+          value={selectedTag}
+          onChange={(e) => {
+            setSelectedTag(e.target.value);
+            setDishName("");
+            setShowProductDetails(false);
+            setIsFetched(false);
+          }}
+          required
+          style={{
+            width: "100%",
+            padding: "10px",
+            borderRadius: "5px",
+            fontSize: "16px",
+            marginBottom: "10px",
+            border: "1px solid #ccc",
+          }}
+        >
+          <option value="">Select Photography Category</option>
 
-  {mealProductTypes
-    .filter((type) =>
-      type.configurationId?.some(
-        (config) => config.name === "Photography"
-      )
-    )
-    .map((type) => (
-      <option key={type._id} value={type._id}>
-        {type.name}
-      </option>
-    ))}
-</select>
+          {mealProductTypes
+            .filter((type) =>
+              type.configurationId?.some(
+                (config) => config.name === "Photography"
+              )
+            )
+            .map((type) => (
+              <option key={type._id} value={type._id}>
+                {type.name}
+              </option>
+            ))}
+        </select>
 
 
         {isLoadingProducts && <p>Loading products...</p>}
 
-      
+
         {/* Product Selection */}
         {products.length > 0 && (
           <>
@@ -584,9 +585,9 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
             <input type="text" id="productid" value={productid} readOnly />
             <label htmlFor="category">Product Price</label>
             <input type="text" id="category" value={category} readOnly />
-            <div className="ProductInclusions" style={{border:"1px solid black" ,marginTop:"10px", padding:"10px"}}>
+            <div className="ProductInclusions" style={{ border: "1px solid black", marginTop: "10px", padding: "10px" }}>
               <label htmlFor="productid">Product Inclusions:</label>
-              <ul style={{listStyle:"disc", paddingLeft:"10px"}}>
+              <ul style={{ listStyle: "disc", paddingLeft: "10px" }}>
                 {inclusion.length > 0 ? (
                   inclusion.map((item, index) => <li key={index}>{item}</li>)
                 ) : (
@@ -619,125 +620,127 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
         {message === "Customer exists."
           ?
           (
-          <div className='orderDeatils'>
-            <div
-              className="date-time-container"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "2%",
-              }}
-            >
-              <div style={{ marginRight: "18px" }}>
-              <label htmlFor="orderTakenBy">Order Taken By*</label>
-            <input
-              type="text"
-              id="orderTakenBy"
-              value={orderTakenBy}
-              onChange={(e) => setOrderTakenBy(e.target.value)}
-              placeholder="Order Taken By"
-              required
-            />
+            <div className='orderDeatils'>
+              <div
+                className="date-time-container"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "2%",
+                }}
+              >
+                <div style={{ marginRight: "18px" }}>
+                  <label htmlFor="orderTakenBy">Order Taken By*</label>
+                  <input
+                    type="text"
+                    id="orderTakenBy"
+                    value={orderTakenBy}
+                    onChange={(e) => setOrderTakenBy(e.target.value)}
+                    placeholder="Order Taken By"
+                    required
+                  />
+                </div>
+                <div style={{ marginRight: "18px" }}>
+                  <label
+                    htmlFor="date"
+                  >
+                    Date *
+                  </label>
+                  <input
+                    type="date"
+                    id="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    required
+                  />
+                </div>
+                <div style={{ marginRight: "18px" }}>
+                  <label
+                    htmlFor="timeSlot"
+                    style={{
+                      marginBottom: "10px",
+                      display: "block",
+                    }}
+                  >
+                    Time Slot*
+                  </label>
+                  <Select
+                    options={timeSlotOptions}
+                    value={timeSlot}
+                    onChange={(selectedOption) => setTimeSlot(selectedOption)}
+                    placeholder="Select Time Slot"
+                    required
+                  />
+                </div>
               </div>
-              <div style={{ marginRight: "18px" }}>
-                <label
-                  htmlFor="date"
-                >
-                  Date *
-                </label>
+              <div className="address-box">
+                <label htmlFor="address">Address*</label>
+                <textarea
+                  type="text"
+                  id="address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="Address"
+                  required
+                />
+              </div>
+              <div className="googleLocation-box">
+                <label htmlFor="googleLocation">Google Location</label>
+                <textarea
+                  type="text"
+                  id="googleLocation"
+                  value={googleLocation}
+                  onChange={(e) => setGoogleLocation(e.target.value)}
+                  placeholder="googleLocation"
+                />
+              </div>
+              <div className="amount-box">
+                <label htmlFor="totalamount">Total Amount*</label>
                 <input
-                  type="date"
-                  id="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
+                  type="text"
+                  id="totalamount"
+                  value={totalamount}
+                  onChange={(e) => setTotalAmount(e.target.value)}
+                  placeholder="Total Amount"
                   required
                 />
-              </div>
-              <div style={{ marginRight: "18px" }}>
-                <label
-                  htmlFor="timeSlot"
-                  style={{
-                    marginBottom: "10px",
-                    display: "block",
-                  }}
-                >
-                  Time Slot*
-                </label>
-                <Select
-                  options={timeSlotOptions}
-                  value={timeSlot}
-                  onChange={(selectedOption) => setTimeSlot(selectedOption)}
-                  placeholder="Select Time Slot"
-                  required
+
+                <label htmlFor="advanceamount">Advance Amount</label>
+                <input
+                  type="text"
+                  id="advanceamount"
+                  value={advanceamount}
+                  onChange={(e) => setAdvanceAmount(e.target.value)}
+                  placeholder="Advance Amount"
+                />
+                <label htmlFor="balanceamount">Balance Amount</label>
+                <input
+                  type="text"
+                  id="balanceamount"
+                  value={balanceamount}
+                  placeholder="Balance Amount"
+                  disabled
                 />
               </div>
-            </div>
-            <div className="address-box">
-              <label htmlFor="address">Address*</label>
-              <textarea
-                type="text"
-                id="address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="Address"
-                required
-              />
-            </div>
-            <div className="googleLocation-box">
-              <label htmlFor="googleLocation">Google Location</label>
-              <textarea
-                type="text"
-                id="googleLocation"
-                value={googleLocation}
-                onChange={(e) => setGoogleLocation(e.target.value)}
-                placeholder="googleLocation"
-              />
-            </div>
-            <div className="amount-box">
-              <label htmlFor="totalamount">Total Amount*</label>
-              <input
-                type="text"
-                id="totalamount"
-                value={totalamount}
-                onChange={(e) => setTotalAmount(e.target.value)}
-                placeholder="Total Amount"
-                required
-              />
 
-              <label htmlFor="advanceamount">Advance Amount</label>
-              <input
-                type="text"
-                id="advanceamount"
-                value={advanceamount}
-                onChange={(e) => setAdvanceAmount(e.target.value)}
-                placeholder="Advance Amount"
-              />
-              <label htmlFor="balanceamount">Balance Amount</label>
-              <input
-                type="text"
-                id="balanceamount"
-                value={balanceamount}
-                placeholder="Balance Amount"
-                disabled
-              />
-            </div>
+              {/* Add-On Products */}
+              {addOnProducts.length > 0 && (
 
-    {/* Add-On Products */}
-        {addOnProducts.length > 0 && (
-          <div className="add-on-section" style={{ 
-            border: "1px solid #ccc", 
-            padding: "15px", 
-            borderRadius: "5px", 
-            marginBottom: "20px",
-            backgroundColor: "#f9f9f9"
-          }}>
-            <h3>Add-On Products</h3>
-            <div className="add-on-grid" style={{ 
-              display: "grid", 
-              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", 
-              gap: "15px" 
-            }}>
-              {addOnProducts.map((addOn, index) => (
+
+                <div className="add-on-section" style={{
+                  border: "1px solid #ccc",
+                  padding: "15px",
+                  borderRadius: "5px",
+                  marginBottom: "20px",
+                  backgroundColor: "#f9f9f9"
+                }}>
+                  <h3>Add-On Products</h3>
+                  <div className="add-on-grid" style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                    gap: "15px"
+                  }}>
+{addOnProducts.map((addOn, index) => (
                 <div key={index} className="add-on-card" style={{ 
                   border: "1px solid #ddd", 
                   borderRadius: "8px", 
@@ -791,25 +794,25 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
                     </p>
                   </div>
                 </div>
-              ))}
-            </div>
-            {selectedAddOns.length > 0 && (
-              <div style={{ 
-                marginTop: "15px", 
-                padding: "10px", 
-                backgroundColor: "#e8f5e8", 
-                borderRadius: "5px",
-                border: "1px solid #28a745"
-              }}>
-                <h4 style={{ margin: "0 0 10px 0", color: "#28a745" }}>Selected Add-Ons:</h4>
-                <ul style={{ margin: "0", paddingLeft: "20px" }}>
-                  {selectedAddOns.map((addOn, index) => (
+              ))}                  </div>
+                  {selectedAddOns.length > 0 && (
+                    <div style={{
+                      marginTop: "15px",
+                      padding: "10px",
+                      backgroundColor: "#e8f5e8",
+                      borderRadius: "5px",
+                      border: "1px solid #28a745"
+                    }}>
+                      <h4 style={{ margin: "0 0 10px 0", color: "#28a745" }}>Selected Add-Ons:</h4>
+                      <ul style={{ margin: "0", paddingLeft: "20px" }}>
+                        {selectedAddOns.map((addOn, index) => (
                     <li key={index} style={{ marginBottom: "5px" }}>
                       {addOn.title} - ₹{addOn.price}
                     </li>
                   ))}
-                </ul>
-                {/* <p style={{ 
+
+                      </ul>
+                      {/* <p style={{ 
                   margin: "10px 0 0 0", 
                   fontWeight: "bold", 
                   fontSize: "16px",
@@ -817,88 +820,102 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
                 }}>
                   Total Add-Ons: ₹{addOnsTotalPrice}
                 </p> */}
-              </div>
-            )}
-          </div>
-        )}
+                    </div>
+                  )}
+                </div>
+              )}
 
 
-            <div className="cityPincode-box" style={{ margin: "10px 0",
-    width: "100%",
-    display: "flex",
-    alignItems: "flex-start",
-    gap: "12px",}}>
-              <div className="city-box" style={{ flex: 1 }}>
-                <label
-                  htmlFor="city"
-                  style={{
+              <div className="cityPincode-box" style={{
+                margin: "10px 0",
+                width: "100%",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "12px",
+              }}>
+                <div className="city-box" style={{ flex: 1 }}>
+                  <label
+                    htmlFor="city"
+                    style={{
 
-                    marginBottom: "5px",
-                    display: "block",
-                  }}
-                >
-                  City *
-                </label>
-                <select
-                  id="city"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  required
-                  style={{
-                    width: "100%",
-                    padding: "10px",
-                    borderRadius: "5px",
-                    fontSize: "16px",
-                    transition: "border-color 0.3s",
-                  }}
-                >
-                  <option value="" style={{ color: "#aaa" }}>
-                    Select City
-                  </option>
-                  <option value="Bangalore">Bangalore</option>
-                  <option value="Delhi">Delhi</option>
-                  <option value="Mumbai">Mumbai</option>
-                  <option value="Hyderabad">Hyderabad</option>
-                </select>
+                      marginBottom: "5px",
+                      display: "block",
+                    }}
+                  >
+                    City *
+                  </label>
+                  <select
+                    id="city"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    required
+                    style={{
+                      width: "100%",
+                      padding: "10px",
+                      borderRadius: "5px",
+                      fontSize: "16px",
+                      transition: "border-color 0.3s",
+                    }}
+                  >
+                    <option value="" style={{ color: "#aaa" }}>
+                      Select City
+                    </option>
+                    <option value="Bangalore">Bangalore</option>
+                    <option value="Delhi">Delhi</option>
+                    <option value="Mumbai">Mumbai</option>
+                    <option value="Hyderabad">Hyderabad</option>
+                  </select>
 
-              </div>
-              <div className="pincode-box" style={{ flex: 1 }}>
-                <label htmlFor="pincode">Pincode *</label>
-                <input
-                  type="text"
-                  id="pincode"
-                  value={pincode}
-                  onChange={(e) => setPincode(e.target.value)}
-                  style={{ padding: "11px", borderRadius: "5px", fontSize: "16px", width: "100%", marginTop: "0px", boxSizing: "border-box" }}
-                />
-                <p style={{ fontWeight: "bold", fontSize: "15px", color: pincodeMessageColor }}>{pincodeMessage}</p>
-              </div>
-               <div className="event-box" style={{ flex: 1 }}>
-                <label htmlFor="pincode">Add Event</label>
-                 <SearchWithDropDown
-                  options={eventList}
-                  selectedValue={selectedEvent}
-                  onChange={(val) => setSelectedEvent(val)}
-                  placeholder="Search event..."
+                </div>
+                <div className="pincode-box" style={{ flex: 1 }}>
+                  <label htmlFor="pincode">Pincode *</label>
+                  <input
+                    type="text"
+                    id="pincode"
+                    value={pincode}
+                    onChange={(e) => setPincode(e.target.value)}
+                    style={{ padding: "11px", borderRadius: "5px", fontSize: "16px", width: "100%", marginTop: "0px", boxSizing: "border-box" }}
                   />
-              </div> 
-            </div>
-            <div className='checkoutInputType border-1 rounded-4'>
-              <h4>Share your comments (if any)</h4>
-              <textarea className='rounded border border-1 p-1 bg-white text-black'
-                value={comment}
-                onChange={handleComment}
-                cols={90}
-                rows={4}
-                placeholder="Enter your comment."
-              />
-            </div>
-           
-            {/* Create Order */}
-            <button className="orderCheck-btn" type="submit" >
-              {lloading ? "Creating Order..." : "Create Order"}
-            </button>
-          </div>)
+                  <p style={{ fontWeight: "bold", fontSize: "15px", color: pincodeMessageColor }}>{pincodeMessage}</p>
+                </div>
+                <div className="event-box" style={{ flex: 1 }}>
+                  <label htmlFor="pincode">Add Event</label>
+                  <SearchWithDropDown
+                    options={eventList}
+                    selectedValue={selectedEvent}
+                    onChange={(val) => setSelectedEvent(val)}
+                    placeholder="Search event..."
+                  />
+                </div>
+              </div>
+              <div className='checkoutInputType border-1 rounded-4'>
+                <h4>Share your comments (if any)</h4>
+              <div className="addon-form">
+              {commentFields.map((field, index) => (
+              <div key={index} className="comment-container">
+      <input
+      style={{marginBottom : "8px"}}
+        className='comment-input'
+        value={comment.split("\n")[index] || ""}
+        onChange={(e) => handleComment(index, e.target.value)}
+        placeholder="Enter your comment."
+      />
+
+      <button 
+      style={{marginBottom : "8px"}}
+      type="button" className="add-new-btn" onClick={addCommentField}>
+        Add New
+      </button>
+    </div>
+  ))}
+  </div>    
+              </div>
+
+              {/* Create Order */}
+              <button className="orderCheck-btn" type="submit" >
+                {lloading ? "Creating Order..." : "Create Order"}
+              </button>
+            </div>)
           :
           <> {lloading && <div className="loader">Loading...</div>}
             {showPopup && (

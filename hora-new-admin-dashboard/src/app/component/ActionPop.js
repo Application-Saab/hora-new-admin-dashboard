@@ -2,7 +2,7 @@ import Image from "next/image";
 import "./Actionpopup.css";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import * as XLSX from "xlsx";
+import * as XLSX from "xlsx"; 
 
 const categoryMap = {
   "65a92271ae1586258ccd0628": "anniversary-decoration",
@@ -1079,7 +1079,7 @@ const ActionPopup = ({
       {isOpen && (
         <div className="popup-overlay">
           <div className="popup-content">
-            <button onClick={onClose} className="close-btn">
+            <button onClick={onClose} className="close-btn-popup">
               ✖
             </button>
 
@@ -1138,14 +1138,25 @@ const ActionPopup = ({
                                 </li>
                               ))}
                             </ul>
-                          ) : (
-                            "N/A"
-                          )}
+                           ) : (
+                           "N/A"
+                           )}
                         </p>
 
                         <p>
                           <strong>Order decoration_comments:</strong>{" "}
-                          {orderDetails.decoration_comments || "N/A"}
+                          {orderDetails.decoration_comments ? (
+                         <ol style={{ paddingLeft: '20px', marginTop: '5px' }}>
+                         {orderDetails.decoration_comments
+                         .split('\n')
+                         .filter(comment => comment.trim() !== '')
+                         .map((comment, index) => (
+                        <li key={index}>{comment}</li>
+                      ))}
+                   </ol>
+                  ) : (
+                 <span>N/A</span>
+                )}
                         </p>
                         <p>
                           {orderDetails.items.map((item, itemIndex) => {
@@ -1339,7 +1350,18 @@ const ActionPopup = ({
                         </p>
                         <p>
                           <strong>Order Comments:</strong>{" "}
-                          {orderDetails.decoration_comments || "N/A"}
+                          {orderDetails.decoration_comments ? (
+                         <ol style={{ paddingLeft: '20px', marginTop: '5px' }}>
+                          {orderDetails.decoration_comments
+                          .split('\n')
+                          .filter(comment => comment.trim() !== '')
+                          .map((comment, index) => (
+                          <li key={index}>{comment}</li>
+                          ))}
+                        </ol>
+                      ) : (
+                     <span>N/A</span>
+                      )}
                         </p>
 
                         <div
@@ -1365,7 +1387,6 @@ const ActionPopup = ({
                             Order Included:
                           </p>
                           {orderDetails.items[0].photography &&
-                          orderDetails.items[0].photography.length > 0 &&
                           orderDetails.items[0].photography.inclusion &&
                           orderDetails.items[0].photography.inclusion.length >
                             0 ? (
@@ -1420,6 +1441,7 @@ const ActionPopup = ({
                                     item.title
                                 );
 
+
                               if (!addOns || addOns.length === 0) {
                                 return (
                                   <p
@@ -1466,7 +1488,7 @@ const ActionPopup = ({
                                       >
                                         <Image
                                           src={item.image}
-                                          alt={item.title}
+                                          alt={item?.title}
                                           width={240}
                                           height={120}
                                           style={{
@@ -1491,7 +1513,7 @@ const ActionPopup = ({
                                             color: "#059669",
                                           }}
                                         >
-                                          ₹{item.price}
+                                         ₹{item.price}
                                         </p>
                                         <h3
                                           style={{
@@ -1501,7 +1523,7 @@ const ActionPopup = ({
                                             marginTop: "2px",
                                           }}
                                         >
-                                          {item.title}
+                                        Name :  {item?.title}
                                         </h3>
                                         <p
                                           style={{
@@ -1510,7 +1532,7 @@ const ActionPopup = ({
                                             marginTop: "4px",
                                           }}
                                         >
-                                          {item.description}
+                                          Discription : {item?.description || "N/A"}
                                         </p>
                                       </div>
                                     </div>
