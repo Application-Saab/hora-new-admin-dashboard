@@ -35,7 +35,7 @@ const OrderList = () => {
   const [actionPopupOrderType, setActionPopupOrderType] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
   const [decorationFields, setDecorationFields] = useState([]);
-
+const [order, setOrder] = useState(null);
   const [actionPopupChefOrder_Id, setActionPopupChefOrder_Id] = useState("");
 
   // supplier
@@ -270,7 +270,7 @@ const OrderList = () => {
     return updateOrderId;
   };
 
-  const openActionPopup = (orderId, order_id, orderType) => {
+  const openActionPopup = (orderId, order_id, orderType, order) => {
     console.log(orderId, "orderId");
     console.log(order_id, "order_id1");
     console.log(orderType, "orderType");
@@ -279,6 +279,7 @@ const OrderList = () => {
     setActionPopupOrderType(orderType);
     setActionPopupChefOrder_Id(order_id);
     setPopupOpen(true); // Open the popup
+    setOrder(order)
   };
 
   const openSupplierDeatilsPopup = async (orderId) => {
@@ -470,7 +471,7 @@ useEffect(() => {
   const handleSave = async () => {
     const requestData = {
       _id: selectedOrderId,
-      decoration_comments: decorationComment,
+      decoration_comments: decorationFields.join("\n"),
       add_on: addOnList, //add on list into array format
       total_amount: totalAmountEdit, //totalAmountEdit is when user click edit order popup
       balance_amount: balanceAmountEdit, //balanceAmountEdit is when user click edit order popup
@@ -1087,7 +1088,8 @@ useEffect(() => {
                           openActionPopup(
                             order.order_id,
                             order._id,
-                            order.type                          
+                            order.type,
+                            order                        
                           );
                         }}
                       >
@@ -1905,6 +1907,7 @@ useEffect(() => {
           actionPopupChefOrderId={actionPopupChefOrderId}
           actionPopupOrderType={actionPopupOrderType}
           actionPopupChefOrder_Id={actionPopupChefOrder_Id}
+          order={order}
           onClose={closePopup}
         />
       </div>
