@@ -9,11 +9,7 @@ const CreateCelebrationBoosterPopup = ({ isOpen, onClose, onSuccess }) => {
     name: "",
     featured_image: "",
     price: "",
-    cost_price: "",
-    type: "",
-    caption: "",
-    badge: "",
-    discount: "",
+    tag: ["69b91f42ab5ae5291cee5621"],
     inclusionText: "",
   });
 
@@ -136,57 +132,6 @@ const CreateCelebrationBoosterPopup = ({ isOpen, onClose, onSuccess }) => {
                 value={formData.price}
                 onChange={handleChange}
                 required
-                className="package-create-input"
-              />
-
-              <input
-                type="text"
-                name="cost_price"
-                placeholder="Cost Price"
-                value={formData.cost_price}
-                onChange={handleChange}
-                className="package-create-input"
-              />
-            </div>
-
-            {/* Type + Discount */}
-            <div className="package-create-input-ctn">
-              <input
-                type="text"
-                name="type"
-                placeholder="Type (Decoration / Cake / etc)"
-                value={formData.type}
-                onChange={handleChange}
-                className="package-create-input"
-              />
-
-              <input
-                type="number"
-                name="discount"
-                placeholder="Discount (%)"
-                value={formData.discount}
-                onChange={handleChange}
-                className="package-create-input"
-              />
-            </div>
-
-            {/* Caption + Badge */}
-            <div className="package-create-input-ctn">
-              <input
-                type="text"
-                name="caption"
-                placeholder="Caption"
-                value={formData.caption}
-                onChange={handleChange}
-                className="package-create-input"
-              />
-
-              <input
-                type="text"
-                name="badge"
-                placeholder="Badge (Best Seller / New)"
-                value={formData.badge}
-                onChange={handleChange}
                 className="package-create-input"
               />
             </div>
