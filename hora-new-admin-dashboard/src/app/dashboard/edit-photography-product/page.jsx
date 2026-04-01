@@ -56,7 +56,7 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
         if (subCategory) {
             try {
                 const response = await fetch(
-                    `http://localhost:5000/api/meals/idByTag?tag=${subCategory}`
+                    `https://horaservices.com:3000/api/meals/idByTag?tag=${subCategory}`
                 );
                 const data = await response.json();
 
@@ -79,7 +79,7 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
     const fetchSecondAPI = async (_id) => {
         try {
             const response = await fetch(
-                `http://localhost:5000/api/photography/searchByTag/${_id}`
+                `https://horaservices.com:3000/api/photography/searchByTag/${_id}`
             );
             const data = await response.json();
             if (data && data.data) {
@@ -121,7 +121,7 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
 
         try {
             const response = await fetch(
-                "http://localhost:5000/api/image_upload",
+                "https://horaservices.com:3000/api/image_upload",
                 {
                     method: "POST",
                     body: formData,
@@ -332,7 +332,7 @@ const [mealProductTypes, setMealProductTypes] = useState([]);
                                                 onClick={async () => {
                                                     const newStatus = item.status === 1 ? 0 : 1;
 
-                                                    await axios.post("http://localhost:5000/api/dish/update_decoration_status", {
+                                                    await axios.post("https://horaservices.com:3000/api/dish/update_decoration_status", {
                                                         id: item._id,
                                                         status: newStatus,
                                                     });

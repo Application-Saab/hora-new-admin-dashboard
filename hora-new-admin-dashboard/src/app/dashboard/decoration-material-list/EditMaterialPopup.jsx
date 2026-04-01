@@ -66,7 +66,7 @@ const EditDecoarationMaterialPopup = ({
       const form = new FormData();
       form.append("file", file);
 
-      const res = await fetch("http://localhost:5000/api/image_upload", {
+      const res = await fetch("https://horaservices.com:3000/api/image_upload", {
         method: "POST",
         body: form,
       });

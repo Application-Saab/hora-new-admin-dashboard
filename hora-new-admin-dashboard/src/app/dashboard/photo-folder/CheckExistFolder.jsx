@@ -16,7 +16,7 @@ const [ setError] = useState(null);
         // setCustomerId(''); // Reset previous errors
         try {
           const response = await fetch(
-            `http://localhost:5000/api/photo/GetFoldersByCustomerId/${customerId}`
+            `https://horaservices.com:3000/api/photo/GetFoldersByCustomerId/${customerId}`
           );
           if (!response.ok) {
             throw new Error(`Failed to fetch: ${response.statusText}`);
@@ -48,7 +48,7 @@ const [ setError] = useState(null);
   //   setLoading(true);
   //   try {
   //     const response = await fetch(
-  //       "http://localhost:5000/api/photo/DeleteFolder",
+  //       "https://horaservices.com:3000/api/photo/DeleteFolder",
   //       {
   //         method: "DELETE",
   //         headers: {

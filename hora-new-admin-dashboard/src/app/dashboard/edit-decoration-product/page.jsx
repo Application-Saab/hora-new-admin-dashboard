@@ -57,7 +57,7 @@ const DecorationEditor = () => {
     if (subCategory) {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/meals/idByTag?tag=${subCategory}`,
+          `https://horaservices.com:3000/api/meals/idByTag?tag=${subCategory}`,
         );
         const data = await response.json();
 
@@ -446,7 +446,7 @@ const DecorationEditor = () => {
   const fetchSecondAPI = async (_id) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/Decoration/searchByTag/${_id}`,
+        `https://horaservices.com:3000/api/Decoration/searchByTag/${_id}`,
       );
       const data = await response.json();
 
@@ -526,7 +526,7 @@ const DecorationEditor = () => {
     setUploadingImage(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/image_upload", {
+      const response = await fetch("https://horaservices.com:3000/api/image_upload", {
         method: "POST",
         body: formData,
       });
@@ -768,7 +768,7 @@ const DecorationEditor = () => {
                           const newStatus = item.status === 1 ? 0 : 1;
 
                           await axios.post(
-                            "http://localhost:5000/api/dish/update_decoration_status",
+                            "https://horaservices.com:3000/api/dish/update_decoration_status",
                             {
                               id: item._id,
                               status: newStatus,
