@@ -30,8 +30,6 @@ const AddProductForm = () => {
     specs: [],
     type: [],
     material: [],
-    // rentedConsumable: [],
-    // moqs: [],
   });
   const [inclusions, setInclusions] = useState([
     {
@@ -47,11 +45,6 @@ const AddProductForm = () => {
       previewText: "",
     },
   ]);
-  console.log(
-    "%c [ inclusions ]-38",
-    "font-size:13px; background:pink; color:#bf2c9f;",
-    inclusions,
-  );
   const [executionPrice, setExecutionPrice] = useState(0);
   const [advancePercent, setAdvancePercent] = useState(0);
   const [nextId, setNextId] = useState(2);
@@ -210,7 +203,7 @@ const AddProductForm = () => {
         vendorMaterialPrice: totalPrice,
         executionPrice: executionPrice,
         horaAdvance: advanceAmountHora,
-        inclusionVariables : inclusions
+        inclusionVariables: inclusions,
       };
     } else {
       payload = {
@@ -242,36 +235,6 @@ const AddProductForm = () => {
       showAlert("Error submitting product", "error");
     }
   };
-
-  // new inclustion style
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const res = await fetch(
-  //         "https://script.google.com/macros/s/AKfycbw4xPYuAXPztRz8fD5-txc-_zDlkZwXllmlQH_r5IAj855Xvr0ylEedJoIAJUVRMEzp/exec"
-  //       );
-  //       const data = await res.json();
-  //       setData(data);
-
-  //       const specs = [...new Set(data.map((r) => r.Specs).filter(Boolean))];
-  //       const type = [...new Set(data.map((r) => r.Type).filter(Boolean))];
-  //       const material = [
-  //         ...new Set(data.map((r) => r.Material).filter(Boolean)),
-  //       ];
-  //       const rented = [
-  //         ...new Set(data.map((r) => r["Rented/Consumable"]).filter(Boolean)),
-  //       ];
-  //       const moqs = [...new Set(data.map((r) => r.MOQ).filter(Boolean))];
-
-  //       setOptions({ specs, type, material, rentedConsumable: rented, moqs });
-  //     } catch (err) {
-  //       console.error("Error fetching data:", err);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchData();
-  // }, []);
 
   useEffect(() => {
     const fetchMaterialFilterData = async () => {
@@ -310,103 +273,6 @@ const AddProductForm = () => {
     fetchMaterialFilterData();
   }, []);
 
-  // const handleSelectChange = (id, field, value) => {
-  //   setInclusions((prev) =>
-  //     prev.map((inc) => {
-  //       if (inc.id === id) {
-  //         const updated = { ...inc, [field]: value };
-
-  //         const {
-  //           specs,
-  //           type,
-  //           material,
-  //           rentedConsumable,
-  //           moq,
-  //           customQuantity,
-  //         } = updated;
-
-  //         let matchedRow = null;
-  //         let price = 0;
-
-  //         if (specs && type && material && rentedConsumable) {
-  //           matchedRow = data.find(
-  //             (row) =>
-  //               row.Specs === specs &&
-  //               row.Type === type &&
-  //               row.Material === material &&
-  //               row["Rented/Consumable"] === rentedConsumable
-  //           );
-
-  //           // if (matchedRow) {
-  //           //   if (rentedConsumable === "Consumable") {
-  //           //     const qty = parseFloat(customQuantity) || 0;
-  //           //     console.log(qty, "qty12");
-  //           //     price = (qty / 100) * matchedRow["Hora Vendor Material Price"];
-  //           //   } else {
-  //           //     price = matchedRow["Hora Vendor Material Price"];
-  //           //   }
-  //           // }
-  //           if (matchedRow) {
-  //             if (rentedConsumable === "Consumable") {
-  //               const qty = parseFloat(customQuantity) || 0;
-  //               const horaPrice = matchedRow["Hora Vendor Material Price"];
-  //               const moq = parseFloat(matchedRow["MOQ"]) || 1;
-  //               price = (qty * horaPrice) / moq;
-  //               console.log(qty, "qty123");
-  //               console.log(horaPrice, "horaprice");
-  //               console.log(moq, "moq");
-  //               console.log(price, "price");
-  //             } else {
-  //               price = matchedRow["Hora Vendor Material Price"];
-  //             }
-  //           }
-  //         }
-
-  //         let previewText = `${specs || "-"} ${type || "-"} ${material || "-"}`;
-  //         if (rentedConsumable === "Rented") {
-  //           previewText += ` ${moq || "-"}`;
-  //         } else if (rentedConsumable === "Consumable") {
-  //           previewText += ` ${customQuantity || 1} PCS`;
-  //         }
-  //         // previewText += `, Price: $${price.toFixed(2)}`;
-
-  //         return { ...updated, matchedRow, price, previewText };
-  //       }
-  //       return inc;
-  //     })
-  //   );
-  // };
-
-  // const buildPreviewText = (item) => {
-  //   let previewText = `${item.specs || "-"} ${item.type || "-"} ${item.material || "-"}`;
-
-  //   if (item.rentedConsumable === "Rented") {
-  //     previewText += ` ${item.moq || "-"}`;
-  //   } else if (item.rentedConsumable === "Consumable") {
-  //     previewText += ` ${item.customQuantity || item.moq || 1}`;
-  //   }
-
-  //   return previewText;
-  // };
-
-  // const getCalculatedPrice = (matchedRow, rentedConsumable, customQuantity) => {
-  //   if (!matchedRow) return 0;
-
-  //   const vendorPrice = parseFloat(matchedRow.vendorMaterialPrice) || 0;
-
-  //   if (rentedConsumable === "Consumable") {
-  //     const qty = parseFloat(customQuantity) || 0;
-  //     const moq =
-  //       parseFloat(
-  //         String(matchedRow.minimumOrderQuantity || "").replace(/[^\d.]/g, ""),
-  //       ) || 1;
-
-  //     return (qty * vendorPrice) / moq;
-  //   }
-
-  //   return vendorPrice;
-  // };
-
   const buildPreviewText = (item) => {
     let previewText = `${item.specs || "-"} ${item.type || "-"} ${item.material || "-"}`;
 
@@ -437,124 +303,6 @@ const AddProductForm = () => {
     return vendorPrice;
   };
 
-  //   const getFilteredTypes = (specs) => {
-  //   if (!specs) return options.type;
-
-  //   return [
-  //     ...new Set(
-  //       data
-  //         .filter((row) => row.value === specs)
-  //         .map((row) => row.type)
-  //         .filter(Boolean)
-  //     ),
-  //   ];
-  // };
-
-  // const getFilteredMaterials = (specs, type) => {
-  //   let filtered = data;
-
-  //   if (specs) {
-  //     filtered = filtered.filter((row) => row.value === specs);
-  //   }
-
-  //   if (type) {
-  //     filtered = filtered.filter((row) => row.type === type);
-  //   }
-
-  //   return [...new Set(filtered.map((row) => row.material).filter(Boolean))];
-  // };
-
-  // const handleSelectChange = (id, field, value) => {
-  //   setInclusions((prev) =>
-  //     prev.map((inc) => {
-  //       if (inc.id !== id) return inc;
-
-  //       const updated = {
-  //         ...inc,
-  //         [field]: value,
-  //       };
-
-  //       let matchedRow = null;
-  //       let rentedConsumable = updated.rentedConsumable;
-  //       let moq = updated.moq;
-  //       let price = updated.price;
-
-  //       if (updated.specs && updated.type && updated.material) {
-  //         matchedRow = data.find(
-  //           (row) =>
-  //             row.value === updated.specs &&
-  //             row.type === updated.type &&
-  //             row.material === updated.material,
-  //         );
-
-  //         if (matchedRow) {
-  //           rentedConsumable = matchedRow.materialCategory || "";
-  //           moq = matchedRow.minimumOrderQuantity || "";
-  //           price = getCalculatedPrice(
-  //             matchedRow,
-  //             rentedConsumable,
-  //             updated.customQuantity,
-  //           );
-  //         } else {
-  //           rentedConsumable = "";
-  //           moq = "";
-  //           price = 0;
-  //         }
-  //       } else {
-  //         rentedConsumable = "";
-  //         moq = "";
-  //         price = 0;
-  //       }
-
-  //       const finalItem = {
-  //         ...updated,
-  //         matchedRow,
-  //         rentedConsumable,
-  //         moq,
-  //         price,
-  //       };
-
-  //       return {
-  //         ...finalItem,
-  //         previewText: buildPreviewText(finalItem),
-  //       };
-  //     }),
-  //   );
-  // };
-
-  // const handleCustomQuantityChange = (id, value) => {
-  //   setInclusions((prev) =>
-  //     prev.map((inc) => {
-  //       if (inc.id === id) {
-  //         let price = inc.price;
-  //         let matchedRow = inc.matchedRow;
-  //         // if (inc.rentedConsumable === "Consumable" && matchedRow) {
-  //         //   const qty = parseFloat(value) || 0;
-  //         //   price = (qty / 100) * matchedRow["Hora Vendor Material Price"];
-  //         // }
-  //         if (inc.rentedConsumable === "Consumable" && matchedRow) {
-  //           const qty = parseFloat(value) || 0;
-  //           const horaPrice = matchedRow["Hora Vendor Material Price"];
-  //           const moq = parseFloat(matchedRow["MOQ"]) || 1;
-  //           price = (qty * horaPrice) / moq;
-  //         }
-  //         let previewText = `${inc.specs || "-"} ${inc.type || "-"}  ${
-  //           inc.material || "-"
-  //         }`;
-  //         if (inc.rentedConsumable === "Rented") {
-  //           previewText += ` ${inc.moq || "-"}`;
-  //         } else if (inc.rentedConsumable === "Consumable") {
-  //           previewText += ` ${value || 1} PCS`;
-  //         }
-  //         // previewText += `, Price: $${price.toFixed(2)}`;
-
-  //         return { ...inc, customQuantity: value, price, previewText };
-  //       }
-  //       return inc;
-  //     })
-  //   );
-  // };
-
   const handleSelectChange = (id, field, value) => {
     setInclusions((prev) =>
       prev.map((inc) => {
@@ -564,8 +312,6 @@ const AddProductForm = () => {
           ...inc,
           [field]: value,
         };
-
-        // agar specs change hua hai to us specs ki first matched row auto-fill kar do
         if (field === "specs") {
           const firstMatch = data.find((row) => row.value === value);
 
@@ -580,7 +326,6 @@ const AddProductForm = () => {
               matchedRow: firstMatch,
             };
 
-            // consumable me default qty blank ho to MOQ number ya 1 le sakte ho
             const defaultQty =
               updated.customQuantity ||
               extractNumber(firstMatch.minimumOrderQuantity) ||
@@ -615,9 +360,7 @@ const AddProductForm = () => {
           }
         }
 
-        // agar type change hua
         if (field === "type") {
-          // pehle same specs + new type ka first material dhundo
           let firstMatch = data.find(
             (row) => row.value === updated.specs && row.type === value,
           );
@@ -658,7 +401,6 @@ const AddProductForm = () => {
           return updated;
         }
 
-        // agar material change hua
         if (field === "material") {
           const exactMatch = data.find(
             (row) =>
@@ -706,35 +448,6 @@ const AddProductForm = () => {
     );
   };
 
-  // const handleCustomQuantityChange = (id, value) => {
-  //   setInclusions((prev) =>
-  //     prev.map((inc) => {
-  //       if (inc.id !== id) return inc;
-
-  //       const updated = {
-  //         ...inc,
-  //         customQuantity: value,
-  //       };
-
-  //       const price = getCalculatedPrice(
-  //         updated.matchedRow,
-  //         updated.rentedConsumable,
-  //         value,
-  //       );
-
-  //       const finalItem = {
-  //         ...updated,
-  //         price,
-  //       };
-
-  //       return {
-  //         ...finalItem,
-  //         previewText: buildPreviewText(finalItem),
-  //       };
-  //     }),
-  //   );
-  // };
-
   const handleCustomQuantityChange = (id, value) => {
     setInclusions((prev) =>
       prev.map((inc) => {
@@ -754,27 +467,6 @@ const AddProductForm = () => {
         updated.previewText = buildPreviewText(updated);
 
         return updated;
-      }),
-    );
-  };
-
-  const handleMoqChange = (id, value) => {
-    setInclusions((prev) =>
-      prev.map((inc) => {
-        if (inc.id === id) {
-          let previewText = `${inc.specs || "-"} ${inc.type || "-"} ${
-            inc.material || "-"
-          }`;
-          if (inc.rentedConsumable === "Rented") {
-            previewText += ` ${value || "-"}`;
-          } else if (inc.rentedConsumable === "Consumable") {
-            previewText += ` ${inc.customQuantity || 1} PCS`;
-          }
-          // previewText += `, Price: $${inc.price.toFixed(2)}`;
-
-          return { ...inc, moq: value, previewText };
-        }
-        return inc;
       }),
     );
   };
@@ -1032,7 +724,6 @@ const AddProductForm = () => {
       </div>
 
       <div style={container}>
-        {/* Dropdown to select mode */}
         <div style={{ marginBottom: "20px" }}>
           <label style={{ marginRight: "8px" }}>Choose Mode:</label>
           <select
@@ -1129,17 +820,16 @@ const AddProductForm = () => {
                     />
 
                     {inc.rentedConsumable === "Consumable" && (
-                    <input
-                      type="number"
-                      placeholder="Qty"
-                      value={inc.customQuantity}
-                      onChange={(e) =>
-                        handleCustomQuantityChange(inc.id, e.target.value)
-                      }
-                      // readOnly
-                      style={input}
-                    />
-                  )}
+                      <input
+                        type="number"
+                        placeholder="Qty"
+                        value={inc.customQuantity}
+                        onChange={(e) =>
+                          handleCustomQuantityChange(inc.id, e.target.value)
+                        }
+                        style={input}
+                      />
+                    )}
 
                     <input
                       type="number"
@@ -1214,7 +904,6 @@ const AddProductForm = () => {
                 />
               </div>
 
-              {/* Customer Price Calculation */}
               <div>
                 <strong>Customer Price:</strong> ₹
                 {advancePercent >= 100
@@ -1225,7 +914,6 @@ const AddProductForm = () => {
                     ).toFixed(2)}
               </div>
 
-              {/* Advance Amount Calculation */}
               <div>
                 <strong>Advance Hora Amount:</strong> ₹
                 {advancePercent >= 100
@@ -1237,44 +925,6 @@ const AddProductForm = () => {
                     ).toFixed(2)}
               </div>
             </div>
-
-            {/* <div style={totalsBox}>
-              <div>
-                <strong>Hora Vendor Material Price:</strong> ₹
-                {totalPrice.toFixed(2)}
-              </div>
-              <div>
-                <strong>Execution Price:</strong>{" "}
-                <input
-                  type="number"
-                  value={executionPrice}
-                  onChange={(e) =>
-                    setExecutionPrice(parseFloat(e.target.value) || 0)
-                  }
-                  style={input}
-                />
-              </div>
-               <div>
-    <strong>Advance %:</strong>{" "}
-    <input
-      type="number"
-      value={advancePercent}
-      onChange={(e) => setAdvancePercent(parseFloat(e.target.value) || 0)}
-      style={input}
-      placeholder="e.g. 20"
-    />
-  </div>
-
-  <div>
-    <strong>Customer Price:</strong> ₹
-    {advancePercent >= 100
-      ? "Invalid %"
-      : ((totalPrice + executionPrice) / (1 - advancePercent / 100)).toFixed(2)}
-  </div>
-              <div>
-                <strong>Final Price:</strong> ₹{finalPrice.toFixed(2)}
-              </div>
-            </div> */}
 
             <h4 style={{ marginTop: "30px", marginBottom: "8px" }}>
               📝 Inclusion Summary

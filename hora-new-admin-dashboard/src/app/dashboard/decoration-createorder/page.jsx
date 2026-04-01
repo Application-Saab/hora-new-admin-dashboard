@@ -83,11 +83,6 @@ const AddDecOrder = () => {
       previewText: "",
     },
   ]);
-  console.log(
-    "%c [ inclusions ]-38",
-    "font-size:13px; background:pink; color:#bf2c9f;",
-    inclusions,
-  );
     const [executionPrice, setExecutionPrice] = useState(0);
   const [advancePercent, setAdvancePercent] = useState(0);
   const [nextId, setNextId] = useState(2);
@@ -389,7 +384,7 @@ const AddDecOrder = () => {
   };
 
   const totalPrice = inclusions.reduce((sum, i) => sum + i.price, 0);
-  const finalPrice = totalPrice + executionPrice;
+  // const finalPrice = totalPrice + executionPrice;
   const summaryText = inclusions.map((i) => i.previewText).join("\n");
 
 
@@ -702,6 +697,7 @@ const AddDecOrder = () => {
       balance_amount: balanceamount,
       order_taken_by: orderTakenBy,
       eventName: selectedEvent,
+      inclusionVariables: inclusions
     };
 
     console.log(requestData, "requestData decoration");
