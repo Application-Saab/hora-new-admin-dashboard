@@ -194,7 +194,7 @@ const CheckVendorOrders = () => {
     console.log(status, "stattdd", result, "result");
     try {
       const response = await fetch(
-        "https://horaservices.com:3000/api/admin/update_user_status",
+        "http://localhost:5000/api/admin/update_user_status",
         {
           method: "POST",
           headers: {

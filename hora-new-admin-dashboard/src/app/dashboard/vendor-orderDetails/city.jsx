@@ -11,7 +11,7 @@ const VendorCity = () => {
   const fetchOrders = async () => {
     try {
       const { data } = await axios.post(
-        "https://horaservices.com:3000/api/admin/adminOrderList",
+        "http://localhost:5000/api/admin/adminOrderList",
         {
           page: 1,
           per_page: 1000,

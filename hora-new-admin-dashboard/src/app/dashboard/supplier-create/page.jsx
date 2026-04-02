@@ -18,7 +18,7 @@ const Testing = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        "https://horaservices.com:3000/api/admin/user_signup",
+        "http://localhost:5000/api/admin/user_signup",
         {
           name,
           phone,
@@ -46,7 +46,7 @@ const Testing = () => {
 
     try {
       await axios.post(
-        `https://horaservices.com:3000/api/users/supplier_personal_details_update/${userId}`,
+        `http://localhost:5000/api/users/supplier_personal_details_update/${userId}`,
         {
           _id: userId,
           city: city,

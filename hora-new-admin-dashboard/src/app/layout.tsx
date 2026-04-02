@@ -29,6 +29,8 @@ const menuItems = [
   
   { label: "User Analysis", icon: <FaClipboardList />, url: "/dashboard/user-analysis" },
 
+  { label: "Wonderland Tracking", icon: <FaClipboardList />, url: "/dashboard/wonderland-tracking" },
+
   {
     label: "Order Details",
     icon: <FaClipboardList />,
@@ -300,7 +302,7 @@ export default function RootLayout({
 
       try {
         const response = await axios.post(
-          "https://horaservices.com:3000/api/admin/admin_user_list",
+          "http://localhost:5000/api/admin/admin_user_list",
           {
             email: adminEmail,
             role: "admin",

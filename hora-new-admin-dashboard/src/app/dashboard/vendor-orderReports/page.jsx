@@ -24,7 +24,7 @@ const OrderDashboard = () => {
   // First API call to get _id from phone number
   const getUserIdFromPhone = async (phone) => {
     try {
-      const response = await fetch('https://horaservices.com:3000/api/admin/admin_user_list', {
+      const response = await fetch('http://localhost:5000/api/admin/admin_user_list', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -73,7 +73,7 @@ const OrderDashboard = () => {
       const userId = await getUserIdFromPhone(phoneNumber.trim());
       
       // Step 2: Get orders using the retrieved user ID
-      const response = await fetch('https://horaservices.com:3000/api/admin/adminOrderList', {
+      const response = await fetch('http://localhost:5000/api/admin/adminOrderList', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

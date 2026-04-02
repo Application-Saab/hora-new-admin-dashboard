@@ -38,7 +38,7 @@ export default function OrderReportDownloader() {
     const tagIds = Object.keys(tagMapping);
     const tagResponses = await Promise.all(
       tagIds.map(tag =>
-        fetch(`https://horaservices.com:3000/api/Decoration/searchByTag/${tag}`)
+        fetch(`http://localhost:5000/api/Decoration/searchByTag/${tag}`)
           .then(res => res.json())
       )
     );
@@ -52,7 +52,7 @@ export default function OrderReportDownloader() {
     );
 
     // Step 2: Fetch admin order list
-    const adminResponse = await fetch(`https://horaservices.com:3000/api/admin/adminOrderList`, {
+    const adminResponse = await fetch(`http://localhost:5000/api/admin/adminOrderList`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

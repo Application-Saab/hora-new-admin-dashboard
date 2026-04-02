@@ -55,21 +55,21 @@ const ActionPopup = ({
 
     // Set the popup type and corresponding API URL based on order type
     if (actionPopupOrderType === 1) {
-      apiUrl = `https://horaservices.com:3000/api/order/order_details_decoration/${actionPopupOrderId}`;
+      apiUrl = `http://localhost:5000/api/order/order_details_decoration/${actionPopupOrderId}`;
       setPopupType("decoration");
     } else if (actionPopupOrderType === 2) {
       const chefOrderId = actionPopupChefOrder_Id.toString();
-      apiUrl = `https://horaservices.com:3000/api/order/order_details/v1/${chefOrderId}`;
+      apiUrl = `http://localhost:5000/api/order/order_details/v1/${chefOrderId}`;
       setPopupType("chef");
     } else if (actionPopupOrderType === 6 || actionPopupOrderType === 7) {
       // alert(actionPopupOrderType)
-      apiUrl = `https://horaservices.com:3000/api/order/order_details_food_delivery/${actionPopupOrderId}`;
+      apiUrl = `http://localhost:5000/api/order/order_details_food_delivery/${actionPopupOrderId}`;
       setPopupType("foodDelivery");
     } else if (actionPopupOrderType === 8) {
       // Need new api for photograpgy
       const photographyOrderId = actionPopupChefOrderId.toString();
-      apiUrl = `https://horaservices.com:3000/api/order/order_details_photography/${photographyOrderId}`;
-      // https://horaservices.com:3000/api/order/order_details_photography/9753
+      apiUrl = `http://localhost:5000/api/order/order_details_photography/${photographyOrderId}`;
+      // http://localhost:5000/api/order/order_details_photography/9753
       setPopupType("Photography");
     } else {
       setError("Currently, data is not available");
@@ -578,7 +578,7 @@ const ActionPopup = ({
         const encodedName = encodeURIComponent(dec.name);
         try {
           const response = await axios.get(
-            `https://horaservices.com:3000/api/Decoration/searchByName/${encodedName}`
+            `http://localhost:5000/api/Decoration/searchByName/${encodedName}`
           );
           const product = response.data.data?.[0];
 
