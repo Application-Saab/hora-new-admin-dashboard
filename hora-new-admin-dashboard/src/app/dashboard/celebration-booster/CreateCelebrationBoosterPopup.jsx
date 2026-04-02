@@ -2,17 +2,14 @@
 import React, { useState } from "react";
 import "./CreateCelebrationPopup.css";
 import { BASE_URL, CREATE_CELEBRATION_BOOSTER } from "@/utils/apiconstant";
+import axios from "axios";
 
 const CreateCelebrationBoosterPopup = ({ isOpen, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     name: "",
     featured_image: "",
     price: "",
-    cost_price: "",
-    type: "",
-    caption: "",
-    badge: "",
-    discount: "",
+    tag: ["69b91f42ab5ae5291cee5621"],
     inclusionText: "",
   });
 
@@ -35,59 +32,60 @@ const CreateCelebrationBoosterPopup = ({ isOpen, onClose, onSuccess }) => {
       .join(" - ")}</div>`,
   ];
 
-  // Image Upload
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
+    if (!file) return;
 
     const form = new FormData();
     form.append("file", file);
 
-    const res = await fetch("https://horaservices.com:3000/api/image_upload", {
-      method: "POST",
-      body: form,
-    });
+    try {
+      const res = await axios.post(
+        "https://horaservices.com:3000/api/image_upload",
+        form,
+      );
 
-    const data = await res.json();
+      const data = res.data;
 
-    setFormData((prev) => ({
-      ...prev,
-      featured_image: data.data,
-    }));
+      setFormData((prev) => ({
+        ...prev,
+        featured_image: data.data,
+      }));
+    } catch (error) {
+      console.error(
+        "Error uploading file:",
+        error.response?.data || error.message,
+      );
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     setLoading(true);
-
-    // Format inclusion
     const formattedInclusion = formatText(formData.inclusionText);
-
     const payload = {
       ...formData,
       inclusion: formattedInclusion,
     };
+
     try {
-      const res = await fetch(`${BASE_URL}${CREATE_CELEBRATION_BOOSTER}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const res = await axios.post(
+        `${BASE_URL}${CREATE_CELEBRATION_BOOSTER}`,
+        payload,
+      );
 
-      const data = await res.json();
-
-      if (data) {
+      if (res.data) {
         alert("Booster Created Successfully");
         onSuccess();
         onClose();
       }
-
-      setLoading(false);
     } catch (err) {
-      console.log(err);
-      alert("Error creating booster");
+      console.error(
+        "Error creating booster:",
+        err.response?.data || err.message,
+      );
+      alert(err.response?.data?.message || "Error creating booster");
+    } finally {
       setLoading(false);
     }
   };
@@ -134,57 +132,6 @@ const CreateCelebrationBoosterPopup = ({ isOpen, onClose, onSuccess }) => {
                 value={formData.price}
                 onChange={handleChange}
                 required
-                className="package-create-input"
-              />
-
-              <input
-                type="text"
-                name="cost_price"
-                placeholder="Cost Price"
-                value={formData.cost_price}
-                onChange={handleChange}
-                className="package-create-input"
-              />
-            </div>
-
-            {/* Type + Discount */}
-            <div className="package-create-input-ctn">
-              <input
-                type="text"
-                name="type"
-                placeholder="Type (Decoration / Cake / etc)"
-                value={formData.type}
-                onChange={handleChange}
-                className="package-create-input"
-              />
-
-              <input
-                type="number"
-                name="discount"
-                placeholder="Discount (%)"
-                value={formData.discount}
-                onChange={handleChange}
-                className="package-create-input"
-              />
-            </div>
-
-            {/* Caption + Badge */}
-            <div className="package-create-input-ctn">
-              <input
-                type="text"
-                name="caption"
-                placeholder="Caption"
-                value={formData.caption}
-                onChange={handleChange}
-                className="package-create-input"
-              />
-
-              <input
-                type="text"
-                name="badge"
-                placeholder="Badge (Best Seller / New)"
-                value={formData.badge}
-                onChange={handleChange}
                 className="package-create-input"
               />
             </div>

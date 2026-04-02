@@ -25,6 +25,7 @@ const CreatePackagePopup = ({ isOpen, onClose, onSuccess }) => {
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
+    if (!file) return;
 
     const form = new FormData();
     form.append("file", file);
@@ -54,7 +55,7 @@ const CreatePackagePopup = ({ isOpen, onClose, onSuccess }) => {
       });
 
       const data = await res.json();
-      if (data) {
+      if (res.ok && data.success) {
         setLoadingCreate(false);
         alert("Package Created Successfully");
       }
@@ -159,7 +160,11 @@ const CreatePackagePopup = ({ isOpen, onClose, onSuccess }) => {
               >
                 Cancel
               </button>
-              <button type="submit" className="package-create-btn" disabled={loadingCreate}>
+              <button
+                type="submit"
+                className="package-create-btn"
+                disabled={loadingCreate}
+              >
                 {loadingCreate ? "Creating..." : "Create"}
               </button>
             </div>
