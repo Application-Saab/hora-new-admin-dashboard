@@ -3,7 +3,12 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Image from "next/image";
 import "./package-items-popup.css";
-import { ADD_DISH_TO_PACKAGE, BASE_URL, GET_DISHES_FOR_PACKAGE, REMOVE_DISH_FROM_PACKAGE } from "@/utils/apiconstant";
+import {
+  ADD_DISH_TO_PACKAGE,
+  BASE_URL,
+  GET_DISHES_FOR_PACKAGE,
+  REMOVE_DISH_FROM_PACKAGE,
+} from "@/utils/apiconstant";
 
 const AddDishToPackagePopup = ({ isOpen, onClose, packageData }) => {
   const [dishes, setDishes] = useState([]);
@@ -32,9 +37,7 @@ const AddDishToPackagePopup = ({ isOpen, onClose, packageData }) => {
     try {
       setLoading(true);
 
-      const response = await axios.get(
-        `${BASE_URL}${GET_DISHES_FOR_PACKAGE}`,
-      );
+      const response = await axios.get(`${BASE_URL}${GET_DISHES_FOR_PACKAGE}`);
 
       setDishes(response.data.data);
       setFilteredDishes(response.data.data);
@@ -96,13 +99,10 @@ const AddDishToPackagePopup = ({ isOpen, onClose, packageData }) => {
 
   const removeDishFromPackage = async (dishId) => {
     try {
-      let resp = await axios.post(
-        `${BASE_URL}${REMOVE_DISH_FROM_PACKAGE}`,
-        {
-          packageId: packageData._id,
-          dishId: dishId,
-        },
-      );
+      let resp = await axios.post(`${BASE_URL}${REMOVE_DISH_FROM_PACKAGE}`, {
+        packageId: packageData._id,
+        dishId: dishId,
+      });
 
       if (resp.status !== 200) {
         alert("Error removing dish from package");
@@ -154,7 +154,7 @@ const AddDishToPackagePopup = ({ isOpen, onClose, packageData }) => {
           >
             <option value="">All</option>
             <option value="1">Veg</option>
-            <option value="0">Non Veg</option>
+            <option value="2">Non Veg</option>
           </select>
         </div>
 
