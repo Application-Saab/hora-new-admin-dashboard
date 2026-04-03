@@ -112,7 +112,7 @@ const CheckSupplier = ({
           email: "",
           page: "",
           per_page: 2000,
-          phone: "",
+          phone: customerNumber,
           role: "supplier",
         }
       );
@@ -128,10 +128,7 @@ const CheckSupplier = ({
 
       console.log("Total suppliers found:", users.length);
 
-      const formattedCustomerNumber = customerNumber.trim();
-      const supplier = users.find(
-        (user) => user.phone?.trim() === formattedCustomerNumber
-      );
+      const supplier = users[0];
 
       if (supplier) {
         setSupplierData(supplier);

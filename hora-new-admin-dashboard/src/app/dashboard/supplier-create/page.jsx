@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "./testing.css";
+import { supplierType } from "@/utils/supplierType";
 
 const Testing = () => {
   const [name, setName] = useState("");
@@ -106,20 +107,17 @@ const Testing = () => {
             </select>
             <label>Order Type:</label>
             <select
-              value={orderType}
-              onChange={(e) => setOrderType(e.target.value)}
-            >
-              <option value="Decorator">Decorator</option>
-              <option value="photography">Photography</option>
-              <option value="chef">Chef</option>
-              <option value="waiter">Waiter</option>
-              <option value="bar_tender">Bar Tender</option>
-              <option value="cleaner">Cleaner</option>
-              <option value="food_delivery">Food Delivery</option>
-              <option value="live_catering">Live Catering</option>
-              <option value="magician">Magician</option>
-              <option value="tattoo_artist">Tattoo Artist</option>
-            </select>
+  value={orderType}
+  onChange={(e) => setOrderType(e.target.value)}
+>
+  <option value="">Select Type</option>
+
+  {supplierType.map((item, index) => (
+    <option key={index} value={item.value}>
+      {item.label}
+    </option>
+  ))}
+</select>
             <button onClick={handleSubmitDetails}>Submit</button>
             <button onClick={() => setShowModal(false)} className="close-btn">
               Cancel
