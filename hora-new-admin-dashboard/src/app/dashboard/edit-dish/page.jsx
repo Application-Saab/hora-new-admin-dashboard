@@ -14,7 +14,7 @@ export default function EditDishPage() {
       setDishId(storedId);
 
       // Fetch dish details from API
-      fetch(`http://localhost:5000/api/dish/details/${storedId}`)
+      fetch(`https://horaservices.com:3000/api/dish/details/${storedId}`)
         .then((res) => res.json())
         .then((data) => {
           console.log('Dish data from API:', data);

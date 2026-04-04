@@ -22,7 +22,7 @@ const UserFilter = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/admin/admin_user_list",
+        "https://horaservices.com:3000/api/admin/admin_user_list",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

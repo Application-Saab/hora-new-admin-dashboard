@@ -36,7 +36,7 @@ export default function UserAnalysisPage() {
   */
   const fetchData = (query) => {
     fetch(
-      `http://localhost:5000/api/analytics/visits/unique/range?${query}`
+      `https://horaservices.com:3000/api/analytics/visits/unique/range?${query}`
     )
       .then(res => res.json())
       .then(res => setData(res.data || []))

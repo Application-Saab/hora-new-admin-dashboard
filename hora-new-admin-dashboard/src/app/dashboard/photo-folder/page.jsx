@@ -27,7 +27,7 @@ const PhotoCreateProject = () => {
     try {
       // Make API call to create folder
       const response = await fetch(
-        "http://localhost:5000/api/photo/CreateFolder",
+        "https://horaservices.com:3000/api/photo/CreateFolder",
         {
           method: "POST",
           headers: {
