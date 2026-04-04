@@ -2,10 +2,14 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./wonderland-tracking.css";
-import { BASE_URL, GET_WONDERLAND_GLOBAL_STATS, GET_WONDERLAND_LISTING_DATA } from "@/utils/apiconstant";
+import {
+  BASE_URL,
+  GET_WONDERLAND_GLOBAL_STATS,
+  GET_WONDERLAND_LISTING_DATA,
+} from "@/utils/apiconstant";
 
 const AdminAnalytics = () => {
-  const [type, setType] = useState("byUsers"); // byUsers | byEvents
+  const [type, setType] = useState("byUsers");
   const [data, setData] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -14,6 +18,7 @@ const AdminAnalytics = () => {
   const [pagination, setPagination] = useState({});
 
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
   const [dateFilter, setDateFilter] = useState("all");
 
   useEffect(() => {
@@ -22,9 +27,8 @@ const AdminAnalytics = () => {
 
   useEffect(() => {
     fetchData();
-  }, [type, page, search, dateFilter]);
+  }, [type, page, debouncedSearch, dateFilter]);
 
-  // 🔥 Global Stats API
   const fetchStats = async () => {
     try {
       const res = await axios.get(`${BASE_URL}${GET_WONDERLAND_GLOBAL_STATS}`);
@@ -34,18 +38,20 @@ const AdminAnalytics = () => {
     }
   };
 
-  // 🔥 Listing API
   const fetchData = async () => {
     try {
       setLoading(true);
 
-      const res = await axios.post(`${BASE_URL}${GET_WONDERLAND_LISTING_DATA}`, {
-        type,
-        page,
-        per_page: 10,
-        search,
-        dateFilter,
-      });
+      const res = await axios.post(
+        `${BASE_URL}${GET_WONDERLAND_LISTING_DATA}`,
+        {
+          type,
+          page,
+          per_page: 10,
+          search,
+          dateFilter,
+        },
+      );
 
       setData(res.data.data.data);
       setPagination(res.data.data.paginate);
@@ -56,21 +62,46 @@ const AdminAnalytics = () => {
     }
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const formatDate = (dateInput) => {
+    if (!dateInput) return "N/A";
+    const d = new Date(dateInput);
+
+    if (isNaN(d.getTime())) {
+      return "Invalid Date";
+    }
+
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+
+    return `${day}/${month}/${year}`;
+  };
+
   return (
     <div className="container">
       <h1 className="header-title">Admin Analytics Dashboard</h1>
 
-      {/* 🔥 GLOBAL STATS */}
       {stats && (
         <div className="stats-container">
-          <div className="card">Total Users: {stats.totalUsers}</div>
+          <div className="card">Total Users: {stats.totalUniqueEventUsers}</div>
+          <div className="card">
+            Only Wonderland logins: {stats.totalWonderlandUsers}
+          </div>
           <div className="card">Total Events: {stats.totalEvents}</div>
-          <div className="card">Total Posts: {stats.totalPosts}</div>
+          <div className="card">Total Hosts: {stats.totalHosts}</div>
           <div className="card">Total Guests: {stats.totalGuests}</div>
+          <div className="card">Total Posts: {stats.totalPosts}</div>
         </div>
       )}
 
-      {/* 🔥 TOGGLE */}
       <div className="toggle-container">
         <button
           className={type === "byUsers" ? "active" : ""}
@@ -93,14 +124,11 @@ const AdminAnalytics = () => {
         </button>
       </div>
 
-      {/* 🔥 FILTERS */}
       <div className="filters-container">
         <input
           type="text"
           placeholder={
-            type === "byUsers"
-              ? "Search User Name..."
-              : "Search Host Name..."
+            type === "byUsers" ? "Search by phone" : "Search by event name"
           }
           value={search}
           onChange={(e) => {
@@ -123,13 +151,13 @@ const AdminAnalytics = () => {
         </select>
       </div>
 
-      {/* 🔥 TABLE */}
       <div className="table-container">
         <table>
           <thead>
             {type === "byUsers" ? (
               <tr>
                 <th>Name</th>
+                <th>Phone</th>
                 <th>Hosted Events</th>
                 <th>Guest Events</th>
                 <th>Posts</th>
@@ -137,8 +165,9 @@ const AdminAnalytics = () => {
               </tr>
             ) : (
               <tr>
-                <th>Event Type</th>
-                <th>Host Name</th>
+                <th>Wonderland ID</th>
+                <th>Event Name</th>
+                <th>Host Phone</th>
                 <th>Guests</th>
                 <th>Posts</th>
                 <th>Date</th>
@@ -152,6 +181,7 @@ const AdminAnalytics = () => {
                 type === "byUsers" ? (
                   <tr key={i}>
                     <td>{item.name}</td>
+                    <td>{item.phone}</td>
                     <td>{item.hostedEventsCount}</td>
                     <td>{item.guestEventsCount}</td>
                     <td>{item.postsCount}</td>
@@ -159,15 +189,14 @@ const AdminAnalytics = () => {
                   </tr>
                 ) : (
                   <tr key={i}>
-                    <td>{item.eventType}</td>
+                    <td>{item.wonderland_id}</td>
                     <td>{item.hostName}</td>
+                    <td>{item.hostPhone}</td>
                     <td>{item.guestCount}</td>
                     <td>{item.photoCount}</td>
-                    <td>
-                      {new Date(item.createdAt).toLocaleDateString()}
-                    </td>
+                    <td>{formatDate(item.eventDate)}</td>
                   </tr>
-                )
+                ),
               )
             ) : (
               <tr>
@@ -180,7 +209,6 @@ const AdminAnalytics = () => {
         </table>
       </div>
 
-      {/* 🔥 PAGINATION */}
       {data.length > 0 && (
         <div className="pagination">
           <button
