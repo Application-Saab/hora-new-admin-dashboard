@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "./testing.css";
+import { BASE_URL } from "../../../utils/apiconstant";
 
 const Testing = () => {
   const [name, setName] = useState("");
@@ -18,7 +19,7 @@ const Testing = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        "https://horaservices.com:3000/api/admin/user_signup",
+        `${BASE_URL}/api/admin/user_signup`,
         {
           name,
           phone,
@@ -46,7 +47,7 @@ const Testing = () => {
 
     try {
       await axios.post(
-        `https://horaservices.com:3000/api/users/supplier_personal_details_update/${userId}`,
+        `${BASE_URL}/api/users/supplier_personal_details_update/${userId}`,
         {
           _id: userId,
           city: city,

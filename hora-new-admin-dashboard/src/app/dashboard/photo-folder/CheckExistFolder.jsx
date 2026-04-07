@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import CheckCustomer from "./CheckCustomer"; // Import the CheckCustomer component
 import ImageUpload from "./uploadInfolder/ImageUpload"; // Import the ImageUpload component
+import { BASE_URL } from "../../../utils/apiconstant";
 const CheckExistFolder = () => {
   const [customerId, setCustomerId] = useState("");
   const [folders, setFolders] = useState(null);
@@ -16,7 +17,7 @@ const [ setError] = useState(null);
         // setCustomerId(''); // Reset previous errors
         try {
           const response = await fetch(
-            `https://horaservices.com:3000/api/photo/GetFoldersByCustomerId/${customerId}`
+            `${BASE_URL}/api/photo/GetFoldersByCustomerId/${customerId}`
           );
           if (!response.ok) {
             throw new Error(`Failed to fetch: ${response.statusText}`);
@@ -48,7 +49,7 @@ const [ setError] = useState(null);
   //   setLoading(true);
   //   try {
   //     const response = await fetch(
-  //       "https://horaservices.com:3000/api/photo/DeleteFolder",
+  //       `${BASE_URL}/api/photo/DeleteFolder`,
   //       {
   //         method: "DELETE",
   //         headers: {

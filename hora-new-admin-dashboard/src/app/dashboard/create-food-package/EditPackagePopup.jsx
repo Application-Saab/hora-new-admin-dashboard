@@ -47,7 +47,7 @@ const EditPackagePopup = ({ isOpen, onClose, packageData, onSuccess }) => {
     const form = new FormData();
     form.append("file", file);
 
-    const res = await fetch("https://horaservices.com:3000/api/image_upload", {
+    const res = await fetch(`${BASE_URL}/api/image_upload`, {
       method: "POST",
       body: form,
     });
@@ -122,7 +122,7 @@ const EditPackagePopup = ({ isOpen, onClose, packageData, onSuccess }) => {
 
                 {formData.image && (
                   <img
-                    src={`https://horaservices.com/api/uploads/${formData.image}`}
+                    src={`${BASE_URL}/api/uploads/${formData.image}`}
                     alt="preview"
                     style={{
                       width: "60px",

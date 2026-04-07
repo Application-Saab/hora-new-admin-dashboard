@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "./CreateSupplierPopup.css";
+import { BASE_URL } from "@/utils/apiconstant";
 
 const CreateSupplierPopup = ({ isOpen, onClose ,CustomerNumber}) => {
   const [fullName, setFullName] = useState("");
@@ -49,7 +50,7 @@ const CreateSupplierPopup = ({ isOpen, onClose ,CustomerNumber}) => {
   
     try {
       const response = await axios.post(
-        "https://horaservices.com:3000/api/admin/user_signup",
+        `${BASE_URL}/api/admin/user_signup`,
         supplierData,
         { headers: { "Content-Type": "application/json" } }
       );

@@ -3,6 +3,7 @@ import "./Actionpopup.css";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import * as XLSX from "xlsx"; 
+import { BASE_URL } from "@/utils/apiconstant";
 
 const categoryMap = {
   "65a92271ae1586258ccd0628": "anniversary-decoration",
@@ -55,21 +56,19 @@ const ActionPopup = ({
 
     // Set the popup type and corresponding API URL based on order type
     if (actionPopupOrderType === 1) {
-      apiUrl = `https://horaservices.com:3000/api/order/order_details_decoration/${actionPopupOrderId}`;
+      apiUrl = `${BASE_URL}/api/order/order_details_decoration/${actionPopupOrderId}`;
       setPopupType("decoration");
     } else if (actionPopupOrderType === 2) {
       const chefOrderId = actionPopupChefOrder_Id.toString();
-      apiUrl = `https://horaservices.com:3000/api/order/order_details/v1/${chefOrderId}`;
+      apiUrl = `${BASE_URL}/api/order/order_details/v1/${chefOrderId}`;
       setPopupType("chef");
     } else if (actionPopupOrderType === 6 || actionPopupOrderType === 7) {
-      // alert(actionPopupOrderType)
-      apiUrl = `https://horaservices.com:3000/api/order/order_details_food_delivery/${actionPopupOrderId}`;
+      apiUrl = `${BASE_URL}/api/order/order_details_food_delivery/${actionPopupOrderId}`;
       setPopupType("foodDelivery");
     } else if (actionPopupOrderType === 8) {
       // Need new api for photograpgy
       const photographyOrderId = actionPopupChefOrderId.toString();
-      apiUrl = `https://horaservices.com:3000/api/order/order_details_photography/${photographyOrderId}`;
-      // https://horaservices.com:3000/api/order/order_details_photography/9753
+      apiUrl = `${BASE_URL}/api/order/order_details_photography/${photographyOrderId}`;
       setPopupType("Photography");
     } else {
       setError("Currently, data is not available");
@@ -229,7 +228,7 @@ const ActionPopup = ({
                               return (
                                 <li key={item._id} className="order-item">
                                   <Image
-                                    src={`https://horaservices.com/api/uploads/${item.image}`}
+                                    src={`${BASE_URL}/api/uploads/${item.image}`}
                                     alt={item.name}
                                     width={80}
                                     height={80}
@@ -261,7 +260,7 @@ const ActionPopup = ({
                             {orderDetails.items.map((item) => (
                               <li key={item._id} className="order-item">
                                 <Image
-                                  src={`https://horaservices.com/api/uploads/${item.image}`}
+                                  src={`${BASE_URL}/api/uploads/${item.image}`}
                                   alt={item.name}
                                   width={80}
                                   height={80}
@@ -295,7 +294,7 @@ const ActionPopup = ({
                       return (
                         <li key={item._id} className="order-item">
                           <Image
-                            src={`https://horaservices.com/api/uploads/${item.image}`}
+                            src={`${BASE_URL}/api/uploads/${item.image}`}
                             alt={item.name}
                             width={80}
                             height={80}
@@ -326,7 +325,7 @@ const ActionPopup = ({
                       {orderDetails?.selecteditems?.map((item) => (
                         <li key={item._id} className="order-item">
                           <Image
-                            src={`https://horaservices.com/api/uploads/${item.image}`}
+                            src={`${BASE_URL}/api/uploads/${item.image}`}
                             alt={item.name}
                             width={80}
                             height={80}
@@ -357,7 +356,7 @@ const ActionPopup = ({
                         (item) => (
                           <li key={item._id} className="order-item">
                             <Image
-                              src={`https://horaservices.com/api/uploads/${item.image}`}
+                              src={`${BASE_URL}/api/uploads/${item.image}`}
                               alt={item.name}
                               width={80}
                               height={80}
@@ -517,7 +516,7 @@ const ActionPopup = ({
       const dec = item?.decoration;
       if (dec) {
         // check if decoration exists
-        message += `\n\n*Product Name:* ${dec?.name}\n*Image URL:* https://horaservices.com/api/uploads/${dec?.featured_image}\n`;
+        message += `\n\n*Product Name:* ${dec?.name}\n*Image URL:* ${BASE_URL}/api/uploads/${dec?.featured_image}\n`;
         const inclusionText = getCleanInclusionText(dec?.inclusion); // format inclusion text
         message += `\n*Inclusion:* \n${inclusionText}`;
       }
@@ -578,7 +577,7 @@ const ActionPopup = ({
         const encodedName = encodeURIComponent(dec.name);
         try {
           const response = await axios.get(
-            `https://horaservices.com:3000/api/Decoration/searchByName/${encodedName}`
+            `${BASE_URL}/api/Decoration/searchByName/${encodedName}`
           );
           const product = response.data.data?.[0];
 
@@ -587,7 +586,7 @@ const ActionPopup = ({
             if (matchedTag) {
               const categoryName = categoryMap[matchedTag];
               const formattedName = dec.name.split(" ").join("-");
-              const finalUrl = `https://horaservices.com/balloon-decoration/${categoryName}/product/${formattedName}`;
+              const finalUrl = `${BASE_URL}/balloon-decoration/${categoryName}/product/${formattedName}`;
               message += `*Product Page:* ${finalUrl}\n`;
             } else {
               console.warn("❌ No matching tag found for:", dec.name);
@@ -1173,7 +1172,7 @@ const ActionPopup = ({
                                 </p>
                                 <p>
                                   <Image
-                                    src={`https://horaservices.com/api/uploads/compressed_webp/${
+                                    src={`${BASE_URL}/api/uploads/compressed_webp/${
                                       dec.featured_image.split(".")[0]
                                     }.webp`}
                                     width={200}
@@ -1203,7 +1202,7 @@ const ActionPopup = ({
                               (image, index) => {
                                 const imageName = typeof image === "string" ? image : image?.image;
                                 const imageUrl = imageName
-                                ? `https://horaservices.com/api/uploads/${imageName}`
+                                ? `${BASE_URL}/api/uploads/${imageName}`
                                  : "";             
                                 return (
                                   <div

@@ -107,7 +107,7 @@ const CheckSupplier = ({
       console.log("Checking supplier number:", customerNumber);
 
       const response = await axios.post(
-        "https://horaservices.com:3000/api/admin/admin_user_list",
+        `${BASE_URL}/api/admin/admin_user_list`,
         {
           email: "",
           page: "",

@@ -6,6 +6,7 @@ import Image from "next/image";
 import DishPopup from './DishDetailsPopup';
 
 import { useRouter } from "next/navigation";
+import { BASE_URL } from "@/utils/apiconstant";
 
 
 const DishTable = () => {
@@ -59,7 +60,7 @@ const DishTable = () => {
       }
 
       const response = await axios.post(
-        "https://horaservices.com:3000/api/dish/admin_dish_list",
+        `${BASE_URL}/api/dish/admin_dish_list`,
         payload
       );
 
@@ -114,7 +115,7 @@ const DishTable = () => {
     const newStatus = currentStatus === 1 ? 0 : 1;
   
     try {
-      const response = await fetch('https://horaservices.com:3000/api/dish/update_dish_status', {
+      const response = await fetch(`${BASE_URL}/api/dish/update_dish_status`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -198,7 +199,7 @@ const DishTable = () => {
               dishes.map((dish) => (
                 <tr key={dish._id}>
                   <td className="dish-image">
-                    <Image src={`https://horaservices.com/api/uploads/${dish.image}`}
+                    <Image src={`${BASE_URL}/api/uploads/${dish.image}`}
                          alt={dish.name} className="image" width={40} height={40}/>
                   </td>
                   <td>{dish.name}</td>

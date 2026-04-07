@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useCallback } from 'react';
 import getOrderType from '../../../utils/getOrderType';
+import { BASE_URL } from '@/utils/apiconstant';
 // import './ReportDownloader.css';
 
 // --- Helpers ---
@@ -78,7 +79,7 @@ const ReportDownloader = () => {
       ...(orderType !== 'All' && { type: Number(orderType) }),
     };
     try {
-      const res = await fetch('https://horaservices.com:3000/api/admin/adminOrderList', {
+      const res = await fetch(`${BASE_URL}/api/admin/adminOrderList`, {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify(payload)
       });

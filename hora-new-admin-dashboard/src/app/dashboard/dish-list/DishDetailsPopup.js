@@ -1,8 +1,7 @@
-// components/DishPopup.jsx
-
 import React from "react";
 import Image from "next/image"; // or
 import './DishDetailsPopup.css';
+import { BASE_URL } from "@/utils/apiconstant";
 
 const DishPopup = ({ dish, onClose }) => {
   if (!dish) return null;
@@ -15,7 +14,7 @@ const DishPopup = ({ dish, onClose }) => {
 
         <div className="popup-image">
           <Image
-            src={`https://horaservices.com/api/uploads/${dish.image}`}
+            src={`${BASE_URL}/api/uploads/${dish.image}`}
             alt={dish.name}
             width={150}
             height={150}
