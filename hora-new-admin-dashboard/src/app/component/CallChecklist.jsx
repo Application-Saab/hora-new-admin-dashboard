@@ -385,7 +385,7 @@ const CallChecklist = ({ open, onClose, data = null }) => {
                         let imageSrc = "";
 
                         if (typeof file === "string") {
-                          imageSrc = `https://horaservices.com/api/uploads/${file}`;
+                          imageSrc = `${BASE_URL}/api/uploads/${file}`;
                         } else if (file instanceof File || file instanceof Blob) {
                           imageSrc = URL.createObjectURL(file);
                         } else {

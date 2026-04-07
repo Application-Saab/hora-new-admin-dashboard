@@ -1,11 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import "./users.css";
+import { BASE_URL } from "../../../utils/apiconstant";
 
 const fetchAdminUsers = async (params) => {
   try {
     const response = await fetch(
-      "https://horaservices.com:3000/api/admin/admin_user_list",
+      `${BASE_URL}/api/admin/admin_user_list`,
       {
         method: "POST",
         headers: {
@@ -86,7 +87,7 @@ const AdminUsers = () => {
    const fetchUsers = async () => {
      setLoading(true);
      try {
-       const response = await fetch('https://horaservices.com:3000/api/admin/admin_user_list', {
+       const response = await fetch(`${BASE_URL}/api/admin/admin_user_list`, {
          method: 'POST',
          headers: {
            'Content-Type': 'application/json',

@@ -183,7 +183,7 @@ const AddDishToPackagePopup = ({ isOpen, onClose, packageData }) => {
                     <tr key={dish._id}>
                       <td>
                         <Image
-                          src={`https://horaservices.com/api/uploads/${dish.image}`}
+                          src={`${BASE_URL}/api/uploads/${dish.image}`}
                           width={40}
                           height={40}
                           alt={dish.name}

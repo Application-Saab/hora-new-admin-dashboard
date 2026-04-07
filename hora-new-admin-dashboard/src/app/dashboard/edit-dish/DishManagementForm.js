@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import styles from '../create-dish/DishManagementForm.module.css';
+import { BASE_URL } from '@/utils/apiconstant';
 
 // const DishManagementForm = ({ initialData }) => {
     const DishManagementForm = ({ initialData, dishId }) => {
@@ -102,7 +103,7 @@ import styles from '../create-dish/DishManagementForm.module.css';
         quantityUnit: initialData.per_plate_qty.unit,
         cookingMinutes: initialData.cooking_min,
         preparationMinutes: initialData.preparation_min,
-        peopleServed: initialData.noofpeopleServedByDish.toString(),
+        peopleServed: initialData?.noofpeopleServedByDish?.toString(),
         generalAppliance: initialData.general_appliance_id,
         specialAppliance: initialData.special_appliance_id,
         gasRequired: initialData.is_gas ? 'yes' : 'no',
@@ -197,7 +198,7 @@ import styles from '../create-dish/DishManagementForm.module.css';
   }, []);
 
   const fetchDropdownOptions = async (endpoint, payload = { per_page: "500" }) => {
-    const apiUrl = `https://horaservices.com:3000/api/${endpoint}`;
+    const apiUrl = `${BASE_URL}/api/${endpoint}`;
 
     try {
       const response = await fetch(apiUrl, {
@@ -257,7 +258,7 @@ import styles from '../create-dish/DishManagementForm.module.css';
         const formData = new FormData();
         formData.append('file', file);
 
-        const response = await fetch('https://horaservices.com:3000/api/image_upload', {
+        const response = await fetch(`${BASE_URL}/api/image_upload`, {
           method: 'POST',
           body: formData
         });
@@ -445,7 +446,7 @@ const cuisineArray = [
       console.log('Submitting data:', requestData);
 
       try {
-        const response = await fetch('https://horaservices.com:3000/api/dish/edit', {
+        const response = await fetch(`${BASE_URL}/api/dish/edit`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

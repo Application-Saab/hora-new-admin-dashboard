@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './DishManagementForm.module.css';
+import { BASE_URL } from '../../../utils/apiconstant';
 
 const DishManagementForm = () => {
   // Convert single selection fields to arrays for multiple selection
@@ -152,7 +153,7 @@ const DishManagementForm = () => {
   }, []);
 
   const fetchDropdownOptions = async (endpoint, payload = { per_page: "500" }) => {
-    const apiUrl = `https://horaservices.com:3000/api/${endpoint}`;
+    const apiUrl = `${BASE_URL}/api/${endpoint}`;
 
     try {
       const response = await fetch(apiUrl, {
@@ -213,7 +214,7 @@ const DishManagementForm = () => {
         const formData = new FormData();
         formData.append('file', file);
 
-        const response = await fetch('https://horaservices.com:3000/api/image_upload', {
+        const response = await fetch(`${BASE_URL}/api/image_upload`, {
           method: 'POST',
           body: formData
         });
@@ -399,7 +400,7 @@ const DishManagementForm = () => {
       console.log('Submitting data:', requestData);
 
       try {
-        const response = await fetch('https://horaservices.com:3000/api/dish/add', {
+        const response = await fetch(`${BASE_URL}/api/dish/add`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -840,7 +841,7 @@ const DishManagementForm = () => {
                   {selectedIngredients.map(ing => (
                     <div key={ing.id} className={styles["ingredient-item"]}>
                       <span>{ing.name} - {ing.quantity} {options.quantityUnitOptions.find(u => u._id === ing.unit)?.name}</span>
-                       {/* <img src={`https://horaservices.com/api/uploads/${ing.image}`} 
+                       {/* <img src={`${BASE_URL}/api/uploads/${ing.image}`} 
                         // alt={ing.name}
                       //  style={{ width: "100%", height: "auto" }} width={30} height={30}
                         // /> */}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import DishManagementForm from './DishManagementForm'; // Adjust the import path as needed
+import { BASE_URL } from '@/utils/apiconstant';
 
 export default function EditDishPage() {
   const [dishId, setDishId] = useState(null);
@@ -14,7 +15,7 @@ export default function EditDishPage() {
       setDishId(storedId);
 
       // Fetch dish details from API
-      fetch(`https://horaservices.com:3000/api/dish/details/${storedId}`)
+      fetch(`${BASE_URL}/api/dish/details/${storedId}`)
         .then((res) => res.json())
         .then((data) => {
           console.log('Dish data from API:', data);

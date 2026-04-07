@@ -245,7 +245,7 @@ const OrderList = () => {
   const updateOrderStatus = async (orderId, status) => {
     try {
       const response = await fetch(
-        "https://horaservices.com:3000/api/order/update_order_status",
+        `${BASE_URL}/api/order/update_order_status`,
         {
           method: "POST",
           headers: {
@@ -287,7 +287,7 @@ const OrderList = () => {
   const openSupplierDeatilsPopup = async (orderId) => {
     try {
       const response = await fetch(
-        `https://horaservices.com:3000/api/admin/getUserDetails/${orderId}`
+        `${BASE_URL}/api/admin/getUserDetails/${orderId}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch user details");
@@ -337,7 +337,7 @@ const OrderList = () => {
       console.log("Request Body:", requestBody);
 
       const response = await axios.post(
-        "https://horaservices.com:3000/api/order/edit",
+        `${BASE_URL}/api/order/edit`,
         requestBody,
         {
           headers: {
@@ -449,7 +449,7 @@ const OrderList = () => {
 
     try {
       const response = await fetch(
-        "https://horaservices.com:3000/api/order/edit",
+        `${BASE_URL}/api/order/edit`,
         {
           method: "POST",
           headers: {
@@ -489,7 +489,7 @@ const OrderList = () => {
     if (selectedOrderId2) {
       try {
         const response = await axios.post(
-          "https://horaservices.com:3000/api/order/cancelOrder",
+          `${BASE_URL}/api/order/cancelOrder`,
           { _id: selectedOrderId2 }, // Body
           {
             headers: {
@@ -602,7 +602,7 @@ const OrderList = () => {
 
     try {
       const answer = await fetch(
-        "https://horaservices.com:3000/api/multiple_image_upload",
+        `${BASE_URL}/api/multiple_image_upload`,
         {
           method: "POST",
           body: formThing,
@@ -640,7 +640,7 @@ const OrderList = () => {
 
     try {
       const response = await fetch(
-        "https://horaservices.com:3000/api/order/edit",
+        `${BASE_URL}/api/order/edit`,
         {
           method: "POST",
           headers: {
