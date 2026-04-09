@@ -479,3 +479,20 @@
       max-height: 95vh;
     }
   }
+.checkbox-container{
+ display: flex;
+ flex-direction: column;
+ gap: 1;
+}
+.checklist-body {
+  padding: 14px 16px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.checklist-body label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+}

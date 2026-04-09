@@ -34,7 +34,8 @@ const OrderList = () => {
   const [actionPopupChefOrderId, setActionPopupChefOrderId] = useState("");
   const [actionPopupOrderType, setActionPopupOrderType] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
-
+  const [decorationFields, setDecorationFields] = useState([]);
+const [order, setOrder] = useState(null);
   const [actionPopupChefOrder_Id, setActionPopupChefOrder_Id] = useState("");
 
   // supplier
@@ -273,7 +274,7 @@ const OrderList = () => {
     return updateOrderId;
   };
 
-  const openActionPopup = (orderId, order_id, orderType) => {
+  const openActionPopup = (orderId, order_id, orderType, order) => {
     console.log(orderId, "orderId");
     console.log(order_id, "order_id1");
     console.log(orderType, "orderType");
@@ -282,6 +283,7 @@ const OrderList = () => {
     setActionPopupOrderType(orderType);
     setActionPopupChefOrder_Id(order_id);
     setPopupOpen(true); // Open the popup
+    setOrder(order)
   };
 
   const openSupplierDeatilsPopup = async (orderId) => {
@@ -391,12 +393,44 @@ const OrderList = () => {
   const [selectedOrderId, setSelectedOrderId] = useState(null);
 
   const [decorationComment, setDecorationComment] = useState("");
-
   const [addOnList, setAddOnList] = useState([{ name: "", price: "" }]);
 
   const [totalAmountEdit, setTotalAmountEdit] = useState("");
   const [balanceAmountEdit, setBalanceAmountEdit] = useState("");
   const [advanceAmountEdit, setAdvanceAmountEdit] = useState("");
+
+const handleDecorationComment = (index, value) => {
+  const updated = [...decorationFields];
+  updated[index] = value;
+  setDecorationFields(updated);
+};
+
+const addDecorationField = () => {
+  setDecorationFields([...decorationFields, ""]);
+};
+useEffect(() => {
+  const comments = popupData?.decoration_comments;
+
+  if (comments) {
+    const lines = comments
+      .split("\n")
+      .filter(line => line.trim() !== ""); 
+
+    setDecorationComment(lines.join("\n"));
+    setDecorationFields(Array.from({ length: lines.length }, (_, i) => i));
+  } else {
+    setDecorationComment("");
+    setDecorationFields([0]);
+  }
+}, [popupData]);
+
+useEffect(() => {
+  if (decorationComment) {
+    const splitComments = decorationComment.split("\n");
+    setDecorationFields(splitComments);
+  }
+}, [decorationComment]);
+
 
   const handleOpenEditOrderPopup = (
     orderId,
@@ -438,7 +472,7 @@ const OrderList = () => {
   const handleSave = async () => {
     const requestData = {
       _id: selectedOrderId,
-      decoration_comments: decorationComment,
+      decoration_comments: decorationFields.join("\n"),
       add_on: addOnList, //add on list into array format
       total_amount: totalAmountEdit, //totalAmountEdit is when user click edit order popup
       balance_amount: balanceAmountEdit, //balanceAmountEdit is when user click edit order popup
@@ -1056,7 +1090,8 @@ const OrderList = () => {
                           openActionPopup(
                             order.order_id,
                             order._id,
-                            order.type
+                            order.type,
+                            order                        
                           );
                         }}
                       >
@@ -1613,19 +1648,36 @@ const OrderList = () => {
               <div className="popup">
                 <h2>Edit Order</h2>
                 <label
-                  htmlFor="totalAmountEdit"
-                  style={{ display: "block", fontWeight: "bold" }}
-                >
-                  Decoration Comments
-                </label>
-                <textarea
-                  type="text"
-                  value={decorationComment}
-                  onChange={(e) => setDecorationComment(e.target.value)}
-                  placeholder="Enter decoration comment"
-                  className="input-field"
-                  rows={4}
-                />
+  htmlFor="totalAmountEdit"
+  style={{ display: "block", fontWeight: "bold" }}
+>
+  Decoration Comments
+</label>
+
+<div className="editOrder-addon-form">
+  {decorationFields.map((field, index) => (
+    <div key={index} className="editOrder-comment-container">
+      <input
+        className="editOrder-comment-input"
+        value={field}
+        onChange={(e) =>
+          handleDecorationComment(index, e.target.value)
+        }
+        placeholder="Enter decoration comment"
+      />
+
+      {index === decorationFields.length - 1 && (
+        <button
+          type="button"
+          className="editOrder-add-new-btn"
+          onClick={addDecorationField}
+        >
+          Add
+        </button>
+      )}
+    </div>
+  ))}
+</div>
                 <div>
                   {/* Total Amount */}
                   <div
@@ -1857,6 +1909,7 @@ const OrderList = () => {
           actionPopupChefOrderId={actionPopupChefOrderId}
           actionPopupOrderType={actionPopupOrderType}
           actionPopupChefOrder_Id={actionPopupChefOrder_Id}
+          order={order}
           onClose={closePopup}
         />
       </div>
@@ -1943,7 +1996,7 @@ const OrderList = () => {
       </div>
 
       {/* </>} */}
-      <CallChecklist
+     <CallChecklist
         open={showChecklist}
         data={callChecklistData}
         onClose={() => setShowChecklist(false)}

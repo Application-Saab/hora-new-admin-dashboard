@@ -3,7 +3,7 @@ import "./Actionpopup.css";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import * as XLSX from "xlsx"; 
-import { BASE_URL } from "@/utils/apiconstant";
+import CallChecklistContent from "./CallChecklistContent";
 
 const categoryMap = {
   "65a92271ae1586258ccd0628": "anniversary-decoration",
@@ -26,11 +26,13 @@ const ActionPopup = ({
   actionPopupOrderType,
   actionPopupChefOrder_Id,
   onClose,
+  order,
 }) => {
   const [popupType, setPopupType] = useState("");
   const [orderDetails, setOrderDetails] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showChecklist, setShowChecklist] = useState(false);
   let apiUrl = "";
 
   let foodDeliveryInclusions = [
@@ -100,6 +102,10 @@ const ActionPopup = ({
 
     fetchOrderapi();
   }, [actionPopupOrderId, actionPopupChefOrderId, actionPopupOrderType]);
+
+  const handleCallClick = () => {
+    setShowChecklist(true); 
+  };
 
   const getOrderId = (e) => {
     const orderId1 = 10800 + e;
@@ -1234,6 +1240,7 @@ const ActionPopup = ({
                     </div>
 
                     <div className="order-summary-box">
+                      <div className="text-center">
                       <h3 style={{ color: "white" }}>Order Summary</h3>
                       <ul style={{ listStyleType: "none", padding: 0 }}>
                         <li className="priceList">
@@ -1284,6 +1291,32 @@ const ActionPopup = ({
                       >
                         Copy Order Summary(For Users)
                       </button>
+                      {order?.type === 1 &&
+                        <div style={{ marginTop: '10px' }}>
+                        {order?.call_checklist_exists === true ? 
+                        <button className="view-btn call-btn" onClick={() => handleCallClick()}>
+                          View Call Checklist
+                        </button>
+                        :
+                        <button className="call-btn add-btn" onClick={() => handleCallClick()}>
+                          Call Checklist
+                        </button>
+                        }
+                        </div>
+                        }
+                    </div>      
+
+                    {showChecklist && (
+                      <div className="callChecklist-container">
+                       <CallChecklistContent
+                       open={showChecklist}
+                       onClose={() => setShowChecklist(false)}
+                       data={order}
+                       cancleBtnColor="#fff"
+                      />
+                      </div>
+                    )}
+
                     </div>
                   </div>
                 </div>

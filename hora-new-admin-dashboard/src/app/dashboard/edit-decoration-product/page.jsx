@@ -5,6 +5,7 @@ import "./DecorationEditor.css";
 import { BASE_URL, EDIT_DECORATION_PRODUCT, PRODUCT_MEAL_TYPE } from "../../../utils/apiconstant";
 import Image from "next/image";
 import axios from "axios";
+import CheckboxGroup from "@/app/component/CheckboxGroup";
 
 const DecorationEditor = () => {
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
@@ -19,6 +20,31 @@ const DecorationEditor = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [mealProductTypes, setMealProductTypes] = useState([]);
+const [callChecklist, setCallChecklist] = useState({
+  designType: {}
+});
+
+const designTypeOptions = [
+  "Wall",
+  "Ring",
+  "Ring + Flex",
+  "Sequined",
+  "U Shape",
+  "Square Stand",
+  "Room Decor",
+  "Cradle",
+  "Flex",
+  "Artificial Flower",
+  "Real Flower",
+];
+
+const getDefaultDesignType = (data = {}) => {
+  const result = {};
+  designTypeOptions.forEach(item => {
+    result[item] = data?.[item] || false;
+  });
+  return result;
+};
 
   const handleSelectChange = async (event) => {
     const subCategory = event.target.value;
@@ -175,6 +201,7 @@ const DecorationEditor = () => {
       featured_image: image ? image : popupData.featured_image,
       tag: selectedTags,
       inclusion: formattedInclusion,
+      designType: callChecklist.designType
     };
 
     try {
@@ -208,6 +235,30 @@ const DecorationEditor = () => {
 
     setPopupData(null); // Close the popup after saving
   };
+
+const handleCheckboxChange = (section, item) => {
+  setCallChecklist(prev => ({
+    ...prev,
+    [section]: {
+      ...prev[section],
+      [item]: !prev[section]?.[item]   // toggle true/false
+    }
+  }));
+};
+useEffect(() => {
+  if (popupData?.designType) {
+    setCallChecklist(prev => ({
+      ...prev,
+      designType: getDefaultDesignType(popupData.designType)
+    }));
+  } else {
+    setCallChecklist(prev => ({
+      ...prev,
+      designType: getDefaultDesignType()
+    }));
+  }
+}, [popupData]);
+
 
   // Add this function to filter the data
   const filteredData = responseData.filter((item) => {
@@ -453,6 +504,18 @@ const DecorationEditor = () => {
                 ))}
                   </div>
                   </div>
+                  <div className="checkbox-container">
+  <div className="checklist-body">
+    <CheckboxGroup
+      key={"designType"}
+      title={"Explain the type of design"}
+      items={designTypeOptions}
+      section={"designType"}
+      checklist={callChecklist}
+      onChange={handleCheckboxChange}
+    />
+  </div>
+</div>
 
                   <div className="modal-full-width">
                     <div className="divider"></div>
