@@ -72,11 +72,7 @@ const EditCelebrationBoosterPopup = ({
     const form = new FormData();
     form.append("file", file);
 
-<<<<<<< HEAD
-    const res = await fetch("https://horaservices.com:3000/api/image_upload", {
-=======
     const res = await fetch(`${BASE_URL}/api/image_upload`, {
->>>>>>> b5e5102970d939bbe3a320fe94a8c81add566da4
       method: "POST",
       body: form,
     });
@@ -160,11 +156,7 @@ const EditCelebrationBoosterPopup = ({
               >
                 {formData.featured_image && (
                   <img
-<<<<<<< HEAD
-                    src={`https://horaservices.com/api/uploads/${formData.featured_image}`}
-=======
                     src={`${BASE_URL}/api/uploads/${formData.featured_image}`}
->>>>>>> b5e5102970d939bbe3a320fe94a8c81add566da4
                     alt="preview"
                     style={{
                       width: "60px",

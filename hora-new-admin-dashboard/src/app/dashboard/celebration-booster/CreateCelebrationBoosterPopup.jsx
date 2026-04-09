@@ -41,11 +41,7 @@ const CreateCelebrationBoosterPopup = ({ isOpen, onClose, onSuccess }) => {
 
     try {
       const res = await axios.post(
-<<<<<<< HEAD
-        "https://horaservices.com:3000/api/image_upload",
-=======
         `${BASE_URL}/api/image_upload`,
->>>>>>> b5e5102970d939bbe3a320fe94a8c81add566da4
         form,
       );
 

@@ -114,75 +114,6 @@ export default function UserAnalysisPage() {
   --------------------------------
   */
   const pageCounts = {};
-<<<<<<< HEAD
-
-  data.forEach(day => {
-    const allPages = (day.pages || []).flat(Infinity);
-
-    allPages.forEach(page => {
-      if (!page || typeof page !== "string") return;
-
-      const cleanPage = page.trim();
-      if (!cleanPage) return;
-
-      pageCounts[cleanPage] =
-        (pageCounts[cleanPage] || 0) + 1;
-    });
-  });
-
-  const sortedPages = Object.entries(pageCounts).sort(
-    (a, b) => b[1] - a[1]
-  );
-
-  /*
-  --------------------------------
-  BAR CHART (TOP PAGES)
-  --------------------------------
-  */
-  const topPages = sortedPages.slice(0, 5);
-
-  // const pageChartData = {
-  //   labels: topPages.map(([page]) =>
-  //     page.split("/").pop() || "home"
-  //   ),
-  //   datasets: [
-  //     {
-  //       label: "Page Views",
-  //       data: topPages.map(([, count]) => count),
-  //       borderWidth: 2
-  //     }
-  //   ]
-  // };
-
-  /*
-  --------------------------------
-  🔥 PAGE TREND LINE CHART
-  --------------------------------
-  */
-  const pageTrendDatasets = topPages.map(([page]) => ({
-    label: page.split("/").pop() || "home",
-    data: data.map(day => {
-      const allPages = (day.pages || []).flat(Infinity);
-      return allPages.filter(p => p === page).length;
-    }),
-    tension: 0.4
-  }));
-
-  const pageTrendChartData = {
-    labels,
-    datasets: pageTrendDatasets
-  };
-
-  /*
-  --------------------------------
-  SUMMARY
-  --------------------------------
-  */
-  const totalUsers = data.reduce((sum, d) => sum + d.users, 0);
-  // const maxUsers =
-  //   data.length > 0 ? Math.max(...data.map(d => d.users)) : 0;
-
-=======
 
   data.forEach(day => {
     const allPages = (day.pages || []).flat(Infinity);
@@ -251,7 +182,6 @@ export default function UserAnalysisPage() {
   const maxUsers =
     data.length > 0 ? Math.max(...data.map(d => d.users)) : 0;
 
->>>>>>> b5e5102970d939bbe3a320fe94a8c81add566da4
   /*
   --------------------------------
   UI

@@ -3,11 +3,7 @@ import "./Actionpopup.css";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import * as XLSX from "xlsx"; 
-<<<<<<< HEAD
 import CallChecklistContent from "./CallChecklistContent";
-=======
-import { BASE_URL } from "@/utils/apiconstant";
->>>>>>> b5e5102970d939bbe3a320fe94a8c81add566da4
 
 const categoryMap = {
   "65a92271ae1586258ccd0628": "anniversary-decoration",
