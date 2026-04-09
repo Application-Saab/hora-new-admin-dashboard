@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import "./UserFilter.css";
+import { BASE_URL } from "../../../utils/apiconstant";
 
 const InputGroup = ({ label, children }) => (
   <div className="input-group">
@@ -22,7 +23,7 @@ const UserFilter = () => {
 
     try {
       const response = await fetch(
-        "https://horaservices.com:3000/api/admin/admin_user_list",
+        `${BASE_URL}/api/admin/admin_user_list`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

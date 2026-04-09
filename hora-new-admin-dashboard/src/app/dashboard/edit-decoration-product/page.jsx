@@ -54,7 +54,7 @@ const getDefaultDesignType = (data = {}) => {
     if (subCategory) {
       try {
         const response = await fetch(
-          `https://horaservices.com:3000/api/meals/idByTag?tag=${subCategory}`
+          `${BASE_URL}/api/meals/idByTag?tag=${subCategory}`
         );
         const data = await response.json();
 
@@ -77,7 +77,7 @@ const getDefaultDesignType = (data = {}) => {
   const fetchSecondAPI = async (_id) => {
     try {
       const response = await fetch(
-        `https://horaservices.com:3000/api/Decoration/searchByTag/${_id}`
+        `${BASE_URL}/api/Decoration/searchByTag/${_id}`
       );
       const data = await response.json();
 
@@ -144,7 +144,7 @@ const getDefaultDesignType = (data = {}) => {
 
     try {
       const response = await fetch(
-        "https://horaservices.com:3000/api/image_upload",
+        `${BASE_URL}/api/image_upload`,
         {
           method: "POST",
           body: formData,
@@ -337,8 +337,7 @@ useEffect(() => {
                     <td>
                       {item.featured_image ? (
                         <Image
-                          // src={`https://horaservices.com/api/uploads/compressed_webp/${item.featured_image}`}
-                          src={`https://horaservices.com/api/uploads/compressed_webp/${
+                          src={`${BASE_URL}/api/uploads/compressed_webp/${
                             item?.featured_image.split(".")[0]
                           }.webp`}
                           alt={item.name}
@@ -380,7 +379,7 @@ useEffect(() => {
                         onClick={async () => {
                           const newStatus = item.status === 1 ? 0 : 1;
 
-                          await axios.post("https://horaservices.com:3000/api/dish/update_decoration_status", {
+                          await axios.post(`${BASE_URL}/api/dish/update_decoration_status`, {
                             id: item._id,
                             status: newStatus,
                           });
@@ -465,7 +464,7 @@ useEffect(() => {
                         <div className="image-preview-container">
                           <p className="image-label">New Image:</p>
                           <img
-                            src={`https://horaservices.com/api/uploads/${image}`}
+                            src={`${BASE_URL}/api/uploads/${image}`}
                             alt="New uploaded image"
                             className="image-preview"
                           />
@@ -474,7 +473,7 @@ useEffect(() => {
                         <div className="image-preview-container">
                           <p className="image-label">Current Image:</p>
                           <img
-                            src={`https://horaservices.com/api/uploads/compressed_webp/${popupData.featured_image}`}
+                            src={`${BASE_URL}/api/uploads/compressed_webp/${popupData.featured_image}`}
                             alt={popupData.name}
                             className="image-preview"
                           />

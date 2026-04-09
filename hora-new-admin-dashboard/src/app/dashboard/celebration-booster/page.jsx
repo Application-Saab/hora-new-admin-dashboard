@@ -161,7 +161,11 @@ const DishTable = () => {
                 <tr key={dish._id}>
                   <td className="dish-image">
                     <Image
+<<<<<<< HEAD
                       src={`https://horaservices.com/api/uploads/${dish.image}`}
+=======
+                      src={`${BASE_URL}/api/uploads/${dish.image}`}
+>>>>>>> b5e5102970d939bbe3a320fe94a8c81add566da4
                       alt={dish.name}
                       className="image"
                       width={40}
