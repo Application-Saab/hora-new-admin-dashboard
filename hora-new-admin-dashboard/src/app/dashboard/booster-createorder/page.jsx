@@ -139,7 +139,7 @@ const AddDecOrder = () => {
     };
     try {
       const response = await axios.post(
-        "https://horaservices.com:3000/api/admin/user_signup",
+        `${BASE_URL}/api/admin/user_signup`,
         requestData,
       );
       setCustomerId(response.data.dataToSave);
@@ -279,7 +279,7 @@ Advance Amount: ₹${advanceamount || "N/A"}
 Balance Amount: ₹${balanceamount || "N/A"}
 
 *Booster Name*: ${dishName}
-Image: https://horaservices.com/api/uploads/${product.featured_image}
+Image: ${BASE_URL}/api/uploads/${product.featured_image}
 
 Comment: ${comment}
 Order Taken By: ${orderTakenBy}
@@ -346,7 +346,7 @@ Order Taken By: ${orderTakenBy}
               <label htmlFor="featuredImage">Product Image</label>
               <div>
                 <Image
-                  src={`https://horaservices.com/api/uploads/${product.featured_image}`}
+                  src={`${BASE_URL}/api/uploads/${product.featured_image}`}
                   alt="Product"
                   width={200}
                   height={200}

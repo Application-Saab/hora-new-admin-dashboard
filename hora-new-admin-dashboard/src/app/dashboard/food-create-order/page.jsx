@@ -370,7 +370,7 @@ function AddFoodOrder() {
           {/* Column 1: Image */}
           <div className="order-cell_tb image-cell_tb">
             <Image
-              src={`https://horaservices.com/api/uploads/${item.image}`}
+              src={`${BASE_URL}/api/uploads/${item.image}`}
               alt={item.name}
               className="checkout-img_tb"
               width={100}
@@ -654,7 +654,7 @@ function AddFoodOrder() {
                               style={style.dishImgname}
                             >
                               <Image
-                                src={`https://horaservices.com/api/uploads/${dish.image}`}
+                                src={`${BASE_URL}/api/uploads/${dish.image}`}
                                 alt={dish.name}
                                 className="bottom-sheet-image"
                                 width={30}
@@ -755,7 +755,7 @@ function AddFoodOrder() {
                       <Image
                         // src="attachment_dish67.png"
 
-                        src={`https://horaservices.com/api/uploads/${dish.image}`}
+                        src={`${BASE_URL}/api/uploads/${dish.image}`}
                         alt={dish.name}
                         style={{
                           width: "40px",

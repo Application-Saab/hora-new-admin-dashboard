@@ -196,7 +196,7 @@ if (selectedItems.length <= 7) {
   const getTotalIngredients = (data) => {
     let totalIngredients = {};
     const defaultImage =
-      "https://horaservices.com/api/uploads/default-ingredient.png";
+      `${BASE_URL}/api/uploads/default-ingredient.png`;
 
     for (const dishId in data) {
       const dish = data[dishId];
@@ -576,7 +576,7 @@ if (selectedItems.length <= 7) {
                     <div className="dish-item">
                       <div className="dish-image">
                         <Image
-                          src={`https://horaservices.com/api/uploads/${item.image}`}
+                          src={`${BASE_URL}/api/uploads/${item.image}`}
                           alt={item.name}
                           width={50}
                           height={50}
@@ -652,7 +652,7 @@ if (selectedItems.length <= 7) {
                     <div key={index} className="selected-item-card">
                       <div className="selected-item-image">
                         <Image
-                          src={`https://horaservices.com/api/uploads/${item.image}`}
+                          src={`${BASE_URL}/api/uploads/${item.image}`}
                           alt={item.name}
                           width={50}
                           height={50}
@@ -703,7 +703,7 @@ if (selectedItems.length <= 7) {
                     <div key={index} className="ingredient-card">
                       <div className="ingredient-image">
                         <Image
-                          src={`https://horaservices.com/api/uploads/${ingredient.image}`}
+                          src={`${BASE_URL}/api/uploads/${ingredient.image}`}
                           alt={ingredient.name}
                           width={isMobile ? 60 : 80}
                           height={isMobile ? 60 : 80}

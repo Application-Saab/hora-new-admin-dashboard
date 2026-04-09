@@ -1,5 +1,6 @@
 'use client';
 import React, { useState } from "react";
+import { BASE_URL } from "../../../utils/apiconstant";
 
 const tagMapping = {
   "65a91598ae1586258cccffd4": "Birthday",
@@ -38,7 +39,7 @@ export default function OrderReportDownloader() {
     const tagIds = Object.keys(tagMapping);
     const tagResponses = await Promise.all(
       tagIds.map(tag =>
-        fetch(`https://horaservices.com:3000/api/Decoration/searchByTag/${tag}`)
+        fetch(`${BASE_URL}/api/Decoration/searchByTag/${tag}`)
           .then(res => res.json())
       )
     );
@@ -52,7 +53,7 @@ export default function OrderReportDownloader() {
     );
 
     // Step 2: Fetch admin order list
-    const adminResponse = await fetch(`https://horaservices.com:3000/api/admin/adminOrderList`, {
+    const adminResponse = await fetch(`${BASE_URL}/api/admin/adminOrderList`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

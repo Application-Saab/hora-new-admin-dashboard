@@ -2,7 +2,11 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "./CreateSupplierPopup.css";
+<<<<<<< HEAD
 import {supplierType} from "../../../utils/supplierType";
+=======
+import { BASE_URL } from "@/utils/apiconstant";
+>>>>>>> b5e5102970d939bbe3a320fe94a8c81add566da4
 
 const CreateSupplierPopup = ({ isOpen, onClose ,CustomerNumber}) => {
   const [fullName, setFullName] = useState("");
@@ -41,7 +45,7 @@ const CreateSupplierPopup = ({ isOpen, onClose ,CustomerNumber}) => {
   
     try {
       const response = await axios.post(
-        "https://horaservices.com:3000/api/admin/user_signup",
+        `${BASE_URL}/api/admin/user_signup`,
         supplierData,
         { headers: { "Content-Type": "application/json" } }
       );
