@@ -2,11 +2,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "./CreateSupplierPopup.css";
-<<<<<<< HEAD
 import {supplierType} from "../../../utils/supplierType";
-=======
 import { BASE_URL } from "@/utils/apiconstant";
->>>>>>> b5e5102970d939bbe3a320fe94a8c81add566da4
 
 const CreateSupplierPopup = ({ isOpen, onClose ,CustomerNumber}) => {
   const [fullName, setFullName] = useState("");
