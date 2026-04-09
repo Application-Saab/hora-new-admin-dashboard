@@ -2,14 +2,16 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "./CreateSupplierPopup.css";
+import {supplierType} from "../../../utils/supplierType";
 import { BASE_URL } from "@/utils/apiconstant";
+import {updateSupplierDetailsApi} from './supplierDetails.js';
 
 const CreateSupplierPopup = ({ isOpen, onClose ,CustomerNumber}) => {
   const [fullName, setFullName] = useState("");
   // const [email, setEmail] = useState("");
   const [mobileNumber, setMobileNumber] = useState(CustomerNumber);
-  const [foodType, setFoodType] = useState("true");
-  const [city, setCity] = useState("");
+  const [orderType, setOrderType] = useState("Decorator");
+  const [city, setCity] = useState("delhi");
   const [loading, setLoading] = useState(false);
 
   const handleCreate = async () => {
@@ -30,20 +32,11 @@ const CreateSupplierPopup = ({ isOpen, onClose ,CustomerNumber}) => {
       setLoading(false);
       return;
     }
-  
+
     const supplierData = {
-      aadhar_no: "",
-      age: "",
-      city: city.trim(),
-      experience: "",
-      is_veg: foodType === "true",  // Convert to boolean
-      job_type: "",
       name: fullName.trim(),
       phone: mobileNumber,
       role: "supplier",
-      userAppliance: [],
-      userCuisioness: [],
-      vechicle_type: "",
     };
   
     console.log("Supplier Data:", supplierData); // Debugging
@@ -54,16 +47,39 @@ const CreateSupplierPopup = ({ isOpen, onClose ,CustomerNumber}) => {
         supplierData,
         { headers: { "Content-Type": "application/json" } }
       );
-  
-      if (response.data.error && response.data.status === 503) {
-        alert("Supplier Already Exists");
-      } else if (response.status === 200) {
-        alert("Supplier Created Successfully!");
-        onClose();
+
+      if (!response?.data?.error) {
+      const newUserId = response?.data?.dataToSave?._id;
+      const newToken = response?.data?.token;
+
+      await handleSubmitDetails(newUserId, newToken);
+      } else {
+        alert("Supplier Already Added");
       }
     } catch (error) {
       console.error("Error creating supplier:", error?.response?.data || error);
       alert(`Error: ${error?.response?.data?.message || "Invalid request."}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleSubmitDetails = async (id, authToken) => {
+    setLoading(true);
+    const orderTypeValue = orderType === "Decorator" ? 1 : 8;
+    try {
+    await updateSupplierDetailsApi(id,
+    {
+    _id: id,
+    city: city,
+    order_type: orderTypeValue,
+    job_profile: orderType,
+    },
+  authToken
+);
+      alert("Details saved successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Error saving details");
     } finally {
       setLoading(false);
     }
@@ -107,30 +123,30 @@ const CreateSupplierPopup = ({ isOpen, onClose ,CustomerNumber}) => {
           />
         </div>
         <div className="popup-field">
-          <label>Food Type</label>
+          <label>Order Type:</label>
           <select
-            value={foodType}
-            onChange={(e) => setFoodType(e.target.value)}
-          >
-            {/* <option value="true">Veg</option>
-            <option value="false">Non-Veg</option> */}
-            <option value="Decoration">Decoration</option>
-            <option value="Chef">Chef</option>
-            <option value="Food Delivery or Live Catering">Food Delivery/Live Catering</option>
-            {/* <option value="Live Catering">Live Catering</option> */}
-            <option value="Photography">Photography</option>
-          </select>
+  value={orderType}
+  onChange={(e) => setOrderType(e.target.value)}
+>
+  <option value="">Select Type</option>
+
+  {supplierType.map((item, index) => (
+    <option key={index} value={item.value}>
+      {item.label}
+    </option>
+  ))}
+</select>
         </div>
         <div className="popup-field">
-          <label>City</label>
-          <input
-            type="text"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            placeholder="Enter city"
-            required
-          />
+          <label>City:</label>
+            <select value={city} onChange={(e) => setCity(e.target.value)}>
+              <option value="delhi">Delhi</option>
+              <option value="mumbai">Mumbai</option>
+              <option value="bangalore">Bangalore</option>
+              <option value="hyderabad">Hyderabad</option>
+            </select>
         </div>
+        
         <div className="popup-buttons">
           <button
             className="create-btn"
