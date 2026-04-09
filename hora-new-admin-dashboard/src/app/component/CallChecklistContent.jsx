@@ -2,85 +2,14 @@ import React, { useState, useEffect } from "react";
 import "./CallChecklist.css";
 import { eventList } from "@/constants/eventList";
 import SearchWithDropDown from "./SearchWithDropDown";
-import axios from "axios";
-import {
-  BASE_URL,
-  SAVE_CALL_CHECKLIST,
-  UPDATE_CALL_CHECKLIST,
-  MULTI_IMAGE_UPLOAD,
-  DELETE_CHECKLIST_IMAGE,
-} from "@/utils/apiconstant";
 import Image from "next/image";
 import CheckboxGroup from "./CheckboxGroup";
-
-const DEFAULT_CHECKLIST = {
-  designType: {},
-  rentalPolicy: {},
-  itemsVerified: {},
-  itemsVerifiedImages: {},
-  lights: {},
-  cakeTable: {},
-  locationType: {},
-  inclusionsExplained: false,
-  timeSlotVerified: false,
-  addressVerified: false,
-  mapVerified: false,
-  cancellationPolicy: false,
-  slotNotChangeable: false,
-  executorTimeInformed: false
-};
-const CHECKBOX_GROUP_CONFIG = [
-  {
-    title: "Explain the type of design",
-    section: "designType",
-    items: ["Wall", "Ring", "Ring + Flex", "Sequined", "U Shape", "Square Stand", "Room Decor", "Cradle", "Flex", "Artificial Flower", "Real Flower"]
-  },
-  {
-    title: "Explain rental policy (items returned after 24 hours)",
-    section: "rentalPolicy",
-    items: ["Ring", "Flex", "Artificial Flowers", "Balloons Foil", "Cutout", "Marquee light"]
-  },
-  {
-    title:
-      "Power supply should be near the decoration spot or extensions should be arranged by customer",
-    section: "lights",
-    items: ["Neon", "Focus"]
-  },
-  {
-    title: "Verify Cake Tables and neon light",
-    section: "cakeTable",
-    items: [
-      "Paper cake table",
-      "Golden stand cake table",
-      "Transparent stand cake table",
-      "Solid stand cake table with flex",
-      "Neon Light 8 inch",
-      "Neon light 12 inch",
-      "Marquee light 9 inch",
-      "Marquee light 32 inch",
-    ]
-  },
-  {
-    title: "Check if the decoration is happening at hotel or Home etc.",
-    section: "locationType",
-    items: ["Home", "Society Hall", "Restaurant", "Other"]
-  }
-];
-
+import { CHECKBOX_GROUP_CONFIG, keyMap, DEFAULT_CHECKLIST} from '@/utils/callChecklist';
+import { deleteChecklistImageApi, uploadChecklistImagesApi, updateCallChecklistApi, saveCallChecklistApi} from "@/services/callChecklist";
 
 const CallChecklistContent = ({ open, onClose, data = null, cancleBtnColor="#000" }) => {
   const isEditMode = data?.call_checklist_exists === true;
   const [eventName, setEventName] = useState("");
-
-  const keyMap = {
-    "Explain the inclusions and comments": "inclusionandcomment",
-    "Verify the time slot": "verifiedTimeslot",
-    "Verify the address": "varifiedAddress",
-    "Verify the Google map location": "verifiedMap",
-    "Inform about cancellation policy": "cancellationInformed",
-    "The slot cannot be changed on the day in order.": "slotVerified",
-    "The executor will reach your location between XX-YY timeslot": "executorTime"
-  };
 
   const [callChecklist, setCallChecklist] = useState(DEFAULT_CHECKLIST);
   const [originalChecklist, setOriginalChecklist] = useState(DEFAULT_CHECKLIST);
@@ -115,11 +44,7 @@ const CallChecklistContent = ({ open, onClose, data = null, cancleBtnColor="#000
       newFiles.forEach(file => formData.append("files", file));
       formData.append("item", item);
 
-      const res = await axios.post(
-        `${BASE_URL}${MULTI_IMAGE_UPLOAD}`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      const res = await uploadChecklistImagesApi(formData);
 
       const oldImages = images.filter(img => typeof img === "string");
 
@@ -161,11 +86,11 @@ const CallChecklistContent = ({ open, onClose, data = null, cancleBtnColor="#000
     // Backend delete
     if (typeof image === "string") {
       try {
-        await axios.post(`${BASE_URL}${DELETE_CHECKLIST_IMAGE}`, {
-          orderId: data._id,
-          itemKey: item,
-          imageName: image
-        });
+      await deleteChecklistImageApi({
+       orderId: data._id,
+       itemKey: item,
+       imageName: image
+      });
       } catch (err) {
         console.error(err);
         alert("Failed to delete image from server");
@@ -271,7 +196,6 @@ const CallChecklistContent = ({ open, onClose, data = null, cancleBtnColor="#000
   const handleSave = async () => {
     try {
       let payload;
-      let url;
 
       if (isEditMode) {
         const changedChecklist = getChangedFields(originalChecklist, callChecklist);
@@ -286,8 +210,7 @@ const CallChecklistContent = ({ open, onClose, data = null, cancleBtnColor="#000
           call_checklist: callChecklist
         };
 
-        url = `${BASE_URL}${UPDATE_CALL_CHECKLIST}/${data?._id}`;
-        await axios.put(url, payload);
+        await updateCallChecklistApi(data?._id, payload);
       } else {
         payload = {
           orderId: data?._id,
@@ -295,8 +218,7 @@ const CallChecklistContent = ({ open, onClose, data = null, cancleBtnColor="#000
           call_checklist: callChecklist
         };
 
-        url = `${BASE_URL}${SAVE_CALL_CHECKLIST}`;
-        await axios.post(url, payload);
+        await saveCallChecklistApi(payload);
       }
 
       alert(isEditMode ? "Checklist updated successfully" : "Checklist saved successfully");
