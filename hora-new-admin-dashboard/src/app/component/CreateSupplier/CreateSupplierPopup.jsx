@@ -4,6 +4,7 @@ import axios from "axios";
 import "./CreateSupplierPopup.css";
 import {supplierType} from "../../../utils/supplierType";
 import { BASE_URL } from "@/utils/apiconstant";
+import {updateSupplierDetailsApi} from './supplierDetails.js';
 
 const CreateSupplierPopup = ({ isOpen, onClose ,CustomerNumber}) => {
   const [fullName, setFullName] = useState("");
@@ -66,21 +67,15 @@ const CreateSupplierPopup = ({ isOpen, onClose ,CustomerNumber}) => {
     setLoading(true);
     const orderTypeValue = orderType === "Decorator" ? 1 : 8;
     try {
-      await axios.post(
-        `https://horaservices.com:3000/api/users/supplier_personal_details_update/${id}`,
-        {
-          _id: id,
-          city: city,
-          order_type: orderTypeValue,
-          job_profile: orderType,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: authToken,
-          },
-        },
-      );
+    await updateSupplierDetailsApi(id,
+    {
+    _id: id,
+    city: city,
+    order_type: orderTypeValue,
+    job_profile: orderType,
+    },
+  authToken
+);
       alert("Details saved successfully!");
     } catch (err) {
       console.error(err);

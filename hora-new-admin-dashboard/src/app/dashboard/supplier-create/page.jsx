@@ -4,6 +4,7 @@ import axios from "axios";
 import "./testing.css";
 import { supplierType } from "@/utils/supplierType";
 import { BASE_URL } from "../../../utils/apiconstant";
+import { updateSupplierDetailsApi} from '../../component/CreateSupplier/supplierDetails.js';
 
 const Testing = () => {
   const [name, setName] = useState("");
@@ -47,20 +48,14 @@ const Testing = () => {
     const orderTypeValue = orderType === "Decorator" ? 1 : 8;
 
     try {
-      await axios.post(
-        `${BASE_URL}/api/users/supplier_personal_details_update/${userId}`,
-        {
+       await updateSupplierDetailsApi(userId,
+          {
           _id: userId,
           city: city,
           order_type: orderTypeValue,
           job_profile: orderType,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token,
           },
-        },
+        token
       );
       alert("Details saved successfully!");
       setShowModal(false);
