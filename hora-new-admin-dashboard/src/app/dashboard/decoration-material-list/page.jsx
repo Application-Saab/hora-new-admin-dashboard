@@ -1,15 +1,14 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import "./decoration-material-list.css";
 import Image from "next/image";
 import CreateMaterialPopup from "./CreateNewMaterialPopup";
 import EditMaterialPopup from "./EditMaterialPopup";
 import {
-  BASE_URL,
-  GET_DECORATION_MATERIALS,
-  UPDATE_DECORATION_MATERIAL,
-} from "@/utils/apiconstant";
+  fetchDecorationMaterials,
+  handleMaterialStatusToggle,
+} from "./decorationMaterialListServices";
+import { BASE_URL } from "@/utils/apiconstant";
 
 const DishTable = () => {
   const [dishes, setDishes] = useState([]);
@@ -33,47 +32,23 @@ const DishTable = () => {
   const [showCreateMaterialPopup, setShowCreateMaterialPopup] = useState(false);
   const [showEditMaterialPopup, setShowEditMaterialPopup] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState(null);
-  
-  useEffect(() => {
-    fetchData();
-  }, [page, searchName, materialCategory, materialStatus]);
 
-  const fetchData = async () => {
-    try {
-      setError(null);
-      setLoading(true);
-
-      // Prepare request payload
-      const payload = {
-        page: page,
-        per_page: 10,
-        materialName: searchName,
-      };
-
-      // Add is_dish filter if selected
-      if (materialCategory) {
-        payload.materialCategory = materialCategory;
-      }
-
-      // Add status filter if selected
-      if (materialStatus) {
-        payload.materialStatus = parseInt(materialStatus);
-      }
-
-      const response = await axios.post(
-        `${BASE_URL}${GET_DECORATION_MATERIALS}`,
-        payload,
-      );
-
-      setDishes(response.data.data.materials);
-      setPagination(response.data.data.paginate);
-    } catch (error) {
-      setError("Error fetching decoration material data");
-      console.error("Error fetching decoration material data:", error);
-    } finally {
-      setLoading(false);
-    }
+  const callMaterialAPi = () => {
+    fetchDecorationMaterials(
+      setError,
+      setLoading,
+      setDishes,
+      setPagination,
+      page,
+      searchName,
+      materialCategory,
+      materialStatus,
+    );
   };
+
+  useEffect(() => {
+    callMaterialAPi();
+  }, [page, searchName, materialCategory, materialStatus]);
 
   const handlePageChange = (newPage) => setPage(newPage);
 
@@ -98,32 +73,6 @@ const DishTable = () => {
   const handleStatusChange = (e) => {
     setMaterialStatus(e.target.value);
     setPage(1); // Reset to first page when filtering
-  };
-
-  const handleStatusToggle = async (id, currentStatus) => {
-    const newStatus = currentStatus === 1 ? 2 : 1;
-
-    try {
-      const response = await fetch(`${BASE_URL}${UPDATE_DECORATION_MATERIAL}/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          _id: id,
-          materialStatus: newStatus,
-        }),
-      });
-
-      if (response.ok) {
-        fetchData();
-        console.log("Status updated successfully");
-      } else {
-        console.error("Failed to update status");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-    }
   };
 
   return (
@@ -195,7 +144,7 @@ const DishTable = () => {
                 <tr key={dish._id}>
                   <td className="dish-image">
                     <Image
-                      src={`https://horaservices.com/api/uploads/${dish.image}`}
+                      src={`${BASE_URL}/api/uploads/${dish.image}`}
                       alt={dish.name}
                       className="image"
                       width={40}
@@ -214,7 +163,11 @@ const DishTable = () => {
                   <td>
                     <button
                       onClick={() =>
-                        handleStatusToggle(dish._id, dish.materialStatus)
+                        handleMaterialStatusToggle(
+                          dish._id,
+                          dish.materialStatus,
+                          () => callMaterialAPi(),
+                        )
                       }
                       className={`status-button ${dish.materialStatus === 1 ? "active" : "inactive"}`}
                     >
@@ -244,14 +197,14 @@ const DishTable = () => {
           <CreateMaterialPopup
             isOpen={showCreateMaterialPopup}
             onClose={() => setShowCreateMaterialPopup(false)}
-            onSuccess={fetchData}
+            onSuccess={callMaterialAPi}
           />
         )}
         {showEditMaterialPopup && (
           <EditMaterialPopup
             isOpen={showEditMaterialPopup}
             onClose={() => setShowEditMaterialPopup(false)}
-            onSuccess={fetchData}
+            onSuccess={callMaterialAPi}
             materialData={selectedMaterial}
           />
         )}

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./CreateNewMaterialPopup.css";
-import { BASE_URL, CREATE_DECORATION_MATERIAL } from "@/utils/apiconstant";
+import { handleEditMaterialList, handleFileUploadMaterialList } from "./decorationMaterialListServices";
 
 const CreateDecoarationMaterialPopup = ({ isOpen, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -30,65 +30,19 @@ const CreateDecoarationMaterialPopup = ({ isOpen, onClose, onSuccess }) => {
   };
 
   const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    try {
-      const form = new FormData();
-      form.append("file", file);
-
-      const res = await fetch("https://horaservices.com:3000/api/image_upload", {
-        method: "POST",
-        body: form,
-      });
-
-      const data = await res.json();
-
-      setFormData((prev) => ({
-        ...prev,
-        images: data.data,
-      }));
-    } catch (error) {
-      console.log(error);
-      alert("Image upload failed");
-    }
+    handleFileUploadMaterialList(e, setFormData);
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoadingCreate(true);
-
-    const payload = {
-      ...formData,
-      vendorMaterialPrice: parseFloat(formData.vendorMaterialPrice) || 0,
-      vendorMaterialRateRetail:
-        parseFloat(formData.vendorMaterialRateRetail) || 0,
-      vendorMaterialRateWholesale:
-        parseFloat(formData.vendorMaterialRateWholesale) || 0,
-    }
-
-    try {
-      const res = await fetch(`${BASE_URL}${CREATE_DECORATION_MATERIAL}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-
-      if (data?.success === false || data) {
-        alert("Material Created Successfully");
-        onSuccess();
-        onClose();
-      }
-    } catch (err) {
-      console.log(err);
-      alert("Error creating material");
-    } finally {
-      setLoadingCreate(false);
-    }
+    handleEditMaterialList(
+      e,
+      formData,
+      null,
+      onSuccess,
+      onClose,
+      setLoadingCreate,
+      false,
+    );
   };
 
   if (!isOpen) return null;

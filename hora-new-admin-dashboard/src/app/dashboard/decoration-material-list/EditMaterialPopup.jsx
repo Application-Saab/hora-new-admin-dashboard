@@ -1,7 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import "./CreateNewMaterialPopup.css";
-import { BASE_URL, UPDATE_DECORATION_MATERIAL } from "@/utils/apiconstant";
+import { BASE_URL } from "@/utils/apiconstant";
+import {
+  handleEditMaterialList,
+  handleFileUploadMaterialList,
+} from "./decorationMaterialListServices";
 
 const EditDecoarationMaterialPopup = ({
   isOpen,
@@ -57,69 +61,19 @@ const EditDecoarationMaterialPopup = ({
     }));
   };
 
-  // Image upload
   const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    try {
-      const form = new FormData();
-      form.append("file", file);
-
-      const res = await fetch("https://horaservices.com:3000/api/image_upload", {
-        method: "POST",
-        body: form,
-      });
-
-      const data = await res.json();
-
-      setFormData((prev) => ({
-        ...prev,
-        images: data.data,
-      }));
-    } catch (error) {
-      console.log(error);
-      alert("Image upload failed");
-    }
+    handleFileUploadMaterialList(e, setFormData);
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoadingUpdate(true);
-
-    try {
-      const payload = {
-        ...formData,
-        vendorMaterialPrice: parseFloat(formData.vendorMaterialPrice) || 0,
-        vendorMaterialRateRetail:
-          parseFloat(formData.vendorMaterialRateRetail) || 0,
-        vendorMaterialRateWholesale:
-          parseFloat(formData.vendorMaterialRateWholesale) || 0,
-      };
-      const res = await fetch(
-        `${BASE_URL}${UPDATE_DECORATION_MATERIAL}/${materialData._id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        },
-      );
-
-      const data = await res.json();
-
-      if (data) {
-        alert("Material Updated Successfully");
-        onSuccess();
-        onClose();
-      }
-    } catch (err) {
-      console.log(err);
-      alert("Error updating material");
-    } finally {
-      setLoadingUpdate(false);
-    }
+    handleEditMaterialList(
+      e,
+      formData,
+      materialData._id,
+      onSuccess,
+      onClose,
+      setLoadingUpdate,
+    );
   };
 
   if (!isOpen) return null;
@@ -251,7 +205,7 @@ const EditDecoarationMaterialPopup = ({
               >
                 {formData.images && (
                   <img
-                    src={`https://horaservices.com/api/uploads/${formData.images}`}
+                    src={`${BASE_URL}/api/uploads/${formData.images}`}
                     alt="preview"
                     style={{
                       width: "60px",
