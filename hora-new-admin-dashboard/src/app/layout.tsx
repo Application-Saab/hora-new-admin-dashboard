@@ -30,6 +30,8 @@ const menuItems = [
   
   { label: "User Analysis", icon: <FaClipboardList />, url: "/dashboard/user-analysis" },
 
+  { label: "Wonderland Tracking", icon: <FaClipboardList />, url: "/dashboard/wonderland-tracking" },
+
   {
     label: "Order Details",
     icon: <FaClipboardList />,

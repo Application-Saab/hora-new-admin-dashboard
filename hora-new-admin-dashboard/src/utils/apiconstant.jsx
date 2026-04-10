@@ -41,3 +41,7 @@ export const CREATE_CELEBRATION_BOOSTER = '/api/celebration-booster/createCelebr
 export const UPDATE_CELEBRATION_BOOSTER = '/api/celebration-booster/updateCelebrationBooster';
 export const GET_CELEBRATION_BOOSTERS = '/api/celebration-booster/adminCelebrationBoosterList';
 export const GET_CELEBRATION_BOOSTERS_BY_NAME = '/api/celebration-booster/getCelebrationBoosterByName';
+
+// Wonderland tracking routes
+export const GET_WONDERLAND_GLOBAL_STATS = '/api/customer/event/all-tracking';
+export const GET_WONDERLAND_LISTING_DATA = '/api/customer/event/admin_all_details';
