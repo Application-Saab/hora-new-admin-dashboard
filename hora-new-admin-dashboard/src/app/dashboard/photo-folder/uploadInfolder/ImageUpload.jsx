@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import ThumbnailGallery from "./ThumbnailGallery";
 import Image from "next/image";
+import { BASE_URL } from "../../../../utils/apiconstant";
 
 
 const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages }) => {
@@ -218,11 +219,11 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages }
         <div style={{ marginBottom: "1rem" }}>
           <h4>Folder link to share:</h4>
           <a
-            href={`https://horaservices.com/photo-gallery?folderName=${folderTitle}&customerId=${customerId}`}
+            href={`${BASE_URL}/photo-gallery?folderName=${folderTitle}&customerId=${customerId}`}
             target="_blank"
             rel="noreferrer"
           >
-            https://horaservices.com/photo-gallery?folderName={folderTitle}
+            ${BASE_URL}/photo-gallery?folderName={folderTitle}
             &customerId={customerId}
           </a>
         </div>

@@ -20,6 +20,7 @@ import {
 } from "react-icons/fa";
 import { GiFireworkRocket } from "react-icons/gi";
 import { useRouter, usePathname } from "next/navigation";
+import { BASE_URL } from "@/utils/apiconstant";
 
 //  MENU ITEMS WITH GROUPS
 const menuItems = [
@@ -306,7 +307,7 @@ export default function RootLayout({
 
       try {
         const response = await axios.post(
-          "https://horaservices.com:3000/api/admin/admin_user_list",
+          `${BASE_URL}/api/admin/admin_user_list`,
           {
             email: adminEmail,
             role: "admin",

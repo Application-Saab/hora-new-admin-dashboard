@@ -47,7 +47,6 @@ const AddDecOrder = () => {
   const [comment, setComment] = useState("");
   const [dishNameError, setDishNameError] = useState("");
   const [commentFields, setCommentFields] = useState([0]);
-  const [dishNameError, setDishNameError] = useState('')
   // const [error, setError] = useState(null);
 
   const [loading, setLoading] = useState(false);
@@ -575,8 +574,8 @@ const addCommentField = () => {
     console.log(requestData, "requestion data");
     try {
       const response = await axios.post(
-        "https://horaservices.com:3000/api/admin/user_signup",
-        requestData,
+        `${BASE_URL}/api/admin/user_signup`,
+        requestData
       );
 
       console.log("Customer added:", response.data.dataToSave._id);
@@ -779,7 +778,7 @@ const addCommentField = () => {
   Balance Amount: ₹${balanceamount || "N/A"}
   
   *Product Name*: ${dishName}
-  Product Image URL: https://horaservices.com/api/uploads/${product.featured_image}
+  Product Image URL: ${BASE_URL}/api/uploads/${product.featured_image}
   
   *Add-On Items*:
   ${addons}
@@ -852,7 +851,7 @@ const addCommentField = () => {
               <label htmlFor="featuredImage">Product Image</label>
               <div>
                 <Image
-                  src={`https://horaservices.com/api/uploads/${product.featured_image}`}
+                  src={`${BASE_URL}/api/uploads/${product.featured_image}`}
                   alt="Product"
                   width={200}
                   height={200}

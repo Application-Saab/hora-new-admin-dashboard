@@ -15,6 +15,7 @@ import {
 } from "chart.js";
 
 import { Line } from "react-chartjs-2";
+import { BASE_URL } from "../../../utils/apiconstant";
 
 ChartJS.register(
   CategoryScale,
@@ -36,7 +37,7 @@ export default function UserAnalysisPage() {
   */
   const fetchData = (query) => {
     fetch(
-      `https://horaservices.com:3000/api/analytics/visits/unique/range?${query}`
+      `${BASE_URL}/api/analytics/visits/unique/range?${query}`
     )
       .then(res => res.json())
       .then(res => setData(res.data || []))

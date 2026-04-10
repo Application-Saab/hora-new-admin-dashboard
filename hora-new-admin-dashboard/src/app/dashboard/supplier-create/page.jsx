@@ -2,6 +2,9 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "./testing.css";
+import { supplierType } from "@/utils/supplierType";
+import { BASE_URL } from "../../../utils/apiconstant";
+import { updateSupplierDetailsApi} from '../../component/CreateSupplier/supplierDetails.js';
 
 const Testing = () => {
   const [name, setName] = useState("");
@@ -18,7 +21,7 @@ const Testing = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        "https://horaservices.com:3000/api/admin/user_signup",
+        `${BASE_URL}/api/admin/user_signup`,
         {
           name,
           phone,
@@ -45,20 +48,14 @@ const Testing = () => {
     const orderTypeValue = orderType === "Decorator" ? 1 : 8;
 
     try {
-      await axios.post(
-        `https://horaservices.com:3000/api/users/supplier_personal_details_update/${userId}`,
-        {
+       await updateSupplierDetailsApi(userId,
+          {
           _id: userId,
           city: city,
           order_type: orderTypeValue,
           job_profile: orderType,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token,
           },
-        },
+        token
       );
       alert("Details saved successfully!");
       setShowModal(false);
@@ -106,20 +103,17 @@ const Testing = () => {
             </select>
             <label>Order Type:</label>
             <select
-              value={orderType}
-              onChange={(e) => setOrderType(e.target.value)}
-            >
-              <option value="Decorator">Decorator</option>
-              <option value="photography">Photography</option>
-              <option value="chef">Chef</option>
-              <option value="waiter">Waiter</option>
-              <option value="bar_tender">Bar Tender</option>
-              <option value="cleaner">Cleaner</option>
-              <option value="food_delivery">Food Delivery</option>
-              <option value="live_catering">Live Catering</option>
-              <option value="magician">Magician</option>
-              <option value="tattoo_artist">Tattoo Artist</option>
-            </select>
+  value={orderType}
+  onChange={(e) => setOrderType(e.target.value)}
+>
+  <option value="">Select Type</option>
+
+  {supplierType.map((item, index) => (
+    <option key={index} value={item.value}>
+      {item.label}
+    </option>
+  ))}
+</select>
             <button onClick={handleSubmitDetails}>Submit</button>
             <button onClick={() => setShowModal(false)} className="close-btn">
               Cancel

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { PieChart, Pie, Tooltip, Legend, Cell } from "recharts";
+import { BASE_URL } from "../../../utils/apiconstant";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#A52A2A"];
 
@@ -11,7 +12,7 @@ const VendorCity = () => {
   const fetchOrders = async () => {
     try {
       const { data } = await axios.post(
-        "https://horaservices.com:3000/api/admin/adminOrderList",
+          `${BASE_URL}/api/admin/adminOrderList`,
         {
           page: 1,
           per_page: 1000,
