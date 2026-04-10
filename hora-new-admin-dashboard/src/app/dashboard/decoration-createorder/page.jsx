@@ -32,7 +32,6 @@ const AddDecOrder = () => {
   const [city, setCity] = useState("");
   const [pincode, setPincode] = useState("");
   const [product, setProduct] = useState(null);
-  console.log('%c [ product ]-35', 'font-size:13px; background:pink; color:#bf2c9f;', product)
   const [isContinueClicked, setIsContinueClicked] = useState(false);
   const [showProductDetails, setShowProductDetails] = useState(false);
   const [isFetched, setIsFetched] = useState(false);
@@ -497,7 +496,6 @@ const addCommentField = () => {
           const url = `${BASE_URL}${GET_DECORATION_BY_NAME}${encodeURIComponent(dishName)}`;
           const response = await axios.get(url);
           const productData = response.data?.data?.[0];
-          console.log(response.data?.data?.[0]);
           if (productData) {
             setProduct(productData);
             setProductID(productData._id);
@@ -571,14 +569,11 @@ const addCommentField = () => {
       email: "",
       role: "customer",
     };
-    console.log(requestData, "requestion data");
     try {
       const response = await axios.post(
         `${BASE_URL}/api/admin/user_signup`,
         requestData
       );
-
-      console.log("Customer added:", response.data.dataToSave._id);
       setCustomerId(response.data.dataToSave);
       setMessage("Customer successfully added.");
       window.location.reload();
@@ -612,7 +607,6 @@ const addCommentField = () => {
       const url = BASE_URL + SAVE_LOCATION_ENDPOINT;
 
       const address2 = address + pincode;
-      console.log(address2, "address2");
       const requestDataa = {
         address1: address2,
         address2: googleLocation,
@@ -621,7 +615,6 @@ const addCommentField = () => {
         userId: customerId,
       };
 
-      console.log(requestDataa, "requestdataa");
       const token =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OGMxMGQxY2M5YzY3Y2M0N2NlYWU5MGEiLCJuYW1lIjoiIiwiZW1haWwiOiIiLCJwaG9uZSI6IjExMDAxMjMyNTIiLCJyb2xlIjoiY3VzdG9tZXIiLCJpYXQiOjE3NTc0ODIyODAsImV4cCI6MTc4OTAxODI4MH0.pQYGg7IKV36-5p-ko2FNksYZ9JvoIjkXmAl1snlXALs";
 
@@ -649,7 +642,6 @@ const addCommentField = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setlLoading(true);
-    console.log("handlesubmit");
 
     const add_on = Object.keys(selectedItems).map((id) => {
       const item = itemsData.find((i) => i.id === parseInt(id));
@@ -663,11 +655,7 @@ const addCommentField = () => {
       name: product.name,
       price: product.price,
     }));
-
     const combinedAddOns = [...add_on, ...addOnProduct];
-
-    console.log(combinedAddOns, "All Add-Ons Combined");
-
     const formattedDate = date ? formatDate(date) : null;
 
     const addressID = await saveAddress();
@@ -705,9 +693,7 @@ const addCommentField = () => {
       eventName: selectedEvent,
       inclusionVariables: inclusions
     };
-
-    console.log(requestData, "requestData decoration");
-
+    
     try {
       const response = await axios.post(
         `${BASE_URL}${CONFIRM_ORDER_ENDPOINT}`,
