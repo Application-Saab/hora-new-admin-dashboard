@@ -1,13 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import "./wonderland-tracking.css";
 import {
-  BASE_URL,
-  GET_WONDERLAND_GLOBAL_STATS,
-  GET_WONDERLAND_LISTING_DATA,
-} from "@/utils/apiconstant";
-import { WonderlandTrackingTable } from "./wonderlandTrackingServices.jsx";
+  fetchWonderlandListingData,
+  fetchWonderlandStats,
+} from "./wonderlandTrackingServices";
 
 const AdminAnalytics = () => {
   const [type, setType] = useState("byUsers");
@@ -23,45 +20,20 @@ const AdminAnalytics = () => {
   const [dateFilter, setDateFilter] = useState("all");
 
   useEffect(() => {
-    fetchStats();
+    fetchWonderlandStats(setStats);
   }, []);
 
   useEffect(() => {
-    fetchData();
+    fetchWonderlandListingData(
+      setLoading,
+      setData,
+      setPagination,
+      type,
+      page,
+      debouncedSearch,
+      dateFilter,
+    );
   }, [type, page, debouncedSearch, dateFilter]);
-
-  const fetchStats = async () => {
-    try {
-      const res = await axios.get(`${BASE_URL}${GET_WONDERLAND_GLOBAL_STATS}`);
-      setStats(res.data.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-
-      const res = await axios.post(
-        `${BASE_URL}${GET_WONDERLAND_LISTING_DATA}`,
-        {
-          type,
-          page,
-          per_page: 10,
-          search,
-          dateFilter,
-        },
-      );
-
-      setData(res.data.data.data);
-      setPagination(res.data.data.paginate);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -70,6 +42,21 @@ const AdminAnalytics = () => {
 
     return () => clearTimeout(timer);
   }, [search]);
+
+  const formatDateDDMMYYYY = (dateInput) => {
+    if (!dateInput) return "N/A";
+    const d = new Date(dateInput);
+
+    if (isNaN(d.getTime())) {
+      return "Invalid Date";
+    }
+
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+
+    return `${day}/${month}/${year}`;
+  };
 
   return (
     <div className="container">
@@ -136,9 +123,63 @@ const AdminAnalytics = () => {
           <option value="last_1_year">Last 1 Year</option>
         </select>
       </div>
+      <div className="table-container">
+        <table>
+          <thead>
+            {type === "byUsers" ? (
+              <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Hosted Events</th>
+                <th>Guest Events</th>
+                <th>Posts</th>
+                <th>Wonderland</th>
+              </tr>
+            ) : (
+              <tr>
+                <th>Wonderland ID</th>
+                <th>Event Name</th>
+                <th>Host Phone</th>
+                <th>Guests</th>
+                <th>Posts</th>
+                <th>Date</th>
+              </tr>
+            )}
+          </thead>
 
-      <WonderlandTrackingTable data={data} type={type} />
-
+          <tbody>
+            {data.length > 0 ? (
+              data.map((item, i) =>
+                type === "byUsers" ? (
+                  <tr key={i}>
+                    <td>{item.name}</td>
+                    <td>{item.phone}</td>
+                    <td>{item.hostedEventsCount}</td>
+                    <td>{item.guestEventsCount}</td>
+                    <td>{item.postsCount}</td>
+                    <td>{item.fromWonderland ? "Yes" : "No"}</td>
+                  </tr>
+                ) : (
+                  <tr key={i}>
+                    <td>{item.wonderland_id}</td>
+                    <td>{item.hostName}</td>
+                    <td>{item.hostPhone}</td>
+                    <td>{item.guestCount}</td>
+                    <td>{item.photoCount}</td>
+                    <td>{formatDateDDMMYYYY(item.eventDate)}</td>
+                  </tr>
+                ),
+              )
+            ) : (
+              <tr>
+                <td colSpan="5" className="no-data">
+                  No Data Found
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
       {data.length > 0 && (
         <div className="pagination">
           <button
