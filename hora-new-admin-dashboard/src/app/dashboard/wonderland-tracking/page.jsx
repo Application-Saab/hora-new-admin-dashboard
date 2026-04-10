@@ -4,7 +4,7 @@ import "./wonderland-tracking.css";
 import {
   fetchWonderlandListingData,
   fetchWonderlandStats,
-} from "./wonderlandTrackingServices";
+} from "../../../services/wonderlandTrackingServices";
 
 const AdminAnalytics = () => {
   const [type, setType] = useState("byUsers");
