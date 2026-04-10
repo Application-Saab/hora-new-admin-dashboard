@@ -5,7 +5,7 @@ import { BASE_URL } from "@/utils/apiconstant";
 import {
   handleEditMaterialList,
   handleFileUploadMaterialList,
-} from "./decorationMaterialListServices";
+} from "../../../services/decorationMaterialListServices";
 
 const EditDecoarationMaterialPopup = ({
   isOpen,

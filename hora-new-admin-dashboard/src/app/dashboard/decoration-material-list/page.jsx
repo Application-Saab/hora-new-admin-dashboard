@@ -7,7 +7,7 @@ import EditMaterialPopup from "./EditMaterialPopup";
 import {
   fetchDecorationMaterials,
   handleMaterialStatusToggle,
-} from "./decorationMaterialListServices";
+} from "../../../services/decorationMaterialListServices";
 import { BASE_URL } from "@/utils/apiconstant";
 
 const DishTable = () => {

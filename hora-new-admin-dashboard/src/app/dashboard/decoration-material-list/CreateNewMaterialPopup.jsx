@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./CreateNewMaterialPopup.css";
-import { handleEditMaterialList, handleFileUploadMaterialList } from "./decorationMaterialListServices";
+import { handleEditMaterialList, handleFileUploadMaterialList } from "../../../services/decorationMaterialListServices";
 
 const CreateDecoarationMaterialPopup = ({ isOpen, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
