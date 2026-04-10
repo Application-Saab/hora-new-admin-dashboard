@@ -16,6 +16,7 @@ import {
   FaUtensils,
   FaChevronDown,
   FaChevronRight,
+  FaListUl 
 } from "react-icons/fa";
 import { GiFireworkRocket } from "react-icons/gi";
 import { useRouter, usePathname } from "next/navigation";
@@ -66,6 +67,11 @@ const menuItems = [
         label: "Decoration-Order-Report",
         icon: <FaCamera />,
         url: "/dashboard/Decoration-Order-Report"
+      },
+      {
+        label: "Material List",
+        icon: <FaListUl  />,
+        url: "/dashboard/decoration-material-list"
       },
     ],
   },

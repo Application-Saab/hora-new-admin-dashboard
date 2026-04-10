@@ -6,6 +6,7 @@ import {
   PRODUCT_MEAL_TYPE,
   IMAGE_UPLOAD,
   ADD_DECORATION_PRODUCT,
+  GET_MATERIAL_FILTER_DATA,
 } from "../../../utils/apiconstant";
 
 const AddProductForm = () => {
@@ -29,8 +30,6 @@ const AddProductForm = () => {
     specs: [],
     type: [],
     material: [],
-    rentedConsumable: [],
-    moqs: [],
   });
   const [inclusions, setInclusions] = useState([
     {
@@ -72,7 +71,7 @@ const AddProductForm = () => {
         setter(
           url.includes("admin_meals_list")
             ? data.data.meal || []
-            : data.data.configuration || []
+            : data.data.configuration || [],
         );
       }
     } catch (error) {
@@ -83,11 +82,11 @@ const AddProductForm = () => {
   const handleCheckboxChange = (id, type) => {
     if (type === "product") {
       setSelectedProductTypes((prev) =>
-        prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+        prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
       );
     } else if (type === "meal") {
       setSelectedMealTypes((prev) =>
-        prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+        prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
       );
     }
   };
@@ -204,6 +203,7 @@ const AddProductForm = () => {
         vendorMaterialPrice: totalPrice,
         executionPrice: executionPrice,
         horaAdvance: advanceAmountHora,
+        inclusionVariables: inclusions,
       };
     } else {
       payload = {
@@ -226,7 +226,7 @@ const AddProductForm = () => {
       } else {
         showAlert(
           "Failed to create product: " + (data.message || "Unknown error"),
-          "error"
+          "error",
         );
       }
     } catch (error) {
@@ -236,154 +236,238 @@ const AddProductForm = () => {
     }
   };
 
-  // new inclustion style
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchMaterialFilterData = async () => {
       try {
-        const res = await fetch(
-          "https://script.google.com/macros/s/AKfycbw4xPYuAXPztRz8fD5-txc-_zDlkZwXllmlQH_r5IAj855Xvr0ylEedJoIAJUVRMEzp/exec"
-        );
-        const data = await res.json();
-        setData(data);
+        const res = await fetch(`${BASE_URL}${GET_MATERIAL_FILTER_DATA}`);
+        const result = await res.json();
 
-        const specs = [...new Set(data.map((r) => r.Specs).filter(Boolean))];
-        const type = [...new Set(data.map((r) => r.Type).filter(Boolean))];
-        const material = [
-          ...new Set(data.map((r) => r.Material).filter(Boolean)),
-        ];
-        const rented = [
-          ...new Set(data.map((r) => r["Rented/Consumable"]).filter(Boolean)),
-        ];
-        const moqs = [...new Set(data.map((r) => r.MOQ).filter(Boolean))];
+        if (
+          result?.error === false ||
+          result?.success === false ||
+          result?.data
+        ) {
+          const apiData = result.data || {};
 
-        setOptions({ specs, type, material, rentedConsumable: rented, moqs });
+          const specsData = Array.isArray(apiData.specs) ? apiData.specs : [];
+          const typeData = Array.isArray(apiData.type) ? apiData.type : [];
+          const materialData = Array.isArray(apiData.material)
+            ? apiData.material
+            : [];
+
+          setData(specsData);
+
+          setOptions({
+            specs: specsData.map((item) => item.value).filter(Boolean),
+            type: typeData.map((item) => item.value).filter(Boolean),
+            material: materialData.map((item) => item.value).filter(Boolean),
+          });
+        }
       } catch (err) {
-        console.error("Error fetching data:", err);
+        console.error("Error fetching material filter data:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
+
+    fetchMaterialFilterData();
   }, []);
+
+  const buildPreviewText = (item) => {
+    let previewText = `${item.specs || "-"} ${item.type || "-"} ${item.material || "-"}`;
+
+    if (item.rentedConsumable === "Rented") {
+      previewText += ` ${item.moq || "-"}`;
+    } else if (item.rentedConsumable === "Consumable") {
+      previewText += ` ${item.customQuantity || item.moq || 1}`;
+    }
+
+    return previewText;
+  };
+
+  const extractNumber = (value) => {
+    return parseFloat(String(value || "").replace(/[^\d.]/g, "")) || 0;
+  };
+
+  const getCalculatedPrice = (matchedRow, rentedConsumable, customQuantity) => {
+    if (!matchedRow) return 0;
+
+    const vendorPrice = parseFloat(matchedRow.vendorMaterialPrice) || 0;
+
+    if (rentedConsumable === "Consumable") {
+      const qty = parseFloat(customQuantity) || 0;
+      const moqNumber = extractNumber(matchedRow.minimumOrderQuantity) || 1;
+      return (qty * vendorPrice) / moqNumber;
+    }
+
+    return vendorPrice;
+  };
 
   const handleSelectChange = (id, field, value) => {
     setInclusions((prev) =>
       prev.map((inc) => {
-        if (inc.id === id) {
-          const updated = { ...inc, [field]: value };
+        if (inc.id !== id) return inc;
 
-          const {
-            specs,
-            type,
-            material,
-            rentedConsumable,
-            moq,
-            customQuantity,
-          } = updated;
+        let updated = {
+          ...inc,
+          [field]: value,
+        };
+        if (field === "specs") {
+          const firstMatch = data.find((row) => row.value === value);
 
-          let matchedRow = null;
-          let price = 0;
+          if (firstMatch) {
+            updated = {
+              ...updated,
+              specs: firstMatch.value || "",
+              type: firstMatch.type || "",
+              material: firstMatch.material || "",
+              rentedConsumable: firstMatch.materialCategory || "",
+              moq: firstMatch.minimumOrderQuantity || "",
+              matchedRow: firstMatch,
+            };
 
-          if (specs && type && material && rentedConsumable) {
-            matchedRow = data.find(
-              (row) =>
-                row.Specs === specs &&
-                row.Type === type &&
-                row.Material === material &&
-                row["Rented/Consumable"] === rentedConsumable
+            const defaultQty =
+              updated.customQuantity ||
+              extractNumber(firstMatch.minimumOrderQuantity) ||
+              1;
+
+            updated.customQuantity =
+              firstMatch.materialCategory === "Consumable"
+                ? updated.customQuantity || defaultQty
+                : "";
+
+            updated.price = getCalculatedPrice(
+              firstMatch,
+              firstMatch.materialCategory,
+              updated.customQuantity,
             );
 
-            // if (matchedRow) {
-            //   if (rentedConsumable === "Consumable") {
-            //     const qty = parseFloat(customQuantity) || 0;
-            //     console.log(qty, "qty12");
-            //     price = (qty / 100) * matchedRow["Hora Vendor Material Price"];
-            //   } else {
-            //     price = matchedRow["Hora Vendor Material Price"];
-            //   }
-            // }
-            if (matchedRow) {
-              if (rentedConsumable === "Consumable") {
-                const qty = parseFloat(customQuantity) || 0;
-                const horaPrice = matchedRow["Hora Vendor Material Price"];
-                const moq = parseFloat(matchedRow["MOQ"]) || 1;
-                price = (qty * horaPrice) / moq;
-                console.log(qty, "qty123");
-                console.log(horaPrice, "horaprice");
-                console.log(moq, "moq");
-                console.log(price, "price");
-              } else {
-                price = matchedRow["Hora Vendor Material Price"];
-              }
-            }
+            updated.previewText = buildPreviewText(updated);
+            return updated;
+          } else {
+            updated = {
+              ...updated,
+              type: "",
+              material: "",
+              rentedConsumable: "",
+              moq: "",
+              customQuantity: "",
+              matchedRow: null,
+              price: 0,
+            };
+            updated.previewText = buildPreviewText(updated);
+            return updated;
           }
-
-          let previewText = `${specs || "-"} ${type || "-"} ${material || "-"}`;
-          if (rentedConsumable === "Rented") {
-            previewText += ` ${moq || "-"}`;
-          } else if (rentedConsumable === "Consumable") {
-            previewText += ` ${customQuantity || 1} PCS`;
-          }
-          // previewText += `, Price: $${price.toFixed(2)}`;
-
-          return { ...updated, matchedRow, price, previewText };
         }
-        return inc;
-      })
+
+        if (field === "type") {
+          let firstMatch = data.find(
+            (row) => row.value === updated.specs && row.type === value,
+          );
+
+          if (firstMatch) {
+            updated = {
+              ...updated,
+              type: firstMatch.type || "",
+              material: firstMatch.material || "",
+              rentedConsumable: firstMatch.materialCategory || "",
+              moq: firstMatch.minimumOrderQuantity || "",
+              matchedRow: firstMatch,
+            };
+
+            if (firstMatch.materialCategory !== "Consumable") {
+              updated.customQuantity = "";
+            }
+
+            updated.price = getCalculatedPrice(
+              firstMatch,
+              firstMatch.materialCategory,
+              updated.customQuantity,
+            );
+          } else {
+            updated = {
+              ...updated,
+              type: value,
+              material: "",
+              rentedConsumable: "",
+              moq: "",
+              customQuantity: "",
+              matchedRow: null,
+              price: 0,
+            };
+          }
+
+          updated.previewText = buildPreviewText(updated);
+          return updated;
+        }
+
+        if (field === "material") {
+          const exactMatch = data.find(
+            (row) =>
+              row.value === updated.specs &&
+              row.type === updated.type &&
+              row.material === value,
+          );
+
+          if (exactMatch) {
+            updated = {
+              ...updated,
+              material: exactMatch.material || "",
+              rentedConsumable: exactMatch.materialCategory || "",
+              moq: exactMatch.minimumOrderQuantity || "",
+              matchedRow: exactMatch,
+            };
+
+            if (exactMatch.materialCategory !== "Consumable") {
+              updated.customQuantity = "";
+            }
+
+            updated.price = getCalculatedPrice(
+              exactMatch,
+              exactMatch.materialCategory,
+              updated.customQuantity,
+            );
+          } else {
+            updated = {
+              ...updated,
+              material: value,
+              rentedConsumable: "",
+              moq: "",
+              customQuantity: "",
+              matchedRow: null,
+              price: 0,
+            };
+          }
+
+          updated.previewText = buildPreviewText(updated);
+          return updated;
+        }
+
+        return updated;
+      }),
     );
   };
 
   const handleCustomQuantityChange = (id, value) => {
     setInclusions((prev) =>
       prev.map((inc) => {
-        if (inc.id === id) {
-          let price = inc.price;
-          let matchedRow = inc.matchedRow;
-          // if (inc.rentedConsumable === "Consumable" && matchedRow) {
-          //   const qty = parseFloat(value) || 0;
-          //   price = (qty / 100) * matchedRow["Hora Vendor Material Price"];
-          // }
-          if (inc.rentedConsumable === "Consumable" && matchedRow) {
-            const qty = parseFloat(value) || 0;
-            const horaPrice = matchedRow["Hora Vendor Material Price"];
-            const moq = parseFloat(matchedRow["MOQ"]) || 1;
-            price = (qty * horaPrice) / moq;
-          }
-          let previewText = `${inc.specs || "-"} ${inc.type || "-"}  ${
-            inc.material || "-"
-          }`;
-          if (inc.rentedConsumable === "Rented") {
-            previewText += ` ${inc.moq || "-"}`;
-          } else if (inc.rentedConsumable === "Consumable") {
-            previewText += ` ${value || 1} PCS`;
-          }
-          // previewText += `, Price: $${price.toFixed(2)}`;
+        if (inc.id !== id) return inc;
 
-          return { ...inc, customQuantity: value, price, previewText };
-        }
-        return inc;
-      })
-    );
-  };
+        const updated = {
+          ...inc,
+          customQuantity: value,
+        };
 
-  const handleMoqChange = (id, value) => {
-    setInclusions((prev) =>
-      prev.map((inc) => {
-        if (inc.id === id) {
-          let previewText = `${inc.specs || "-"} ${inc.type || "-"} ${
-            inc.material || "-"
-          }`;
-          if (inc.rentedConsumable === "Rented") {
-            previewText += ` ${value || "-"}`;
-          } else if (inc.rentedConsumable === "Consumable") {
-            previewText += ` ${inc.customQuantity || 1} PCS`;
-          }
-          // previewText += `, Price: $${inc.price.toFixed(2)}`;
+        updated.price = getCalculatedPrice(
+          updated.matchedRow,
+          updated.rentedConsumable,
+          value,
+        );
 
-          return { ...inc, moq: value, previewText };
-        }
-        return inc;
-      })
+        updated.previewText = buildPreviewText(updated);
+
+        return updated;
+      }),
     );
   };
 
@@ -404,13 +488,13 @@ const AddProductForm = () => {
           return { ...i, price: num, previewText };
         }
         return i;
-      })
+      }),
     );
   };
 
   const handlePreviewChange = (id, value) => {
     setInclusions((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, previewText: value } : i))
+      prev.map((i) => (i.id === id ? { ...i, previewText: value } : i)),
     );
   };
 
@@ -517,6 +601,33 @@ const AddProductForm = () => {
     fontSize: "16px",
   };
 
+  const getFilteredTypes = (specs) => {
+    if (!specs) return options.type;
+
+    return [
+      ...new Set(
+        data
+          .filter((row) => row.value === specs)
+          .map((row) => row.type)
+          .filter(Boolean),
+      ),
+    ];
+  };
+
+  const getFilteredMaterials = (specs, type) => {
+    let filtered = data;
+
+    if (specs) {
+      filtered = filtered.filter((row) => row.value === specs);
+    }
+
+    if (type) {
+      filtered = filtered.filter((row) => row.type === type);
+    }
+
+    return [...new Set(filtered.map((row) => row.material).filter(Boolean))];
+  };
+
   if (loading) return <div style={{ padding: "40px" }}>Loading...</div>;
 
   return (
@@ -575,22 +686,23 @@ const AddProductForm = () => {
             {showCategoryItems && (
               <div className="category-items">
                 {mealProductTypes
-                 .filter((type) =>
-                  Array.isArray(type.configurationId) &&
-                  type.configurationId.some(
-                  (config) => config.name === "Decoration"
+                  .filter(
+                    (type) =>
+                      Array.isArray(type.configurationId) &&
+                      type.configurationId.some(
+                        (config) => config.name === "Decoration",
+                      ),
                   )
-                  )
-                .map((type) => (
-                  <label key={type._id} className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={selectedMealTypes.includes(type._id)}
-                      onChange={() => handleCheckboxChange(type._id, "meal")}
-                    />
-                    {type.name}
-                  </label>
-                ))}
+                  .map((type) => (
+                    <label key={type._id} className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={selectedMealTypes.includes(type._id)}
+                        onChange={() => handleCheckboxChange(type._id, "meal")}
+                      />
+                      {type.name}
+                    </label>
+                  ))}
               </div>
             )}
           </div>
@@ -612,7 +724,6 @@ const AddProductForm = () => {
       </div>
 
       <div style={container}>
-        {/* Dropdown to select mode */}
         <div style={{ marginBottom: "20px" }}>
           <label style={{ marginRight: "8px" }}>Choose Mode:</label>
           <select
@@ -638,134 +749,129 @@ const AddProductForm = () => {
             >
               + Add Inclusion
             </button>
-            {inclusions.map((inc) => (
-              <div key={inc.id} style={inclusionBox}>
-                <div style={row}>
-                  <select
-                    value={inc.specs}
-                    onChange={(e) =>
-                      handleSelectChange(inc.id, "specs", e.target.value)
-                    }
-                    style={select}
-                  >
-                    <option value="">Specs</option>
-                    {options.specs.map((o, i) => (
-                      <option key={i} value={o}>
-                        {o}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={inc.type}
-                    onChange={(e) =>
-                      handleSelectChange(inc.id, "type", e.target.value)
-                    }
-                    style={select}
-                  >
-                    <option value="">Type</option>
-                    {options.type.map((o, i) => (
-                      <option key={i} value={o}>
-                        {o}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={inc.material}
-                    onChange={(e) =>
-                      handleSelectChange(inc.id, "material", e.target.value)
-                    }
-                    style={select}
-                  >
-                    <option value="">Material</option>
-                    {options.material.map((o, i) => (
-                      <option key={i} value={o}>
-                        {o}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={inc.rentedConsumable}
-                    onChange={(e) =>
-                      handleSelectChange(
-                        inc.id,
-                        "rentedConsumable",
-                        e.target.value
-                      )
-                    }
-                    style={select}
-                  >
-                    <option value="">Rented/Consumable</option>
-                    {options.rentedConsumable.map((o, i) => (
-                      <option key={i} value={o}>
-                        {o}
-                      </option>
-                    ))}
-                  </select>
-
-                  {inc.rentedConsumable === "Rented" && (
+            {inclusions.map((inc) => {
+              const filteredTypes = getFilteredTypes(inc.specs);
+              const filteredMaterials = getFilteredMaterials(
+                inc.specs,
+                inc.type,
+              );
+              return (
+                <div key={inc.id} style={inclusionBox}>
+                  <div style={row}>
                     <select
-                      value={inc.moq}
-                      onChange={(e) => handleMoqChange(inc.id, e.target.value)}
+                      value={inc.specs}
+                      onChange={(e) =>
+                        handleSelectChange(inc.id, "specs", e.target.value)
+                      }
                       style={select}
                     >
-                      <option value="">MOQ</option>
-                      {options.moqs.map((o, i) => (
+                      <option value="">Specs</option>
+                      {options.specs.map((o, i) => (
                         <option key={i} value={o}>
                           {o}
                         </option>
                       ))}
                     </select>
-                  )}
 
-                  {inc.rentedConsumable === "Consumable" && (
+                    <select
+                      value={inc.type}
+                      onChange={(e) =>
+                        handleSelectChange(inc.id, "type", e.target.value)
+                      }
+                      style={select}
+                    >
+                      <option value="">Type</option>
+                      {filteredTypes?.map((o, i) => (
+                        <option key={i} value={o}>
+                          {o}
+                        </option>
+                      ))}
+                    </select>
+
+                    <select
+                      value={inc.material}
+                      onChange={(e) =>
+                        handleSelectChange(inc.id, "material", e.target.value)
+                      }
+                      style={select}
+                    >
+                      <option value="">Material</option>
+                      {filteredMaterials?.map((o, i) => (
+                        <option key={i} value={o}>
+                          {o}
+                        </option>
+                      ))}
+                    </select>
+
+                    <input
+                      type="text"
+                      value={inc.rentedConsumable}
+                      placeholder="Rented/Consumable"
+                      readOnly
+                      style={{ ...select, backgroundColor: "#f5f5f5" }}
+                    />
+
+                    <input
+                      type="text"
+                      value={inc.moq}
+                      placeholder="MOQ"
+                      readOnly
+                      style={{ ...select, backgroundColor: "#f5f5f5" }}
+                    />
+
+                    {inc.rentedConsumable === "Consumable" && (
+                      <input
+                        type="number"
+                        placeholder="Qty"
+                        value={inc.customQuantity}
+                        onChange={(e) =>
+                          handleCustomQuantityChange(inc.id, e.target.value)
+                        }
+                        style={input}
+                      />
+                    )}
+
                     <input
                       type="number"
-                      placeholder="Qty"
-                      value={inc.customQuantity}
+                      placeholder="Price"
+                      value={inc.price}
                       onChange={(e) =>
-                        handleCustomQuantityChange(inc.id, e.target.value)
+                        handlePriceChange(inc.id, e.target.value)
                       }
                       style={input}
                     />
-                  )}
 
-                  <input
-                    type="number"
-                    placeholder="Price"
-                    value={inc.price}
-                    onChange={(e) => handlePriceChange(inc.id, e.target.value)}
-                    style={input}
-                  />
-
-                  <button
-                    onClick={() => handleRemoveInclusion(inc.id)}
+                    <button
+                      onClick={() => handleRemoveInclusion(inc.id)}
+                      style={{
+                        ...button,
+                        backgroundColor: "#e74c3c",
+                        color: "#fff",
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <div
                     style={{
-                      ...button,
-                      backgroundColor: "#e74c3c",
-                      color: "#fff",
+                      marginTop: "4px",
+                      fontWeight: "bold",
+                      color: inc.matchedRow ? "#27ae60" : "#c0392b",
                     }}
                   >
-                    Remove
-                  </button>
-                </div>
+                    {inc.matchedRow ? "✅ Matched" : "❌ Not Matched"}
+                  </div>
 
-                <div
-                  style={{
-                    marginTop: "4px",
-                    fontWeight: "bold",
-                    color: inc.matchedRow ? "#27ae60" : "#c0392b",
-                  }}
-                >
-                  {inc.matchedRow ? "✅ Matched" : "❌ Not Matched"}
+                  <textarea
+                    value={inc.previewText}
+                    onChange={(e) =>
+                      handlePreviewChange(inc.id, e.target.value)
+                    }
+                    style={preview}
+                  />
                 </div>
-
-                <textarea
-                  value={inc.previewText}
-                  onChange={(e) => handlePreviewChange(inc.id, e.target.value)}
-                  style={preview}
-                />
-              </div>
-            ))}
+              );
+            })}
 
             <div style={totalsBox}>
               <div>
@@ -798,7 +904,6 @@ const AddProductForm = () => {
                 />
               </div>
 
-              {/* Customer Price Calculation */}
               <div>
                 <strong>Customer Price:</strong> ₹
                 {advancePercent >= 100
@@ -809,7 +914,6 @@ const AddProductForm = () => {
                     ).toFixed(2)}
               </div>
 
-              {/* Advance Amount Calculation */}
               <div>
                 <strong>Advance Hora Amount:</strong> ₹
                 {advancePercent >= 100
@@ -821,44 +925,6 @@ const AddProductForm = () => {
                     ).toFixed(2)}
               </div>
             </div>
-
-            {/* <div style={totalsBox}>
-              <div>
-                <strong>Hora Vendor Material Price:</strong> ₹
-                {totalPrice.toFixed(2)}
-              </div>
-              <div>
-                <strong>Execution Price:</strong>{" "}
-                <input
-                  type="number"
-                  value={executionPrice}
-                  onChange={(e) =>
-                    setExecutionPrice(parseFloat(e.target.value) || 0)
-                  }
-                  style={input}
-                />
-              </div>
-               <div>
-    <strong>Advance %:</strong>{" "}
-    <input
-      type="number"
-      value={advancePercent}
-      onChange={(e) => setAdvancePercent(parseFloat(e.target.value) || 0)}
-      style={input}
-      placeholder="e.g. 20"
-    />
-  </div>
-
-  <div>
-    <strong>Customer Price:</strong> ₹
-    {advancePercent >= 100
-      ? "Invalid %"
-      : ((totalPrice + executionPrice) / (1 - advancePercent / 100)).toFixed(2)}
-  </div>
-              <div>
-                <strong>Final Price:</strong> ₹{finalPrice.toFixed(2)}
-              </div>
-            </div> */}
 
             <h4 style={{ marginTop: "30px", marginBottom: "8px" }}>
               📝 Inclusion Summary
