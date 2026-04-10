@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import "./login.css";
+import { BASE_URL } from "@/utils/apiconstant";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -14,7 +15,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("https://horaservices.com:3000/api/admin/admin_signin", {
+      const response = await fetch(`${BASE_URL}/api/admin/admin_signin`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

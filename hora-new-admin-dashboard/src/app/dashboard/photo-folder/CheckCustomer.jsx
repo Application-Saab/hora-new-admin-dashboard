@@ -61,7 +61,7 @@ const CheckCustomer = ({ onCustomerIdChange , setEnteredNum }) => {
 
         try {
             const response = await axios.post(
-                "https://horaservices.com:3000/api/admin/user_signup",
+                `${BASE_URL}/api/admin/user_signup`,
                 requestData
             );
 

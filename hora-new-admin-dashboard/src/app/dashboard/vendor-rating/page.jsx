@@ -167,7 +167,7 @@ const VendorRating = () => {
               <th>Vendor Name</th>
               <th>Phone Number</th>
               <th>Badge</th>
-              <th>Order Limit</th>
+              <th>Order Limit (Of Given Day)</th>
             </tr>
           </thead>
           <tbody>

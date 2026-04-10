@@ -75,7 +75,7 @@ const SearchWithDropDown = ({
                     }}
                 >
                     {filteredOptions.length === 0 ? (
-                        <div style={{ padding: "10px", color: "#999" }}>No result found</div>
+                        <div style={{ padding: "10px", color: "#000" }}>No result found</div>
                     ) : (
                         filteredOptions.map((opt, idx) => (
                             <div
@@ -88,6 +88,7 @@ const SearchWithDropDown = ({
                                 style={{
                                     padding: "10px",
                                     cursor: "pointer",
+                                    color:"#000"
                                 }}
                             >
                                 {opt}

@@ -5,6 +5,7 @@ import "./DecorationEditor.css";
 import { BASE_URL, EDIT_DECORATION_PRODUCT, PRODUCT_MEAL_TYPE } from "../../../utils/apiconstant";
 import Image from "next/image";
 import axios from "axios";
+import CheckboxGroup from "@/app/component/CheckboxGroup";
 
 const DecorationEditor = () => {
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
@@ -19,6 +20,31 @@ const DecorationEditor = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [mealProductTypes, setMealProductTypes] = useState([]);
+const [callChecklist, setCallChecklist] = useState({
+  designType: {}
+});
+
+const designTypeOptions = [
+  "Wall",
+  "Ring",
+  "Ring + Flex",
+  "Sequined",
+  "U Shape",
+  "Square Stand",
+  "Room Decor",
+  "Cradle",
+  "Flex",
+  "Artificial Flower",
+  "Real Flower",
+];
+
+const getDefaultDesignType = (data = {}) => {
+  const result = {};
+  designTypeOptions.forEach(item => {
+    result[item] = data?.[item] || false;
+  });
+  return result;
+};
 
   const handleSelectChange = async (event) => {
     const subCategory = event.target.value;
@@ -28,7 +54,7 @@ const DecorationEditor = () => {
     if (subCategory) {
       try {
         const response = await fetch(
-          `https://horaservices.com:3000/api/meals/idByTag?tag=${subCategory}`
+          `${BASE_URL}/api/meals/idByTag?tag=${subCategory}`
         );
         const data = await response.json();
 
@@ -51,7 +77,7 @@ const DecorationEditor = () => {
   const fetchSecondAPI = async (_id) => {
     try {
       const response = await fetch(
-        `https://horaservices.com:3000/api/Decoration/searchByTag/${_id}`
+        `${BASE_URL}/api/Decoration/searchByTag/${_id}`
       );
       const data = await response.json();
 
@@ -118,7 +144,7 @@ const DecorationEditor = () => {
 
     try {
       const response = await fetch(
-        "https://horaservices.com:3000/api/image_upload",
+        `${BASE_URL}/api/image_upload`,
         {
           method: "POST",
           body: formData,
@@ -175,6 +201,7 @@ const DecorationEditor = () => {
       featured_image: image ? image : popupData.featured_image,
       tag: selectedTags,
       inclusion: formattedInclusion,
+      designType: callChecklist.designType
     };
 
     try {
@@ -208,6 +235,30 @@ const DecorationEditor = () => {
 
     setPopupData(null); // Close the popup after saving
   };
+
+const handleCheckboxChange = (section, item) => {
+  setCallChecklist(prev => ({
+    ...prev,
+    [section]: {
+      ...prev[section],
+      [item]: !prev[section]?.[item]   // toggle true/false
+    }
+  }));
+};
+useEffect(() => {
+  if (popupData?.designType) {
+    setCallChecklist(prev => ({
+      ...prev,
+      designType: getDefaultDesignType(popupData.designType)
+    }));
+  } else {
+    setCallChecklist(prev => ({
+      ...prev,
+      designType: getDefaultDesignType()
+    }));
+  }
+}, [popupData]);
+
 
   // Add this function to filter the data
   const filteredData = responseData.filter((item) => {
@@ -286,8 +337,7 @@ const DecorationEditor = () => {
                     <td>
                       {item.featured_image ? (
                         <Image
-                          // src={`https://horaservices.com/api/uploads/compressed_webp/${item.featured_image}`}
-                          src={`https://horaservices.com/api/uploads/compressed_webp/${
+                          src={`${BASE_URL}/api/uploads/compressed_webp/${
                             item?.featured_image.split(".")[0]
                           }.webp`}
                           alt={item.name}
@@ -329,7 +379,7 @@ const DecorationEditor = () => {
                         onClick={async () => {
                           const newStatus = item.status === 1 ? 0 : 1;
 
-                          await axios.post("https://horaservices.com:3000/api/dish/update_decoration_status", {
+                          await axios.post(`${BASE_URL}/api/dish/update_decoration_status`, {
                             id: item._id,
                             status: newStatus,
                           });
@@ -414,7 +464,7 @@ const DecorationEditor = () => {
                         <div className="image-preview-container">
                           <p className="image-label">New Image:</p>
                           <img
-                            src={`https://horaservices.com/api/uploads/${image}`}
+                            src={`${BASE_URL}/api/uploads/${image}`}
                             alt="New uploaded image"
                             className="image-preview"
                           />
@@ -423,7 +473,7 @@ const DecorationEditor = () => {
                         <div className="image-preview-container">
                           <p className="image-label">Current Image:</p>
                           <img
-                            src={`https://horaservices.com/api/uploads/compressed_webp/${popupData.featured_image}`}
+                            src={`${BASE_URL}/api/uploads/compressed_webp/${popupData.featured_image}`}
                             alt={popupData.name}
                             className="image-preview"
                           />
@@ -454,6 +504,18 @@ const DecorationEditor = () => {
                 ))}
                   </div>
                   </div>
+                  <div className="checkbox-container">
+  <div className="checklist-body">
+    <CheckboxGroup
+      key={"designType"}
+      title={"Explain the type of design"}
+      items={designTypeOptions}
+      section={"designType"}
+      checklist={callChecklist}
+      onChange={handleCheckboxChange}
+    />
+  </div>
+</div>
 
                   <div className="modal-full-width">
                     <div className="divider"></div>

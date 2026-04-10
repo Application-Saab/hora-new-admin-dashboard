@@ -107,12 +107,12 @@ const CheckSupplier = ({
       console.log("Checking supplier number:", customerNumber);
 
       const response = await axios.post(
-        "https://horaservices.com:3000/api/admin/admin_user_list",
+        `${BASE_URL}/api/admin/admin_user_list`,
         {
           email: "",
           page: "",
           per_page: 2000,
-          phone: "",
+          phone: customerNumber,
           role: "supplier",
         }
       );
@@ -128,10 +128,7 @@ const CheckSupplier = ({
 
       console.log("Total suppliers found:", users.length);
 
-      const formattedCustomerNumber = customerNumber.trim();
-      const supplier = users.find(
-        (user) => user.phone?.trim() === formattedCustomerNumber
-      );
+      const supplier = users[0];
 
       if (supplier) {
         setSupplierData(supplier);
