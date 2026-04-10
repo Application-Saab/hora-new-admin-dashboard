@@ -47,3 +47,7 @@ export const GET_DECORATION_MATERIALS = '/api/material-list/admin_material_list'
 export const CREATE_DECORATION_MATERIAL = '/api/material-list/createMaterial';
 export const UPDATE_DECORATION_MATERIAL = '/api/material-list/updateMaterial';
 export const GET_MATERIAL_FILTER_DATA = "/api/material-list/getMaterialFilterData";
+
+// Wonderland tracking routes
+export const GET_WONDERLAND_GLOBAL_STATS = '/api/customer/event/all-tracking';
+export const GET_WONDERLAND_LISTING_DATA = '/api/customer/event/admin_all_details';
