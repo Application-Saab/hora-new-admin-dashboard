@@ -4,7 +4,7 @@ import axios from "axios";
 import "./testing.css";
 import { supplierType } from "@/utils/supplierType";
 import { BASE_URL } from "../../../utils/apiconstant";
-import { updateSupplierDetailsApi} from '../../component/CreateSupplier/supplierDetails.js';
+import { updateSupplierDetailsApi } from "@/app/component/createsupplier/supplierDetails";
 
 const Testing = () => {
   const [name, setName] = useState("");
