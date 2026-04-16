@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import {BASE_URL} from '../../../utils/apiconstant'
+import {BASE_URL, MEDIA_PROCESSING_BASE_URL} from '../../../utils/apiconstant'
 
 const AddMoreImages = () => {
   const [url, setUrl] = useState("");
@@ -94,7 +94,7 @@ const AddMoreImages = () => {
 
       try {
         await axios.post(
-          "https://mediaprocess.horaservices.com/upload",
+        `${MEDIA_PROCESSING_BASE_URL}/upload`,
           formData
         );
         newStatuses[file.name] = "Uploaded";
@@ -133,7 +133,7 @@ const AddMoreImages = () => {
   // Delete image
   const deleteImage = async (id) => {
     try {
-      await axios.delete(`https://mediaprocess.horaservices.com/delete-image/${id}`);
+      await axios.delete(`${MEDIA_PROCESSING_BASE_URL}/delete-image/${id}`);
 
       // Update state after deletion
       setImages((prevImages) => prevImages.filter((img) => img._id !== id));

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import ThumbnailGallery from "./ThumbnailGallery";
 import Image from "next/image";
-import { BASE_URL } from "../../../../utils/apiconstant";
+import { BASE_URL, MEDIA_PROCESSING_BASE_URL } from "../../../../utils/apiconstant";
 
 
 const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages }) => {
@@ -60,7 +60,7 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages }
     formData.append("phoneNo", enteredNum);
 
     try {
-      const response = await fetch("https://mediaprocess.horaservices.com/upload", {
+      const response = await fetch(`${MEDIA_PROCESSING_BASE_URL}/upload`, {
         method: "POST",
         body: formData,
       });
@@ -194,7 +194,7 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages }
       formData.append("phoneNo", enteredNum);
 
       try {
-        const res = await fetch("https://mediaprocess.horaservices.com/upload", {
+        const res = await fetch(`${MEDIA_PROCESSING_BASE_URL}/upload`, {
           method: "POST",
           body: formData,
         });
