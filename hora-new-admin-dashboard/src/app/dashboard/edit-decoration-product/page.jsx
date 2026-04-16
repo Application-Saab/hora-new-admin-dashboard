@@ -590,7 +590,7 @@ const getDefaultDesignType = (data = {}) => {
     setSelectedTags([]);
     setInclusions([]);
   };
-
+  let formattedInclusion = [];
   const handleSaveChanges = async () => {
     let requestData = {
       _id: popupData._id,
@@ -603,12 +603,14 @@ const getDefaultDesignType = (data = {}) => {
     };
 
     if (mode === "Option1") {
+      console.log("Saving Option1 changes...");
       requestData = {
         ...requestData,
         inclusionVariables: inclusions,
       };
     } else {
-      const formattedInclusion = [
+      console.log("Saving Option2 changes...");
+      formattedInclusion = [
         `<div>- ${option2Text
           .split("\n")
           .map((line) => line.trim())
