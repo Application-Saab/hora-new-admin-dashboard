@@ -27,7 +27,7 @@ const PhotoCreateProject = () => {
     try {
       // Make API call to create folder
       const response = await fetch(
-        "https://horaservices.com:3000/api/photo/CreateFolder",
+        `${BASE_URL}/api/photo/CreateFolder`,
         {
           method: "POST",
           headers: {
@@ -97,13 +97,13 @@ const PhotoCreateProject = () => {
         body: JSON.stringify({
           orderIdDb: driveVendorId - 10800,
           orderIdCustomer: driveVendorId,
-          phone: data?.folderDetails?.phoneNo,
-          fulfillmentDate:  data?.folderDetails?.order_date
-                        ? new Date(data?.folderDetails?.order_date).toLocaleDateString("en-GB")
+          phone: data?.phoneNo,
+          fulfillmentDate:  data?.order_date
+                        ? new Date(data?.order_date).toLocaleDateString("en-GB")
                         : "N/A",
           services: "Photography",
           driveLink: driveFolderUrl,
-          horaWebLink: `https://horaservices.com/photo-gallery?folderName=${data?.folderDetails?.folderName}&customerId=${data?.folderDetails?.customerId}`,
+          horaWebLink: data?.webLink,
         }),
       });
       console.log(
@@ -114,9 +114,9 @@ const PhotoCreateProject = () => {
 
       alert(`Images are uploading in background, will reflect on link in less then 1 hour for : ${driveVendorId}:`);
       console.log("........", data);
-      setFolderTitle(data?.folderDetails?.folderName);
-      setCustomerId(data?.folderDetails?.customerId);
-      setEnteredNum(data?.folderDetails?.phoneNo);
+      setFolderTitle(data?.folderName);
+      setCustomerId(data?.customerId);
+      setEnteredNum(data?.phoneNo);
       setDriveUploadLoading(false);
       setShowFolder(true);
       setShowForm(false);

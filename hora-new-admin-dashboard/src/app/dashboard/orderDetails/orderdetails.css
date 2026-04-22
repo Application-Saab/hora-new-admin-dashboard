@@ -688,7 +688,35 @@ h3 {
 .add-btn{
   background: #007bff;
 }
+.editOrder-comment-input{
+   padding: 5px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 80%;
+}
+.editOrder-comment-container{
+display: flex;
+gap: 5px;
+}
+.editOrder-add-new-btn {
+  padding: 5px 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
 
+.editOrder-add-new-btn:hover {
+  background-color: #45a049;
+}
+.editOrder-addon-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 0px; 
+}
 .order-link-container{
 display: flex;
  gap: 6px;

@@ -16,9 +16,11 @@ import {
   FaUtensils,
   FaChevronDown,
   FaChevronRight,
-  FaPlus,
+  FaListUl 
 } from "react-icons/fa";
+import { GiFireworkRocket } from "react-icons/gi";
 import { useRouter, usePathname } from "next/navigation";
+import { BASE_URL } from "@/utils/apiconstant";
 
 //  MENU ITEMS WITH GROUPS
 const menuItems = [
@@ -28,6 +30,8 @@ const menuItems = [
 
   
   { label: "User Analysis", icon: <FaClipboardList />, url: "/dashboard/user-analysis" },
+
+  { label: "Wonderland Tracking", icon: <FaClipboardList />, url: "/dashboard/wonderland-tracking" },
 
   {
     label: "Order Details",
@@ -63,6 +67,11 @@ const menuItems = [
         label: "Decoration-Order-Report",
         icon: <FaCamera />,
         url: "/dashboard/Decoration-Order-Report"
+      },
+      {
+        label: "Material List",
+        icon: <FaListUl  />,
+        url: "/dashboard/decoration-material-list"
       },
     ],
   },
@@ -100,6 +109,23 @@ const menuItems = [
   },
 
   {
+    label: "Celebration Boosters",
+    icon: <GiFireworkRocket />,
+    children: [
+      {
+        label: "Create Order",
+        icon: <FaPlusCircle />,
+        url: "/dashboard/booster-createorder",
+      },
+      {
+        label: "Boosters List",
+        icon: <GiFireworkRocket />,
+        url: "/dashboard/celebration-booster",
+      },
+    ],
+  },
+
+  {
     label: "Vendor",
     icon: <FaClipboardList />,
     children: [
@@ -112,6 +138,11 @@ const menuItems = [
         label: "Order Reports",
         icon: <FaClipboardList />,
         url: "/dashboard/vendor-orderReports",
+      },
+      {
+        label: "Vendor Rating",
+        icon: <FaClipboardList />,
+        url: "/dashboard/vendor-rating",
       },
     ],
   },
@@ -152,10 +183,14 @@ const menuItems = [
         icon: <FaPlusCircle />,
         url: "/dashboard/chef-for-party-food-create",
       },
+      {
+        label : "Create Food Package",
+        icon : <FaPlusCircle />,
+        url : "/dashboard/create-food-package"
+      }
     ],
   },
 
-  { label: "Addons", icon: <FaPlus />, url: "/dashboard/addons" },
 
   { label: "Dish List", icon: <FaUtensils />, url: "/dashboard/dish-list" },
 
@@ -274,7 +309,7 @@ export default function RootLayout({
 
       try {
         const response = await axios.post(
-          "https://horaservices.com:3000/api/admin/admin_user_list",
+          `${BASE_URL}/api/admin/admin_user_list`,
           {
             email: adminEmail,
             role: "admin",

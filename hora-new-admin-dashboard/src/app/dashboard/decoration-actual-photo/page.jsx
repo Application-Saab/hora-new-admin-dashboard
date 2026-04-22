@@ -64,7 +64,7 @@ const ActualDecImage = () => {
 
       if (data.decoration?.featured_image) {
         setMainImage(
-          `https://horaservices.com/api/uploads/${data.decoration.featured_image}`
+          `${BASE_URL}/api/uploads/${data.decoration.featured_image}`
         );
       }
 
@@ -76,7 +76,7 @@ const ActualDecImage = () => {
             _id: img._id || null,
             image: img.image,
             is_tagged: img.is_tagged || false,
-            url: `https://horaservices.com/api/uploads/${img.image}`,
+            url: `${BASE_URL}/api/uploads/${img.image}`,
           }));
 
           return { orderId: order.order_id, images };

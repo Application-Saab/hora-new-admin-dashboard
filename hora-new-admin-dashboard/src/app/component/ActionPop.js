@@ -2,7 +2,9 @@ import Image from "next/image";
 import "./Actionpopup.css";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import * as XLSX from "xlsx";
+import * as XLSX from "xlsx"; 
+import CallChecklistContent from "./CallChecklistContent";
+import { BASE_URL } from "@/utils/apiconstant";
 
 const categoryMap = {
   "65a92271ae1586258ccd0628": "anniversary-decoration",
@@ -25,11 +27,13 @@ const ActionPopup = ({
   actionPopupOrderType,
   actionPopupChefOrder_Id,
   onClose,
+  order,
 }) => {
   const [popupType, setPopupType] = useState("");
   const [orderDetails, setOrderDetails] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showChecklist, setShowChecklist] = useState(false);
   let apiUrl = "";
 
   let foodDeliveryInclusions = [
@@ -55,21 +59,19 @@ const ActionPopup = ({
 
     // Set the popup type and corresponding API URL based on order type
     if (actionPopupOrderType === 1) {
-      apiUrl = `https://horaservices.com:3000/api/order/order_details_decoration/${actionPopupOrderId}`;
+      apiUrl = `${BASE_URL}/api/order/order_details_decoration/${actionPopupOrderId}`;
       setPopupType("decoration");
     } else if (actionPopupOrderType === 2) {
       const chefOrderId = actionPopupChefOrder_Id.toString();
-      apiUrl = `https://horaservices.com:3000/api/order/order_details/v1/${chefOrderId}`;
+      apiUrl = `${BASE_URL}/api/order/order_details/v1/${chefOrderId}`;
       setPopupType("chef");
     } else if (actionPopupOrderType === 6 || actionPopupOrderType === 7) {
-      // alert(actionPopupOrderType)
-      apiUrl = `https://horaservices.com:3000/api/order/order_details_food_delivery/${actionPopupOrderId}`;
+      apiUrl = `${BASE_URL}/api/order/order_details_food_delivery/${actionPopupOrderId}`;
       setPopupType("foodDelivery");
     } else if (actionPopupOrderType === 8) {
       // Need new api for photograpgy
       const photographyOrderId = actionPopupChefOrderId.toString();
-      apiUrl = `https://horaservices.com:3000/api/order/order_details_photography/${photographyOrderId}`;
-      // https://horaservices.com:3000/api/order/order_details_photography/9753
+      apiUrl = `${BASE_URL}/api/order/order_details_photography/${photographyOrderId}`;
       setPopupType("Photography");
     } else {
       setError("Currently, data is not available");
@@ -101,6 +103,10 @@ const ActionPopup = ({
 
     fetchOrderapi();
   }, [actionPopupOrderId, actionPopupChefOrderId, actionPopupOrderType]);
+
+  const handleCallClick = () => {
+    setShowChecklist(true); 
+  };
 
   const getOrderId = (e) => {
     const orderId1 = 10800 + e;
@@ -229,7 +235,7 @@ const ActionPopup = ({
                               return (
                                 <li key={item._id} className="order-item">
                                   <Image
-                                    src={`https://horaservices.com/api/uploads/${item.image}`}
+                                    src={`${BASE_URL}/api/uploads/${item.image}`}
                                     alt={item.name}
                                     width={80}
                                     height={80}
@@ -261,7 +267,7 @@ const ActionPopup = ({
                             {orderDetails.items.map((item) => (
                               <li key={item._id} className="order-item">
                                 <Image
-                                  src={`https://horaservices.com/api/uploads/${item.image}`}
+                                  src={`${BASE_URL}/api/uploads/${item.image}`}
                                   alt={item.name}
                                   width={80}
                                   height={80}
@@ -295,7 +301,7 @@ const ActionPopup = ({
                       return (
                         <li key={item._id} className="order-item">
                           <Image
-                            src={`https://horaservices.com/api/uploads/${item.image}`}
+                            src={`${BASE_URL}/api/uploads/${item.image}`}
                             alt={item.name}
                             width={80}
                             height={80}
@@ -326,7 +332,7 @@ const ActionPopup = ({
                       {orderDetails?.selecteditems?.map((item) => (
                         <li key={item._id} className="order-item">
                           <Image
-                            src={`https://horaservices.com/api/uploads/${item.image}`}
+                            src={`${BASE_URL}/api/uploads/${item.image}`}
                             alt={item.name}
                             width={80}
                             height={80}
@@ -357,7 +363,7 @@ const ActionPopup = ({
                         (item) => (
                           <li key={item._id} className="order-item">
                             <Image
-                              src={`https://horaservices.com/api/uploads/${item.image}`}
+                              src={`${BASE_URL}/api/uploads/${item.image}`}
                               alt={item.name}
                               width={80}
                               height={80}
@@ -517,7 +523,7 @@ const ActionPopup = ({
       const dec = item?.decoration;
       if (dec) {
         // check if decoration exists
-        message += `\n\n*Product Name:* ${dec?.name}\n*Image URL:* https://horaservices.com/api/uploads/${dec?.featured_image}\n`;
+        message += `\n\n*Product Name:* ${dec?.name}\n*Image URL:* ${BASE_URL}/api/uploads/${dec?.featured_image}\n`;
         const inclusionText = getCleanInclusionText(dec?.inclusion); // format inclusion text
         message += `\n*Inclusion:* \n${inclusionText}`;
       }
@@ -578,7 +584,7 @@ const ActionPopup = ({
         const encodedName = encodeURIComponent(dec.name);
         try {
           const response = await axios.get(
-            `https://horaservices.com:3000/api/Decoration/searchByName/${encodedName}`
+            `${BASE_URL}/api/Decoration/searchByName/${encodedName}`
           );
           const product = response.data.data?.[0];
 
@@ -587,7 +593,7 @@ const ActionPopup = ({
             if (matchedTag) {
               const categoryName = categoryMap[matchedTag];
               const formattedName = dec.name.split(" ").join("-");
-              const finalUrl = `https://horaservices.com/balloon-decoration/${categoryName}/product/${formattedName}`;
+              const finalUrl = `${BASE_URL}/balloon-decoration/${categoryName}/product/${formattedName}`;
               message += `*Product Page:* ${finalUrl}\n`;
             } else {
               console.warn("❌ No matching tag found for:", dec.name);
@@ -1128,54 +1134,35 @@ const ActionPopup = ({
                         <p>
                           <strong>Order Add On:</strong>{" "}
                           {orderDetails.add_on.length > 0 ? (
-  <ul>
-    {orderDetails.add_on.map((item, index) => {
-      
-      let rawTitle =
-        item?.name ||
-        item?.title ||
-        "Addon";
-
-      const quantityMatch = rawTitle.match(/Quantity\s*(\d+)/i);
-
-      const extractedQuantity = quantityMatch
-        ? Number(quantityMatch[1])
-        : null;
-
-      const cleanedTitle = rawTitle.replace(
-        /\s*-\s*Quantity\s*\d+/i,
-        ""
-      ).trim();
-
-      const quantity =
-        extractedQuantity || Number(item?.quantity) || 1;
-
-      const price = Number(
-        item?.price ||
-        0
-      );
-
-      const total =
-        item?.totalPrice
-          ? Number(item.totalPrice)
-          : price * quantity;
-
-      return (
-        <li key={index}>
-          <strong>{cleanedTitle}</strong>
-          : ₹{price} x {quantity} = ₹{total}
-        </li>
-      );
-    })}
-  </ul>
-) : (
-  "N/A"
-)}
+                            <ul>
+                              {orderDetails.add_on.map((item, index) => (
+                                <li key={index}>
+                                  <strong>
+                                    {item.name} {item.title}
+                                  </strong>
+                                  : ₹{item.price}
+                                </li>
+                              ))}
+                            </ul>
+                           ) : (
+                           "N/A"
+                           )}
                         </p>
 
                         <p>
                           <strong>Order decoration_comments:</strong>{" "}
-                          {orderDetails.decoration_comments || "N/A"}
+                          {orderDetails.decoration_comments ? (
+                         <ol style={{ paddingLeft: '20px', marginTop: '5px' }}>
+                         {orderDetails.decoration_comments
+                         .split('\n')
+                         .filter(comment => comment.trim() !== '')
+                         .map((comment, index) => (
+                        <li key={index}>{comment}</li>
+                      ))}
+                   </ol>
+                  ) : (
+                 <span>N/A</span>
+                )}
                         </p>
                         <p>
                           {orderDetails.items.map((item, itemIndex) => {
@@ -1192,7 +1179,7 @@ const ActionPopup = ({
                                 </p>
                                 <p>
                                   <Image
-                                    src={`https://horaservices.com/api/uploads/compressed_webp/${
+                                    src={`${BASE_URL}/api/uploads/compressed_webp/${
                                       dec.featured_image.split(".")[0]
                                     }.webp`}
                                     width={200}
@@ -1222,7 +1209,7 @@ const ActionPopup = ({
                               (image, index) => {
                                 const imageName = typeof image === "string" ? image : image?.image;
                                 const imageUrl = imageName
-                                ? `https://horaservices.com/api/uploads/${imageName}`
+                                ? `${BASE_URL}/api/uploads/${imageName}`
                                  : "";             
                                 return (
                                   <div
@@ -1254,6 +1241,7 @@ const ActionPopup = ({
                     </div>
 
                     <div className="order-summary-box">
+                      <div className="text-center">
                       <h3 style={{ color: "white" }}>Order Summary</h3>
                       <ul style={{ listStyleType: "none", padding: 0 }}>
                         <li className="priceList">
@@ -1304,6 +1292,32 @@ const ActionPopup = ({
                       >
                         Copy Order Summary(For Users)
                       </button>
+                      {order?.type === 1 &&
+                        <div style={{ marginTop: '10px' }}>
+                        {order?.call_checklist_exists === true ? 
+                        <button className="view-btn call-btn" onClick={() => handleCallClick()}>
+                          View Call Checklist
+                        </button>
+                        :
+                        <button className="call-btn add-btn" onClick={() => handleCallClick()}>
+                          Call Checklist
+                        </button>
+                        }
+                        </div>
+                        }
+                    </div>      
+
+                    {showChecklist && (
+                      <div className="callChecklist-container">
+                       <CallChecklistContent
+                       open={showChecklist}
+                       onClose={() => setShowChecklist(false)}
+                       data={order}
+                       cancleBtnColor="#fff"
+                      />
+                      </div>
+                    )}
+
                     </div>
                   </div>
                 </div>
@@ -1369,7 +1383,18 @@ const ActionPopup = ({
                         </p>
                         <p>
                           <strong>Order Comments:</strong>{" "}
-                          {orderDetails.decoration_comments || "N/A"}
+                          {orderDetails.decoration_comments ? (
+                         <ol style={{ paddingLeft: '20px', marginTop: '5px' }}>
+                          {orderDetails.decoration_comments
+                          .split('\n')
+                          .filter(comment => comment.trim() !== '')
+                          .map((comment, index) => (
+                          <li key={index}>{comment}</li>
+                          ))}
+                        </ol>
+                      ) : (
+                     <span>N/A</span>
+                      )}
                         </p>
 
                         <div
@@ -1439,13 +1464,15 @@ const ActionPopup = ({
                             </p>
 
                             {(() => {
-                             const addOns =
-  Array.isArray(orderDetails?.add_on) &&
-  orderDetails.add_on.filter(
-    (item) =>
-      item?.title ||
-      item?.name
-  );
+                              const addOns =
+                                Array.isArray(orderDetails.add_on) &&
+                                orderDetails.add_on.filter(
+                                  (item) =>
+                                    item &&
+                                    typeof item === "object" &&
+                                    Object.keys(item).length > 0 &&
+                                    item.title
+                                );
 
 
                               if (!addOns || addOns.length === 0) {
@@ -1493,11 +1520,7 @@ const ActionPopup = ({
                                         }}
                                       >
                                         <Image
-                                          src={
-  item?.image
-    ? `https://horaservices.com/api/uploads/compressed_webp/${item.image}`
-    : "/placeholder.png"
-}
+                                          src={item.image}
                                           alt={item?.title}
                                           width={240}
                                           height={120}
@@ -1523,7 +1546,7 @@ const ActionPopup = ({
                                             color: "#059669",
                                           }}
                                         >
-                                         {item?.price} x {item?.quantity || 1} = ₹{item?.totalPrice || item?.price}
+                                         ₹{item.price}
                                         </p>
                                         <h3
                                           style={{
@@ -1543,15 +1566,6 @@ const ActionPopup = ({
                                           }}
                                         >
                                           Discription : {item?.description || "N/A"}
-                                        </p>
-                                        <p
-                                          style={{
-                                            fontSize: "12px",
-                                            color: "#6b7280",
-                                            marginTop: "4px",
-                                          }}
-                                        >
-                                          quantity - {item?.quantity || 1}
                                         </p>
                                       </div>
                                     </div>
