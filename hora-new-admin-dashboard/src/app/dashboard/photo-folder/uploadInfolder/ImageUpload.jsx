@@ -5,7 +5,7 @@ import Image from "next/image";
 import {MEDIA_WORKER_URL} from '../../../../utils/apiconstant'
 
 
-const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages, isWeblink, weblink }) => {
+const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages, isWeblink =false, weblink }) => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [showThumbnailComp, setShowThumbnailComp] = useState(false);
   const [updatedImg, setUpdatedImg] = useState(true);
@@ -17,6 +17,11 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages, 
 
   const MAX_CONCURRENT_UPLOADS = selectedImages.length;
 
+  useEffect(() => {
+  if (folderTitle && customerId) {
+    setShowLink(true);
+  }
+}, [folderTitle, customerId]);
 
   useEffect(() => {
     if (refetchDriveImages) {

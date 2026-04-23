@@ -246,7 +246,7 @@ const PhotoCreateProject = () => {
           customerId={customerId}
           folderTitle={folderTitle}
           enteredNum={enteredNum}
-          isWeblink={true}
+          isWeblink={!!weblink}
           weblink={weblink}
         />
       )}

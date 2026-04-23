@@ -1,5 +1,5 @@
 export const BASE_URL = 'https://horaservices.com:3000';
-export const MEDIA_WORKER_URL = "https://mediaprocessv2.horaservices.com"
+export const MEDIA_WORKER_URL ="https://horaservices.com/media-api"
 export const GET_DECORATION_BY_NAME = '/api/Decoration/searchByName/';
 export const CONFIRM_ORDER_ENDPOINT = "/api/order/add";
 export const SAVE_LOCATION_ENDPOINT='/api/users/address/editByUserID';
