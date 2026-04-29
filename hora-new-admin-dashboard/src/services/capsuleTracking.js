@@ -4,13 +4,10 @@ import {
   BASE_URL,
 } from "@/utils/apiconstant";
 
-export const getCapsuleTracking = async ({ page = 1, limit = 10 }) => {
+export const getCapsuleTracking = async (params) => {
   try {
     const response = await axios.get(`${BASE_URL}/api/internal/capsule-tracking`, {
-      params: {
-        page,
-        limit,
-      },
+      params
     });
 
     return {
@@ -19,6 +16,6 @@ export const getCapsuleTracking = async ({ page = 1, limit = 10 }) => {
     };
   } catch (error) {
     console.error("Capsule Tracking API Error:", error);
-    throw error; 
+    throw error;
   }
 };
