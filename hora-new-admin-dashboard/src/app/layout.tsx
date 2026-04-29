@@ -105,6 +105,9 @@ const menuItems = [
         icon: <FaPlusCircle />,
         url: "/dashboard/add-more-images",
       },
+      { label: "Capsule Tracking",
+         icon: <FaClipboardList />,
+          url: "/dashboard/capsule-tracking" },
     ],
   },
 
