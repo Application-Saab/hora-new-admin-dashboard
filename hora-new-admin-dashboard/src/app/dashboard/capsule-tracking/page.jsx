@@ -9,10 +9,6 @@ const Capsuletracking = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
-  const today = new Date().toISOString().split("T")[0];
-
-  const [startDate, setStartDate] = useState(today);
-  const [endDate, setEndDate] = useState(today);
 
   // Fetch orders from API
   const fetchOrders = async () => {
@@ -22,8 +18,6 @@ const Capsuletracking = () => {
       const { data, pagination } = await getCapsuleTracking({
         page,
         limit: 10,
-        startDate,
-        endDate
       });
 
       setOrders(data);
@@ -38,7 +32,7 @@ const Capsuletracking = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, [page, startDate, endDate]);
+  }, [page]);
 
   const getOrderId = (e) => {
     const orderId1 = 10800 + e;
@@ -52,26 +46,12 @@ const Capsuletracking = () => {
     <div className="vendor-container">
       <div className="vendor-card">
         <h2 className="vendor-title">Capsule Tracking</h2>
-        <div style={{ marginBottom: "10px" }}>
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
-
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            style={{ marginLeft: "10px" }}
-          />
-        </div>
         <div className="table-wrapper">
           <table className="vendor-table">
             <thead className="capsule-table-header">
               <tr>
                 <th>Order ID</th>
-                <th>User ID</th>
+                <th>Created At</th>
                 <th>Capsule Link</th>
                 <th>Total Photos Uploaded</th>
                 <th>Total Likes</th>
@@ -101,7 +81,11 @@ const Capsuletracking = () => {
                 orders.map((order, index) => (
                   <tr key={index}>
                     <td>{getOrderId(order?.order_id)}</td>
-                    <td>{order?.fromId}</td>
+                    <td>
+                      {order?.imageUploadCounts?.AllImagesUploadedAt
+                        ? new Date(order.imageUploadCounts.AllImagesUploadedAt).toLocaleString("en-IN")
+                        : "-"}
+                    </td>
                     <td>
                       <a href={order?.orderWebLink} target="_blank" rel="noreferrer">
                         {order?.orderWebLink}
