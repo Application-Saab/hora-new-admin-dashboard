@@ -19,3 +19,10 @@ export const getCapsuleTracking = async (params) => {
     throw error;
   }
 };
+
+export const getCapsuleUsers = async ({ page, limit, search }) => {
+  const res = await fetch(
+    `${BASE_URL}/api/internal/capsule-users?page=${page}&limit=${limit}&search=${search}`
+  );
+  return res.json();
+};
