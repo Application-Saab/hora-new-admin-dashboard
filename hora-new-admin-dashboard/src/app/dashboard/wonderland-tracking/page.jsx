@@ -24,16 +24,23 @@ const AdminAnalytics = () => {
   }, []);
 
   useEffect(() => {
-    fetchWonderlandListingData(
-      setLoading,
-      setData,
-      setPagination,
-      type,
-      page,
-      debouncedSearch,
-      dateFilter,
-    );
-  }, [type, page, debouncedSearch, dateFilter]);
+  const controller = new AbortController();
+
+  fetchWonderlandListingData({
+    setLoading,
+    setData,
+    setPagination,
+    type,
+    page,
+    search: debouncedSearch,
+    dateFilter,
+    signal: controller.signal,
+  });
+
+  return () => {
+    controller.abort();
+  };
+}, [type, page, debouncedSearch, dateFilter]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
