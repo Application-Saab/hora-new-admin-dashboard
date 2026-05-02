@@ -17,6 +17,7 @@ import { IoMdOpen } from "react-icons/io";
 import SearchWithDropDown from "../../component/SearchWithDropDown";
 import { eventList } from '../../../constants/eventList'
 import CallChecklist from '../../component/CallChecklist'
+import CommonPopup from "../../component/CommonPopup"
 
 const OrderList = () => {
   const [orders, setOrders] = useState([]);
@@ -34,6 +35,9 @@ const OrderList = () => {
   const [actionPopupChefOrderId, setActionPopupChefOrderId] = useState("");
   const [actionPopupOrderType, setActionPopupOrderType] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
+  const [linkPopupOpen, setLinkPopupOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+
   const [decorationFields, setDecorationFields] = useState([]);
 const [order, setOrder] = useState(null);
   const [actionPopupChefOrder_Id, setActionPopupChefOrder_Id] = useState("");
@@ -1351,6 +1355,7 @@ useEffect(() => {
                             //   </span>
                             // )
                             : (
+                              <div className="order-link-container">
                               <div className="order-links">
 
                                 {/* Drive Link */}
@@ -1360,7 +1365,6 @@ useEffect(() => {
                                 >
                                   <IoMdOpen size={30} />
                                   <span>drivelink</span>
-                                  <span>{order?.imageUploadCounts?.totalFromDrive || 0}</span>
                                 </div>
 
                                 {/* Web Link */}
@@ -1371,12 +1375,18 @@ useEffect(() => {
                                   >
                                     <IoMdOpen size={30} />
                                     <span>weblink</span>
-                                    <span>{order?.imageUploadCounts?.totalWeblink || 0}</span>
+                                    
                                   </div>
-                                ) : null}
+                                  
+                                ) : null} 
 
                               </div>
-
+                                <button onClick={() => {
+                                 setSelectedOrder(order);
+                                 setLinkPopupOpen(true);
+                                  }}
+                                className="link-btns">Details</button>
+                              </div>
 
                             )
                         ) : (
@@ -2001,6 +2011,48 @@ useEffect(() => {
         data={callChecklistData}
         onClose={() => setShowChecklist(false)}
       />
+      {/* Details MODAL */}
+{linkPopupOpen && selectedOrder && (
+  <CommonPopup
+    isOpen={linkPopupOpen}
+    onClose={() => setLinkPopupOpen(false)}
+    heading="Drivelink Details"
+    mainBtnVisible={false}
+    popupBody={
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+
+        <div>
+          <strong>Total Files From Drive :</strong>{" "}
+          {selectedOrder?.imageUploadCounts?.totalFromDrive || 0}
+        </div>
+
+        <div>
+          <strong>Drive Upload Time :</strong>{" "}
+          {selectedOrder?.imageUploadCounts?.driveProvidedAt
+            ? new Date(
+                selectedOrder.imageUploadCounts.driveProvidedAt
+              ).toLocaleString()
+            : "-"}
+        </div>
+
+        <div>
+          <strong>Total Files Weblink :</strong>{" "}
+          {selectedOrder?.imageUploadCounts?.totalWeblink || 0}
+        </div>
+
+        <div>
+          <strong>Weblink Completion Time :</strong>{" "}
+          {selectedOrder?.imageUploadCounts?.AllImagesUploadedAt
+            ? new Date(
+                selectedOrder.imageUploadCounts.AllImagesUploadedAt
+              ).toLocaleString()
+            : "-"}
+        </div>
+
+      </div>
+    }
+  />
+)}
     </div>
   );
 };

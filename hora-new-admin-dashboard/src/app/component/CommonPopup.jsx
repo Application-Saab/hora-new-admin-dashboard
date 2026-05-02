@@ -2,7 +2,7 @@
 import React from 'react';
 import './commonpopup.css';
 
-const Popup = ({ isOpen, onClose, heading, popupBody, buttonText, mainButtonAction, disabled }) => {
+const Popup = ({ isOpen, onClose, heading, popupBody, buttonText, mainButtonAction =()=>{}, disabled , mainBtnVisible=true}) => {
     if (!isOpen) return null;
 
     return (
@@ -13,6 +13,7 @@ const Popup = ({ isOpen, onClose, heading, popupBody, buttonText, mainButtonActi
                     {popupBody}
                 </div>
                 <div className='commonpopup-footer'>
+                    {mainBtnVisible &&
                     <button
                         disabled={disabled}
                         onClick={mainButtonAction}
@@ -20,12 +21,13 @@ const Popup = ({ isOpen, onClose, heading, popupBody, buttonText, mainButtonActi
                     >
                         {buttonText}
                     </button>
+                    }
 
                     <button
                         onClick={onClose}
                         className='cancel-btn'
                     >
-                        Cancel
+                        Colse
                     </button>
                 </div>
             </div>

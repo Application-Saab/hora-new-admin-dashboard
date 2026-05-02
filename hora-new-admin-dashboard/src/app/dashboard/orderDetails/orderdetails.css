@@ -717,3 +717,18 @@ gap: 5px;
   gap: 8px;
   padding: 10px 0px; 
 }
+.order-link-container{
+display: flex;
+ gap: 6px;
+ align-items: center;
+ justify-content: center;
+ margin: 10px;
+}
+.link-btns{
+  background-color: rgb(151, 83, 140);
+  padding: 5px;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
