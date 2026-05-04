@@ -41,6 +41,7 @@ const OrderList = () => {
   const [decorationFields, setDecorationFields] = useState([]);
 const [order, setOrder] = useState(null);
   const [actionPopupChefOrder_Id, setActionPopupChefOrder_Id] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // supplier
   const [isSupplierAssigned, setIsSupplierAssigned] = useState(false);
@@ -716,6 +717,7 @@ useEffect(() => {
       "font-size:13px; background:pink; color:#bf2c9f;",
       selectedOrderData
     );
+    setLoading(true);
     try {
       // Make API call to create folder
       const response = await fetch(`${BASE_URL}${UPLOAD_DRIVE_TO_ORDER}`, {
@@ -778,6 +780,9 @@ useEffect(() => {
       console.error("Error creating folder:", error);
       alert(error.message);
     }
+    finally {
+    setLoading(false); 
+  }
   };
 
   return (
@@ -1600,7 +1605,7 @@ useEffect(() => {
                                 onClick={() => {
                                   handleUploadDriveUrl(order);
                                 }}
-                                disabled={!driveLink}
+                                disabled={!driveLink || loading}
                                 style={{
                                   padding: "10px 20px",
                                   backgroundColor: "#28a745",
@@ -1614,7 +1619,7 @@ useEffect(() => {
                                   transition: "background-color 0.3s ease",
                                 }}
                               >
-                                Add
+                                {loading ? "Adding.." : "Add"}
                               </button>
                             </div>
                           </div>
