@@ -1,0 +1,80 @@
+/* Container */
+.admin-form-container {
+  max-width: 80%;
+  margin: 40px auto;
+  padding: 25px;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Heading */
+.admin-form-container h2 {
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+/* Form group */
+.form-group {
+  margin-bottom: 16px;
+}
+
+/* Labels */
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+/* Inputs */
+.form-group input {
+  width: 90%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  transition: border 0.2s ease;
+}
+
+.form-group input:focus {
+  border-color: #000;
+  outline: none;
+}
+
+/* Button */
+.submit-btn {
+  width: 100%;
+  padding: 12px;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background 0.3s ease;
+}
+
+.submit-btn:hover {
+  background: #333;
+}
+
+.submit-btn:disabled {
+  background: #888;
+  cursor: not-allowed;
+}
+
+/* Messages */
+.success-msg {
+  color: green;
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+.error-msg {
+  color: red;
+  margin-top: 12px;
+  font-size: 14px;
+}

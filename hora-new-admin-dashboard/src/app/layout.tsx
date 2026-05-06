@@ -196,6 +196,8 @@ const menuItems = [
 
 
   { label: "Dish List", icon: <FaUtensils />, url: "/dashboard/dish-list" },
+   { label: "Venue Create Order", icon: <FaUtensils />, url: "/dashboard/venue-create-order" },
+
 
   {
     label: "Create Dish",
