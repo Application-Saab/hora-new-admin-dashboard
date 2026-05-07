@@ -91,27 +91,6 @@ const PhotoCreateProject = () => {
         throw new Error(data.message || "Failed to create folder");
       }
 
-      const googleResp = await fetch(`${BASE_URL}/api/photo/drive/update-google-sheet`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderIdDb: driveVendorId - 10800,
-          orderIdCustomer: driveVendorId,
-          phone: data?.phoneNo,
-          fulfillmentDate:  data?.order_date
-                        ? new Date(data?.order_date).toLocaleDateString("en-GB")
-                        : "N/A",
-          services: "Photography",
-          driveLink: driveFolderUrl,
-          horaWebLink: data?.webLink,
-        }),
-      });
-      console.log(
-        "%c [ googleResp ]-95",
-        "font-size:13px; background:pink; color:#bf2c9f;",
-        googleResp
-      );
-
       alert(`Images are uploading in background, will reflect on link in less then 1 hour for : ${driveVendorId}:`);
       console.log("........", data);
       setFolderTitle(data?.folderName);
