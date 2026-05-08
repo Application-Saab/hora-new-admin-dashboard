@@ -59,25 +59,9 @@ const Capsuletracking = () => {
     setSearch("");
   }, [activeTab]);
 
-useEffect(() => {
-
-  // Capsule tab => always call API
-  if (activeTab === "capsule") {
+  useEffect(() => {
     fetchOrders();
-    return;
-  }
-
-  if (
-    activeTab === "user" &&
-    (
-      search === "" ||
-      /^\d{10}$/.test(search)
-    )
-  ) {
-    fetchOrders();
-  }
-
-}, [page, activeTab, search]);
+  }, [page, activeTab, search]);
 
   const getOrderId = (e) => {
     const orderId1 = 10800 + e;
@@ -186,8 +170,8 @@ useEffect(() => {
                       <>
                         <td>{getOrderId(order?.order_id)}</td>
                         <td>
-                          {order?.imageUploadCounts?.driveProvidedAt
-                            ? new Date(order.imageUploadCounts.driveProvidedAt).toLocaleString("en-IN")
+                          {order?.imageUploadCounts?.AllImagesUploadedAt
+                            ? new Date(order.imageUploadCounts.AllImagesUploadedAt).toLocaleString("en-IN")
                             : "-"}
                         </td>
                         <td>
