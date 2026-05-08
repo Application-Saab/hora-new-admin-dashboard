@@ -742,32 +742,6 @@ useEffect(() => {
         throw new Error(data.error || "Failed to create folder");
       }
 
-      const googleResp = await fetch(
-        `${BASE_URL}/api/photo/drive/update-google-sheet`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            orderIdDb: selectedOrderData?.order_id,
-            orderIdCustomer: selectedOrderData?.order_id + 10800,
-            phone: selectedOrderData?.phone_no,
-            fulfillmentDate: selectedOrderData.order_date
-              ? new Date(selectedOrderData?.order_date).toLocaleDateString(
-                "en-GB"
-              )
-              : "N/A",
-            services: "Photography",
-            driveLink: driveLink,
-            horaWebLink: data?.webLink,
-          }),
-        }
-      );
-      console.log(
-        "%c [ googleResp ]-95",
-        "font-size:13px; background:pink; color:#bf2c9f;",
-        googleResp
-      );
-
       alert(
         `Drive link are added for order_id : ${selectedOrderData?.order_id + 10800
         }`
