@@ -1,0 +1,88 @@
+.event-masonry-item {
+  margin-bottom: 0px;
+  break-inside: avoid;
+  border-radius: 5px;
+  overflow: hidden;
+  background-color: #e9ecef;
+  min-height: 50px; 
+  position: relative;
+  display: block;
+  transition: background-color 0.3s;
+  padding: 3px;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+}
+
+/* Styles for the <img> tag itself within LazyImage */
+.event-lazy-image-actual-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.event-lazy-image-actual-img.loaded {
+  opacity: 1;
+}
+
+/* Spinner container and spinner animation */
+.event-lazy-image-spinner-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.event-lazy-image-spinner-animation {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(0, 0, 0, 0.2);
+  border-top-color: #333; 
+  border-radius: 50%;
+  animation: lazy-image-spin 0.7s linear infinite;
+}
+
+@keyframes lazy-image-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Masonry Grid column setup (ensure these are suitable for your design) */
+.event-image-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+}
+.grid-item.small {
+  grid-column: span 1;
+  grid-row: span 1;
+  aspect-ratio: 1 / 1;
+}
+
+.grid-item.big {
+  grid-column: span 2;
+  grid-row: span 2;
+  aspect-ratio: 2 / 2;
+}
+
+.grid-item.small-right-top {
+  grid-column: 3 / 4;
+  grid-row: span 1;
+  aspect-ratio: 1 / 1;
+}
+
+.grid-item.small-right-bottom {
+  grid-column: 3 / 4;
+  grid-row: span 1;
+  aspect-ratio: 1 / 1;
+}
