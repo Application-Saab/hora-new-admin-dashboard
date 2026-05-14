@@ -175,7 +175,9 @@ const Capsuletracking = () => {
                             : "-"}
                         </td>
                         <td>
-                          <a href={order?.orderWebLink} target="_blank" rel="noreferrer">
+                          <a 
+                          href={`${order?.orderWebLink}${order?.orderWebLink?.includes('?') ? '&' : '?'}fromPanel=true`}
+                           target="_blank" rel="noreferrer">
                             {order?.orderWebLink}
                           </a>
                         </td>
