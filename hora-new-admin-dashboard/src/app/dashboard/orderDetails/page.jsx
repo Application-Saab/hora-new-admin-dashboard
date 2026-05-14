@@ -1344,17 +1344,21 @@ useEffect(() => {
                                 >
                                   <IoMdOpen size={30} />
                                   <span>drivelink</span>
+                                  {order?.imageUploadCounts?.totalFromDrive}
                                 </div>
 
                                 {/* Web Link */}
                                 {order?.orderWebLink ? (
                                   <div
                                     className="link-item"
-                                    onClick={() => window.open(order.orderWebLink, "_blank")}
+                                    onClick={() => {
+                                    const finalLink = `${order?.orderWebLink}${order?.orderWebLink?.includes('?') ? '&' : '?'}fromPanel=true`;
+                                    window.open(finalLink, "_blank");
+                                  }}
                                   >
                                     <IoMdOpen size={30} />
                                     <span>weblink</span>
-                                    
+                                    {order?.imageUploadCounts?.totalWeblink}
                                   </div>
                                   
                                 ) : null} 
