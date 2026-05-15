@@ -1,4 +1,5 @@
 import CallChecklistContent from "./CallChecklistContent";
+import PhotographyCallChecklistContent from './PhotographyCallChecklistContent';
 import './CallChecklist.css'
 
 const CallChecklist = ({ open, onClose, data = null }) => {
@@ -10,11 +11,21 @@ const CallChecklist = ({ open, onClose, data = null }) => {
          <div className="checklist-header">
           <h3>Order Call Checklist</h3>
         </div>
-      <CallChecklistContent
+        {data?.type === 1 ?
+        <CallChecklistContent
         open={open}
         onClose={onClose}
         data={data}
       />
+      : data?.type === 8 ?
+      <PhotographyCallChecklistContent
+        open={open}
+        onClose={onClose}
+        data={data}
+      />
+      : <></>
+      }
+      
       </div>
     </div>
   );
