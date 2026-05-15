@@ -209,3 +209,18 @@ label {
   z-index: 2;
 }
 
+
+.photography-checklist-textarea {
+  width: 100%;
+  max-width: 100%;
+  min-height: 30px;
+  padding: 12px;
+  border: 1px solid #dcdcdc;
+  border-radius: 8px;
+  resize: vertical;
+  box-sizing: border-box;
+  margin-top: 10px;
+}
+.checklist-block {
+  width: 100%;
+}
