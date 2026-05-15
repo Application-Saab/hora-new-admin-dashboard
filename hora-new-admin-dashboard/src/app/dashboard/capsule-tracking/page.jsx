@@ -128,14 +128,14 @@ const Capsuletracking = () => {
                   <th>Order ID</th>
                   <th>Created At</th>
                   <th>Capsule Link</th>
-                  <th>Total Photos Uploaded</th>
+                  <th>Total Photos</th>
                   <th>Total Likes</th>
-                  <th>Face Recognition Users</th>
-                  <th>User Folders</th>
-                  <th>Photos Downloaded</th>
-                  <th>Photos Shared</th>
-                  <th>Times link opened</th>
+                  <th>Face Recognition</th>
+                  <th>Folders</th>
+                  <th>Downloaded</th>
+                  <th>Shared</th>
                   <th>Total Registered users</th>
+                  <th>Times link opened</th>
                 </tr>
               ) : (
                 // User Table Headers
@@ -170,8 +170,8 @@ const Capsuletracking = () => {
                       <>
                         <td>{getOrderId(order?.order_id)}</td>
                         <td>
-                          {order?.imageUploadCounts?.AllImagesUploadedAt
-                            ? new Date(order.imageUploadCounts.AllImagesUploadedAt).toLocaleString("en-IN")
+                          {order?.imageUploadCounts?.driveProvidedAt
+                            ? new Date(order.imageUploadCounts.driveProvidedAt).toLocaleString("en-IN")
                             : "-"}
                         </td>
                         <td>
@@ -187,8 +187,8 @@ const Capsuletracking = () => {
                         <td>{order?.counts?.otherSubFoldersCount || 0}</td>
                         <td>{order?.counts?.totalDownloads || 0}</td>
                         <td>{order?.counts?.totalShares || 0}</td>
-                        <td>{order?.counts?.totalClicks || 0}</td>
                         <td>{order?.counts?.totalViews || 0}</td>
+                        <td>{order?.counts?.totalClicks || 0}</td>
                       </>
                     ) : (
                       <>
