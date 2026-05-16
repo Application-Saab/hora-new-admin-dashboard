@@ -1084,7 +1084,7 @@ useEffect(() => {
                      <td>
                       <div style={styles.container}>
                         {/* Call Icon */}
-                        {order?.type === 1 ? 
+                        {(order?.type === 1 || order?.type === 8) ? 
                         <>
                         {order?.call_checklist_exists === true ? 
                         <button className="view-btn call-btn" onClick={() => handleCallClick(order)}>
