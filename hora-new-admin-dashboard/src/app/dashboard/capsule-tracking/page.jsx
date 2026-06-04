@@ -136,6 +136,8 @@ const Capsuletracking = () => {
                   <th>Shared</th>
                   <th>Total Registered users</th>
                   <th>Times link opened</th>
+                  <th>First Device Type</th>
+                  <th>Second Device Type</th>
                 </tr>
               ) : (
                 // User Table Headers
@@ -189,6 +191,8 @@ const Capsuletracking = () => {
                         <td>{order?.counts?.totalShares || 0}</td>
                         <td>{order?.counts?.totalViews || 0}</td>
                         <td>{order?.counts?.totalClicks || 0}</td>
+                        <td>{order?.counts?.firstDeviceType || "-"}</td>
+                        <td>{order?.counts?.secondDeviceType || "-"}</td>
                       </>
                     ) : (
                       <>
