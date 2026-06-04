@@ -1,8 +1,8 @@
 /* Container */
 .container {
   max-width: 70%;
-    margin: 22px auto;
-    padding: 10px 23px;
+  margin: 22px auto;
+  padding: 10px 23px;
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -41,24 +41,24 @@
 }
 
 /* Buttons */
-.container button {
+.container .create-popup-btn {
   margin-top: 16px;
   width: 100%;
   padding: 10px;
   border: none;
   border-radius: 8px;
-background-color: #9252AA;
+  background-color: #9252aa;
   color: white;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s ease;
 }
 
-.container button:hover {
+.container .create-popup-btn:hover {
   background-color: #0059c1;
 }
 
-.container button:disabled {
+.container .create-popup-btn:disabled {
   background-color: #ccc;
   cursor: not-allowed;
 }
@@ -71,7 +71,6 @@ background-color: #9252AA;
 
 /* popup new customer css */
 /* General Styles */
-
 
 /* Popup Container */
 .popup {
@@ -131,7 +130,9 @@ background-color: #9252AA;
   background: #f9f9f9;
   font-size: 1rem;
   outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .popup input:focus {
@@ -141,7 +142,7 @@ background-color: #9252AA;
 }
 
 /* Buttons */
-.popup button {
+.popup .popup-modal-btn {
   width: 48%;
   padding: 12px;
   margin: 10px 1%;
@@ -153,10 +154,12 @@ background-color: #9252AA;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s ease;
 }
 
-.popup button:hover {
+.popup .create-popup-btn:hover {
   background-color: #45a049;
   /* Darker green hover effect */
   transform: translateY(-2px);
@@ -164,20 +167,20 @@ background-color: #9252AA;
 }
 
 /* Cancel Button */
-.popup button.cancel {
+.popup .create-popup-btn.cancel {
   background: #e0e0e0;
   /* Light grey for cancel */
   color: #333;
 }
 
-.popup button.cancel:hover {
+.popup .create-popup-btn.cancel:hover {
   background: #d6d6d6;
   /* Darker grey on hover */
 }
 
 .buttonSecondary {
   padding: 10px 20px;
-  background-color: #9252AA;
+  background-color: #9252aa;
   color: #fff;
   border: none;
   border-radius: 5px;
@@ -186,11 +189,98 @@ background-color: #9252AA;
 
 .buttonPrimary {
   padding: 10px 20px;
-  background-color: #9252AA;
+  background-color: #9252aa;
   color: #fff;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   margin-top: 10px;
   width: 100%;
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.popup-content {
+  background: white;
+  padding: 20px;
+  width: 90%;
+  max-width: 700px;
+  /* max-height: 90vh; */
+  /* overflow-y: auto; */
+  border-radius: 10px;
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: #9252aa !important;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px !important;
+  height: 30px;
+  cursor: pointer;
+}
+
+.popup-image {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.popup-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.popup-table th,
+.popup-table td {
+  padding: 8px;
+  border: 1px solid #ccc;
+  text-align: left;
+}
+
+.popup-table th {
+  background-color: #f0f0f0;
+  width: 40%;
+}
+.package-form-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 10px;
+}
+.package-create-input-ctn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin: 15px 10px;
+}
+.package-create-input {
+  width: 100%;
+  padding: 10px 10px;
+}
+.package-create-btn {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.package-cancel-btn {
+  background-color: grey !important ;
 }

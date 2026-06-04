@@ -1,0 +1,55 @@
+.package-popup {
+  width: 95%;
+  max-width: 1300px;
+}
+
+.package-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.package-header input {
+  flex: 1;
+  padding: 10px;
+}
+
+.package-table-wrapper {
+  max-height: 550px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+}
+
+.status-badge {
+  padding: 6px 10px;
+  border-radius: 20px;
+  color: white;
+  font-size: 12px;
+}
+
+.status-badge.active {
+  background: green;
+}
+
+.status-badge.inactive {
+  background: red;
+}
+
+.terms-popup-content {
+  width: 90%;
+  max-width: 1100px;
+}
+
+.terms-editor {
+  min-height: 400px;
+}
+
+.terms-editor .ql-container {
+  min-height: 350px;
+}
+
+.terms-editor .ql-editor {
+  min-height: 350px;
+  font-size: 15px;
+}

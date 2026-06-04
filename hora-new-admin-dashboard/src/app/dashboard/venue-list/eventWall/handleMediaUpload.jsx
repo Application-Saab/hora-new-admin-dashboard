@@ -4,7 +4,7 @@ import axios from "axios";
 import imageCompression from "browser-image-compression";
 import { createPendingUploadsDb } from "./pendingUploadsDb";
 
-import { BASE_URL s} from "../../../../utils/apiconstant"
+import { BASE_URL } from "../../../../utils/apiconstant"
 import { MEDIA_WORKER_URL } from "../../../../utils/apiconstant";
 
 // 3 Second Video Clip Generator
