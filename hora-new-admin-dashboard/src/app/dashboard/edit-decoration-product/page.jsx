@@ -31,6 +31,10 @@ const DecorationEditor = () => {
     type: [],
     material: [],
   });
+  const [existingImages, setExistingImages] = useState([]);
+  console.log('%c [ existingImages ]', 'font-size:13px; background:pink; color:#bf2c9f;', existingImages)
+const [newImages, setNewImages] = useState([]);
+const [removedImages, setRemovedImages] = useState([]);
   const [inclusions, setInclusions] = useState([
     {
       id: 1,
@@ -513,17 +517,22 @@ const getDefaultDesignType = (data = {}) => {
   };
 
   const handlePopupOpen = (item) => {
+    console.log('%c [ item ]', 'font-size:13px; background:pink; color:#bf2c9f;', item)
     setPopupData(item);
     setName(item.name);
     setPrice(item.price);
     setImage(null);
     setSelectedTags(item.tag || []);
 
+    setExistingImages(item.featured_images || []);
+    setNewImages([]);
+    setRemovedImages([]);
+
     // OPTION DECIDE
     if (item.inclusionVariables && item.inclusionVariables.length > 0) {
       setMode("Option1");
 
-      const mapped = item.inclusionVariables.map((inc, index) => ({
+      const mapped = JSON.parse(item?.inclusionVariables)?.map((inc, index) => ({
         ...inc,
         id: index + 1,
       }));
@@ -542,37 +551,28 @@ const getDefaultDesignType = (data = {}) => {
     }
   };
 
-  const handleImageChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  // const handleImageChange = async (e) => {
+  //   const file = e.target.files[0];
+  //   if (!file) return;
+  //   setImage(file)
+  // };
 
-    const formData = new FormData();
-    formData.append("file", file);
+  const handleImageChange = (e) => {
+  const files = Array.from(e.target.files);
+  setNewImages((prev) => [...prev, ...files]);
+};
 
-    setUploadingImage(true);
+const removeExistingImage = (img) => {
+  setRemovedImages((prev) => [...prev, img]);
 
-    try {
-      const response = await fetch(
-        `${BASE_URL}/api/image_upload`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+  setExistingImages((prev) =>
+    prev.filter((i) => i.fileName !== img.fileName)
+  );
+};
 
-      const data = await response.json();
-      if (response.ok && data.data) {
-        // Just store the filename, not the full URL
-        setImage(data.data);
-      } else {
-        console.error("Image upload failed:", data);
-      }
-    } catch (error) {
-      console.error("Error uploading image:", error);
-    } finally {
-      setUploadingImage(false);
-    }
-  };
+const removeNewImage = (index) => {
+  setNewImages((prev) => prev.filter((_, i) => i !== index));
+};
 
   const handleTagChange = (tagId) => {
     setSelectedTags((prevTags) =>
@@ -591,26 +591,34 @@ const getDefaultDesignType = (data = {}) => {
     setInclusions([]);
   };
   let formattedInclusion = [];
-  const handleSaveChanges = async () => {
-    let requestData = {
-      _id: popupData._id,
-      name,
-      price,
-      featured_image: image ? image : popupData.featured_image,
-      tag: selectedTags,
-      inclusion: formattedInclusion,
-      designType: callChecklist.designType
-    };
+const handleSaveChanges = async () => {
+  try {
+    const formData = new FormData();
 
+    formData.append("_id", popupData._id);
+    formData.append("name", name);
+    formData.append("price", price);
+
+    formData.append("tag", JSON.stringify(selectedTags));
+    formData.append("designType", JSON.stringify(callChecklist.designType));
+
+
+  // NEW IMAGES
+  newImages.forEach((file) => {
+    formData.append("featured_images", file);
+  });
+
+  // REMOVED IMAGES
+  formData.append("removedImages", JSON.stringify(removedImages));
+
+    // --------------------------
+    // OPTION LOGIC
+    // --------------------------
     if (mode === "Option1") {
-      console.log("Saving Option1 changes...");
-      requestData = {
-        ...requestData,
-        inclusionVariables: inclusions,
-      };
+      formData.append("inclusionVariables", JSON.stringify(inclusions));
+      formData.append("inclusion",JSON.stringify(formattedInclusion));
     } else {
-      console.log("Saving Option2 changes...");
-      formattedInclusion = [
+      const formatted = [
         `<div>- ${option2Text
           .split("\n")
           .map((line) => line.trim())
@@ -618,40 +626,31 @@ const getDefaultDesignType = (data = {}) => {
           .join(" - ")}</div>`,
       ];
 
-      requestData = {
-        ...requestData,
-        inclusion: formattedInclusion,
-      };
+      formData.append("inclusion", JSON.stringify(formatted));
     }
 
-    try {
-      // Make the API request
-      const response = await fetch(BASE_URL + EDIT_DECORATION_PRODUCT, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestData),
-      });
+    const response = await fetch(BASE_URL + EDIT_DECORATION_PRODUCT, {
+      method: "POST",
+      body: formData,
+    });
 
-      const result = await response.json();
-      console.log("API response:", result);
+    const result = await response.json();
+    console.log("Response:", result);
 
-      if (response.ok) {
-        if (selectedSubCategory) {
-          handleSelectChange({ target: { value: selectedSubCategory } });
-        }
-      } else {
-        console.error("API error:", result);
-        // Optionally show error message
+    if (result.error === false) {
+      if (selectedSubCategory) {
+        handleSelectChange({
+          target: { value: selectedSubCategory },
+        });
       }
-    } catch (error) {
-      console.error("Error saving changes:", error);
-      // Optionally show error message
+      setPopupData(null);
+    } else {
+      console.error("API error:", result);
     }
-
-    setPopupData(null); // Close the popup after saving
-  };
+  } catch (error) {
+    console.error("Save error:", error);
+  }
+};
 
   const handlePriceChange = (id, value) => {
     const num = parseFloat(value) || 0;
@@ -778,10 +777,10 @@ useEffect(() => {
                   <tr key={item._id} className="table-row">
                     <td>{item.name}</td>
                     <td>
-                      {item.featured_image ? (
+                      {item?.featured_images?.length && item?.featured_images[0] ? (
                         <Image
                           src={`${BASE_URL}/api/uploads/compressed_webp/${
-                            item?.featured_image.split(".")[0]
+                            item?.featured_images[0]?.fileName?.split(".")[0]
                           }.webp`}
                           alt={item.name}
                           className="thumbnail"
@@ -886,43 +885,40 @@ useEffect(() => {
                       </div>
                     </div>
 
-                    <div className="form-group">
-                      <h3 className="section-title">Image Upload</h3>
-                      <div className="upload-container">
-                        <label htmlFor="image-upload" className="upload-button">
-                          {uploadingImage ? "Uploading..." : "Upload Image"}
-                          <input
-                            id="image-upload"
-                            type="file"
-                            className="hidden-input"
-                            onChange={handleImageChange}
-                          />
-                        </label>
-                        {uploadingImage && (
-                          <div className="upload-spinner"></div>
-                        )}
-                      </div>
+                   <div>
+  {/* EXISTING IMAGES */}
+  <div style={{ display: "flex", gap: 10 }}>
+    {existingImages?.map((img) => (
+      <div key={img.fileName}>
+        <img
+          src={`${BASE_URL}/api/uploads/compressed_webp/${img.fileName}`}
+          width={80}
+        />
+        <button onClick={() => removeExistingImage(img)}>
+          Remove
+        </button>
+      </div>
+    ))}
+  </div>
 
-                      {image ? (
-                        <div className="image-preview-container">
-                          <p className="image-label">New Image:</p>
-                          <img
-                            src={`${BASE_URL}/api/uploads/${image}`}
-                            alt="New uploaded image"
-                            className="image-preview"
-                          />
-                        </div>
-                      ) : popupData.featured_image ? (
-                        <div className="image-preview-container">
-                          <p className="image-label">Current Image:</p>
-                          <img
-                            src={`${BASE_URL}/api/uploads/compressed_webp/${popupData.featured_image}`}
-                            alt={popupData.name}
-                            className="image-preview"
-                          />
-                        </div>
-                      ) : null}
-                    </div>
+  {/* NEW IMAGES */}
+  <div style={{ display: "flex", gap: 10 }}>
+    {newImages.map((file, index) => (
+      <div key={index}>
+        <img src={URL.createObjectURL(file)} width={80} />
+        <button onClick={() => removeNewImage(index)}>
+          Remove
+        </button>
+      </div>
+    ))}
+  </div>
+
+  <input
+    type="file"
+    multiple
+    onChange={handleImageChange}
+  />
+</div>
                   </div>
 
                   <div className="modal-column">

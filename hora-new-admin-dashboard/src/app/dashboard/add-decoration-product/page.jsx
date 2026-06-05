@@ -18,6 +18,8 @@ const AddProductForm = () => {
   const [mealProductTypes, setMealProductTypes] = useState([]);
   const [uploadedImage, setUploadedImage] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [fileData, setFileData] = useState(null);
+  const [images, setImages] = useState([]);
   const [showCategoryItems, setShowCategoryItems] = useState(false);
   const [alertMessage, setAlertMessage] = useState({
     show: false,
@@ -91,32 +93,47 @@ const AddProductForm = () => {
     }
   };
 
-  const handleImageUpload = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
 
-    setPreviewImage(URL.createObjectURL(file));
+    const previews = files.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }));
 
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const response = await fetch(BASE_URL + IMAGE_UPLOAD, {
-        method: "POST",
-        body: formData,
-      });
-      const data = await response.json();
-      if (data.error === false) {
-        setUploadedImage(data.data);
-      } else {
-        console.error("Image upload failed:", data.message);
-        showAlert("Image upload failed: " + data.message, "error");
-      }
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      showAlert("Error uploading image", "error");
-    }
+    setImages((prev) => [...prev, ...previews]);
   };
+
+  const removeImage = (index) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // const handleImageUpload = async (event) => {
+  //   const file = event.target.files[0];
+  //   if (!file) return;
+  //   setFileData(file);
+  //   setPreviewImage(URL.createObjectURL(file));
+
+  //   // const formData = new FormData();
+  //   // formData.append("file", file);
+
+  //   // try {
+  //   //   const response = await fetch(BASE_URL + IMAGE_UPLOAD, {
+  //   //     method: "POST",
+  //   //     body: formData,
+  //   //   });
+  //   //   const data = await response.json();
+  //   //   if (data.error === false) {
+  //   //     setUploadedImage(data.data);
+  //   //   } else {
+  //   //     console.error("Image upload failed:", data.message);
+  //   //     showAlert("Image upload failed: " + data.message, "error");
+  //   //   }
+  //   // } catch (error) {
+  //   //   console.error("Error uploading image:", error);
+  //   //   showAlert("Error uploading image", "error");
+  //   // }
+  // };
 
   const resetForm = () => {
     setProductName("");
@@ -136,102 +153,117 @@ const AddProductForm = () => {
   };
 
   const handleSubmitProduct = async () => {
-    console.log("Hora Vendor Material Price:", totalPrice);
-    console.log("Execution Price:", executionPrice);
-    console.log("Final Price:", finalPrice);
-
-    const customerPrice =
-      (totalPrice + executionPrice) / (1 - advancePercent / 100);
-    console.log(customerPrice, "customerPrice");
-    const advanceAmountHora = customerPrice * (advancePercent / 100);
-    console.log("advanceAmountHora", advanceAmountHora);
-
-    const productData = {
-      name: productName,
-      dish_rate: productRate,
-      description: "",
-      image: uploadedImage,
-      cuisineId: ["65a2c9d3513d9389d34e2ec9"],
-      mealId: selectedMealTypes,
-      is_dish: "1",
-      dish_allow: "true",
-      serving_dish: [],
-      is_preparation: "true",
-      per_plate_qty: {
-        qty: "",
-        unit: "",
-      },
-      cooking_min: 10,
-      preparation_min: 10,
-      special_appliance_id: [],
-      general_appliance_id: [],
-      is_gas: "true",
-      // preperationtext: description,
-      noofpeopleServedByDish: "",
-      ingredientUsed: [
-        {
-          _id: "641539dbbafd4ec2e102bc91",
-          name: "Ajinomoto",
-          image: "attachment78.png",
-          unit: "",
-          qty: "",
-        },
-      ],
-      categoryIds: [],
-      catId: [],
-      status: "1",
-    };
-
-    console.log(productData, "productdata");
-
-    const formatText = (text) => [
-      `<div>- ${text
-        .split("\n")
-        .map((line) => line.trim())
-        .filter(Boolean)
-        .join(" - ")}</div>`,
-    ];
-
-    const formattedSummary = formatText(summaryText);
-    const formattedOption2Text = formatText(option2Text);
-
-    let payload;
-    if (mode === "Option1") {
-      payload = {
-        ...productData,
-        preperationtext: formattedSummary,
-        vendorMaterialPrice: totalPrice,
-        executionPrice: executionPrice,
-        horaAdvance: advanceAmountHora,
-        inclusionVariables: inclusions,
-      };
-    } else {
-      payload = {
-        ...productData,
-        preperationtext: formattedOption2Text,
-      };
-    }
-
     try {
+      console.log("Submitting product...");
+
+      if (!productName || !productRate) {
+        showAlert("Product name and rate are required", "error");
+        return;
+      }
+
+      const customerPrice =
+        (totalPrice + executionPrice) / (1 - (advancePercent || 0) / 100);
+
+      const advanceAmountHora = customerPrice * ((advancePercent || 0) / 100);
+
+      const formatText = (text = "") =>
+        `<div>${text
+          .split("\n")
+          .map((line) => line.trim())
+          .filter(Boolean)
+          .map((line) => `- ${line}`)
+          .join(" ")}</div>`;
+
+      const isOption1 = mode === "Option1";
+
+      // 🧠 BASE FORM DATA (single source of truth)
+      const formData = new FormData();
+
+      // ✅ IMAGE
+      // if (fileData) {
+      //   formData.append("featured_image", fileData);
+      // }
+
+      images.forEach((img) => {
+        formData.append("featured_images", img.file);
+      });
+
+      // ✅ BASIC FIELDS
+      formData.append("name", productName);
+      formData.append("dish_rate", productRate || 0);
+      formData.append("description", "");
+      formData.append("status", "1");
+
+      // ✅ ARRAY / OBJECT FIELDS (IMPORTANT → stringify)
+      formData.append(
+        "cuisineId",
+        JSON.stringify(["65a2c9d3513d9389d34e2ec9"]),
+      );
+
+      formData.append("mealId", JSON.stringify(selectedMealTypes || []));
+
+      formData.append("serving_dish", JSON.stringify([]));
+      formData.append("special_appliance_id", JSON.stringify([]));
+      formData.append("general_appliance_id", JSON.stringify([]));
+      formData.append("categoryIds", JSON.stringify([]));
+      formData.append("catId", JSON.stringify([]));
+
+      formData.append("per_plate_qty", JSON.stringify({ qty: "", unit: "" }));
+
+      formData.append(
+        "ingredientUsed",
+        JSON.stringify([
+          {
+            _id: "641539dbbafd4ec2e102bc91",
+            name: "Ajinomoto",
+            image: "attachment78.png",
+            unit: "",
+            qty: "",
+          },
+        ]),
+      );
+
+      // ✅ FLAGS
+      formData.append("is_dish", "1");
+      formData.append("dish_allow", "true");
+      formData.append("is_preparation", "true");
+      formData.append("is_gas", "true");
+      formData.append("cooking_min", "10");
+      formData.append("preparation_min", "10");
+
+      // ✅ PREPARATION TEXT
+      formData.append(
+        "preperationtext",
+        isOption1 ? formatText(summaryText) : formatText(option2Text),
+      );
+
+      // ✅ OPTION 1 EXTRA FIELDS
+      if (isOption1) {
+        formData.append("vendorMaterialPrice", totalPrice || 0);
+        formData.append("executionPrice", executionPrice || 0);
+        formData.append("horaAdvance", advanceAmountHora || 0);
+        formData.append("inclusionVariables", JSON.stringify(inclusions || []));
+      }
+
+      // 🚀 API CALL (IMPORTANT → NO JSON.stringify)
       const response = await fetch(BASE_URL + ADD_DECORATION_PRODUCT, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: formData,
       });
+
       const data = await response.json();
 
-      if (data.error === false) {
+      if (data?.error === false) {
         showAlert("Product successfully created!", "success");
         resetForm();
       } else {
         showAlert(
-          "Failed to create product: " + (data.message || "Unknown error"),
+          "Failed to create product: " + (data?.message || "Unknown error"),
           "error",
         );
       }
     } catch (error) {
-      console.log(selectedProductTypes, "selectedProductTypes");
-      console.error("Error submitting product:", error);
+      console.error("Submit error:", error);
       showAlert("Error submitting product", "error");
     }
   };
@@ -658,21 +690,52 @@ const AddProductForm = () => {
           <label>Product Image *</label>
           <div
             className="image-upload-container"
+            style={{ width: "100%" }}
             onClick={() => document.getElementById("imageUpload").click()}
           >
-            {previewImage ? (
-              <img src={previewImage} alt="Preview" className="image-preview" />
+            {images?.length > 0 ? (
+              // <img src={previewImage} alt="Preview" className="image-preview" />
+              <div
+                className="image-box"
+                style={{ display: "flex", width: "100%", height: '200px' }}
+              >
+                {images?.map((img, index) => (
+                  <React.Fragment key={index}>
+                    <div style={{display: "flex", flexDirection: "column", alignItems: "center", marginRight: "10px"}}>
+                      <img src={img.preview} className="image-preview" alt="" />
+                      <button onClick={() => removeImage(index)}>Remove</button>
+                    </div>
+                  </React.Fragment>
+                ))}
+              </div>
             ) : (
               <div className="image-placeholder">Click to Upload</div>
             )}
           </div>
+          {/* 
+          <div className="image-grid">
+            {images.map((img, index) => (
+              <div key={index} className="image-box">
+                <img src={img.preview} alt="" />
+                <button onClick={() => removeImage(index)}>Remove</button>
+              </div>
+            ))}
+          </div> */}
           <input
             type="file"
+            multiple
             id="imageUpload"
             style={{ display: "none" }}
             onChange={handleImageUpload}
+            max={10}
           />
+
+          {/* <input type="file" multiple onChange={handleImageUpload} /> */}
         </div>
+
+      </div>
+
+      <div className="form-row horizontal-fields">
 
         <div className="form-group">
           <label>Product Category Type *</label>
