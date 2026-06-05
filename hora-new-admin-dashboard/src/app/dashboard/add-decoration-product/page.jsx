@@ -4,7 +4,6 @@ import "./adddecoration.css";
 import {
   BASE_URL,
   PRODUCT_MEAL_TYPE,
-  IMAGE_UPLOAD,
   ADD_DECORATION_PRODUCT,
   GET_MATERIAL_FILTER_DATA,
 } from "../../../utils/apiconstant";
@@ -13,12 +12,8 @@ const AddProductForm = () => {
   const [productName, setProductName] = useState("");
   const [productRate, setProductRate] = useState("");
   const [, setDescription] = useState("");
-  const [selectedProductTypes, setSelectedProductTypes] = useState([]);
   const [selectedMealTypes, setSelectedMealTypes] = useState([]);
   const [mealProductTypes, setMealProductTypes] = useState([]);
-  const [uploadedImage, setUploadedImage] = useState(null);
-  const [previewImage, setPreviewImage] = useState(null);
-  const [fileData, setFileData] = useState(null);
   const [images, setImages] = useState([]);
   const [showCategoryItems, setShowCategoryItems] = useState(false);
   const [alertMessage, setAlertMessage] = useState({
@@ -83,9 +78,9 @@ const AddProductForm = () => {
 
   const handleCheckboxChange = (id, type) => {
     if (type === "product") {
-      setSelectedProductTypes((prev) =>
-        prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
-      );
+      // setSelectedProductTypes((prev) =>
+      //   prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+      // );
     } else if (type === "meal") {
       setSelectedMealTypes((prev) =>
         prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
@@ -139,10 +134,8 @@ const AddProductForm = () => {
     setProductName("");
     setProductRate("");
     setDescription("");
-    setSelectedProductTypes([]);
+    // setSelectedProductTypes([]);
     setSelectedMealTypes([]);
-    setUploadedImage(null);
-    setPreviewImage(null);
   };
 
   const showAlert = (message, type) => {
@@ -556,7 +549,7 @@ const AddProductForm = () => {
   };
 
   const totalPrice = inclusions.reduce((sum, i) => sum + i.price, 0);
-  const finalPrice = totalPrice + executionPrice;
+  // const finalPrice = totalPrice + executionPrice;
   const summaryText = inclusions.map((i) => i.previewText).join("\n");
 
   const container = {

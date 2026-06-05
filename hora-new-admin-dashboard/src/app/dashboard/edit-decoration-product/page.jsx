@@ -18,10 +18,8 @@ const DecorationEditor = () => {
   const [popupData, setPopupData] = useState(null);
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
-  const [image, setImage] = useState(null);
   const [selectedTags, setSelectedTags] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [mealProductTypes, setMealProductTypes] = useState([]);
   const [mode, setMode] = useState("Option2");
@@ -517,11 +515,9 @@ const getDefaultDesignType = (data = {}) => {
   };
 
   const handlePopupOpen = (item) => {
-    console.log('%c [ item ]', 'font-size:13px; background:pink; color:#bf2c9f;', item)
     setPopupData(item);
     setName(item.name);
     setPrice(item.price);
-    setImage(null);
     setSelectedTags(item.tag || []);
 
     setExistingImages(item.featured_images || []);
@@ -586,7 +582,7 @@ const removeNewImage = (index) => {
     setPopupData(null);
     setName("");
     setPrice("");
-    setImage(null);
+    // setImage(null);
     setSelectedTags([]);
     setInclusions([]);
   };
