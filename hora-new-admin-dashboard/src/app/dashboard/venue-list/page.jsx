@@ -333,8 +333,10 @@ import EditVenuePopup from "./EditVenuePopup";
 import VenuePackagesPopup from "./VenuePackagesPopup";
 import EditTermsPopup from "./CreateTermsModal";
 import { fetchVenues } from "../../../services/venueListServices";
+import { useRouter } from "next/navigation";
 
 const VenueList = () => {
+  const router = useRouter();
   const [venues, setVenues] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -456,6 +458,17 @@ const VenueList = () => {
                 </td>
 
                 <td>{new Date(venue.createdAt).toLocaleDateString()}</td>
+
+                <td>
+                  <button
+                    className="edit-btn"
+                    onClick={() => {
+                      router.push(`/dashboard/venue-list/image-gallery?venueid=${venue._id}`);
+                    }}
+                  >
+                    View Gallery
+                  </button>
+                </td>
 
                 <td>
                   <button
