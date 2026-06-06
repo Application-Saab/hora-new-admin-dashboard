@@ -523,7 +523,7 @@ const ActionPopup = ({
       const dec = item?.decoration;
       if (dec) {
         // check if decoration exists
-        message += `\n\n*Product Name:* ${dec?.name}\n*Image URL:* ${BASE_URL}/api/uploads/${dec?.featured_image}\n`;
+        message += `\n\n*Product Name:* ${dec?.name}\n*Image URL:* ${BASE_URL}/api/uploads/compressed_webp/${dec?.featured_images?.length > 0 ? dec?.featured_images[0]?.fileName : ""}\n`;
         const inclusionText = getCleanInclusionText(dec?.inclusion); // format inclusion text
         message += `\n*Inclusion:* \n${inclusionText}`;
       }
@@ -1180,11 +1180,11 @@ const ActionPopup = ({
                                 <p>
                                   <Image
                                     src={`${BASE_URL}/api/uploads/compressed_webp/${
-                                      dec.featured_image.split(".")[0]
+                                      dec.featured_images?.length > 0 && dec.featured_images[0]?.fileName?.split(".")[0]
                                     }.webp`}
                                     width={200}
                                     height={200}
-                                    alt={`${dec.featured_image}-name`}
+                                    alt={`${dec.featured_images[0]?.fileName?.split(".")[0]}-name`}
                                   />
                                 </p>
                                 <div>{getItemInclusion(dec.inclusion)}</div>

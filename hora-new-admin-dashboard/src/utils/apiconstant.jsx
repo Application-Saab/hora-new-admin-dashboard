@@ -1,4 +1,4 @@
-export const BASE_URL = 'https://horaservices.com';
+export const BASE_URL = 'http://localhost:5000';
 export const MEDIA_PROCESSING_BASE_URL = 'https://horaservices.com/media-api';
 export const GET_DECORATION_BY_NAME = '/api/Decoration/searchByName/';
 export const CONFIRM_ORDER_ENDPOINT = "/api/order/add";
@@ -15,7 +15,7 @@ export const ACCEPT_ORDER = "/api/order/acceptOrder";
 export const PRODUCT_TYPE = "/api/configuration/admin_configuration_list_all";
 export const PRODUCT_MEAL_TYPE = "/api/meals/admin_meals_list";
 export const IMAGE_UPLOAD = "/api/decoration_image_upload";
-export const ADD_DECORATION_PRODUCT = "/api/dish/add";
+export const ADD_DECORATION_PRODUCT = "/api/dish/decoration/add";
 export const EDIT_DECORATION_PRODUCT = "/api/decoration/edit";
 export const EDIT_PHOTOGRAPHY_PRODUCT = "/api/photography/edit";
 export const ADD_PHOTOGRAPHY_PRODUCT = "/api/photography/add";
