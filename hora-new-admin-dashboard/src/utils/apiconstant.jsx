@@ -4,6 +4,8 @@ export const GET_DECORATION_BY_NAME = '/api/Decoration/searchByName/';
 export const CONFIRM_ORDER_ENDPOINT = "/api/order/add";
 export const SAVE_LOCATION_ENDPOINT='/api/users/address/editByUserID';
 export const ADMIN_USER_DETAILS="/api/admin/getUserDetails/";
+export const GET_USER_BY_ID = "/api/user/user-details";
+export const MEDIA_WORKER_URL = "https://horaservices.com/media-api";
 export const ADMIN_ORDER_LIST="/api/admin/adminOrderList";
 export const GET_MEAL_DISH_ENDPOINT = "/api/user/getMealDish";
 export const API_SUCCESS_CODE = 200;
@@ -52,3 +54,8 @@ export const GET_MATERIAL_FILTER_DATA = "/api/material-list/getMaterialFilterDat
 // Wonderland tracking routes
 export const GET_WONDERLAND_GLOBAL_STATS = '/api/customer/event/all-tracking';
 export const GET_WONDERLAND_LISTING_DATA = '/api/customer/event/admin_all_details';
+
+// Venue List APIs
+export const GET_VENUE_IMAGES = '/api/party-venue/venue-images';
+export const UPLOAD_VENUE_MEDIA = '/venue/upload-venue-media';
+export const GETVENUE_DETAILS_BY_ID = '/api/party-venue/venue-details';
