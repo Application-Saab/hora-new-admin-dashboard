@@ -1,13 +1,3 @@
-// import React from 'react'
-
-// const EditPackagePopup = () => {
-//   return (
-//     <div>EditPackagePopup</div>
-//   )
-// }
-
-// export default EditPackagePopup
-
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -15,12 +5,18 @@ import React, { useEffect, useState } from "react";
 import {
   updateVenuePackage,
   fetchPackageItems,
+  fetchPackageCategories,
 } from "@/services/venueListServices";
+import { BASE_URL } from "@/utils/apiconstant";
 
 const EditPackagePopup = ({ isOpen, onClose, onSuccess, packageData }) => {
   const [loadingUpdate, setLoadingUpdate] = useState(false);
-
   const [packageItemsMaster, setPackageItemsMaster] = useState([]);
+  const [filteredItems, setFilteredItems] = useState([]);
+  const [packageCategories, setPackageCategories] = useState([]);
+  const [newItemTitle, setNewItemTitle] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [itemFoodtype, setItemFoodtype] = useState("");
 
   const [formData, setFormData] = useState({
     title: "",
@@ -39,7 +35,8 @@ const EditPackagePopup = ({ isOpen, onClose, onSuccess, packageData }) => {
 
   useEffect(() => {
     if (isOpen) {
-      fetchPackageItems(setPackageItemsMaster);
+      fetchPackageItems(setPackageItemsMaster, setFilteredItems);
+      fetchPackageCategories(setPackageCategories);
     }
   }, [isOpen]);
 
@@ -51,6 +48,37 @@ const EditPackagePopup = ({ isOpen, onClose, onSuccess, packageData }) => {
     setPackageImage(file);
 
     setImagePreview(URL.createObjectURL(file));
+  };
+
+  const handleAddItem = async () => {
+    if (!newItemTitle) return;
+
+    const payload = {
+      title: newItemTitle,
+      categoryIds: selectedCategories,
+      foodType: itemFoodtype,
+    };
+
+    try {
+      await fetch(
+        `${BASE_URL}/api/party-venue/package-item/create-item`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      // reset
+      setNewItemTitle("");
+      setSelectedCategories([]);
+      setItemFoodtype("");
+
+      // 🔥 refetch items
+      fetchPackageItems(setPackageItemsMaster, setFilteredItems);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   useEffect(() => {
@@ -274,32 +302,169 @@ const EditPackagePopup = ({ isOpen, onClose, onSuccess, packageData }) => {
             </div>
 
             <h4>Package Items</h4>
+            <div style={{ display: "flex", gap: "20px" }}>
+              <div
+                style={{
+                  maxHeight: "250px",
+                  overflowY: "auto",
+                  border: "1px solid #ddd",
+                  padding: "10px",
+                  marginBottom: "20px",
+                  width: "60%",
+                }}
+              >
+                <input
+                  type="text"
+                  placeholder="Search items..."
+                  className="package-create-input"
+                  style={{ marginBottom: "10px" }}
+                  onChange={(e) => {
+                    const searchTerm = e.target.value.toLowerCase();
 
-            <div
-              style={{
-                maxHeight: "250px",
-                overflowY: "auto",
-                border: "1px solid #ddd",
-                padding: "10px",
-                marginBottom: "20px",
-              }}
-            >
-              {packageItemsMaster.map((item) => (
-                <label
-                  key={item._id}
+                    if (!searchTerm) {
+                      setFilteredItems(packageItemsMaster);
+                      return;
+                    }
+
+                    const filtered = packageItemsMaster.filter((item) =>
+                      item.title.toLowerCase().includes(searchTerm),
+                    );
+
+                    setFilteredItems(filtered);
+                  }}
+                />
+                {filteredItems.length === 0 && (
+                  <div style={{ textAlign: "center", color: "#888" }}>
+                    No items found.
+                  </div>
+                )}
+                {filteredItems?.map((item) => (
+                  <div
+                    key={item._id}
+                    className="items-dropdown-ctn"
+                    onClick={() => handleItemSelection(item._id)}
+                  >
+                    <div>
+                      <label style={{ fontSize: "12px", margin: "0px" }}>
+                        {item?.foodType === "veg" ? "🟢" : "🔴"} {item.title}
+                      </label>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        checked={formData.packageItems.includes(item._id)}
+                        onChange={() => handleItemSelection(item._id)}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div>
+                <h4 style={{ margin: "0px" }}>Add New Item</h4>
+                <input
+                  type="text"
+                  placeholder="Item Title"
+                  value={newItemTitle}
+                  onChange={(e) => setNewItemTitle(e.target.value)}
+                />
+                <div
                   style={{
-                    display: "block",
-                    marginBottom: "8px",
+                    maxHeight: "150px",
+                    overflowY: "auto",
+                    border: "1px solid #ddd",
+                    padding: "10px",
+                    marginTop: "10px",
+                    width: "100%",
                   }}
                 >
-                  <input
-                    type="checkbox"
-                    checked={formData.packageItems.includes(item._id)}
-                    onChange={() => handleItemSelection(item._id)}
-                  />{" "}
-                  {item.title}
-                </label>
-              ))}
+                  {packageCategories?.map((cat) => (
+                    <div
+                      key={cat._id}
+                      className="items-dropdown-ctn"
+                      onClick={() => {
+                        if (selectedCategories.includes(cat._id)) {
+                          setSelectedCategories((prev) =>
+                            prev.filter((id) => id !== cat._id),
+                          );
+                        } else {
+                          setSelectedCategories((prev) => [...prev, cat._id]);
+                        }
+                      }}
+                    >
+                      <div>
+                        <label style={{ fontSize: "12px", margin: "0px" }}>
+                          {cat.title}
+                        </label>
+                      </div>
+                      <div>
+                        <input
+                          type="checkbox"
+                          checked={selectedCategories.includes(cat._id)}
+                          onChange={() => {
+                            setSelectedCategories((prev) =>
+                              prev.includes(cat._id)
+                                ? prev.filter((id) => id !== cat._id)
+                                : [...prev, cat._id],
+                            );
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    width: "100%",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="foodType"
+                      value="veg"
+                      onChange={(e) => setItemFoodtype(e.target.value)}
+                    />
+                    <label
+                      for="foodType1"
+                      style={{ margin: "0px", fontSize: "12px" }}
+                    >
+                      Veg
+                    </label>
+                    <input
+                      type="radio"
+                      name="foodType"
+                      value="non-veg"
+                      style={{ marginLeft: "10px" }}
+                      onChange={(e) => setItemFoodtype(e.target.value)}
+                    />
+                    <label
+                      for="foodType2"
+                      style={{ margin: "0px", fontSize: "12px" }}
+                    >
+                      Non-Veg
+                    </label>
+                  </div>
+                  <div>
+                    <button
+                      style={{ marginTop: "5px", cursor: "pointer" }}
+                      onClick={handleAddItem}
+                      type="button"
+                    >
+                      Add Item
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <h4>Addons</h4>

@@ -8,11 +8,11 @@ import {
   ADMIN_USER_SIGNUP,
 } from "../../../utils/apiconstant";
 import "./createVenue.css";
+import { venueEventTypes, venueTypes } from "@/constants/venueListConstants";
 
 const CreateVenuePopup = ({
   isOpen,
   onClose,
-  //   materialData,
   onSuccess,
 }) => {
   const [customerNumber, setCustomerNumber] = useState("");
@@ -21,9 +21,17 @@ const CreateVenuePopup = ({
   const [venueType, setVenueType] = useState("");
   const [venueName, setVenueName] = useState("");
   const [location, setLocation] = useState("");
+  const [venueCity, setVenueCity] = useState("");
   const [googleMapLink, setGoogleMapLink] = useState("");
   const [venueImage, setVenueImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
+  const [eventTypes, setEventTypes] = useState([]);
+  const [guestCapacity, setGuestCapacity] = useState("");
+  const [isParkingAvailable, setIsParkingAvailable] = useState(false);
+  const [hallType, setHallType] = useState([]);
+  const [foodTypes, setFoodTypes] = useState([]);
+  const [startingPrice, setStartingPrice] = useState("");
+  const [totalRoomsAvailable, setTotalRoomsAvailable] = useState("");
 
   const [message, setMessage] = useState("");
   const [messageColor, setMessageColor] = useState("");
@@ -37,8 +45,11 @@ const CreateVenuePopup = ({
 
   const [newCustomerPhone, setNewCustomerPhone] = useState("");
 
-  // NEW
-  // const [createdVenue, setCreatedVenue] = useState(null);
+  const toggleValue = (value, setState) => {
+    setState((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value],
+    );
+  };
 
   // -------------------------------------------------
   // Check Customer
@@ -140,14 +151,22 @@ const CreateVenuePopup = ({
       formData.append("venueType", venueType);
       formData.append("venueName", venueName);
       formData.append("location", location);
+      formData.append("city", venueCity);
       formData.append("googleMapLink", googleMapLink);
+      formData.append("eventTypes", JSON.stringify(eventTypes));
+      formData.append("guestCapacity", guestCapacity);
+      formData.append("isParkingAvailable", isParkingAvailable);
+      formData.append("hallType", JSON.stringify(hallType));
+      formData.append("foodTypes", JSON.stringify(foodTypes));
+      formData.append("startingPrice", startingPrice);
+      formData.append("totalRoomsAvailable", totalRoomsAvailable);
 
       if (venueImage) {
         formData.append("image", venueImage);
       }
 
       const res = await axios.post(
-        "http://localhost:5000/api/party-venue/create-party-venue",
+        `${BASE_URL}/api/party-venue/create-party-venue`,
         formData,
         {
           headers: {
@@ -157,7 +176,6 @@ const CreateVenuePopup = ({
       );
 
       if (!res.data.error) {
-
         setMessage("Venue created successfully ✅");
 
         setMessageColor("green");
@@ -189,9 +207,16 @@ const CreateVenuePopup = ({
         </button>
 
         <h2>Create Venue</h2>
-        <div className="container">
-          <h3>Create Venue 🏛️</h3>
-
+        <div
+          className="container"
+          style={{
+            maxHeight: "700px",
+            overflowY: "auto",
+            paddingBottom: "10px",
+            width: "100%",
+            maxWidth: "90%",
+          }}
+        >
           {/* Customer Section */}
           <label>Owner or Manager Number *</label>
 
@@ -216,93 +241,207 @@ const CreateVenuePopup = ({
 
           {/* Venue Form */}
           {customerId && (
-            <form onSubmit={handleCreateVenue}>
-              <label>Venue Type *</label>
+            <div
+            // className="venue-form-ctn"
+            >
+              <form onSubmit={handleCreateVenue}>
+                <label>Venue Type *</label>
 
-              <input
-                value={venueType}
-                onChange={(e) => setVenueType(e.target.value)}
-                placeholder="Hall / Lawn"
-                required
-              />
+                <select
+                  value={venueType}
+                  onChange={(e) => setVenueType(e.target.value)}
+                  required
+                >
+                  {venueTypes?.map((item, index) => (
+                    <option key={index} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
 
-              <label>Venue Name *</label>
+                <label>Venue Name *</label>
 
-              <input
-                value={venueName}
-                onChange={(e) => setVenueName(e.target.value)}
-                required
-              />
+                <input
+                  value={venueName}
+                  onChange={(e) => setVenueName(e.target.value)}
+                  required
+                />
 
-              <label>Location *</label>
+                <label>Location *</label>
 
-              <input
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                required
-              />
+                <input
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  required
+                />
 
-              <label>Google Map Link</label>
+                <label>City *</label>
 
-              <input
-                value={googleMapLink}
-                onChange={(e) => setGoogleMapLink(e.target.value)}
-              />
+                <input
+                  value={venueCity}
+                  onChange={(e) => setVenueCity(e.target.value)}
+                  required
+                />
 
-              <label>Venue Image</label>
+                <label>Google Map Link</label>
 
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
+                <input
+                  value={googleMapLink}
+                  onChange={(e) => setGoogleMapLink(e.target.value)}
+                />
 
-                  if (!file) return;
+                <hr />
+                <label>Event Types</label>
+                <div className="scroll-box">
+                  {venueEventTypes?.map((type) => (
+                    <div
+                      key={type}
+                      className="items-dropdown-ctn"
+                      onClick={() =>
+                        toggleValue(type, setEventTypes, eventTypes)
+                      }
+                    >
+                      <div>
+                        <label>{type}</label>
+                      </div>
 
-                  setVenueImage(file);
+                      <input
+                        type="checkbox"
+                        checked={eventTypes.includes(type)}
+                        readOnly
+                      />
+                    </div>
+                  ))}
+                </div>
 
-                  setImagePreview(URL.createObjectURL(file));
-                }}
-              />
+                <hr />
 
-              {imagePreview && (
-                <div style={{ marginTop: "10px" }}>
-                  <img
-                    src={imagePreview}
-                    alt="preview"
-                    style={{
-                      width: "150px",
-                      height: "100px",
-                      objectFit: "cover",
-                      borderRadius: "8px",
-                    }}
+                <label>Hall Type</label>
+
+                <div className="scroll-box">
+                  {["Outdoor", "Indoor"].map((type) => (
+                    <div
+                      key={type}
+                      className="items-dropdown-ctn"
+                      onClick={() => toggleValue(type, setHallType, hallType)}
+                    >
+                      <div>
+                        <label>{type}</label>
+                      </div>
+
+                      <input
+                        type="checkbox"
+                        checked={hallType.includes(type)}
+                        readOnly
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                <hr />
+
+                <label>Food Types</label>
+
+                <div className="scroll-box">
+                  {["veg", "non-veg"].map((type) => (
+                    <div
+                      key={type}
+                      className="items-dropdown-ctn"
+                      onClick={() => toggleValue(type, setFoodTypes, foodTypes)}
+                    >
+                      <div>
+                        <label>{type}</label>
+                      </div>
+
+                      <input
+                        type="checkbox"
+                        checked={foodTypes.includes(type)}
+                        readOnly
+                      />
+                    </div>
+                  ))}
+                </div>
+                <hr />
+                <label>Guest Capacity</label>
+                <input
+                  type="number"
+                  value={guestCapacity}
+                  onChange={(e) => setGuestCapacity(e.target.value)}
+                />
+                <hr />
+                <label>Starting Price</label>
+
+                <input
+                  type="number"
+                  value={startingPrice}
+                  onChange={(e) => setStartingPrice(e.target.value)}
+                />
+                <hr />
+                <label>Rooms Available</label>
+
+                <input
+                  type="number"
+                  value={totalRoomsAvailable}
+                  onChange={(e) => setTotalRoomsAvailable(e.target.value)}
+                />
+                <hr />
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    marginTop: "10px",
+                  }}
+                >
+                  <label>Parking Available</label>
+                  <input
+                    type="checkbox"
+                    checked={isParkingAvailable}
+                    onChange={(e) => setIsParkingAvailable(e.target.checked)}
                   />
                 </div>
-              )}
+                <hr />
+                <label>Venue Image</label>
 
-              <button
-                type="submit"
-                className="create-popup-btn"
-                disabled={createLoading}
-              >
-                {createLoading ? "Creating..." : "Create Venue"}
-              </button>
-            </form>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+
+                    if (!file) return;
+
+                    setVenueImage(file);
+
+                    setImagePreview(URL.createObjectURL(file));
+                  }}
+                />
+
+                {imagePreview && (
+                  <div style={{ marginTop: "10px" }}>
+                    <img
+                      src={imagePreview}
+                      alt="preview"
+                      style={{
+                        width: "150px",
+                        height: "100px",
+                        objectFit: "cover",
+                        borderRadius: "8px",
+                      }}
+                    />
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className="create-popup-btn"
+                  disabled={createLoading}
+                >
+                  {createLoading ? "Creating..." : "Create Venue"}
+                </button>
+              </form>
+            </div>
           )}
-
-          {/* SHOW EVENT WALL ONLY AFTER VENUE CREATED */}
-          {/*   {createdVenue && (
-        <div className="event-wall-container">
-          <h2 className="wall-heading text-center m-0 p-0">
-            Explore Spaces
-          </h2>
-
-          <EventWallSection
-            venueId={createdVenue._id}
-            customerId={customerId}
-          />
-        </div>
-      )}  */}
 
           {/* Popup */}
           {showPopup && (

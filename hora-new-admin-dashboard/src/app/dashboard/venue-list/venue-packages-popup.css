@@ -53,3 +53,19 @@
   min-height: 350px;
   font-size: 15px;
 }
+.items-dropdown-ctn{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 5px 5px;
+  cursor: pointer;
+}
+.items-dropdown-ctn:hover {
+  background-color: #f0f0f0;
+}
+.venue-form-ctn{
+  max-height: 600px;
+  overflow-y: auto;
+  padding-bottom: 10px;
+}

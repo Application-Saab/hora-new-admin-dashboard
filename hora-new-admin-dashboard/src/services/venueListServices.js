@@ -59,7 +59,7 @@ export const fetchVenuePackages = async (venueId, setPackages, setLoading) => {
     setLoading(true);
 
     const res = await axios.get(
-      `${BASE_URL}/api/party-venue/package/packages-by-venue/${venueId}`,
+      `${BASE_URL}/api/party-venue/package/packages-by-venue-admin/${venueId}`,
     );
 
     setPackages(res.data.data || []);
@@ -70,17 +70,34 @@ export const fetchVenuePackages = async (venueId, setPackages, setLoading) => {
   }
 };
 
-export const fetchPackageItems = async (setPackageItemsMaster) => {
+export const fetchPackageItems = async (
+  setPackageItemsMaster,
+  setFilteredItems,
+) => {
   try {
     const res = await axios.get(
       `${BASE_URL}/api/party-venue/package-item/items-list?itemsStatus=1&limit=500`,
     );
 
     setPackageItemsMaster(res.data.data || []);
+    setFilteredItems(res.data.data || []);
   } catch (err) {
     console.log(err);
   }
 };
+
+export const fetchPackageCategories = async (setPackageCategories) => {
+  try {
+    const res = await axios.get(
+      `${BASE_URL}/api/party-venue/package-category/categories-list?limit=500`,
+    );
+
+    setPackageCategories(res.data.data || []);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 export const createVenuePackage = async (
   payload,
   onSuccess,
@@ -182,5 +199,39 @@ export const updateVenueTerms = async (
     alert("Failed To Update Terms");
   } finally {
     setLoading(false);
+  }
+};
+
+export const toggleVenueStatus = async (id, status, onSuccess) => {
+  try {
+    const res = await axios.patch(
+      `${BASE_URL}/api/party-venue/venue-status/${id}`,
+      {
+        venueStatus: status,
+      },
+    );
+
+    if (!res.data.error) {
+      onSuccess?.();
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const togglePackageStatus = async (id, status, onSuccess) => {
+  try {
+    const res = await axios.patch(
+      `${BASE_URL}/api/party-venue/package/venue-package-status/${id}`,
+      {
+        packageStatus: status,
+      },
+    );
+
+    if (!res.data.error) {
+      onSuccess?.();
+    }
+  } catch (err) {
+    console.log(err);
   }
 };

@@ -6,24 +6,18 @@ import "./venue-packages-popup.css";
 
 import CreatePackagePopup from "./CreatePackagePopup";
 import EditPackagePopup from "./EditPackagePopup";
-import { fetchVenuePackages } from "@/services/venueListServices";
+import { fetchVenuePackages, togglePackageStatus } from "@/services/venueListServices";
 
 const VenuePackagesPopup = ({ isOpen, venue, onClose }) => {
   const [packages, setPackages] = useState([]);
-
   const [loading, setLoading] = useState(false);
-
   const [search, setSearch] = useState("");
-
   const [showCreatePackagePopup, setShowCreatePackagePopup] = useState(false);
-
   const [showEditPackagePopup, setShowEditPackagePopup] = useState(false);
-
   const [selectedPackage, setSelectedPackage] = useState(null);
 
   const callPackageApi = () => {
     if (!venue?._id) return;
-
     fetchVenuePackages(venue._id, setPackages, setLoading);
   };
 
@@ -79,21 +73,13 @@ const VenuePackagesPopup = ({ isOpen, venue, onClose }) => {
                 <tr>
                   <th>Image</th>
                   <th>Title</th>
-
                   <th>Subtitle</th>
-
                   <th>Actual Price</th>
-
                   <th>Discounted</th>
-
                   <th>Max Guests</th>
-
                   <th>Package Items</th>
-
                   <th>Addons</th>
-
                   <th>Status</th>
-
                   <th>Edit</th>
                 </tr>
               </thead>
@@ -119,27 +105,36 @@ const VenuePackagesPopup = ({ isOpen, venue, onClose }) => {
                         )}
                       </td>
                       <td>{pkg.title}</td>
-
                       <td>{pkg.subTitle}</td>
-
                       <td>₹{pkg.actualPrice}</td>
-
                       <td>₹{pkg.discountedPrice}</td>
-
                       <td>{pkg.maxGuests}</td>
-
                       <td>{pkg?.packageItems?.length || 0}</td>
-
                       <td>{pkg?.packageAddons?.length || 0}</td>
 
                       <td>
-                        <span
-                          className={`status-badge ${
-                            pkg.packageStatus === 1 ? "active" : "inactive"
-                          }`}
+                        <button
+                          onClick={() => {
+                            const newStatus = pkg.packageStatus === 1 ? 2 : 1;
+
+                            togglePackageStatus(
+                              pkg._id,
+                              newStatus,
+                              callPackageApi,
+                            );
+                          }}
+                          style={{
+                            padding: "5px 10px",
+                            borderRadius: "5px",
+                            border: "none",
+                            cursor: "pointer",
+                            background:
+                              pkg.packageStatus === 1 ? "green" : "red",
+                            color: "#fff",
+                          }}
                         >
                           {pkg.packageStatus === 1 ? "Active" : "Inactive"}
-                        </span>
+                        </button>
                       </td>
 
                       <td>
