@@ -37,7 +37,8 @@ const OrderList = () => {
   const [selectedCity, setSelectedCity] = useState("");
   const [linkPopupOpen, setLinkPopupOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
-
+  const [showReviewModal, setShowReviewModal] = useState(false);
+const [reviewValue, setReviewValue] = useState("");
   const [decorationFields, setDecorationFields] = useState([]);
 const [order, setOrder] = useState(null);
   const [actionPopupChefOrder_Id, setActionPopupChefOrder_Id] = useState("");
@@ -1109,6 +1110,27 @@ useEffect(() => {
                           <li key={index}>{i}</li>
                         ))}
                       </ul>
+                    {order.reviewStatus === "positive" || order.reviewStatus === "negative" ? (
+                    <div
+                      style={{
+                      marginTop: "8px",
+                      fontWeight: "500",
+                      color: order.reviewStatus === "positive" ? "#16a34a" : "#dc2626",
+                      }}>
+                     {order.reviewStatus === "positive"
+                     ? "Reviewed → Positive"
+                     : "Reviewed → Negative"}
+                    </div>
+                   ) : (
+                   <button
+                    className="link-btns"
+                    onClick={() => {
+                    setSelectedOrder(order);
+                    setShowReviewModal(true);
+                  }}>
+                  Review
+                  </button>
+                )}
                     </td>
 
                     {/* <td style={{ width: "100px", paddingLeft: "16px" }}>
@@ -2035,6 +2057,80 @@ useEffect(() => {
       </div>
     }
   />
+)}
+
+{showReviewModal && selectedOrder && (
+  <div className="review-modal-overlay">
+    <div className="review-modal-box">
+
+      <h3 className="review-title">Submit Review</h3>
+
+      {/* Radio Options */}
+      <div className="review-options">
+
+        <label className="review-radio-label">
+          <input
+            type="radio"
+            name="review"
+            value="positive"
+            checked={reviewValue === "positive"}
+            onChange={(e) => setReviewValue(e.target.value)}
+          />
+          <span>Positive</span>
+        </label>
+
+        <label className="review-radio-label">
+          <input
+            type="radio"
+            name="review"
+            value="negative"
+            checked={reviewValue === "negative"}
+            onChange={(e) => setReviewValue(e.target.value)}
+          />
+          <span>Negative</span>
+        </label>
+
+      </div>
+
+      {/* Buttons */}
+      <div className="review-actions">
+
+        <button
+          className="review-cancel-btn"
+          onClick={() => {
+            setShowReviewModal(false);
+            setReviewValue("");
+          }}
+        >
+          Cancel
+        </button>
+
+        <button
+          className={`review-save-btn ${!reviewValue ? "disabled" : ""}`}
+          disabled={!reviewValue}
+          onClick={async () => {
+            try {
+              await axios.post(`${BASE_URL}${ORDER_EDIT}`, {
+                _id: selectedOrder._id,
+                reviewStatus: reviewValue,
+              });
+
+              setShowReviewModal(false);
+              setReviewValue("");
+              fetchOrders();
+            } catch (err) {
+              console.error(err);
+              alert("Error saving review");
+            }
+          }}
+        >
+          Save
+        </button>
+
+      </div>
+
+    </div>
+  </div>
 )}
     </div>
   );

@@ -732,3 +732,127 @@ display: flex;
   border-radius: 5px;
   cursor: pointer;
 }
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal-box {
+  background: #ffffff;
+  width: 420px;
+  max-width: 90%;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.2s ease-in-out;
+  text-align: center;
+}
+
+.modal-box h3 {
+  margin-bottom: 20px;
+  font-size: 18px;
+  color: #333;
+}
+
+.review-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.review-modal-box {
+  width: 420px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  animation: reviewFadeIn 0.2s ease-in-out;
+}
+
+.review-title {
+  margin-bottom: 15px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.review-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.review-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.review-radio-label input {
+  cursor: pointer;
+}
+
+.review-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* Cancel Button */
+.review-cancel-btn {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #f3f4f6;
+  cursor: pointer;
+}
+
+/* Save Button */
+.review-save-btn {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  background: #97538c;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+/* Disabled state */
+.review-save-btn.disabled {
+  background: #c7a3c2;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.review-save-btn:hover:not(.disabled) {
+  background: #7e3f75;
+}
+
+/* Animation */
+@keyframes reviewFadeIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
