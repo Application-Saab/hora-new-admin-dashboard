@@ -133,7 +133,7 @@ const Capsuletracking = () => {
                   <th>Face Recognition</th>
                   <th>Folders</th>
                   <th>Downloaded</th>
-                  <th>Shared</th>
+                  <th>Total Image Shared</th>
                   <th>Capsule Share Count</th>
                   <th>Total Registered users</th>
                   <th>Times link opened</th>
