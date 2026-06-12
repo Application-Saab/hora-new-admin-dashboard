@@ -7,7 +7,6 @@ import {
   BASE_URL,
   ADMIN_ORDER_LIST,
   ORDER_EDIT,
-  UPLOAD_DRIVE_TO_ORDER,
 } from "../../../utils/apiconstant";
 // import * as XLSX from "xlsx";
 import CheckSupplier from "../../component/createsupplier/CheckSupplier";
@@ -18,6 +17,7 @@ import SearchWithDropDown from "../../component/SearchWithDropDown";
 import { eventList } from '../../../constants/eventList'
 import CallChecklist from '../../component/CallChecklist'
 import CommonPopup from "../../component/CommonPopup"
+import {saveOrderDriveLinks, inclusionToApiKeyMap, apiKeyToInclusionMap} from './drivelinkService';
 
 const OrderList = () => {
   const [orders, setOrders] = useState([]);
@@ -37,7 +37,7 @@ const OrderList = () => {
   const [selectedCity, setSelectedCity] = useState("");
   const [linkPopupOpen, setLinkPopupOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
-
+const [driveLinksInput, setDriveLinksInput] = useState([]);
   const [decorationFields, setDecorationFields] = useState([]);
 const [order, setOrder] = useState(null);
   const [actionPopupChefOrder_Id, setActionPopupChefOrder_Id] = useState("");
@@ -330,6 +330,91 @@ const [order, setOrder] = useState(null);
   };
 
   const handleCloseVendorAmountPopup = () => setShowPopup(false);
+useEffect(() => {
+  if (selectedOrder) {
+    const inclusions = selectedOrder?.call_checklist?.inclusions || {};
+    const existingLinks = selectedOrder?.allDriveLinks || [];
+
+    const trueInclusionsList = Object.keys(inclusions).filter(
+      (key) => inclusions[key] === true
+    );
+
+    const dynamicApiKeys = trueInclusionsList.map(
+      (key) => inclusionToApiKeyMap[key]
+    );
+
+ 
+    const finalApiKeysToShow = [
+      ...new Set([
+        ...dynamicApiKeys,
+        "rawPhotos",
+      ]),
+    ];
+
+    let initialInputState = finalApiKeysToShow.map((backendApiKey) => {
+      const matchedSavedLink = existingLinks.find(
+        (item) => item.linkType === backendApiKey
+      );
+
+      const rawPhotosLink =
+  backendApiKey === "rawPhotos"
+    ? selectedOrder?.orderDriveLink
+    : "";
+
+return {
+  linkType: backendApiKey,
+  link: matchedSavedLink?.link || rawPhotosLink || "",
+  isExisting: !!matchedSavedLink?.link || !!rawPhotosLink,
+};
+
+    });
+
+    const hasRawPhotos = initialInputState.some(
+      (item) => item.linkType === "rawPhotos"
+    );
+
+    if (!hasRawPhotos) {
+      initialInputState.push({
+        linkType: "rawPhotos",
+        link:
+          existingLinks.find(
+            (item) => item.linkType === "rawPhotos"
+          )?.link ||
+          selectedOrder?.orderDriveLink ||
+          "",
+      });
+    }
+
+    setDriveLinksInput(initialInputState);
+  }
+}, [selectedOrder]);
+
+
+const handleSaveAllLinks = async (currentOrder) => {
+  try {
+    setLoading(true);
+
+    const data = await saveOrderDriveLinks(currentOrder, driveLinksInput);
+
+    alert(data.message || "All drive links processed successfully!");
+    setShowDriveLinkModal(false);
+    
+    fetchOrders(); 
+
+  } catch (error) {
+    console.error("Error in component while saving links:", error);
+    
+    alert(error.response?.data?.message || error.message || "Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const handleDynamicLinkChange = (index, value) => {
+  const updatedLinks = [...driveLinksInput];
+  updatedLinks[index].link = value;
+  setDriveLinksInput(updatedLinks);
+};
 
   const handleSaveVendorAmount = async () => {
     try {
@@ -599,12 +684,10 @@ useEffect(() => {
 
   const [showBox, setShowBox] = useState(false);
   const [showDriveLinkModal, setShowDriveLinkModal] = useState(false);
-  const [driveLink, setDriveLink] = useState("");
   const [bigId, setBigId] = useState(null);
   const [pictureList, setPictureList] = useState([]);
   const [uploadedNames, setUploadedNames] = useState([]); // <-- store filenames from "data"
   const filePicker = useRef(null);
-  const [selectedOrderData, setSelectedOrderData] = useState({});
 
   const openBox = (id) => {
     console.log("id", "bro", id);
@@ -622,11 +705,6 @@ useEffect(() => {
     if (filePicker.current) {
       filePicker.current.click();
     }
-  };
-
-  const clickUploadDrive = (data) => {
-    setSelectedOrderData(data);
-    setShowDriveLinkModal(true);
   };
 
   const whenPicturePicked = async (e) => {
@@ -705,58 +783,6 @@ useEffect(() => {
     } catch (err) {
       console.error("❌ Failed to send request:", err);
     }
-  };
-
-  const handleOnchangeDriveLink = (e) => {
-    setDriveLink(e.target.value);
-  };
-
-  const handleUploadDriveUrl = async () => {
-    console.log(
-      "%c [ selectedOrderData ]-650",
-      "font-size:13px; background:pink; color:#bf2c9f;",
-      selectedOrderData
-    );
-    setLoading(true);
-    try {
-      // Make API call to create folder
-      const response = await fetch(`${BASE_URL}${UPLOAD_DRIVE_TO_ORDER}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          order_id: selectedOrderData?.order_id,
-          folderUrl: driveLink,
-        }),
-      });
-      const data = await response.json();
-      console.log(
-        "%c [ data ]-663",
-        "font-size:13px; background:pink; color:#bf2c9f;",
-        data
-      );
-
-      if (!response.ok) {
-        // alert(data?.error)
-        throw new Error(data.error || "Failed to create folder");
-      }
-
-      alert(
-        `Drive link are added for order_id : ${selectedOrderData?.order_id + 10800
-        }`
-      );
-      console.log("........", data);
-      setShowDriveLinkModal(false);
-      fetchOrders();
-      // setRefetchDriveImages(true);
-    } catch (error) {
-      console.error("Error creating folder:", error);
-      alert(error.message);
-    }
-    finally {
-    setLoading(false); 
-  }
   };
 
   return (
@@ -949,6 +975,7 @@ useEffect(() => {
                 <th>Edit Order</th>
                 <th>Add EventName</th>
                 <th>Add Order Image</th>
+                <th>Add Multiple Drive links</th>
               </tr>
             </thead>
             <tbody>
@@ -1285,7 +1312,7 @@ useEffect(() => {
                     </td>
                     {/* <td>s</td> */}
                     <>
-                      <td>
+                    <td>
                         {order.type === 1 ? (
                           order.userOrderDishImageArray &&
                             order.userOrderDishImageArray.length > 0 ? (
@@ -1317,12 +1344,9 @@ useEffect(() => {
                           )
                         ) : order.type === 8 ? (
                           !order.orderDriveLink ? (
-                            <button
-                              onClick={() => clickUploadDrive(order)}
-                              style={styles.editOrderPopupBtn3}
-                            >
-                              Add Drive Link
-                            </button>
+                            <div>
+                              -
+                            </div>
                           )
                             // : 
                             // (
@@ -1378,6 +1402,74 @@ useEffect(() => {
                           </span>
                         )}
                       </td>
+
+<td>
+  {order.type === 8 ? (() => {
+    const inclusions = order?.call_checklist?.inclusions || {};
+    const trueDynamicApiKeys = [
+  ...new Set([
+    ...Object.keys(inclusions)
+      .filter(key => inclusions[key] === true)
+      .map(key => inclusionToApiKeyMap[key]),
+    "rawPhotos"
+  ])
+];
+
+    const totalExpectedForCounter = trueDynamicApiKeys.length;
+
+    const savedLinks = order?.allDriveLinks || [];
+
+const filledCountForCounter = trueDynamicApiKeys.filter((linkType) => {
+  if (linkType === "rawPhotos") {
+    return (
+      savedLinks.some(
+        (item) =>
+          item.linkType === "rawPhotos" &&
+          item.link &&
+          item.link.trim() !== ""
+      ) ||
+      (order?.orderDriveLink &&
+        order.orderDriveLink.trim() !== "")
+    );
+  }
+
+  return savedLinks.some(
+    (item) =>
+      item.linkType === linkType &&
+      item.link &&
+      item.link.trim() !== ""
+  );
+}).length;
+
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: "8px", alignItems: "center" }}>
+        
+        <div style={{ 
+          fontWeight: "700", fontSize: "14px", 
+        }}>
+          Links: {filledCountForCounter} / {totalExpectedForCounter}
+        </div>
+
+        {/* Action Button */}
+        <button
+          onClick={() => {
+            setSelectedOrder(order);
+            setShowDriveLinkModal(true);
+          }}
+          style={{
+            ...styles.editOrderPopupBtn3,
+            backgroundColor: filledCountForCounter === totalExpectedForCounter ? "#28a745" : "#007BFF",
+            padding: "6px 12px", fontSize: "12px"
+          }}
+        >
+          {filledCountForCounter === 0 ? "Add Drive Links" : "Edit / Add More"}
+        </button>
+      </div>
+    );
+  })() : (
+    <span style={{ color: "gray", fontStyle: "italic" }}>not able</span>
+  )}
+</td>
                       {showBox && (
                         <div
                           style={{
@@ -1505,99 +1597,6 @@ useEffect(() => {
                                 }}
                               >
                                 Add
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      {showDriveLinkModal && (
-                        <div
-                          style={{
-                            position: "fixed",
-                            top: "0",
-                            left: "0",
-                            width: "100%",
-                            height: "100%",
-                            backgroundColor: "rgba(0, 0, 0, 0.5)",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            zIndex: "9999",
-                          }}
-                        >
-                          <div
-                            style={{
-                              backgroundColor: "white",
-                              padding: "20px",
-                              borderRadius: "8px",
-                              width: "600px",
-                              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-                            }}
-                          >
-                            <h3
-                              style={{
-                                fontSize: "18px",
-                                fontWeight: "bold",
-                                marginBottom: "15px",
-                                color: "#333",
-                              }}
-                            >
-                              Upload Drive Link
-                            </h3>
-
-                            <input
-                              type="text"
-                              placeholder="Paste drive link"
-                              onChange={handleOnchangeDriveLink}
-                              style={{
-                                height: "40px",
-                                width: "100%",
-                                paddingInline: "5px",
-                              }}
-                            />
-
-                            <div
-                              style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                marginTop: "20px",
-                              }}
-                            >
-                              <button
-                                onClick={() => setShowDriveLinkModal(false)}
-                                style={{
-                                  padding: "10px 20px",
-                                  backgroundColor: "#f44336",
-                                  color: "white",
-                                  border: "none",
-                                  borderRadius: "5px",
-                                  cursor: "pointer",
-                                  fontSize: "16px",
-                                  transition: "background-color 0.3s ease",
-                                }}
-                              >
-                                Cancel
-                              </button>
-
-                              <button
-                                onClick={() => {
-                                  handleUploadDriveUrl(order);
-                                }}
-                                disabled={!driveLink || loading}
-                                style={{
-                                  padding: "10px 20px",
-                                  backgroundColor: "#28a745",
-                                  color: "white",
-                                  border: "none",
-                                  borderRadius: "5px",
-                                  cursor: !driveLink
-                                    ? "not-allowed"
-                                    : "pointer",
-                                  fontSize: "16px",
-                                  transition: "background-color 0.3s ease",
-                                }}
-                              >
-                                {loading ? "Adding.." : "Add"}
                               </button>
                             </div>
                           </div>
@@ -2035,6 +2034,77 @@ useEffect(() => {
       </div>
     }
   />
+)}
+
+{showDriveLinkModal && selectedOrder && (
+  <div className="drive-modal-overlay">
+    <div className="drive-modal">
+
+      <h3 className="drive-modal-title">
+        Manage Drive Links
+      </h3>
+
+      <p className="drive-modal-order-id">
+        Order ID: <strong>{getOrderId(selectedOrder.order_id)}</strong>
+      </p>
+
+      <hr className="drive-modal-divider" />
+
+      {driveLinksInput.map((item, index) => (
+        <div key={index} className="drive-link-group">
+          <label className="drive-link-label">
+            {apiKeyToInclusionMap[item.linkType] || item.linkType}
+          </label>
+
+          <input
+            type="text"
+            disabled={item.isExisting}
+            placeholder={`Paste Google Drive link for ${
+              apiKeyToInclusionMap[item.linkType] || item.linkType
+            }`}
+            value={item.link}
+            onChange={(e) =>
+              handleDynamicLinkChange(index, e.target.value)
+            }
+            className="drive-link-input"
+          />
+        </div>
+      ))}
+
+      <div className="drive-modal-actions">
+        <button
+          onClick={() => setShowDriveLinkModal(false)}
+          className="cancel-btn"
+        >
+          Cancel
+        </button>
+
+        {driveLinksInput.length > 0 &&
+          (() => {
+            const hasNewLink = driveLinksInput.some(
+              (item) =>
+                item.link &&
+                item.link.trim() !== "" &&
+                !item.isExisting
+            );
+
+            return (
+              <button
+                onClick={() => handleSaveAllLinks(selectedOrder)}
+                disabled={loading || !hasNewLink}
+                className={`save-btn ${
+                  loading || !hasNewLink
+                    ? "save-btn-disabled"
+                    : ""
+                }`}
+              >
+                {loading ? "Saving..." : "Save Links"}
+              </button>
+            );
+          })()}
+      </div>
+    </div>
+  </div>
 )}
     </div>
   );
