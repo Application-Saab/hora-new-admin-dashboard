@@ -37,10 +37,7 @@ const OrderList = () => {
   const [selectedCity, setSelectedCity] = useState("");
   const [linkPopupOpen, setLinkPopupOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
-<<<<<<< HEAD
 const [driveLinksInput, setDriveLinksInput] = useState([]);
-=======
->>>>>>> 1f3a60d9fbc581d661137f90f5ffa17df5971796
   const [showReviewModal, setShowReviewModal] = useState(false);
 const [reviewValue, setReviewValue] = useState("");
   const [decorationFields, setDecorationFields] = useState([]);
