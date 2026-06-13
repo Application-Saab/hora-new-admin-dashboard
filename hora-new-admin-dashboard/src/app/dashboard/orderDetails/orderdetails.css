@@ -732,94 +732,265 @@ display: flex;
   border-radius: 5px;
   cursor: pointer;
 }
-.drive-modal-overlay {
+.drive-modal-overlay,
+.modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 9999;
 }
 
-.drive-modal {
-  background-color: #fff;
-  padding: 24px;
-  border-radius: 10px;
-  width: 550px;
-  max-height: 85vh;
-  overflow-y: auto;
+.drive-modal-overlay {
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
-.drive-modal-title {
+.modal-overlay {
+  background: rgba(0, 0, 0, 0.6);
+}
+.modal-box {
+  background: #ffffff;
+  width: 420px;
+  max-width: 90%;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.2s ease-in-out;
+  text-align: center;
+}
+
+.modal-box h3 {
+  margin-bottom: 20px;
   font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 5px;
   color: #333;
 }
 
-.drive-modal-order-id {
-  font-size: 12px;
-  color: #666;
+.review-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.review-modal-box {
+  width: 420px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  animation: reviewFadeIn 0.2s ease-in-out;
+}
+
+.review-title {
   margin-bottom: 15px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.review-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.review-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.review-radio-label input {
+  cursor: pointer;
+}
+
+.review-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* Cancel Button */
+.review-cancel-btn {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #f3f4f6;
+  cursor: pointer;
+}
+
+/* Save Button */
+.review-save-btn {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  background: #97538c;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+/* Disabled state */
+.review-save-btn.disabled {
+  background: #c7a3c2;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.review-save-btn:hover:not(.disabled) {
+  background: #7e3f75;
+}
+
+/* Animation */
+@keyframes reviewFadeIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Drive Modal Overlay */
+.drive-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+/* Drive Modal Box */
+.drive-modal {
+  width: 550px;
+  max-width: 95%;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  animation: driveFadeIn 0.2s ease-in-out;
+}
+
+.drive-modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.drive-modal-order-id {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 16px;
 }
 
 .drive-modal-divider {
-  border-color: #eee;
-  margin-bottom: 20px;
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 16px 0 20px;
 }
 
+/* Link Groups */
 .drive-link-group {
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
 .drive-link-label {
   display: block;
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: #444;
   font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 6px;
 }
 
 .drive-link-input {
-  height: 40px;
   width: 100%;
-  padding-inline: 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
-  font-size: 13px;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  outline: none;
+  font-size: 14px;
+  transition: 0.2s;
 }
 
+.drive-link-input:focus {
+  border-color: #97538c;
+  box-shadow: 0 0 0 3px rgba(151, 83, 140, 0.15);
+}
+
+.drive-link-input:disabled {
+  background: #f3f4f6;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+/* Footer */
 .drive-modal-actions {
   display: flex;
-  justify-content: space-between;
-  margin-top: 25px;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
 }
 
 .cancel-btn {
-  padding: 10px 22px;
-  background-color: #f44336;
-  color: white;
-  border: none;
-  border-radius: 5px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #fff;
   cursor: pointer;
+  font-weight: 500;
+}
+
+.cancel-btn:hover {
+  background: #f3f4f6;
 }
 
 .save-btn {
-  padding: 10px 22px;
-  background-color: #28a745;
-  color: white;
+  padding: 10px 18px;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
+  background: #97538c;
+  color: #fff;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  font-weight: 500;
 }
 
+.save-btn:hover:not(:disabled) {
+  background: #7e3f75;
+}
+
+.save-btn:disabled,
 .save-btn-disabled {
-  background-color: #a5d6a7;
+  background: #d1d5db;
+  color: #6b7280;
   cursor: not-allowed;
+}
+
+/* Animation */
+@keyframes driveFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
