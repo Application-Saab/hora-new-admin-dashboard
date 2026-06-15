@@ -133,7 +133,8 @@ const Capsuletracking = () => {
                   <th>Face Recognition</th>
                   <th>Folders</th>
                   <th>Downloaded</th>
-                  <th>Shared</th>
+                  <th>Total Image Shared</th>
+                  <th>Capsule Share Count</th>
                   <th>Total Registered users</th>
                   <th>Times link opened</th>
                   <th>Face Counts</th>
@@ -190,6 +191,7 @@ const Capsuletracking = () => {
                         <td>{order?.counts?.otherSubFoldersCount || 0}</td>
                         <td>{order?.counts?.totalDownloads || 0}</td>
                         <td>{order?.counts?.totalShares || 0}</td>
+                        <td>{order?.counts?.shareCapsuleClicks || 0}</td>
                         <td>{order?.counts?.totalViews || 0}</td>
                         <td>{order?.counts?.totalClicks || 0}</td>
                         <td>{order?.counts?.totalPersonCount || 0}</td>
