@@ -235,3 +235,22 @@ export const togglePackageStatus = async (id, status, onSuccess) => {
     console.log(err);
   }
 };
+
+export const deleteVenueMedia = async (imageId, setLoading, onSuccess) => {
+  try {
+    setLoading?.(true);
+
+    const res = await axios.post(
+      `${BASE_URL}/api/party-venue/venue-image/${imageId}`,
+    );
+
+    onSuccess?.();
+
+    return res.data;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  } finally {
+    setLoading?.(false);
+  }
+};

@@ -139,16 +139,13 @@ const CreatePackagePopup = ({ isOpen, onClose, onSuccess, venueId }) => {
     };
 
     try {
-      await fetch(
-        `${BASE_URL}/api/party-venue/package-item/create-item`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
+      await fetch(`${BASE_URL}/api/party-venue/package-item/create-item`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify(payload),
+      });
 
       // reset
       setNewItemTitle("");
@@ -317,7 +314,7 @@ const CreatePackagePopup = ({ isOpen, onClose, onSuccess, venueId }) => {
                   >
                     <div>
                       <label style={{ fontSize: "12px", margin: "0px" }}>
-                       {item?.foodType === "veg" ? "🟢" : "🔴"}   {item.title}
+                        {item?.foodType === "veg" ? "🟢" : "🔴"} {item.title}
                       </label>
                     </div>
                     <div>
@@ -330,7 +327,7 @@ const CreatePackagePopup = ({ isOpen, onClose, onSuccess, venueId }) => {
                   </div>
                 ))}
               </div>
-              
+
               <div>
                 <h4 style={{ margin: "0px" }}>Add New Item</h4>
                 <input
@@ -353,14 +350,17 @@ const CreatePackagePopup = ({ isOpen, onClose, onSuccess, venueId }) => {
                     <div
                       key={cat._id}
                       className="items-dropdown-ctn"
+                      // onClick={() => {
+                      //   if (selectedCategories.includes(cat._id)) {
+                      //     setSelectedCategories((prev) =>
+                      //       prev.filter((id) => id !== cat._id),
+                      //     );
+                      //   } else {
+                      //     setSelectedCategories((prev) => [...prev, cat._id]);
+                      //   }
+                      // }}
                       onClick={() => {
-                        if (selectedCategories.includes(cat._id)) {
-                          setSelectedCategories((prev) =>
-                            prev.filter((id) => id !== cat._id),
-                          );
-                        } else {
-                          setSelectedCategories((prev) => [...prev, cat._id]);
-                        }
+                        setSelectedCategories([cat._id]);
                       }}
                     >
                       <div>
@@ -370,14 +370,18 @@ const CreatePackagePopup = ({ isOpen, onClose, onSuccess, venueId }) => {
                       </div>
                       <div>
                         <input
-                          type="checkbox"
-                          checked={selectedCategories.includes(cat._id)}
+                          type="radio"
+                          // checked={selectedCategories.includes(cat._id)}
+                          checked={selectedCategories[0] === cat._id}
+                          // onChange={() => {
+                          //   setSelectedCategories((prev) =>
+                          //     prev.includes(cat._id)
+                          //       ? prev.filter((id) => id !== cat._id)
+                          //       : [...prev, cat._id],
+                          //   );
+                          // }}
                           onChange={() => {
-                            setSelectedCategories((prev) =>
-                              prev.includes(cat._id)
-                                ? prev.filter((id) => id !== cat._id)
-                                : [...prev, cat._id],
-                            );
+                            setSelectedCategories([cat._id]);
                           }}
                         />
                       </div>

@@ -10,8 +10,8 @@ import { venueEventTypes, venueTypes } from "@/constants/venueListConstants";
 const EditVenuePopup = ({ isOpen, onClose, venueData, onSuccess }) => {
   const [formData, setFormData] = useState({
     venueName: "",
-    venueType: "",
     location: "",
+    locality: "",
     city: "",
     googleMapLink: "",
   });
@@ -19,6 +19,7 @@ const EditVenuePopup = ({ isOpen, onClose, venueData, onSuccess }) => {
   const [venueImage, setVenueImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
   const [eventTypes, setEventTypes] = useState([]);
+  const [venueType, setVenueType] = useState([]);
   const [guestCapacity, setGuestCapacity] = useState("");
   const [isParkingAvailable, setIsParkingAvailable] = useState(false);
   const [hallType, setHallType] = useState([]);
@@ -30,13 +31,14 @@ const EditVenuePopup = ({ isOpen, onClose, venueData, onSuccess }) => {
     if (venueData) {
       setFormData({
         venueName: venueData.venueName || "",
-        venueType: venueData.venueType || "",
         location: venueData.location || "",
+        locality: venueData.locality || "",
         city: venueData.city || "",
         googleMapLink: venueData.googleMapLink || "",
       });
 
       setEventTypes(venueData.eventTypes || []);
+      setVenueType(venueData.venueType || []);
       setGuestCapacity(venueData.guestCapacity || "");
       setIsParkingAvailable(venueData.isParkingAvailable || false);
       setHallType(venueData.hallType || []);
@@ -78,11 +80,12 @@ const EditVenuePopup = ({ isOpen, onClose, venueData, onSuccess }) => {
       setLoading(true);
       const payload = new FormData();
       payload.append("venueName", formData.venueName);
-      payload.append("venueType", formData.venueType);
       payload.append("location", formData.location);
+      payload.append("locality", formData.locality);
       payload.append("city", formData.city);
       payload.append("googleMapLink", formData.googleMapLink);
       payload.append("eventTypes", JSON.stringify(eventTypes));
+      payload.append("venueType", JSON.stringify(venueType));
       payload.append("guestCapacity", guestCapacity);
       payload.append("isParkingAvailable", isParkingAvailable);
       payload.append("hallType", JSON.stringify(hallType));
@@ -148,19 +151,26 @@ const EditVenuePopup = ({ isOpen, onClose, venueData, onSuccess }) => {
               placeholder="Venue Name"
             />
 
-            <select
-              value={formData.venueType}
-              name="venueType"
-              onChange={handleChange}
-              required
-              style={{marginTop: "20px"}}
-            >
-              {venueTypes?.map((item, index) => (
-                <option key={index} value={item}>
-                  {item}
-                </option>
+            <label>Venue Types</label>
+            <div className="scroll-box">
+              {venueTypes.map((item, index) => (
+                <div
+                  key={index}
+                  className="items-dropdown-ctn"
+                  onClick={() => toggleValue(item, setVenueType, venueType)}
+                >
+                  <div>
+                    <label>{item}</label>
+                  </div>
+
+                  <input
+                    type="checkbox"
+                    checked={venueType.includes(item)}
+                    readOnly
+                  />
+                </div>
               ))}
-            </select>
+            </div>
 
             <input
               name="location"
@@ -168,11 +178,19 @@ const EditVenuePopup = ({ isOpen, onClose, venueData, onSuccess }) => {
               onChange={handleChange}
               placeholder="Location"
             />
+
             <input
               name="city"
               value={formData.city}
               onChange={handleChange}
               placeholder="Venue City"
+            />
+
+            <input
+              name="locality"
+              value={formData.locality}
+              onChange={handleChange}
+              placeholder="Venue Locality"
             />
 
             <input
