@@ -136,6 +136,7 @@ const Capsuletracking = () => {
                   <th>Total Image Shared</th>
                   <th>Capsule Share Count</th>
                   <th>Total Registered users</th>
+                  <th>Locker Image Count</th>
                   <th>Times link opened</th>
                   <th>Face Counts</th>
                   <th>First Device Type</th>
@@ -193,6 +194,7 @@ const Capsuletracking = () => {
                         <td>{order?.counts?.totalShares || 0}</td>
                         <td>{order?.counts?.shareCapsuleClicks || 0}</td>
                         <td>{order?.counts?.totalViews || 0}</td>
+                        <td>{order?.counts?.lockerImageCount || 0}</td>
                         <td>{order?.counts?.totalClicks || 0}</td>
                         <td>{order?.counts?.totalPersonCount || 0}</td>
                         <td>{order?.counts?.firstDeviceType || "-"}</td>
