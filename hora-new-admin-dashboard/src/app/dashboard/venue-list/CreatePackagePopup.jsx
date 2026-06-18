@@ -32,6 +32,11 @@ const CreatePackagePopup = ({ isOpen, onClose, onSuccess, venueId }) => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [itemFoodtype, setItemFoodtype] = useState("");
 
+  const [showTagModal, setShowTagModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [categoryTagValue, setCategoryTagValue] = useState("");
+  const [packageCategoriesTags, setPackageCategoriesTags] = useState({});
+
   useEffect(() => {
     if (isOpen) {
       fetchPackageItems(setPackageItemsMaster, setFilteredItems);
@@ -80,6 +85,30 @@ const CreatePackagePopup = ({ isOpen, onClose, onSuccess, venueId }) => {
     });
   };
 
+  const groupedItems = filteredItems.reduce((acc, item) => {
+    if (!item.categoryIds?.length) {
+      if (!acc["Uncategorized"]) {
+        acc["Uncategorized"] = [];
+      }
+
+      acc["Uncategorized"].push(item);
+      return acc;
+    }
+
+    item.categoryIds.forEach((cat) => {
+      const categoryName =
+        typeof cat === "object" ? cat.title : "Unknown Category";
+
+      if (!acc[categoryName]) {
+        acc[categoryName] = [];
+      }
+
+      acc[categoryName].push(item);
+    });
+
+    return acc;
+  }, {});
+
   const handleAddonChange = (index, value) => {
     const updated = [...formData.packageAddons];
 
@@ -121,6 +150,10 @@ const CreatePackagePopup = ({ isOpen, onClose, onSuccess, venueId }) => {
     payload.append("tag", formData.tag);
     payload.append("packageItems", JSON.stringify(formData.packageItems));
     payload.append("packageAddons", JSON.stringify(formData.packageAddons));
+    payload.append(
+      "packageCategoriesTags",
+      JSON.stringify(packageCategoriesTags),
+    );
 
     if (packageImage) {
       payload.append("image", packageImage);
@@ -306,27 +339,144 @@ const CreatePackagePopup = ({ isOpen, onClose, onSuccess, venueId }) => {
                     No items found.
                   </div>
                 )}
-                {filteredItems?.map((item) => (
-                  <div
-                    key={item._id}
-                    className="items-dropdown-ctn"
-                    onClick={() => handleItemSelection(item._id)}
-                  >
-                    <div>
-                      <label style={{ fontSize: "12px", margin: "0px" }}>
-                        {item?.foodType === "veg" ? "🟢" : "🔴"} {item.title}
-                      </label>
+                {Object.entries(groupedItems).map(([categoryName, items]) => {
+                  const categoryId = items[0]?.categoryIds?.find(
+                    (cat) => cat.title === categoryName,
+                  )?._id;
+
+                  return (
+                    <div key={categoryName}>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          background: "#f5f5f5",
+                          padding: "8px 10px",
+                          fontWeight: 600,
+                          fontSize: "14px",
+                          borderBottom: "1px solid #ddd",
+                        }}
+                      >
+                        <div>
+                          {categoryName}
+
+                          {packageCategoriesTags[categoryId] && (
+                            <span
+                              style={{
+                                marginLeft: "10px",
+                                color: "#666",
+                                fontWeight: 400,
+                              }}
+                            >
+                              ({packageCategoriesTags[categoryId]})
+                            </span>
+                          )}
+                        </div>
+
+                        <button
+                          type="button"
+                          style={{ cursor: "pointer" }}
+                          onClick={() => {
+                            setSelectedCategory({
+                              id: categoryId,
+                              title: categoryName,
+                            });
+
+                            setCategoryTagValue(
+                              packageCategoriesTags[categoryId] || "",
+                            );
+
+                            setShowTagModal(true);
+                          }}
+                        >
+                          Add Tag
+                        </button>
+                      </div>
+
+                      {items.map((item) => (
+                        <div
+                          key={item._id}
+                          className="items-dropdown-ctn"
+                          onClick={() => handleItemSelection(item._id)}
+                        >
+                          <div>
+                            <label
+                              style={{
+                                fontSize: "12px",
+                                margin: 0,
+                              }}
+                            >
+                              {item.foodType === "veg" ? "🟢" : "🔴"}{" "}
+                              {item.title}
+                            </label>
+                          </div>
+
+                          <div>
+                            <input
+                              type="checkbox"
+                              checked={formData.packageItems.includes(item._id)}
+                              onChange={() => handleItemSelection(item._id)}
+                            />
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <div>
-                      <input
-                        type="checkbox"
-                        checked={formData.packageItems.includes(item._id)}
-                        onChange={() => handleItemSelection(item._id)}
-                      />
+                  );
+                })}
+              </div>
+
+              {showTagModal && (
+                <div className="popup-overlay">
+                  <div
+                    style={{
+                      background: "#fff",
+                      width: "400px",
+                      padding: "20px",
+                      borderRadius: "10px",
+                    }}
+                  >
+                    <h3>{selectedCategory?.title}</h3>
+
+                    <input
+                      type="text"
+                      placeholder="Example: Select 2 Appetisers"
+                      value={categoryTagValue}
+                      onChange={(e) => setCategoryTagValue(e.target.value)}
+                      className="package-create-input"
+                    />
+
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        gap: "10px",
+                        marginTop: "15px",
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setShowTagModal(false)}
+                      >
+                        Cancel
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPackageCategoriesTags((prev) => ({
+                            ...prev,
+                            [selectedCategory.id]: categoryTagValue,
+                          }));
+
+                          setShowTagModal(false);
+                        }}
+                      >
+                        Save
+                      </button>
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
 
               <div>
                 <h4 style={{ margin: "0px" }}>Add New Item</h4>
