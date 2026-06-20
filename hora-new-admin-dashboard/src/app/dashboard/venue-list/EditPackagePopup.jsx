@@ -6,10 +6,17 @@ import {
   updateVenuePackage,
   fetchPackageItems,
   fetchPackageCategories,
+  createVenuePackage,
 } from "@/services/venueListServices";
 import { BASE_URL } from "@/utils/apiconstant";
 
-const EditPackagePopup = ({ isOpen, onClose, onSuccess, packageData }) => {
+const EditPackagePopup = ({
+  isOpen,
+  onClose,
+  onSuccess,
+  packageData,
+  isCloningPackage,
+}) => {
   const [loadingUpdate, setLoadingUpdate] = useState(false);
   const [packageItemsMaster, setPackageItemsMaster] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
@@ -60,14 +67,11 @@ const EditPackagePopup = ({ isOpen, onClose, onSuccess, packageData }) => {
     };
 
     try {
-      await fetch(
-        `${BASE_URL}/api/party-venue/package-item/create-item`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        },
-      );
+      await fetch(`${BASE_URL}/api/party-venue/package-item/create-item`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
       // reset
       setNewItemTitle("");
@@ -164,18 +168,14 @@ const EditPackagePopup = ({ isOpen, onClose, onSuccess, packageData }) => {
 
     const payload = new FormData();
 
+    payload.append("venueId", packageData.venueId); // create ke liye required
+
     payload.append("title", formData.title);
-
     payload.append("subTitle", formData.subTitle);
-
     payload.append("actualPrice", formData.actualPrice);
-
     payload.append("discountedPrice", formData.discountedPrice);
-
     payload.append("maxGuests", formData.maxGuests);
-
     payload.append("packageItems", JSON.stringify(formData.packageItems));
-
     payload.append("packageAddons", JSON.stringify(formData.packageAddons));
     payload.append("tag", formData.tag);
 
@@ -183,15 +183,18 @@ const EditPackagePopup = ({ isOpen, onClose, onSuccess, packageData }) => {
       payload.append("image", packageImage);
     }
 
-    updateVenuePackage(
-      packageData._id,
-      payload,
-      onSuccess,
-      onClose,
-      setLoadingUpdate,
-    );
+    if (isCloningPackage) {
+      createVenuePackage(payload, onSuccess, onClose, setLoadingUpdate);
+    } else {
+      updateVenuePackage(
+        packageData._id,
+        payload,
+        onSuccess,
+        onClose,
+        setLoadingUpdate,
+      );
+    }
   };
-
   if (!isOpen) return null;
 
   return (
@@ -201,7 +204,7 @@ const EditPackagePopup = ({ isOpen, onClose, onSuccess, packageData }) => {
           X
         </button>
 
-        <h2>Edit Package</h2>
+        <h2>{isCloningPackage ? "Clone Package" : "Edit Package"}</h2>
 
         <form onSubmit={handleSubmit}>
           <div className="package-form-container">

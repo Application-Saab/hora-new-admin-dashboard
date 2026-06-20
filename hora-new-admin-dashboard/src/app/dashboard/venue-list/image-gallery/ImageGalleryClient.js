@@ -3,6 +3,8 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import "./VenueImageGallery.css";
 import { useSearchParams } from "next/navigation";
+import { deleteVenueMedia } from "@/services/venueListServices";
+import { MdDelete } from "react-icons/md";
 import {
   BASE_URL,
   GET_VENUE_IMAGES,
@@ -23,6 +25,7 @@ const VenueImageGallery = () => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [uploadQueue, setUploadQueue] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
 
   const [venueDetails, setVenueDetails] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -115,6 +118,25 @@ const VenueImageGallery = () => {
     setUploadQueue((prev) => [...prev, ...prepared]);
   };
 
+  const handleDeleteMedia = async (imageId) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this media?",
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setDeletingId(imageId);
+
+      await deleteVenueMedia(imageId, () => {}, fetchImages);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete media");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   // Upload
   const uploadSequentially = async () => {
     if (!uploadQueue.length || uploading) return;
@@ -177,43 +199,41 @@ const VenueImageGallery = () => {
   };
 
   // Add / Remove from Folder
-const updateFolderAssignment = async () => {
-  if (selectedFolderId === "all") return;
+  const updateFolderAssignment = async () => {
+    if (selectedFolderId === "all") return;
 
-  const { addImageIds, removeImageIds } = getDiff();
+    const { addImageIds, removeImageIds } = getDiff();
 
-  if (!addImageIds.length && !removeImageIds.length) return;
+    if (!addImageIds.length && !removeImageIds.length) return;
 
-  try {
-    await axios.put(`${BASE_URL}/api/party-venue/venue/assign-subfolder`, {
-      subFolderId: selectedFolderId,
-      addImageIds,
-      removeImageIds,
-    });
+    try {
+      await axios.put(`${BASE_URL}/api/party-venue/venue/assign-subfolder`, {
+        subFolderId: selectedFolderId,
+        addImageIds,
+        removeImageIds,
+      });
 
-    setShowAddToFolderModal(false);
+      setShowAddToFolderModal(false);
 
-    fetchImages();
-    fetchVenueDetails();
-  } catch (err) {
-    console.error(err);
-  }
-};
+      fetchImages();
+      fetchVenueDetails();
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-//   const toggleSelect = (id) => {
-//     if (selectedFolderId === "all") return; // No selection in All tab
-//     setSelectedImages((prev) =>
-//       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-//     );
-//   };
+  //   const toggleSelect = (id) => {
+  //     if (selectedFolderId === "all") return; // No selection in All tab
+  //     setSelectedImages((prev) =>
+  //       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+  //     );
+  //   };
 
-const toggleSelect = (id) => {
-  setSelectedImages((prev) =>
-    prev.includes(id)
-      ? prev.filter((x) => x !== id)
-      : [...prev, id],
-  );
-};
+  const toggleSelect = (id) => {
+    setSelectedImages((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  };
 
   return (
     <div className="venue-gallery-wrapper">
@@ -289,7 +309,31 @@ const toggleSelect = (id) => {
         <div className="upload-queue">
           {uploadQueue.map((item) => (
             <div key={item.tempId} className="queue-item">
-              <img src={item.preview} alt="preview" />
+              {/* <img src={item.preview} alt="preview" /> */}
+              {item.file.type.startsWith("video/") ? (
+                <video
+                  src={item.preview}
+                  muted
+                  controls
+                  style={{
+                    width: "100%",
+                    height: "120px",
+                    objectFit: "cover",
+                    borderRadius: "8px",
+                  }}
+                />
+              ) : (
+                <img
+                  src={item.preview}
+                  alt="preview"
+                  style={{
+                    width: "100%",
+                    height: "120px",
+                    objectFit: "cover",
+                    borderRadius: "8px",
+                  }}
+                />
+              )}
               <span className={`status ${item.status}`}>{item.status}</span>
             </div>
           ))}
@@ -301,16 +345,34 @@ const toggleSelect = (id) => {
         {filteredImages.map((img) => (
           <div
             key={img._id}
-            className={`image-card`}
+            className="image-card"
             onClick={() => toggleSelect(img._id)}
           >
-            <img src={img.postWebpUrl || img.postUrl} alt="venue" />
+            <button
+              className="delete-media-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteMedia(img._id);
+              }}
+            >
+              {deletingId === img._id ? "..." : <MdDelete color="red" />}
+            </button>
 
-            {/* {selectedFolderId !== "all" && (
-              <div className="checkbox">
-                {selectedImages.includes(img._id) ? "✅" : "⬜"}
-              </div>
-            )} */}
+            {img.postUrl?.match(/\.(mp4|mov|avi|webm|gif)$/i) ? (
+              <video
+                src={img.postUrl}
+                muted
+                controls
+                preload="metadata"
+                className="gallery-media"
+              />
+            ) : (
+              <img
+                src={img.postWebpUrl || img.postUrl}
+                alt="venue"
+                className="gallery-media"
+              />
+            )}
           </div>
         ))}
       </div>
@@ -319,6 +381,7 @@ const toggleSelect = (id) => {
         type="file"
         multiple
         hidden
+        accept="image/*,video/*"
         ref={fileInputRef}
         onChange={handleFileSelect}
       />
@@ -389,7 +452,22 @@ const toggleSelect = (id) => {
                   className={`modal-image-card ${selectedImages.includes(img._id) ? "selected" : ""}`}
                   onClick={() => toggleSelect(img._id)}
                 >
-                  <img src={img.postWebpUrl || img.postUrl} alt="" />
+                  {/* <img src={img.postWebpUrl || img.postUrl} alt="" /> */}
+                  {img.postUrl?.match(/\.(mp4|mov|avi|webm|gif)$/i) ? (
+                    <video
+                      src={img.postUrl}
+                      muted
+                      controls
+                      preload="metadata"
+                      className="gallery-media"
+                    />
+                  ) : (
+                    <img
+                      src={img.postWebpUrl || img.postUrl}
+                      alt=""
+                      className="gallery-media"
+                    />
+                  )}
                   <div className="modal-checkbox">
                     {selectedImages.includes(img._id) ? "✅" : "⬜"}
                   </div>
@@ -405,9 +483,18 @@ const toggleSelect = (id) => {
               >
                 Cancel
               </button>
-              <button
+              {/* <button
                 onClick={updateFolderAssignment}
                 disabled={selectedImages.length === 0}
+              >
+                Save Changes ({selectedImages.length} selected)
+              </button> */}
+              <button
+                onClick={updateFolderAssignment}
+                disabled={
+                  getDiff().addImageIds.length === 0 &&
+                  getDiff().removeImageIds.length === 0
+                }
               >
                 Save Changes ({selectedImages.length} selected)
               </button>

@@ -10,17 +10,14 @@ import {
 import "./createVenue.css";
 import { venueEventTypes, venueTypes } from "@/constants/venueListConstants";
 
-const CreateVenuePopup = ({
-  isOpen,
-  onClose,
-  onSuccess,
-}) => {
+const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
   const [customerNumber, setCustomerNumber] = useState("");
   const [customerId, setCustomerId] = useState(null);
 
-  const [venueType, setVenueType] = useState("");
+  const [venueType, setVenueType] = useState([]);
   const [venueName, setVenueName] = useState("");
   const [location, setLocation] = useState("");
+  const [locality, setLocality] = useState("");
   const [venueCity, setVenueCity] = useState("");
   const [googleMapLink, setGoogleMapLink] = useState("");
   const [venueImage, setVenueImage] = useState(null);
@@ -148,9 +145,10 @@ const CreateVenuePopup = ({
       const formData = new FormData();
 
       formData.append("userId", customerId);
-      formData.append("venueType", venueType);
+      formData.append("venueType", JSON.stringify(venueType));
       formData.append("venueName", venueName);
       formData.append("location", location);
+      formData.append("locality", locality);
       formData.append("city", venueCity);
       formData.append("googleMapLink", googleMapLink);
       formData.append("eventTypes", JSON.stringify(eventTypes));
@@ -246,18 +244,27 @@ const CreateVenuePopup = ({
             >
               <form onSubmit={handleCreateVenue}>
                 <label>Venue Type *</label>
-
-                <select
-                  value={venueType}
-                  onChange={(e) => setVenueType(e.target.value)}
-                  required
-                >
+                <div className="scroll-box">
                   {venueTypes?.map((item, index) => (
-                    <option key={index} value={item}>
-                      {item}
-                    </option>
+                    <div
+                      key={index}
+                      className="items-dropdown-ctn"
+                      onClick={() =>
+                        toggleValue(item, setVenueType, venueType)
+                      }
+                    >
+                      <div>
+                        <label>{item}</label>
+                      </div>
+
+                      <input
+                        type="checkbox"
+                        checked={venueType.includes(item)}
+                        readOnly
+                      />
+                    </div>
                   ))}
-                </select>
+                </div>
 
                 <label>Venue Name *</label>
 
@@ -281,6 +288,13 @@ const CreateVenuePopup = ({
                   value={venueCity}
                   onChange={(e) => setVenueCity(e.target.value)}
                   required
+                />
+
+                <label>Locality *</label>
+
+                <input
+                  value={locality}
+                  onChange={(e) => setLocality(e.target.value)}
                 />
 
                 <label>Google Map Link</label>

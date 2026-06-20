@@ -14,6 +14,7 @@ const VenuePackagesPopup = ({ isOpen, venue, onClose }) => {
   const [search, setSearch] = useState("");
   const [showCreatePackagePopup, setShowCreatePackagePopup] = useState(false);
   const [showEditPackagePopup, setShowEditPackagePopup] = useState(false);
+  const [isCloningPackage, setIsCloningPackage] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
 
   const callPackageApi = () => {
@@ -81,6 +82,7 @@ const VenuePackagesPopup = ({ isOpen, venue, onClose }) => {
                   <th>Addons</th>
                   <th>Status</th>
                   <th>Edit</th>
+                  <th>Clone</th>
                 </tr>
               </thead>
 
@@ -142,11 +144,22 @@ const VenuePackagesPopup = ({ isOpen, venue, onClose }) => {
                           className="edit-btn"
                           onClick={() => {
                             setSelectedPackage(pkg);
-
                             setShowEditPackagePopup(true);
                           }}
                         >
                           Edit
+                        </button>
+                      </td>
+                      <td>
+                        <button
+                          className="edit-btn"
+                          onClick={() => {
+                            setIsCloningPackage(true)
+                            setSelectedPackage(pkg);
+                            setShowEditPackagePopup(true);
+                          }}
+                        >
+                          Clone Package
                         </button>
                       </td>
                     </tr>
@@ -189,6 +202,7 @@ const VenuePackagesPopup = ({ isOpen, venue, onClose }) => {
           packageData={selectedPackage}
           onClose={() => setShowEditPackagePopup(false)}
           onSuccess={callPackageApi}
+          isCloningPackage={isCloningPackage}
         />
       )}
     </>
