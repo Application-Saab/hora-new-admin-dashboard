@@ -21,3 +21,16 @@ export const venueTypes = [
     "Hotels",
     "Fort/Place"
 ]
+
+export const inviteTypes = [
+  "Birthday",
+  "BabyShower",
+  "Annaprashan",
+  "WelcomeBaby",
+  "Baptism",
+  "NamingCermony",
+  "Housewarming",
+  "Engagement",
+  "Anniversary",
+  "BridalShower"
+];
