@@ -1133,20 +1133,50 @@ const ActionPopup = ({
 
                         <p>
                           <strong>Order Add On:</strong>{" "}
-                          {orderDetails.add_on.length > 0 ? (
-                            <ul>
-                              {orderDetails.add_on.map((item, index) => (
-                                <li key={index}>
-                                  <strong>
-                                    {item.name} {item.title}
-                                  </strong>
-                                  : ₹{item.price}
-                                </li>
-                              ))}
-                            </ul>
-                           ) : (
-                           "N/A"
-                           )}
+                            {orderDetails.add_on.length > 0 ? (
+                              <ul>
+                                {orderDetails.add_on.map((item, index) => {
+
+                                  let rawTitle =
+                                    item?.name ||
+                                    item?.title ||
+                                    "Addon";
+
+                                  const quantityMatch = rawTitle.match(/Quantity\s*(\d+)/i);
+
+                                  const extractedQuantity = quantityMatch
+                                    ? Number(quantityMatch[1])
+                                    : null;
+
+                                  const cleanedTitle = rawTitle.replace(
+                                    /\s*-\s*Quantity\s*\d+/i,
+                                    ""
+                                  ).trim();
+
+                                  const quantity =
+                                    extractedQuantity || Number(item?.quantity) || 1;
+
+                                  const price = Number(
+                                    item?.price ||
+                                    0
+                                  );
+
+                                  const total =
+                                    item?.totalPrice
+                                      ? Number(item.totalPrice)
+                                      : price * quantity;
+
+                                  return (
+                                    <li key={index}>
+                                      <strong>{cleanedTitle}</strong>
+                                      : ₹{price} x {quantity} = ₹{total}
+                                    </li>
+                                  );
+                                })}
+                              </ul>
+                            ) : (
+                              "N/A"
+                            )}
                         </p>
 
                         <p>
@@ -1463,116 +1493,127 @@ const ActionPopup = ({
                               <strong>ADD-ON:</strong>
                             </p>
 
-                            {(() => {
-                              const addOns =
-                                Array.isArray(orderDetails.add_on) &&
-                                orderDetails.add_on.filter(
-                                  (item) =>
-                                    item &&
-                                    typeof item === "object" &&
-                                    Object.keys(item).length > 0 &&
-                                    item.title
-                                );
+                              {(() => {
+                                const addOns =
+                                  Array.isArray(orderDetails?.add_on) &&
+                                  orderDetails.add_on.filter(
+                                    (item) =>
+                                      item?.title ||
+                                      item?.name
+                                  );
 
 
-                              if (!addOns || addOns.length === 0) {
-                                return (
-                                  <p
-                                    style={{
-                                      fontSize: "12px",
-                                      color: "#6b7280",
-                                      marginTop: "6px",
-                                    }}
-                                  >
-                                    N/A
-                                  </p>
-                                );
-                              }
-
-                              return (
-                                <div
-                                  style={{
-                                    display: "grid",
-                                    gridTemplateColumns:
-                                      "repeat(auto-fit, minmax(200px, 1fr))",
-                                    gap: "16px",
-                                  }}
-                                >
-                                  {addOns.map((item, index) => (
-                                    <div
-                                      key={index}
+                                if (!addOns || addOns.length === 0) {
+                                  return (
+                                    <p
                                       style={{
-                                        backgroundColor: "#fff",
-                                        borderRadius: "10px",
-                                        boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-                                        overflow: "hidden",
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        border: "1px solid #e5e7eb",
+                                        fontSize: "12px",
+                                        color: "#6b7280",
+                                        marginTop: "6px",
                                       }}
                                     >
-                                      {/* Image */}
+                                      N/A
+                                    </p>
+                                  );
+                                }
+
+                                return (
+                                  <div
+                                    style={{
+                                      display: "grid",
+                                      gridTemplateColumns:
+                                        "repeat(auto-fit, minmax(200px, 1fr))",
+                                      gap: "16px",
+                                    }}
+                                  >
+                                    {addOns.map((item, index) => (
                                       <div
+                                        key={index}
                                         style={{
-                                          width: "100%",
-                                          height: "120px",
+                                          backgroundColor: "#fff",
+                                          borderRadius: "10px",
+                                          boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
                                           overflow: "hidden",
+                                          display: "flex",
+                                          flexDirection: "column",
+                                          border: "1px solid #e5e7eb",
                                         }}
                                       >
-                                        <Image
-                                          src={item.image}
-                                          alt={item?.title}
-                                          width={240}
-                                          height={120}
+                                        {/* Image */}
+                                        <div
                                           style={{
                                             width: "100%",
-                                            height: "100%",
-                                            objectFit: "cover",
+                                            height: "120px",
+                                            overflow: "hidden",
                                           }}
-                                        />
-                                      </div>
+                                        >
+                                          <Image
+                                            src={
+                                              item?.image
+                                                ? `https://horaservices.com/api/uploads/compressed_webp/${item.image}`
+                                                : "/placeholder.png"
+                                            }
+                                            alt={item?.title}
+                                            width={240}
+                                            height={120}
+                                            style={{
+                                              width: "100%",
+                                              height: "100%",
+                                              objectFit: "cover",
+                                            }}
+                                          />
+                                        </div>
 
-                                      {/* Info */}
-                                      <div
-                                        style={{
-                                          padding: "10px",
-                                          textAlign: "left",
-                                        }}
-                                      >
-                                        <p
+                                        {/* Info */}
+                                        <div
                                           style={{
-                                            fontSize: "13px",
-                                            fontWeight: "600",
-                                            color: "#059669",
+                                            padding: "10px",
+                                            textAlign: "left",
                                           }}
                                         >
-                                         ₹{item.price}
-                                        </p>
-                                        <h3
-                                          style={{
-                                            fontSize: "13px",
-                                            fontWeight: "500",
-                                            color: "#1f2937",
-                                            marginTop: "2px",
-                                          }}
-                                        >
-                                        Name :  {item?.title}
-                                        </h3>
-                                        <p
-                                          style={{
-                                            fontSize: "12px",
-                                            color: "#6b7280",
-                                            marginTop: "4px",
-                                          }}
-                                        >
-                                          Discription : {item?.description || "N/A"}
-                                        </p>
+                                          <p
+                                            style={{
+                                              fontSize: "13px",
+                                              fontWeight: "600",
+                                              color: "#059669",
+                                            }}
+                                          >
+                                            {item?.price} x {item?.quantity || 1} = ₹{item?.totalPrice || item?.price}
+                                          </p>
+                                          <h3
+                                            style={{
+                                              fontSize: "13px",
+                                              fontWeight: "500",
+                                              color: "#1f2937",
+                                              marginTop: "2px",
+                                            }}
+                                          >
+                                            Name :  {item?.title}
+                                          </h3>
+                                          <p
+                                            style={{
+                                              fontSize: "12px",
+                                              color: "#6b7280",
+                                              marginTop: "4px",
+                                            }}
+                                          >
+                                            Discription : {item?.description || "N/A"}
+                                          </p>
+                                          <p
+                                            style={{
+                                              fontSize: "12px",
+                                              color: "#6b7280",
+                                              marginTop: "4px",
+                                            }}
+                                          >
+                                            quantity - {item?.quantity || 1}
+                                          </p>
+                                        </div>
                                       </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              );
-                            })()}
+                                    ))}
+                                  </div>
+                                );
+                              })()}
                           </div>
                         </div>
 

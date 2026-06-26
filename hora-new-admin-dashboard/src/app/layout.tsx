@@ -16,7 +16,8 @@ import {
   FaUtensils,
   FaChevronDown,
   FaChevronRight,
-  FaListUl 
+  FaListUl,
+  FaPlus,
 } from "react-icons/fa";
 import { GiFireworkRocket } from "react-icons/gi";
 import { useRouter, usePathname } from "next/navigation";
@@ -194,7 +195,7 @@ const menuItems = [
     ],
   },
 
-
+  { label: "Addons", icon: <FaPlus />, url: "/dashboard/addons" },
   { label: "Dish List", icon: <FaUtensils />, url: "/dashboard/dish-list" },
    { label: "Venue List", icon: <FaUtensils />, url: "/dashboard/venue-list" },
 
