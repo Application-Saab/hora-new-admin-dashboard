@@ -33,6 +33,13 @@
   color: white;
 }
 
+.create-invite-btn{
+  padding: 10px 20px;
+  border: 1px solid black;
+  background: transparent;
+  color: black;
+}
+
 /* Filters */
 .filters-container {
   margin: 15px 0;

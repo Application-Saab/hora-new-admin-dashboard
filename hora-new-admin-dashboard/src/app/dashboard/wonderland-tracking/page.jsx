@@ -5,8 +5,10 @@ import {
   fetchWonderlandListingData,
   fetchWonderlandStats,
 } from "./wonderlandTrackingServices";
+import { useRouter } from "next/navigation";
 
 const AdminAnalytics = () => {
+  const router = useRouter();
   const [type, setType] = useState("byUsers");
   const [data, setData] = useState([]);
   const [stats, setStats] = useState(null);
@@ -24,23 +26,23 @@ const AdminAnalytics = () => {
   }, []);
 
   useEffect(() => {
-  const controller = new AbortController();
+    const controller = new AbortController();
 
-  fetchWonderlandListingData({
-    setLoading,
-    setData,
-    setPagination,
-    type,
-    page,
-    search: debouncedSearch,
-    dateFilter,
-    signal: controller.signal,
-  });
+    fetchWonderlandListingData({
+      setLoading,
+      setData,
+      setPagination,
+      type,
+      page,
+      search: debouncedSearch,
+      dateFilter,
+      signal: controller.signal,
+    });
 
-  return () => {
-    controller.abort();
-  };
-}, [type, page, debouncedSearch, dateFilter]);
+    return () => {
+      controller.abort();
+    };
+  }, [type, page, debouncedSearch, dateFilter]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -102,6 +104,15 @@ const AdminAnalytics = () => {
         >
           By Events
         </button>
+        <button
+          className="create-invite-btn"
+          type="button"
+          onClick={() => {
+            router.push("/dashboard/wonderland-tracking/create-invite");
+          }}
+        >
+          + Create Invite
+        </button>
       </div>
 
       <div className="filters-container">
@@ -150,6 +161,7 @@ const AdminAnalytics = () => {
                 <th>Guests</th>
                 <th>Posts</th>
                 <th>Date</th>
+                <th>View Event</th>
               </tr>
             )}
           </thead>
@@ -174,6 +186,12 @@ const AdminAnalytics = () => {
                     <td>{item.guestCount}</td>
                     <td>{item.photoCount}</td>
                     <td>{formatDateDDMMYYYY(item.eventDate)}</td>
+                    <td>
+                      <a
+                        target="_blank"
+                        href={`https://horaservices.com/${item?.fromInternational === "yes" ? "wonderlandinternational" : "wonderland"}/invite?eventid=${item?._id}&frompanel=true`}
+                      >View</a>
+                    </td>
                   </tr>
                 ),
               )
