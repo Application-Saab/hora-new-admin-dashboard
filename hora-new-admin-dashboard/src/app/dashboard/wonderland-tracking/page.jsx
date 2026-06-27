@@ -13,6 +13,7 @@ const AdminAnalytics = () => {
   const [data, setData] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [copiedId, setCopiedId] = useState("");
 
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({});
@@ -65,6 +66,19 @@ const AdminAnalytics = () => {
     const year = d.getFullYear();
 
     return `${day}/${month}/${year}`;
+  };
+
+  // Copy Function
+  const handleCopy = async (text, itemId) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedId(itemId);
+      setTimeout(() => {
+        setCopiedId("");
+      }, 2000);
+    } catch (err) {
+      console.error("Link copy karne me dikkat aayi: ", err);
+    }
   };
 
   return (
@@ -162,6 +176,7 @@ const AdminAnalytics = () => {
                 <th>Posts</th>
                 <th>Date</th>
                 <th>View Event</th>
+                <th>Copy Event Link</th>
               </tr>
             )}
           </thead>
@@ -190,7 +205,31 @@ const AdminAnalytics = () => {
                       <a
                         target="_blank"
                         href={`https://horaservices.com/${item?.fromInternational === "yes" ? "wonderlandinternational" : "wonderland"}/invite?eventid=${item?._id}&frompanel=true`}
-                      >View</a>
+                      >
+                        View
+                      </a>
+                    </td>
+                    <td style={{ textAlign: "center" }}>
+                      <button
+                        onClick={() =>
+                          handleCopy(
+                            `https://horaservices.com/${item?.fromInternational === "yes" ? "wonderlandinternational" : "wonderland"}/invite?eventid=${item?._id}`,
+                            item?._id,
+                          )
+                        }
+                        style={{
+                          background:
+                            copiedId === item?._id ? "#22c55e" : "black",
+                          color: "white",
+                          padding: "8px 10px",
+                          cursor: "pointer",
+                          border: "none",
+                          borderRadius: "4px",
+                          transition: "background 0.2s ease",
+                        }}
+                      >
+                        {copiedId === item?._id ? "Copied! ✓" : "Copy Link"}
+                      </button>
                     </td>
                   </tr>
                 ),

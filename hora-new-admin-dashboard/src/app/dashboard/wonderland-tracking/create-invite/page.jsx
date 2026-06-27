@@ -22,6 +22,11 @@ const CreateEventInvitePage = () => {
   const [newCustomerPhone, setNewCustomerPhone] = useState("");
   const [showNewCustomerForm, setShowNewCustomerForm] = useState(false);
 
+  // Name Edit State (when customer exists but name is missing)
+  const [showNameEdit, setShowNameEdit] = useState(false);
+  const [editedName, setEditedName] = useState("");
+  const [editLoading, setEditLoading] = useState(false);
+
   const [checkLoading, setCheckLoading] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
 
@@ -63,10 +68,19 @@ const CreateEventInvitePage = () => {
 
       if (customer) {
         setCustomerId(customer._id);
-        // setHostName(customer.name || "");
-        setMessage("Customer found successfully!");
-        setMessageColor("green");
-        setStep(2); // Move to next step
+
+        if (!customer.name || customer.name.trim() === "") {
+          // Name missing → Show name edit form
+          setEditedName("");
+          setShowNameEdit(true);
+          setMessage("Customer found but name is missing. Please add name.");
+          setMessageColor("orange");
+        } else {
+          // setHostName(customer.name);
+          setMessage("Customer found successfully!");
+          setMessageColor("green");
+          setStep(2);
+        }
       } else {
         setShowNewCustomerForm(true);
         setMessage("Customer not found. Please create new host.");
@@ -74,10 +88,51 @@ const CreateEventInvitePage = () => {
       }
     } catch (err) {
       console.error(err);
-      setMessage("Error checking customer. Please try again.");
+      setMessage("Error checking customer.");
       setMessageColor("red");
     } finally {
       setCheckLoading(false);
+    }
+  };
+
+  // ==================== SAVE / UPDATE NAME ====================
+  const handleSaveName = async () => {
+    if (!editedName.trim()) {
+      setMessage("Please enter a valid name");
+      setMessageColor("red");
+      return;
+    }
+
+    setEditLoading(true);
+
+    try {
+      // Replace UPDATE_USER_BY_ID with your actual constant if available
+      const response = await axios.put(
+        `${BASE_URL}/api/user/user-details/${customerId}`, // Adjust endpoint if needed
+        { name: editedName.trim() },
+        {
+          headers: {
+            Authorization: localStorage.getItem("token") || "", // Adjust according to your auth
+          },
+        }
+      );
+
+      if (!response.data.error) {
+        // setHostName(editedName.trim());
+        setShowNameEdit(false);
+        setMessage("Name saved successfully!");
+        setMessageColor("green");
+        setStep(2); // Move to Event Details
+      } else {
+        setMessage("Failed to save name");
+        setMessageColor("red");
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage("Error updating name. Please try again.");
+      setMessageColor("red");
+    } finally {
+      setEditLoading(false);
     }
   };
 
@@ -138,7 +193,7 @@ const CreateEventInvitePage = () => {
     e.preventDefault();
 
     if (!hostName) {
-      setMessage("Please fill required field");
+      setMessage("Please fill Event Title");
       setMessageColor("red");
       return;
     }
@@ -161,19 +216,14 @@ const CreateEventInvitePage = () => {
 
       const res = await axios.post(
         `${BASE_URL}/api/customer/event/create-event-invite`,
-        payload,
+        payload
       );
 
       if (!res.data.error) {
-        console.log(
-          "%c [ res ]",
-          "font-size:13px; background:pink; color:#bf2c9f;",
-          res,
-        );
         setMessage("🎉 Event Invite Created Successfully!");
         setMessageColor("green");
         setEventCreated(true);
-        setCreatedEventId(res.data?.data?._id);
+        setCreatedEventId(res.data?.data?._id || res.data?.data?.event?._id);
       }
     } catch (err) {
       console.error(err);
@@ -202,22 +252,16 @@ const CreateEventInvitePage = () => {
           </div>
         </div>
 
-        {/* Step 1: Customer / Host */}
-        {step === 1 && (
+        {/* Step 1 */}
+        {step === 1 && !showNameEdit && (
           <div className="section">
             <h2>Host Information</h2>
-
             <div className="input-group">
-              <label>
-                Host Phone Number
-                <span className="required">*</span>
-              </label>
+              <label>Host Phone Number <span className="required">*</span></label>
               <input
                 type="text"
                 value={customerNumber}
-                onChange={(e) =>
-                  setCustomerNumber(e.target.value.replace(/\D/g, ""))
-                }
+                onChange={(e) => setCustomerNumber(e.target.value.replace(/\D/g, ""))}
                 maxLength={10}
                 placeholder="Enter 10 digit phone number"
                 className="input-field"
@@ -232,11 +276,40 @@ const CreateEventInvitePage = () => {
               {checkLoading ? "Checking..." : "Verify Host"}
             </button>
 
-            {message && (
-              <p className="message" style={{ color: messageColor }}>
-                {message}
-              </p>
-            )}
+            {message && <p className="message" style={{ color: messageColor }}>{message}</p>}
+          </div>
+        )}
+
+        {/* Name Edit Form (When customer exists but name missing) */}
+        {showNameEdit && (
+          <div className="section">
+            <h2>Add Host Name</h2>
+            <div className="input-group">
+              <label>Full Name <span className="required">*</span></label>
+              <input
+                type="text"
+                value={editedName}
+                onChange={(e) => setEditedName(e.target.value)}
+                placeholder="Enter host full name"
+                className="input-field"
+              />
+            </div>
+
+            <div className="btn-group">
+              <button 
+                onClick={handleSaveName} 
+                className="primary-btn"
+                disabled={editLoading}
+              >
+                {editLoading ? "Saving..." : "Save Name & Continue"}
+              </button>
+              <button 
+                onClick={() => setShowNameEdit(false)} 
+                className="secondary-btn"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         )}
 
@@ -422,11 +495,27 @@ const CreateEventInvitePage = () => {
                   marginTop: "15px",
                 }}
               >
-                Invite Link :{" "}
+                Invite Link Admin :{" "}
                 <a
                   target="_blank"
                   href={`https://horaservices.com/${fromInternational ? "wonderlandinternational" : "wonderland"}/invite?eventid=${createdEventId}&frompanel=true`}
                 >{`https://horaservices.com/${fromInternational ? "wonderlandinternational" : "wonderland"}/invite?eventid=${createdEventId}&frompanel=true`}</a>
+              </p>
+            )}
+            {eventCreated && (
+              <p
+                className="message"
+                style={{
+                  color: messageColor,
+                  textAlign: "center",
+                  marginTop: "15px",
+                }}
+              >
+                Invite Link To Share :{" "}
+                <a
+                  target="_blank"
+                  href={`https://horaservices.com/${fromInternational ? "wonderlandinternational" : "wonderland"}/invite?eventid=${createdEventId}`}
+                >{`https://horaservices.com/${fromInternational ? "wonderlandinternational" : "wonderland"}/invite?eventid=${createdEventId}`}</a>
               </p>
             )}
           </form>
