@@ -7,7 +7,10 @@ import CreateVenuePopup from "./CreateVenuePopup";
 import EditVenuePopup from "./EditVenuePopup";
 import VenuePackagesPopup from "./VenuePackagesPopup";
 import EditTermsPopup from "./CreateTermsModal";
-import { fetchVenues, toggleVenueStatus  } from "../../../services/venueListServices";
+import {
+  fetchVenues,
+  toggleVenueStatus,
+} from "../../../services/venueListServices";
 import { useRouter } from "next/navigation";
 import { venueTypes } from "@/constants/venueListConstants";
 import { BASE_URL } from "@/utils/apiconstant";
@@ -117,7 +120,11 @@ const VenueList = () => {
                 </td>
                 <td>{venue.venueName}</td>
 
-                <td>{venue.venueType}</td>
+                <td>
+                  {Array.isArray(venue.venueType)
+                    ? venue.venueType.join(", ")
+                    : venue.venueType || ""}
+                </td>
 
                 <td>{venue.location}</td>
 

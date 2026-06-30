@@ -103,38 +103,10 @@ const AddProductForm = () => {
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // const handleImageUpload = async (event) => {
-  //   const file = event.target.files[0];
-  //   if (!file) return;
-  //   setFileData(file);
-  //   setPreviewImage(URL.createObjectURL(file));
-
-  //   // const formData = new FormData();
-  //   // formData.append("file", file);
-
-  //   // try {
-  //   //   const response = await fetch(BASE_URL + IMAGE_UPLOAD, {
-  //   //     method: "POST",
-  //   //     body: formData,
-  //   //   });
-  //   //   const data = await response.json();
-  //   //   if (data.error === false) {
-  //   //     setUploadedImage(data.data);
-  //   //   } else {
-  //   //     console.error("Image upload failed:", data.message);
-  //   //     showAlert("Image upload failed: " + data.message, "error");
-  //   //   }
-  //   // } catch (error) {
-  //   //   console.error("Error uploading image:", error);
-  //   //   showAlert("Error uploading image", "error");
-  //   // }
-  // };
-
   const resetForm = () => {
     setProductName("");
     setProductRate("");
     setDescription("");
-    // setSelectedProductTypes([]);
     setSelectedMealTypes([]);
   };
 
@@ -160,34 +132,31 @@ const AddProductForm = () => {
       const advanceAmountHora = customerPrice * ((advancePercent || 0) / 100);
 
       const formatText = (text = "") =>
-        `<div>${text
+        text
           .split("\n")
           .map((line) => line.trim())
           .filter(Boolean)
-          .map((line) => `- ${line}`)
-          .join(" ")}</div>`;
+          .map(
+            (line) => `<div>${line.startsWith("-") ? line : `- ${line}`}</div>`,
+          )
+          .join("");
 
       const isOption1 = mode === "Option1";
 
-      // 🧠 BASE FORM DATA (single source of truth)
       const formData = new FormData();
 
-      // ✅ IMAGE
-      // if (fileData) {
-      //   formData.append("featured_image", fileData);
-      // }
 
       images.forEach((img) => {
         formData.append("featured_images", img.file);
       });
 
-      // ✅ BASIC FIELDS
+      //  BASIC FIELDS
       formData.append("name", productName);
       formData.append("dish_rate", productRate || 0);
       formData.append("description", "");
       formData.append("status", "1");
 
-      // ✅ ARRAY / OBJECT FIELDS (IMPORTANT → stringify)
+      // ARRAY / OBJECT FIELDS (IMPORTANT → stringify)
       formData.append(
         "cuisineId",
         JSON.stringify(["65a2c9d3513d9389d34e2ec9"]),
@@ -216,7 +185,7 @@ const AddProductForm = () => {
         ]),
       );
 
-      // ✅ FLAGS
+      // FLAGS
       formData.append("is_dish", "1");
       formData.append("dish_allow", "true");
       formData.append("is_preparation", "true");
@@ -224,13 +193,13 @@ const AddProductForm = () => {
       formData.append("cooking_min", "10");
       formData.append("preparation_min", "10");
 
-      // ✅ PREPARATION TEXT
+      // PREPARATION TEXT
       formData.append(
         "preperationtext",
         isOption1 ? formatText(summaryText) : formatText(option2Text),
       );
 
-      // ✅ OPTION 1 EXTRA FIELDS
+      // OPTION 1 EXTRA FIELDS
       if (isOption1) {
         formData.append("vendorMaterialPrice", totalPrice || 0);
         formData.append("executionPrice", executionPrice || 0);
@@ -690,11 +659,18 @@ const AddProductForm = () => {
               // <img src={previewImage} alt="Preview" className="image-preview" />
               <div
                 className="image-box"
-                style={{ display: "flex", width: "100%", height: '200px' }}
+                style={{ display: "flex", width: "100%", height: "200px" }}
               >
                 {images?.map((img, index) => (
                   <React.Fragment key={index}>
-                    <div style={{display: "flex", flexDirection: "column", alignItems: "center", marginRight: "10px"}}>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        marginRight: "10px",
+                      }}
+                    >
                       <img src={img.preview} className="image-preview" alt="" />
                       <button onClick={() => removeImage(index)}>Remove</button>
                     </div>
@@ -705,15 +681,6 @@ const AddProductForm = () => {
               <div className="image-placeholder">Click to Upload</div>
             )}
           </div>
-          {/* 
-          <div className="image-grid">
-            {images.map((img, index) => (
-              <div key={index} className="image-box">
-                <img src={img.preview} alt="" />
-                <button onClick={() => removeImage(index)}>Remove</button>
-              </div>
-            ))}
-          </div> */}
           <input
             type="file"
             multiple
@@ -722,14 +689,10 @@ const AddProductForm = () => {
             onChange={handleImageUpload}
             max={10}
           />
-
-          {/* <input type="file" multiple onChange={handleImageUpload} /> */}
         </div>
-
       </div>
 
       <div className="form-row horizontal-fields">
-
         <div className="form-group">
           <label>Product Category Type *</label>
           <div
