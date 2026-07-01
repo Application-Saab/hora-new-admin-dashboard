@@ -30,9 +30,8 @@ const DecorationEditor = () => {
     material: [],
   });
   const [existingImages, setExistingImages] = useState([]);
-  console.log('%c [ existingImages ]', 'font-size:13px; background:pink; color:#bf2c9f;', existingImages)
-const [newImages, setNewImages] = useState([]);
-const [removedImages, setRemovedImages] = useState([]);
+  const [newImages, setNewImages] = useState([]);
+  const [removedImages, setRemovedImages] = useState([]);
   const [inclusions, setInclusions] = useState([
     {
       id: 1,
@@ -51,31 +50,31 @@ const [removedImages, setRemovedImages] = useState([]);
   const [advancePercent, setAdvancePercent] = useState(0);
   const [option2Text, setOption2Text] = useState("");
   const [nextId, setNextId] = useState(1);
-const [callChecklist, setCallChecklist] = useState({
-  designType: {}
-});
-
-const designTypeOptions = [
-  "Wall",
-  "Ring",
-  "Ring + Flex",
-  "Sequined",
-  "U Shape",
-  "Square Stand",
-  "Room Decor",
-  "Cradle",
-  "Flex",
-  "Artificial Flower",
-  "Real Flower",
-];
-
-const getDefaultDesignType = (data = {}) => {
-  const result = {};
-  designTypeOptions.forEach(item => {
-    result[item] = data?.[item] || false;
+  const [callChecklist, setCallChecklist] = useState({
+    designType: {},
   });
-  return result;
-};
+
+  const designTypeOptions = [
+    "Wall",
+    "Ring",
+    "Ring + Flex",
+    "Sequined",
+    "U Shape",
+    "Square Stand",
+    "Room Decor",
+    "Cradle",
+    "Flex",
+    "Artificial Flower",
+    "Real Flower",
+  ];
+
+  const getDefaultDesignType = (data = {}) => {
+    const result = {};
+    designTypeOptions.forEach((item) => {
+      result[item] = data?.[item] || false;
+    });
+    return result;
+  };
 
   const handleSelectChange = async (event) => {
     const subCategory = event.target.value;
@@ -85,7 +84,7 @@ const getDefaultDesignType = (data = {}) => {
     if (subCategory) {
       try {
         const response = await fetch(
-          `${BASE_URL}/api/meals/idByTag?tag=${subCategory}`
+          `${BASE_URL}/api/meals/idByTag?tag=${subCategory}`,
         );
         const data = await response.json();
 
@@ -474,7 +473,7 @@ const getDefaultDesignType = (data = {}) => {
   const fetchSecondAPI = async (_id) => {
     try {
       const response = await fetch(
-        `${BASE_URL}/api/Decoration/searchByTag/${_id}`
+        `${BASE_URL}/api/Decoration/searchByTag/${_id}`,
       );
       const data = await response.json();
 
@@ -528,10 +527,15 @@ const getDefaultDesignType = (data = {}) => {
     if (item.inclusionVariables && item.inclusionVariables.length > 0) {
       setMode("Option1");
 
-      const mapped = JSON.parse(item?.inclusionVariables)?.map((inc, index) => ({
-        ...inc,
-        id: index + 1,
-      }));
+      let mapped;
+      if (typeof item?.inclusionVariables === "string") {
+        mapped = JSON.parse(item?.inclusionVariables)?.map((inc, index) => ({
+          ...inc,
+          id: index + 1,
+        }));
+      } else {
+        mapped = item.inclusionVariables;
+      }
 
       setInclusions(mapped);
       setNextId(mapped.length + 1);
@@ -547,28 +551,22 @@ const getDefaultDesignType = (data = {}) => {
     }
   };
 
-  // const handleImageChange = async (e) => {
-  //   const file = e.target.files[0];
-  //   if (!file) return;
-  //   setImage(file)
-  // };
-
   const handleImageChange = (e) => {
-  const files = Array.from(e.target.files);
-  setNewImages((prev) => [...prev, ...files]);
-};
+    const files = Array.from(e.target.files);
+    setNewImages((prev) => [...prev, ...files]);
+  };
 
-const removeExistingImage = (img) => {
-  setRemovedImages((prev) => [...prev, img]);
+  const removeExistingImage = (img) => {
+    setRemovedImages((prev) => [...prev, img]);
 
-  setExistingImages((prev) =>
-    prev.filter((i) => i.fileName !== img.fileName)
-  );
-};
+    setExistingImages((prev) =>
+      prev.filter((i) => i.fileName !== img.fileName),
+    );
+  };
 
-const removeNewImage = (index) => {
-  setNewImages((prev) => prev.filter((_, i) => i !== index));
-};
+  const removeNewImage = (index) => {
+    setNewImages((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleTagChange = (tagId) => {
     setSelectedTags((prevTags) =>
@@ -582,71 +580,76 @@ const removeNewImage = (index) => {
     setPopupData(null);
     setName("");
     setPrice("");
-    // setImage(null);
     setSelectedTags([]);
     setInclusions([]);
   };
-  let formattedInclusion = [];
-const handleSaveChanges = async () => {
-  try {
-    const formData = new FormData();
+  const handleSaveChanges = async () => {
+    try {
+      const formData = new FormData();
 
-    formData.append("_id", popupData._id);
-    formData.append("name", name);
-    formData.append("price", price);
+      formData.append("_id", popupData._id);
+      formData.append("name", name);
+      formData.append("price", price);
 
-    formData.append("tag", JSON.stringify(selectedTags));
-    formData.append("designType", JSON.stringify(callChecklist.designType));
+      formData.append("tag", JSON.stringify(selectedTags));
+      formData.append("designType", JSON.stringify(callChecklist.designType));
 
+      // NEW IMAGES
+      newImages.forEach((file) => {
+        formData.append("featured_images", file);
+      });
 
-  // NEW IMAGES
-  newImages.forEach((file) => {
-    formData.append("featured_images", file);
-  });
+      // REMOVED IMAGES
+      formData.append("removedImages", JSON.stringify(removedImages));
+      if (mode === "Option1") {
+        const formattedInclusion = [
+          inclusions
+            .filter((i) => i.previewText?.trim())
+            .map((i) => `<div>-${i.previewText.trim()}</div>`)
+            .join(""),
+        ];
 
-  // REMOVED IMAGES
-  formData.append("removedImages", JSON.stringify(removedImages));
+        formData.append("inclusionVariables", JSON.stringify(inclusions));
 
-    // --------------------------
-    // OPTION LOGIC
-    // --------------------------
-    if (mode === "Option1") {
-      formData.append("inclusionVariables", JSON.stringify(inclusions));
-      formData.append("inclusion",JSON.stringify(formattedInclusion));
-    } else {
-      const formatted = [
-        `<div>- ${option2Text
-          .split("\n")
-          .map((line) => line.trim())
-          .filter(Boolean)
-          .join(" - ")}</div>`,
-      ];
+        formData.append("inclusion", JSON.stringify(formattedInclusion));
+      } else {
+        const formatted = [
+          option2Text
+            .split("\n")
+            .map((line) => line.trim())
+            .filter(Boolean)
+            .map(
+              (line) =>
+                `<div>${line.startsWith("-") ? line : `-${line}`}</div>`,
+            )
+            .join(""),
+        ];
 
-      formData.append("inclusion", JSON.stringify(formatted));
-    }
-
-    const response = await fetch(BASE_URL + EDIT_DECORATION_PRODUCT, {
-      method: "POST",
-      body: formData,
-    });
-
-    const result = await response.json();
-    console.log("Response:", result);
-
-    if (result.error === false) {
-      if (selectedSubCategory) {
-        handleSelectChange({
-          target: { value: selectedSubCategory },
-        });
+        formData.append("inclusion", JSON.stringify(formatted));
       }
-      setPopupData(null);
-    } else {
-      console.error("API error:", result);
+
+      const response = await fetch(BASE_URL + EDIT_DECORATION_PRODUCT, {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+      console.log("Response:", result);
+
+      if (result.error === false) {
+        if (selectedSubCategory) {
+          handleSelectChange({
+            target: { value: selectedSubCategory },
+          });
+        }
+        setPopupData(null);
+      } else {
+        console.error("API error:", result);
+      }
+    } catch (error) {
+      console.error("Save error:", error);
     }
-  } catch (error) {
-    console.error("Save error:", error);
-  }
-};
+  };
 
   const handlePriceChange = (id, value) => {
     const num = parseFloat(value) || 0;
@@ -673,29 +676,28 @@ const handleSaveChanges = async () => {
       prev.map((i) => (i.id === id ? { ...i, previewText: value } : i)),
     );
   };
-const handleCheckboxChange = (section, item) => {
-  setCallChecklist(prev => ({
-    ...prev,
-    [section]: {
-      ...prev[section],
-      [item]: !prev[section]?.[item]   // toggle true/false
+  const handleCheckboxChange = (section, item) => {
+    setCallChecklist((prev) => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [item]: !prev[section]?.[item], // toggle true/false
+      },
+    }));
+  };
+  useEffect(() => {
+    if (popupData?.designType) {
+      setCallChecklist((prev) => ({
+        ...prev,
+        designType: getDefaultDesignType(popupData.designType),
+      }));
+    } else {
+      setCallChecklist((prev) => ({
+        ...prev,
+        designType: getDefaultDesignType(),
+      }));
     }
-  }));
-};
-useEffect(() => {
-  if (popupData?.designType) {
-    setCallChecklist(prev => ({
-      ...prev,
-      designType: getDefaultDesignType(popupData.designType)
-    }));
-  } else {
-    setCallChecklist(prev => ({
-      ...prev,
-      designType: getDefaultDesignType()
-    }));
-  }
-}, [popupData]);
-
+  }, [popupData]);
 
   // Add this function to filter the data
   const filteredData = responseData.filter((item) => {
@@ -773,7 +775,8 @@ useEffect(() => {
                   <tr key={item._id} className="table-row">
                     <td>{item.name}</td>
                     <td>
-                      {item?.featured_images?.length && item?.featured_images[0] ? (
+                      {item?.featured_images?.length &&
+                      item?.featured_images[0] ? (
                         <Image
                           src={`${BASE_URL}/api/uploads/compressed_webp/${
                             item?.featured_images[0]?.fileName?.split(".")[0]
@@ -817,10 +820,13 @@ useEffect(() => {
                         onClick={async () => {
                           const newStatus = item.status === 1 ? 0 : 1;
 
-                          await axios.post(`${BASE_URL}/api/dish/update_decoration_status`, {
-                            id: item._id,
-                            status: newStatus,
-                          });
+                          await axios.post(
+                            `${BASE_URL}/api/dish/update_decoration_status`,
+                            {
+                              id: item._id,
+                              status: newStatus,
+                            },
+                          );
 
                           window.location.reload(); // reload the page s
                         }}
@@ -881,40 +887,40 @@ useEffect(() => {
                       </div>
                     </div>
 
-                   <div>
-  {/* EXISTING IMAGES */}
-  <div style={{ display: "flex", gap: 10 }}>
-    {existingImages?.map((img) => (
-      <div key={img.fileName}>
-        <img
-          src={`${BASE_URL}/api/uploads/compressed_webp/${img.fileName}`}
-          width={80}
-        />
-        <button onClick={() => removeExistingImage(img)}>
-          Remove
-        </button>
-      </div>
-    ))}
-  </div>
+                    <div>
+                      {/* EXISTING IMAGES */}
+                      <div style={{ display: "flex", gap: 10 }}>
+                        {existingImages?.map((img) => (
+                          <div key={img.fileName}>
+                            <img
+                              src={`${BASE_URL}/api/uploads/compressed_webp/${img.fileName}`}
+                              width={80}
+                            />
+                            <button onClick={() => removeExistingImage(img)}>
+                              Remove
+                            </button>
+                          </div>
+                        ))}
+                      </div>
 
-  {/* NEW IMAGES */}
-  <div style={{ display: "flex", gap: 10 }}>
-    {newImages.map((file, index) => (
-      <div key={index}>
-        <img src={URL.createObjectURL(file)} width={80} />
-        <button onClick={() => removeNewImage(index)}>
-          Remove
-        </button>
-      </div>
-    ))}
-  </div>
+                      {/* NEW IMAGES */}
+                      <div style={{ display: "flex", gap: 10 }}>
+                        {newImages.map((file, index) => (
+                          <div key={index}>
+                            <img src={URL.createObjectURL(file)} width={80} />
+                            <button onClick={() => removeNewImage(index)}>
+                              Remove
+                            </button>
+                          </div>
+                        ))}
+                      </div>
 
-  <input
-    type="file"
-    multiple
-    onChange={handleImageChange}
-  />
-</div>
+                      <input
+                        type="file"
+                        multiple
+                        onChange={handleImageChange}
+                      />
+                    </div>
                   </div>
 
                   <div className="modal-column">
@@ -942,17 +948,17 @@ useEffect(() => {
                     </div>
                   </div>
                   <div className="checkbox-container">
-  <div className="checklist-body">
-    <CheckboxGroup
-      key={"designType"}
-      title={"Explain the type of design"}
-      items={designTypeOptions}
-      section={"designType"}
-      checklist={callChecklist}
-      onChange={handleCheckboxChange}
-    />
-  </div>
-</div>
+                    <div className="checklist-body">
+                      <CheckboxGroup
+                        key={"designType"}
+                        title={"Explain the type of design"}
+                        items={designTypeOptions}
+                        section={"designType"}
+                        checklist={callChecklist}
+                        onChange={handleCheckboxChange}
+                      />
+                    </div>
+                  </div>
 
                   <div style={container}>
                     <div style={{ marginBottom: "20px" }}>
