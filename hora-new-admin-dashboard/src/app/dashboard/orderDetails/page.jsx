@@ -347,10 +347,7 @@ useEffect(() => {
 
  
     const finalApiKeysToShow = [
-      ...new Set([
-        ...dynamicApiKeys,
-        "rawPhotos",
-      ]),
+      ...new Set(dynamicApiKeys.filter(Boolean)),
     ];
 
     let initialInputState = finalApiKeysToShow.map((backendApiKey) => {
@@ -370,22 +367,6 @@ return {
 };
 
     });
-
-    const hasRawPhotos = initialInputState.some(
-      (item) => item.linkType === "rawPhotos"
-    );
-
-    if (!hasRawPhotos) {
-      initialInputState.push({
-        linkType: "rawPhotos",
-        link:
-          existingLinks.find(
-            (item) => item.linkType === "rawPhotos"
-          )?.link ||
-          selectedOrder?.orderDriveLink ||
-          "",
-      });
-    }
 
     setDriveLinksInput(initialInputState);
   }
@@ -1433,8 +1414,8 @@ useEffect(() => {
   ...new Set([
     ...Object.keys(inclusions)
       .filter(key => inclusions[key] === true)
-      .map(key => inclusionToApiKeyMap[key]),
-    "rawPhotos"
+      .map(key => inclusionToApiKeyMap[key])
+      .filter(Boolean)
   ])
 ];
 
@@ -1480,10 +1461,13 @@ const filledCountForCounter = trueDynamicApiKeys.filter((linkType) => {
             setShowDriveLinkModal(true);
           }}
           style={{
-            ...styles.editOrderPopupBtn3,
-            backgroundColor: filledCountForCounter === totalExpectedForCounter ? "#28a745" : "#007BFF",
-            padding: "6px 12px", fontSize: "12px"
+            ...(filledCountForCounter === totalExpectedForCounter
+              ? styles.editOrderPopupBtn3Disabled
+              : styles.editOrderPopupBtn3),
+            padding: "6px 12px",
+            fontSize: "12px",
           }}
+          disabled={filledCountForCounter === totalExpectedForCounter}
         >
           {filledCountForCounter === 0 ? "Add Drive Links" : "Edit / Add More"}
         </button>
@@ -2316,6 +2300,22 @@ const styles = {
     cursor: "pointer",
     transition: "transform 0.3s ease, box-shadow 0.3s ease",
     boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    color: "white",
+    fontSize: "10px",
+    fontWeight: "bold",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  editOrderPopupBtn3Disabled: {
+    width: "85px",
+    height: "40px",
+    background: "#9CA3AF",
+    border: "none",
+    borderRadius: "10px",
+    cursor: "not-allowed",
+    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+    boxShadow: "none",
     color: "white",
     fontSize: "10px",
     fontWeight: "bold",
