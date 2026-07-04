@@ -12,6 +12,7 @@ import {
   API_SUCCESS_CODE,
   ADMIN_USER_LIST,
 } from "../../utils/apiconstant";
+import { formatDate } from '../../utils/formateDate'
 // import { json } from 'stream/consumers';
 
 const CreateOrderForm = ({
@@ -179,16 +180,6 @@ const CreateOrderForm = ({
   //     console.log("showButton state updated:", showButton);
   // }, [showButton]);
 
-  const formatDate = (dateString) => {
-    const options = {
-      weekday: "short",
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    };
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", options);
-  };
   console.log(itemDataId, "itemDataId");
   const saveAddress = async () => {
     try {

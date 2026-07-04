@@ -16,6 +16,8 @@ import Select from "react-select";
 import "react-datepicker/dist/react-datepicker.css";
 import { pincodes } from "../../../utils/pincodes.js";
 import { chefTimeSlots } from "../../../utils/chefTimeSlots";
+import { formatDate } from '../../../utils/formateDate'
+
 
 const ChefForPartyCreateOrderComponent = () => {
   const [items, setItems] = useState([]);
@@ -311,18 +313,6 @@ if (selectedItems.length <= 7) {
       setMessageColor("red");
     }
   };
-
-  const formatDate = (dateString) => {
-    const options = {
-      weekday: "short",
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    };
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", options);
-  };
-
   const saveAddress = async () => {
     try {
       const url = BASE_URL + SAVE_LOCATION_ENDPOINT;
@@ -481,7 +471,7 @@ if (selectedItems.length <= 7) {
     const orderSummary = `
   *Chef For Party Details*
     
-  Date: ${date ? formatDate(date) : "N/A"}
+  Date: ${date || "N/A"}
   Time Slot: ${timeSlot?.label || "N/A"}
   Contact Number: ${customerNumber}
   Address: ${address}

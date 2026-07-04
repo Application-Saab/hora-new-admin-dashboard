@@ -19,6 +19,7 @@ import { pincodes } from "../../../utils/pincodes";
 import { addOnProductsById } from '../../../utils/addOnProducts';
 import SearchWithDropDown from "../../component/SearchWithDropDown";
 import { eventList } from "../../../constants/eventList";
+import { formatDate } from '../../../utils/formateDate'
 
 
 const AddPhotoOrder = () => {
@@ -322,17 +323,6 @@ const addCommentField = () => {
   // const handleContinueClick = () => {
   //   setIsContinueClicked(true);
   // };
-
-  const formatDate = (dateString) => {
-    const options = {
-      weekday: "short",
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    };
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", options);
-  };
 
   const saveAddress = async () => {
     try {
