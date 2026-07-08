@@ -970,7 +970,9 @@ useEffect(() => {
                     <td>{order.order_locality || "N/A"}</td>
                     <td>
                       {order?.order_date
-                        ? new Date(order.order_date).toLocaleDateString("en-GB")
+                        ? new Date(order.order_date).toLocaleDateString("en-GB", {
+                          timeZone: "Asia/Kolkata", 
+                        })
                         : "N/A"}
                     </td>
 

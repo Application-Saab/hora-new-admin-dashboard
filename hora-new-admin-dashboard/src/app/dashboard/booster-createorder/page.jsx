@@ -16,6 +16,7 @@ import {
 import { pincodes } from "../../../utils/pincodes.js";
 import SearchWithDropDown from "../../component/SearchWithDropDown";
 import { eventList } from "../../../constants/eventList";
+import { formatDate } from '../../../utils/formateDate'
 
 const AddDecOrder = () => {
   const [dishName, setDishName] = useState("");
@@ -156,17 +157,6 @@ const AddDecOrder = () => {
 
   const handleContinueClick = () => {
     setIsContinueClicked(true);
-  };
-
-  const formatDate = (dateString) => {
-    const options = {
-      weekday: "short",
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    };
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", options);
   };
 
   const saveAddress = async () => {
