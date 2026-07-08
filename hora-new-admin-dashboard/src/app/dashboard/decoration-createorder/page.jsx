@@ -764,7 +764,7 @@ const addCommentField = () => {
   Balance Amount: ₹${balanceamount || "N/A"}
   
   *Product Name*: ${dishName}
-  Product Image URL: ${BASE_URL}/api/uploads/compressed_webp/${product?.featured_image.length > 0 ? product?.featured_image[0]?.fileName : ""}
+  Product Image URL: ${BASE_URL}/api/uploads/${product?.featured_images.length > 0 ? product?.featured_images[0]?.fileName : ""}
   
   *Add-On Items*:
   ${addons}
