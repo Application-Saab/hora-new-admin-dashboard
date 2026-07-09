@@ -1,4 +1,4 @@
-export const BASE_URL = 'https://horaservices.com';
+export const BASE_URL = 'http://localhost:5000';
 export const MEDIA_PROCESSING_BASE_URL = 'https://horaservices.com/media-api';
 export const GET_DECORATION_BY_NAME = '/api/Decoration/searchByName/';
 export const CONFIRM_ORDER_ENDPOINT = "/api/order/add";
@@ -59,3 +59,10 @@ export const GET_WONDERLAND_LISTING_DATA = '/api/customer/event/admin_all_detail
 export const GET_VENUE_IMAGES = '/api/party-venue/venue-images';
 export const UPLOAD_VENUE_MEDIA = '/venue/upload-venue-media';
 export const GETVENUE_DETAILS_BY_ID = '/api/party-venue/venue-details';
+
+// Event Dates Tracking APIs
+export const GET_EVENT_DATES_LISTING_DATA = '/api/event-dates/list';
+
+// Website search tracking APIs
+export const GET_SEARCH_TRACKING_LIST = '/api/search-tracking/tracking-list';
+export const GET_SEARCH_TRACKING_STATS = '/api/search-tracking/stats'

@@ -7,7 +7,7 @@ import {
 } from "./wonderlandTrackingServices";
 import { useRouter } from "next/navigation";
 
-const AdminAnalytics = () => {
+const WonderlandTracking = () => {
   const router = useRouter();
   const [type, setType] = useState("byUsers");
   const [data, setData] = useState([]);
@@ -271,4 +271,4 @@ const AdminAnalytics = () => {
   );
 };
 
-export default AdminAnalytics;
+export default WonderlandTracking;

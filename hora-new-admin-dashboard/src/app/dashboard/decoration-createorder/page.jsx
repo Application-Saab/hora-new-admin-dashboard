@@ -18,13 +18,14 @@ import { pincodes } from "../../../utils/pincodes.js";
 import { itemsData } from "../../../utils/itemData";
 import SearchWithDropDown from "../../component/SearchWithDropDown";
 import { eventList } from "../../../constants/eventList";
-import { formatDate } from '../../../utils/formateDate'
+import { formatDate } from "../../../utils/formateDate";
 
 const AddDecOrder = () => {
   const [dishName, setDishName] = useState("");
   const [productid, setProductID] = useState("");
   const [productprice, setProductPrice] = useState("");
   const [date, setDate] = useState("");
+  console.log('%c [ date ]', 'font-size:13px; background:pink; color:#bf2c9f;', date)
   const [selectedEvent, setSelectedEvent] = useState("");
   const [customerNumber, setCustomerNumber] = useState("");
   const [address, setAddress] = useState("");
@@ -54,6 +55,7 @@ const AddDecOrder = () => {
   const [messageColor, setMessageColor] = useState("");
 
   const [customerId, setCustomerId] = useState(null);
+  console.log('%c [ customerId ]', 'font-size:13px; background:pink; color:#bf2c9f;', customerId)
 
   const [showPopup, setShowPopup] = useState(false); // For toggling the popup
   const [newCustomerName, setNewCustomerName] = useState(""); // For name input
@@ -63,6 +65,20 @@ const AddDecOrder = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const [isOrderCreated, setIsOrderCreated] = useState(false);
+
+  // Wonderland Event states
+  const [wonderlandevent, setWonderlandEvent] = useState("");
+  const [eventFormData, setEventFormData] = useState({
+      userId : "",
+      eventType : "",
+      hostName : "",
+      eventDate : "",
+      eventTime : "",
+      location : "",
+      googleMapLink : "",
+      fromInternational : "NO",
+      orderId : ""
+  });
 
   const [data, setData] = useState([]);
   const [options, setOptions] = useState({
@@ -84,7 +100,7 @@ const AddDecOrder = () => {
       previewText: "",
     },
   ]);
-    const [executionPrice, setExecutionPrice] = useState(0);
+  const [executionPrice, setExecutionPrice] = useState(0);
   const [advancePercent, setAdvancePercent] = useState(0);
   const [nextId, setNextId] = useState(2);
   const [mode, setMode] = useState("Option1");
@@ -127,7 +143,7 @@ const AddDecOrder = () => {
     fetchMaterialFilterData();
   }, []);
 
-    const buildPreviewText = (item) => {
+  const buildPreviewText = (item) => {
     let previewText = `${item.specs || "-"} ${item.type || "-"} ${item.material || "-"}`;
 
     if (item.rentedConsumable === "Rented") {
@@ -157,7 +173,6 @@ const AddDecOrder = () => {
     return vendorPrice;
   };
 
-  
   const handleSelectChange = (id, field, value) => {
     setInclusions((prev) =>
       prev.map((inc) => {
@@ -309,7 +324,7 @@ const AddDecOrder = () => {
     );
   };
 
-    const handleCustomQuantityChange = (id, value) => {
+  const handleCustomQuantityChange = (id, value) => {
     setInclusions((prev) =>
       prev.map((inc) => {
         if (inc.id !== id) return inc;
@@ -332,7 +347,7 @@ const AddDecOrder = () => {
     );
   };
 
-    const handlePriceChange = (id, value) => {
+  const handlePriceChange = (id, value) => {
     const num = parseFloat(value) || 0;
     setInclusions((prev) =>
       prev.map((i) => {
@@ -388,8 +403,6 @@ const AddDecOrder = () => {
   // const finalPrice = totalPrice + executionPrice;
   const summaryText = inclusions.map((i) => i.previewText).join("\n");
 
-
-  
   const getFilteredMaterials = (specs, type) => {
     let filtered = data;
 
@@ -403,7 +416,7 @@ const AddDecOrder = () => {
 
     return [...new Set(filtered.map((row) => row.material).filter(Boolean))];
   };
-  
+
   const getFilteredTypes = (specs) => {
     if (!specs) return options.type;
 
@@ -418,39 +431,37 @@ const AddDecOrder = () => {
   };
 
   useEffect(() => {
-  if (product?.inclusionVariables?.length) {
-    const mapped = product?.inclusionVariables?.map((inc, index) => ({
-      ...inc,
-      id: index + 1,
-      matchedRow: data.find(
-        (row) =>
-          row.value === inc.specs &&
-          row.type === inc.type &&
-          row.material === inc.material
-      ),
-    }));
+    if (product?.inclusionVariables?.length) {
+      const mapped = product?.inclusionVariables?.map((inc, index) => ({
+        ...inc,
+        id: index + 1,
+        matchedRow: data.find(
+          (row) =>
+            row.value === inc.specs &&
+            row.type === inc.type &&
+            row.material === inc.material,
+        ),
+      }));
 
-    setInclusions(mapped);
-    setNextId(mapped.length + 1);
-  } else {
-    setInclusions([
-      {
-        id: 1,
-        specs: "",
-        type: "",
-        material: "",
-        rentedConsumable: "",
-        moq: "",
-        customQuantity: "",
-        matchedRow: null,
-        price: 0,
-        previewText: "",
-      },
-    ]);
-  }
-  }, [product]) 
-
-
+      setInclusions(mapped);
+      setNextId(mapped.length + 1);
+    } else {
+      setInclusions([
+        {
+          id: 1,
+          specs: "",
+          type: "",
+          material: "",
+          rentedConsumable: "",
+          moq: "",
+          customQuantity: "",
+          matchedRow: null,
+          price: 0,
+          previewText: "",
+        },
+      ]);
+    }
+  }, [product]);
 
   const toggleItem = (id) => {
     setSelectedItems((prev) => ({
@@ -480,15 +491,15 @@ const AddDecOrder = () => {
     setProducts([...products, { name: "", price: "" }]);
   };
 
- const handleComment = (index, value) => {
-  const lines = comment.split("\n");
-  lines[index] = value;
-  setComment(lines.join("\n"));
-};
+  const handleComment = (index, value) => {
+    const lines = comment.split("\n");
+    lines[index] = value;
+    setComment(lines.join("\n"));
+  };
 
-const addCommentField = () => {
-  setCommentFields([...commentFields, commentFields.length]);
-};
+  const addCommentField = () => {
+    setCommentFields([...commentFields, commentFields.length]);
+  };
 
   useEffect(() => {
     if (dishName && isContinueClicked && !isFetched) {
@@ -573,7 +584,7 @@ const addCommentField = () => {
     try {
       const response = await axios.post(
         `${BASE_URL}/api/admin/user_signup`,
-        requestData
+        requestData,
       );
       setCustomerId(response.data.dataToSave);
       setMessage("Customer successfully added.");
@@ -681,14 +692,20 @@ const addCommentField = () => {
       balance_amount: balanceamount,
       order_taken_by: orderTakenBy,
       eventName: selectedEvent,
-      inclusionVariables: inclusions
+      inclusionVariables: inclusions,
     };
-    
+
     try {
       const response = await axios.post(
         `${BASE_URL}${CONFIRM_ORDER_ENDPOINT}`,
         requestData,
       );
+      if(response.status === 200 || response.status === 201) {
+        setEventFormData((prev) => ({
+          ...prev,
+          orderId: response.data.data._id,
+        }));
+      }
       alert("Order created successfully:", response.data);
     } catch (error) {
       console.error("Error creating order:", error);
@@ -710,6 +727,22 @@ const addCommentField = () => {
     const balance = totalamount - advanceamount;
     setBalanceAmount(balance);
   }, [totalamount, advanceamount]);
+
+  const convertToISO = (date) => {
+    if (!date) return "";
+    return new Date(`${date}T00:00:00.000Z`).toISOString();
+  };
+  
+  useEffect(() => {
+    setEventFormData((prev) => ({
+      ...prev,
+      eventType: selectedEvent || "",
+      hostName: customerId?.name || "",
+      eventDate: date && convertToISO(date) || "",
+      location: address || "",
+      googleMapLink: googleLocation || "",
+    }));
+  }, [customerId, wonderlandevent, date, address, googleLocation]);
 
   const proDuctInclusions = (product) => {
     if (!product.inclusion || product.inclusion.length === 0) {
@@ -772,6 +805,8 @@ const addCommentField = () => {
     // Alert the user
     alert("Order summary copied!");
   };
+
+
 
   return (
     <div className="container">
@@ -1159,29 +1194,42 @@ const addCommentField = () => {
                 />
               </div>
             </div>
-            <div className='checkoutInputType border-1 rounded-4 '>
+            <div style={{marginTop: '20px'}}>
+              <label htmlFor="wonderlandevent">Wonderland Occasion</label>
+              <input
+                type="text"
+                id="wonderlandevent"
+                value={wonderlandevent}
+                onChange={(e) => setWonderlandEvent(e.target.value)}
+                placeholder="Wonderland Occasion"
+              />
+            </div>
+            <div className="checkoutInputType border-1 rounded-4 ">
               <h4>Share your comments (if any)</h4>
               <div className="addon-form">
-              {commentFields.map((field, index) => (
-    <div key={index} className="comment-container">
-      <input
-      style={{marginBottom : "8px"}}
-        className='comment-input'
-        value={comment.split("\n")[index] || ""}
-        onChange={(e) => handleComment(index, e.target.value)}
-        cols={90}
-        rows={4}
-        placeholder="Enter your comment."
-      />
+                {commentFields.map((field, index) => (
+                  <div key={index} className="comment-container">
+                    <input
+                      style={{ marginBottom: "8px" }}
+                      className="comment-input"
+                      value={comment.split("\n")[index] || ""}
+                      onChange={(e) => handleComment(index, e.target.value)}
+                      cols={90}
+                      rows={4}
+                      placeholder="Enter your comment."
+                    />
 
-      <button 
-      style={{marginBottom : "8px"}}
-      type="button" className="add-new-btn" onClick={addCommentField}>
-        Add New
-      </button>
-    </div>
-  ))}
-  </div>
+                    <button
+                      style={{ marginBottom: "8px" }}
+                      type="button"
+                      className="add-new-btn"
+                      onClick={addCommentField}
+                    >
+                      Add New
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div style={container}>
