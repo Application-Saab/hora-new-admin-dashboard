@@ -15,7 +15,6 @@ import {
   GET_MATERIAL_FILTER_DATA,
 } from "../../../utils/apiconstant";
 import { pincodes } from "../../../utils/pincodes.js";
-import { itemsData } from "../../../utils/itemData";
 import SearchWithDropDown from "../../component/SearchWithDropDown";
 import { eventList } from "../../../constants/eventList";
 import { formatDate } from '../../../utils/formateDate'

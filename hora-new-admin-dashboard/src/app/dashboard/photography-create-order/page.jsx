@@ -16,7 +16,6 @@ import {
 } from "../../../utils/apiconstant";
 import { timeSlotOptions } from "../../../utils/timeSlots";
 import { pincodes } from "../../../utils/pincodes";
-import { addOnProductsById } from '../../../utils/addOnProducts';
 import SearchWithDropDown from "../../component/SearchWithDropDown";
 import { eventList } from "../../../constants/eventList";
 import { formatDate } from '../../../utils/formateDate'
