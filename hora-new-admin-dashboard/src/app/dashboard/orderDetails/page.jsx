@@ -1449,9 +1449,9 @@ const filledCountForCounter = trueDynamicApiKeys.filter((linkType) => {
 
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: "8px", alignItems: "center" }}>
-        
-        <div style={{ 
-          fontWeight: "700", fontSize: "14px", 
+
+        <div style={{
+          fontWeight: "700", fontSize: "14px",
         }}>
           Links: {filledCountForCounter} / {totalExpectedForCounter}
         </div>
@@ -1462,14 +1462,11 @@ const filledCountForCounter = trueDynamicApiKeys.filter((linkType) => {
             setSelectedOrder(order);
             setShowDriveLinkModal(true);
           }}
-          style={{
-            ...(filledCountForCounter === totalExpectedForCounter
-              ? styles.editOrderPopupBtn3Disabled
-              : styles.editOrderPopupBtn3),
-            padding: "6px 12px",
-            fontSize: "12px",
-          }}
-          disabled={filledCountForCounter === totalExpectedForCounter}
+          className={`drive-action-btn ${totalExpectedForCounter > 0 && filledCountForCounter === totalExpectedForCounter
+              ? "drive-btn-green"
+              : "drive-btn-red"
+            }`}
+          disabled={totalExpectedForCounter === 0}
         >
           {filledCountForCounter === 0 ? "Add Drive Links" : "Edit / Add More"}
         </button>
