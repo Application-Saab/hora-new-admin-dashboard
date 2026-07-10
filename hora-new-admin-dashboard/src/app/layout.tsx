@@ -20,6 +20,7 @@ import {
   FaGlassCheers,
   FaSearch,
   FaCity 
+  FaPlus,
 } from "react-icons/fa";
 import { GrAnalytics } from "react-icons/gr";
 import { BsCalendarDate } from "react-icons/bs";
@@ -226,7 +227,7 @@ const menuItems = [
     ],
   },
 
-
+  { label: "Addons", icon: <FaPlus />, url: "/dashboard/addons" },
   { label: "Dish List", icon: <FaUtensils />, url: "/dashboard/dish-list" },
    { label: "Venue List", icon: <FaUtensils />, url: "/dashboard/venue-list" },
 

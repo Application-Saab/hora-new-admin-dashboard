@@ -17,7 +17,6 @@ import {
 } from "../../../utils/apiconstant";
 import { timeSlotOptions } from "../../../utils/timeSlots";
 import { pincodes } from "../../../utils/pincodes";
-import { addOnProductsById } from "../../../utils/addOnProducts";
 import SearchWithDropDown from "../../component/SearchWithDropDown";
 import { eventList } from "../../../constants/eventList";
 import { formatDate } from "../../../utils/formateDate";
@@ -54,6 +53,7 @@ const AddPhotoOrder = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [messageColor, setMessageColor] = useState("");
+  const [selectedItems, setSelectedItems] = useState({});
 
   const [customerId, setCustomerId] = useState(null);
 
@@ -65,6 +65,8 @@ const AddPhotoOrder = () => {
 
   const [selectedAddOns, setSelectedAddOns] = useState([]);
   const [addOnProducts, setAddOnProducts] = useState([]);
+  const [addonIds, setAddonIds] = useState([]);
+
   // const [addOnsTotalPrice, setAddOnsTotalPrice] = useState(0);
 
   // Wonderland Event states
@@ -121,6 +123,36 @@ const AddPhotoOrder = () => {
     setCommentFields([...commentFields, commentFields.length]);
   };
 
+
+  useEffect(() => {
+    if (!addonIds || addonIds.length === 0) return; // wait until addonIds is available
+
+    const getAddons = async () => {
+      try {
+        const query = new URLSearchParams();
+        addonIds.forEach(id => {
+          if (id) query.append("ids", id);
+        });
+
+        if ([...query].length === 0) return; // no valid IDs
+
+        const url = `${BASE_URL}/api/addon/get?${query.toString()}`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (!response.ok || data.error) {
+          throw new Error(data.message || "Failed to fetch addons");
+        }
+
+        setAddOnProducts(data.data || []);
+      } catch (error) {
+        console.error("Error fetching addons:", error);
+      }
+    };
+
+    getAddons();
+  }, [addonIds]);
+
   useEffect(() => {
     if (selectedTag) {
       const fetchProductsByTag = async () => {
@@ -134,9 +166,6 @@ const AddPhotoOrder = () => {
           } else {
             setProducts([]);
           }
-          // Set add-on products for the selected tag
-          const tagId = selectedTag;
-          setAddOnProducts(addOnProductsById[tagId] || []);
         } catch (error) {
           console.error("Error fetching products:", error);
           setProducts([]);
@@ -184,6 +213,7 @@ const AddPhotoOrder = () => {
         console.log(selectedProduct, "productdata");
         setProduct(selectedProduct);
         setProductID(selectedProduct._id);
+        setAddonIds(selectedProduct.addons || []);
         setCategory(selectedProduct.price);
 
         const inclusions =
@@ -413,8 +443,22 @@ const AddPhotoOrder = () => {
       return;
     }
 
+    const add_on = Object.keys(selectedItems).map((id) => {
+
+      const item = addOnProducts.find((i) => i._id === id);
+
+      if (!item) return null;
+
+      return {
+        ...item,
+        quantity: selectedItems[id]?.quantity || 1,
+        totalPrice: item.price * (selectedItems[id]?.quantity || 1)
+      };
+
+    }).filter(Boolean);
+
     const requestData = {
-      add_on: selectedAddOns,
+      add_on: add_on,
       inclusion: inclusion,
       selecteditems: dishName,
       phone_no: customerNumber,
@@ -509,26 +553,50 @@ const AddPhotoOrder = () => {
       Order Taken By: ${orderTakenBy}
     `;
 
-    navigator.clipboard
-      .writeText(orderSummary.trim())
-      .then(() => {
-        alert("Order Summary copied to clipboard!");
-      })
-      .catch((err) => {
-        alert("Failed to copy: ", err);
-      });
-  };
-
-  // Handle add-on selection
-  const handleAddOnChange = (addOn, isChecked) => {
-    setSelectedAddOns((prev) => {
-      if (isChecked) {
-        return [...prev, addOn];
-      } else {
-        return prev.filter((item) => item.title !== addOn.title);
-      }
+    navigator.clipboard.writeText(orderSummary.trim()).then(() => {
+      alert("Order Summary copied to clipboard!");
+    }).catch((err) => {
+      alert("Failed to copy: ", err);
     });
-  };
+};
+
+
+// Handle add-on selection
+const handleAddOnChange = (addOn, isChecked) => {
+  // selectedAddOns update
+  setSelectedAddOns(prev => {
+    if (isChecked) {
+      return [...prev, addOn];
+    } else {
+      return prev.filter(item => item._id !== addOn._id);
+    }
+  });
+
+  setSelectedItems(prev => {
+    const updated = { ...prev };
+
+    if (isChecked) {
+      updated[addOn._id] = { quantity: 1 };
+    } else {
+      delete updated[addOn._id];
+    }
+
+    return updated;
+  });
+};
+
+
+const changeQuantity = (id, delta) => {
+  setSelectedItems((prev) => {
+    const qty = prev[id]?.quantity || 1;
+    const newQty = Math.max(1, qty + delta);
+    return {
+      ...prev,
+      [id]: { quantity: newQty }
+    };
+  });
+};
+
 
   return (
     <div className="container">
@@ -799,101 +867,94 @@ const AddPhotoOrder = () => {
                   style={{
                     display: "grid",
                     gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                    gap: "15px",
-                  }}
-                >
-                  {addOnProducts.map((addOn, index) => (
-                    <div
-                      key={index}
-                      className="add-on-card"
-                      style={{
-                        border: "1px solid #ddd",
-                        borderRadius: "8px",
-                        padding: "12px",
-                        backgroundColor: "white",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "10px",
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        id={`addon-${index}`}
-                        checked={selectedAddOns.some(
-                          (item) => item.title === addOn.title,
-                        )}
-                        onChange={(e) =>
-                          handleAddOnChange(addOn, e.target.checked)
-                        }
-                        style={{ transform: "scale(1.2)" }}
-                      />
-                      <img
-                        src={addOn.image}
-                        alt={addOn.title}
-                        style={{
-                          width: "60px",
-                          height: "60px",
-                          objectFit: "cover",
-                          borderRadius: "4px",
-                        }}
-                      />
-                      <div style={{ flex: 1 }}>
-                        <label
-                          htmlFor={`addon-${index}`}
-                          style={{
-                            fontWeight: "bold",
-                            cursor: "pointer",
-                            display: "block",
-                            marginBottom: "4px",
-                          }}
-                        >
-                          {addOn.title}
-                        </label>
-                        <p
-                          style={{
-                            margin: "0",
-                            fontSize: "12px",
-                            color: "#666",
-                            marginBottom: "4px",
-                          }}
-                        >
-                          {addOn.description}
-                        </p>
-                        <p
-                          style={{
-                            margin: "0",
-                            fontWeight: "bold",
-                            color: "#28a745",
-                            fontSize: "14px",
-                          }}
-                        >
-                          ₹{addOn.price}
-                        </p>
-                      </div>
-                    </div>
-                  ))}{" "}
-                </div>
-                {selectedAddOns.length > 0 && (
-                  <div
-                    style={{
+                    gap: "15px"
+                  }}>
+                    {addOnProducts.map((addOn, index) => {
+                      const selected = selectedItems[addOn._id];
+                      return (
+                        <div key={index} className="add-on-card" style={{
+                          border: "1px solid #ddd",
+                          borderRadius: "8px",
+                          padding: "12px",
+                          backgroundColor: "white",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px"
+                        }}>
+                          <input
+                            type="checkbox"
+                            id={`addon-${index}`}
+                            checked={selectedAddOns.some(item => item.title === addOn.title)}
+                            onChange={(e) => handleAddOnChange(addOn, e.target.checked)}
+                            style={{ transform: "scale(1.2)" }}
+                          />
+                          <img
+                            src={`https://horaservices.com/api/uploads/compressed_webp/${addOn.image}`}
+                            alt={addOn.title}
+                            style={{
+                              width: "60px",
+                              height: "60px",
+                              objectFit: "cover",
+                              borderRadius: "4px"
+                            }}
+                          />
+                          <div style={{ flex: 1 }}>
+                            <label htmlFor={`addon-${index}`} style={{
+                              fontWeight: "bold",
+                              cursor: "pointer",
+                              display: "block",
+                              marginBottom: "4px"
+                            }}>
+                              {addOn.title}
+                            </label>
+                            <p style={{
+                              margin: "0",
+                              fontSize: "12px",
+                              color: "#666",
+                              marginBottom: "4px"
+                            }}>
+                              {addOn.description}
+                            </p>
+                            <p style={{
+                              margin: "0",
+                              fontWeight: "bold",
+                              color: "#28a745",
+                              fontSize: "14px"
+                            }}>
+                              ₹{addOn.price}
+                            </p>
+                          </div>
+                          <div className="right-section">
+                            <button onClick={() => changeQuantity(addOn._id, -1)} className="qty-btn">−</button>
+                            <span className="qty">{selected?.quantity || 1}</span>
+                            <button onClick={() => changeQuantity(addOn._id, 1)} className="qty-btn">+</button>
+                            <div className="total-price">₹{addOn.price * (selected?.quantity || 1)}</div>
+                          </div>
+                        </div>
+                      )
+                    })}               </div>
+                  {selectedAddOns.length > 0 && (
+                    <div style={{
                       marginTop: "15px",
                       padding: "10px",
                       backgroundColor: "#e8f5e8",
                       borderRadius: "5px",
-                      border: "1px solid #28a745",
-                    }}
-                  >
-                    <h4 style={{ margin: "0 0 10px 0", color: "#28a745" }}>
-                      Selected Add-Ons:
-                    </h4>
-                    <ul style={{ margin: "0", paddingLeft: "20px" }}>
-                      {selectedAddOns.map((addOn, index) => (
-                        <li key={index} style={{ marginBottom: "5px" }}>
-                          {addOn.title} - ₹{addOn.price}
-                        </li>
-                      ))}
-                    </ul>
-                    {/* <p style={{ 
+                      border: "1px solid #28a745"
+                    }}>
+                      <h4 style={{ margin: "0 0 10px 0", color: "#28a745" }}>Selected Add-Ons:</h4>
+                      <ul style={{ margin: "0", paddingLeft: "20px" }}>
+                        {selectedAddOns.map((addOn, index) => {
+                          const qty = selectedItems[addOn._id]?.quantity || 1;
+
+                          return (
+                            <li key={index} style={{ marginBottom: "5px" }}>
+                              {addOn.title} - ₹{addOn.price} × {qty}
+                            </li>
+                          );
+                        })}
+
+                      </ul>
+                      {/* <p style={{ 
                   margin: "10px 0 0 0", 
                   fontWeight: "bold", 
                   fontSize: "16px",
