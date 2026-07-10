@@ -28,6 +28,23 @@ function AddFoodOrder() {
   const deliveryCharges = 400;
   const packingCost = 200;
 
+  // Wonderland Event states
+  const [wonderlandevent, setWonderlandEvent] = useState("");
+  const [eventResponse, setEventResponse] = useState({});
+
+  const [eventFormData, setEventFormData] = useState({
+    userId: "",
+    eventType: "",
+    hostName: "",
+    eventDate: "",
+    eventTime: "",
+    location: "",
+    googleMapLink: "",
+    fromInternational: "NO",
+    orderId: "",
+  });
+
+
   const handleChange = (event) => {
     setSelectedDeliveryOption(event.target.value);
   };
@@ -95,7 +112,7 @@ function AddFoodOrder() {
     setSearchQuery(query);
 
     const filtered = mealList.filter(
-      (dish) => dish.name && dish.name.toLowerCase().includes(query)
+      (dish) => dish.name && dish.name.toLowerCase().includes(query),
     );
 
     setFilteredDishes(filtered);
@@ -160,14 +177,14 @@ function AddFoodOrder() {
   console.log("selected", selectedMealList);
 
   const dishObject = selectedMealList.filter(
-    (x) => x.name !== "Tawa Rotis" && x.name !== "Rumali Rotis"
+    (x) => x.name !== "Tawa Rotis" && x.name !== "Rumali Rotis",
   );
 
   const dishCount = dishObject.filter(
     (x) =>
       x.mealId == "63f1b6b7ed240f7a09f7e2de" ||
       x.mealId == "63f1b39a4082ee76673a0a9f" ||
-      x.mealId == "63edc4757e1b370928b149b3"
+      x.mealId == "63edc4757e1b370928b149b3",
   ).length;
 
   console.log(dishCount);
@@ -202,7 +219,7 @@ function AddFoodOrder() {
     "63edc4757e1b370928b149b3",
   ];
 
-  console.log(selectedMealList,"sele");
+  console.log(selectedMealList, "sele");
 
   const discountPercentagePrice = calculateDiscountPercentage(peopleCount);
 
@@ -256,7 +273,7 @@ function AddFoodOrder() {
       //finalTotal = totalPrice - parseFloat(discountedPrice) + deliveryCharges;
       console.log(
         "Initial total after applying discount and delivery charges: " +
-          finalTotal
+          finalTotal,
       );
 
       finalTotal += parseFloat(packingCost);
@@ -287,7 +304,6 @@ function AddFoodOrder() {
     return finalTotal;
   };
 
-
   // Function to calculate the advance payment
   const calculateAdvancePayment = () => {
     return Math.round(calculateFinalTotal() * 0.65);
@@ -300,14 +316,14 @@ function AddFoodOrder() {
   const RenderDishQuantity = ({ item }) => {
     console.log(item);
     var dishObject = selectedMealList.filter(
-      (x) => x.name !== "Tawa Rotis" && x.name !== "Rumali Rotis"
+      (x) => x.name !== "Tawa Rotis" && x.name !== "Rumali Rotis",
     );
 
     const itemCount = dishObject.filter(
       (meal) =>
         meal.mealId[0] === "63f1b6b7ed240f7a09f7e2de" ||
         meal.mealId[0] === "63f1b39a4082ee76673a0a9f" ||
-        meal.mealId[0] === "63edc4757e1b370928b149b3"
+        meal.mealId[0] === "63edc4757e1b370928b149b3",
     ).length;
     //   const mainCourseItemCount = dishObject.filter(meal => meal.id[0] === "63f1b6b7ed240f7a09f7e2de").length
     //   const appetizerItemCount = dishObject.filter(meal => meal.id[0] === "63f1b39a4082ee76673a0a9f").length
@@ -413,28 +429,27 @@ function AddFoodOrder() {
   //   unit: userInputs[dish._id]?.unit ?? dish.unit,
   // }));
 
-
   // console.log("Final updated meal list:", finalMealList);
 
   const finalMealList = selectedMealList.map((dish) => {
     let quantity = dish.quantity * peopleCount;
     let unit = dish.unit;
-  
+
     const isRotis = dish.name === "Tawa Rotis" || dish.name === "Rumali Rotis";
     const validMealIds = [
       "63f1b6b7ed240f7a09f7e2de",
       "63f1b39a4082ee76673a0a9f",
       "63edc4757e1b370928b149b3",
     ];
-  
+
     const dishObject = selectedMealList.filter(
-      (x) => x.name !== "Tawa Rotis" && x.name !== "Rumali Rotis"
+      (x) => x.name !== "Tawa Rotis" && x.name !== "Rumali Rotis",
     );
-  
+
     const itemCount = dishObject.filter((meal) =>
-      validMealIds.includes(meal.mealId[0])
+      validMealIds.includes(meal.mealId[0]),
     ).length;
-  
+
     if (
       selectedDeliveryOption === "food-delivery" &&
       !isRotis &&
@@ -458,13 +473,13 @@ function AddFoodOrder() {
         quantity *= 0.45;
       }
     }
-  
+
     quantity = Math.round(quantity);
-  
+
     if (selectedDeliveryOption === "live-catering") {
       quantity = Math.round(quantity * 1.1);
     }
-  
+
     if (quantity >= 1000) {
       quantity = quantity / 1000;
       if (unit === "Gram") {
@@ -475,22 +490,23 @@ function AddFoodOrder() {
         unit = "PCS";
       }
     }
-  
+
     return {
       ...dish,
-      quantity: selectedDeliveryOption === "food-delivery"
-        ? parseFloat(quantity.toFixed(2))
-        : userInputs[dish._id]?.quantity ?? dish.quantity,
-      unit: selectedDeliveryOption === "food-delivery"
-        ? unit
-        : userInputs[dish._id]?.unit ?? dish.unit,
+      quantity:
+        selectedDeliveryOption === "food-delivery"
+          ? parseFloat(quantity.toFixed(2))
+          : (userInputs[dish._id]?.quantity ?? dish.quantity),
+      unit:
+        selectedDeliveryOption === "food-delivery"
+          ? unit
+          : (userInputs[dish._id]?.unit ?? dish.unit),
     };
   });
-  
+
   // ✅ Print the final meal list
   console.log("Final updated meal list:2", finalMealList);
 
-  
   return (
     <>
       <div className="container">
@@ -669,7 +685,7 @@ function AddFoodOrder() {
                             <input
                               type="checkbox"
                               checked={selectedDishes.some(
-                                (item) => item.name === dish.name
+                                (item) => item.name === dish.name,
                               )}
                               onChange={() => handleDishSelect(dish)}
                               className="dish-checkbox"
@@ -776,7 +792,7 @@ function AddFoodOrder() {
                           handleInputChange(
                             dish._id,
                             "quantity",
-                            Number(e.target.value)
+                            Number(e.target.value),
                           )
                         }
                         style={style.inputStyle}
@@ -1297,8 +1313,16 @@ function AddFoodOrder() {
           peopleCount={peopleCount}
           selectedOption={selectedDeliveryOption}
           // includeTables={includeTables}
-          {...(selectedDeliveryOption === "live-catering" ? { includeTables } : {})}
+          {...(selectedDeliveryOption === "live-catering"
+            ? { includeTables }
+            : {})}
           includeDisposable={includeDisposable}
+          wonderlandevent={wonderlandevent}
+          setWonderlandEvent={setWonderlandEvent}
+          eventResponse={eventResponse}
+          setEventResponse={setEventResponse}
+          eventFormData={eventFormData}
+          setEventFormData={setEventFormData}
         />
       </div>
     </>

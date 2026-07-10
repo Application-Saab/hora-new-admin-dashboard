@@ -12,11 +12,12 @@ import {
   SAVE_LOCATION_ENDPOINT,
   API_SUCCESS_CODE,
   ADMIN_USER_LIST,
+  CREATE_WONDERLAND_EVENT,
 } from "../../../utils/apiconstant";
 import { pincodes } from "../../../utils/pincodes.js";
 import SearchWithDropDown from "../../component/SearchWithDropDown";
 import { eventList } from "../../../constants/eventList";
-import { formatDate } from '../../../utils/formateDate'
+import { formatDate } from "../../../utils/formateDate";
 
 const AddDecOrder = () => {
   const [dishName, setDishName] = useState("");
@@ -53,6 +54,44 @@ const AddDecOrder = () => {
   const [newCustomerName, setNewCustomerName] = useState("");
   const [newCustomerPhone, setNewCustomerPhone] = useState("");
   const [isOrderCreated, setIsOrderCreated] = useState(false);
+
+  // Wonderland Event states
+  const [wonderlandevent, setWonderlandEvent] = useState("");
+  const [eventResponse, setEventResponse] = useState({});
+  console.log(
+    "%c [ eventResponse ]",
+    "font-size:13px; background:pink; color:#bf2c9f;",
+    eventResponse,
+  );
+  const [eventFormData, setEventFormData] = useState({
+    userId: "",
+    eventType: "",
+    hostName: "",
+    eventDate: "",
+    eventTime: "",
+    location: "",
+    googleMapLink: "",
+    fromInternational: "NO",
+    orderId: "",
+  });
+
+  const createWonderlandEvent = async (orderId) => {
+    try {
+      const response = await axios.post(
+        `${BASE_URL}${CREATE_WONDERLAND_EVENT}`,
+        {
+          ...eventFormData,
+          orderId,
+        },
+      );
+      if (response.status === 200 || response.status === 201) {
+        setEventResponse(response?.data?.data);
+      }
+    } catch (error) {
+      console.error("Error creating wonderland event:", error);
+      alert("There was an error creating wonderland event.");
+    }
+  };
 
   const handleComment = (e) => {
     const commentText = e.target.value;
@@ -229,10 +268,20 @@ const AddDecOrder = () => {
     };
 
     try {
-      await axios.post(
+      const response = await axios.post(
         `${BASE_URL}${CONFIRM_ORDER_ENDPOINT}`,
         requestData,
       );
+      console.log(
+        "%c [ response ]",
+        "font-size:13px; background:pink; color:#bf2c9f;",
+        response,
+      );
+      if (response.status === 200 || response.status === 201) {
+        if (wonderlandevent) {
+          createWonderlandEvent(response.data.data.order_id);
+        }
+      }
       alert("Booster Order created successfully");
     } catch (error) {
       console.error("Error creating order:", error);
@@ -254,6 +303,23 @@ const AddDecOrder = () => {
     const balance = totalamount - advanceamount;
     setBalanceAmount(balance);
   }, [totalamount, advanceamount]);
+
+  const convertToISO = (date) => {
+    if (!date) return "";
+    return new Date(`${date}T00:00:00.000Z`).toISOString();
+  };
+
+  useEffect(() => {
+    setEventFormData((prev) => ({
+      ...prev,
+      userId: customerId?._id || "",
+      eventType: selectedEvent || "",
+      hostName: wonderlandevent || "",
+      eventDate: (date && convertToISO(date)) || "",
+      location: address || "",
+      googleMapLink: googleLocation || "",
+    }));
+  }, [customerId, wonderlandevent, date, address, googleLocation]);
 
   const copyOrderSummary = () => {
     const orderSummary = `
@@ -284,7 +350,9 @@ Order Taken By: ${orderTakenBy}
 
   return (
     <div className="container">
-      <h1 className="createOrder pageHeading">Create Decoration Order</h1>
+      <h1 className="createOrder pageHeading">
+        Create celebration Booster Order
+      </h1>
       <form className="orderCreation form" onSubmit={handleSubmit}>
         {/* product check */}
         <label htmlFor="dishName">Product Name *</label>
@@ -558,6 +626,16 @@ Order Taken By: ${orderTakenBy}
                 />
               </div>
             </div>
+            <div style={{ marginTop: "20px" }}>
+              <label htmlFor="wonderlandevent">Wonderland Occasion</label>
+              <input
+                type="text"
+                id="wonderlandevent"
+                value={wonderlandevent}
+                onChange={(e) => setWonderlandEvent(e.target.value)}
+                placeholder="Wonderland Occasion"
+              />
+            </div>
             <div className="checkoutInputType border-1 rounded-4">
               <h4>Share your comments (if any)</h4>
               <textarea
@@ -620,6 +698,39 @@ Order Taken By: ${orderTakenBy}
           </>
         )}
       </form>
+
+      {eventResponse?._id && (
+        <p
+          className="message"
+          style={{
+            color: messageColor,
+            textAlign: "center",
+            marginTop: "15px",
+          }}
+        >
+          Invite Link Admin :{" "}
+          <a
+            target="_blank"
+            href={`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}&frompanel=true`}
+          >{`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}&frompanel=true`}</a>
+        </p>
+      )}
+      {eventResponse?._id && (
+        <p
+          className="message"
+          style={{
+            color: messageColor,
+            textAlign: "center",
+            marginTop: "15px",
+          }}
+        >
+          Invite Link To Share :{" "}
+          <a
+            target="_blank"
+            href={`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}`}
+          >{`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}`}</a>
+        </p>
+      )}
       {message === "Customer exists." && (
         <button onClick={copyOrderSummary} style={style.buttonPrimary}>
           Copy Order Summary(For Customer)

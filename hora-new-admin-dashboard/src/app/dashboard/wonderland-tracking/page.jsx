@@ -170,6 +170,7 @@ const WonderlandTracking = () => {
             ) : (
               <tr>
                 <th>Wonderland ID</th>
+                <th>Order ID</th>
                 <th>Event Name</th>
                 <th>Host Phone</th>
                 <th>Guests</th>
@@ -196,11 +197,12 @@ const WonderlandTracking = () => {
                 ) : (
                   <tr key={i}>
                     <td>{item.wonderland_id}</td>
+                    <td>{item.orderId && `#${item.orderId + 10800}` || "N/A"}</td>
                     <td>{item.hostName}</td>
                     <td>{item.hostPhone}</td>
                     <td>{item.guestCount}</td>
                     <td>{item.photoCount}</td>
-                    <td>{formatDateDDMMYYYY(item.eventDate)}</td>
+                    <td>{formatDateDDMMYYYY(item.eventDate) || "N/A"}</td>
                     <td>
                       <a
                         target="_blank"

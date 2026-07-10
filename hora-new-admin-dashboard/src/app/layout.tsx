@@ -18,7 +18,8 @@ import {
   FaChevronRight,
   FaListUl,
   FaGlassCheers,
-  FaSearch 
+  FaSearch,
+  FaCity 
 } from "react-icons/fa";
 import { GrAnalytics } from "react-icons/gr";
 import { BsCalendarDate } from "react-icons/bs";
@@ -55,7 +56,12 @@ const menuItems = [
         label: "Website Search Tracking",
         icon: <FaSearch />,
         url: "/dashboard/website-search-tracking",
-      }
+      },
+      {
+        label: "User Cities Tracking",
+        icon: <FaCity />,
+        url: "/dashboard/user-cities-tracking",
+      },
     ],
   },
 

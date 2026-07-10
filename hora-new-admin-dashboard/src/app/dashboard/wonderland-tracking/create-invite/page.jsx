@@ -5,6 +5,7 @@ import {
   BASE_URL,
   ADMIN_USER_LIST,
   ADMIN_USER_SIGNUP,
+  CREATE_WONDERLAND_EVENT,
 } from "../../../../utils/apiconstant";
 import "./CreateEventInvite.css";
 import { inviteTypes } from "@/constants/venueListConstants";
@@ -215,7 +216,7 @@ const CreateEventInvitePage = () => {
       };
 
       const res = await axios.post(
-        `${BASE_URL}/api/customer/event/create-event-invite`,
+        `${BASE_URL}${CREATE_WONDERLAND_EVENT}`,
         payload
       );
 

@@ -1,15 +1,30 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import "./website-search-tracking.css";
-import {
-  fetchWebsiteSearchStats,
-  fetchWebsiteSearchTracking,
-} from "./website-search-tracking-service";
+import "./user-cities-tracking.css";
+import { fetchUserCitiesTracking } from "./useer-cities-tracking-service";
 
-const WebsiteSearchTracking = () => {
-  const [stats, setStats] = useState(null);
+const CityNames = {
+  delhi: "Delhi",
+  mumbai: "Mumbai",
+  bengaluru: "Bengaluru",
+  noida: "Noida",
+  ghaziabad: "Ghaziabad",
+  gurugram: "Gurgaon",
+  faridabad: "Faridabad",
+  hyderabad: "Hyderabad",
+  chennai: "Chennai",
+  kolkata: "Kolkata",
+  lucknow: "Lucknow",
+  kanpur: "Kanpur",
+  indore: "Indore",
+  surat: "Surat",
+  bhopal: "Bhopal",
+  goa: "Goa",
+  pune: "Pune",
+};
 
+const UserCitiesTracking = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -19,22 +34,18 @@ const WebsiteSearchTracking = () => {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  const [clickedType, setClickedType] = useState("");
+  const [cityName, setCityName] = useState("");
 
   useEffect(() => {
-    fetchWebsiteSearchStats(setStats);
-  }, []);
-
-  useEffect(() => {
-    fetchWebsiteSearchTracking({
+    fetchUserCitiesTracking({
       setLoading,
       setData,
       setPagination,
       page,
       search: debouncedSearch,
-      clickedType,
+      cityName,
     });
-  }, [page, debouncedSearch, clickedType]);
+  }, [page, debouncedSearch, cityName]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -49,68 +60,47 @@ const WebsiteSearchTracking = () => {
 
     return new Date(date).toLocaleDateString("en-IN");
   };
-
   return (
     <div className="container">
-      <h1 className="header-title">Website Search Tracking</h1>
-
-      {stats && (
-        <div className="stats-container">
-          <div className="card">
-            Total Searches
-            <br />
-            <strong>{stats.totalSearches}</strong>
-          </div>
-
-          <div className="card">
-            Total Clicks
-            <br />
-            <strong>{stats.totalClicks}</strong>
-          </div>
-
-          <div className="card">
-            Logged In Users
-            <br />
-            <strong>{stats.uniqueLoggedInUsers}</strong>
-          </div>
-
-          <div className="card">
-            Guest Visitors
-            <br />
-            <strong>{stats.uniqueGuestVisitors}</strong>
-          </div>
-
-          <div className="card">
-            Top Search Term
-            <br />
-            <strong>{stats?.topSearchTerms[0]?.searchTerm || "N/A"}</strong>
-          </div>
-        </div>
-      )}
+      <h1 className="header-title">User Cities Tracking</h1>
 
       <div className="filters-container">
         <input
           type="text"
-          placeholder="Search by term, title, user name or phone"
+          placeholder="Search by user name or phone"
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
             setPage(1);
           }}
-          style={{ width: "300px", marginRight: "10px", padding: "5px" }}
+          style={{
+            width: "300px",
+            marginRight: "10px",
+            padding: "5px",
+          }}
         />
 
         <select
-          value={clickedType}
+          value={cityName}
           onChange={(e) => {
-            setClickedType(e.target.value);
+            setCityName(e.target.value);
             setPage(1);
           }}
+          style={{
+            width: "220px",
+            padding: "7px",
+            cursor: "pointer",
+          }}
         >
-          <option value="">All Types</option>
-          <option value="theme">Theme</option>
-          <option value="product">Product</option>
-          <option value="category">Category</option>
+          <option value="">All Cities</option>
+
+          {Object.entries(CityNames)
+            .sort((a, b) => a[1].localeCompare(b[1]))
+            .map(([key, value]) => (
+              <option key={key} value={value}>
+                {value}
+              </option>
+            ))}
         </select>
       </div>
 
@@ -120,13 +110,10 @@ const WebsiteSearchTracking = () => {
             <tr>
               <th>User Name</th>
               <th>Phone</th>
-              <th>Search Term</th>
-              <th>Clicked Title</th>
-              <th>Clicked Type</th>
-              <th>Clicked Item Id</th>
-              <th>Created At</th>
+              <th>City</th>
               <th>Visitor Id</th>
               <th>User Id</th>
+              <th>Created At</th>
             </tr>
           </thead>
 
@@ -136,19 +123,16 @@ const WebsiteSearchTracking = () => {
                 <tr key={item._id}>
                   <td>{item?.user?.name || "N/A"}</td>
                   <td>{item?.user?.phone || "N/A"}</td>
-                  <td>{item.searchTerm || "N/A"}</td>
-                  <td>{item.clickedTitle || "N/A"}</td>
-                  <td>{item.clickedType || "N/A"}</td>
-                  <td>{item.clickedItemId || "N/A"}</td>
-                  <td>{formatDate(item.createdAt)}</td>
+                  <td>{item.cityName || "N/A"}</td>
                   <td>{item.visitorId || "N/A"}</td>
                   <td>{item?.user?._id || "N/A"}</td>
+                  <td>{formatDate(item.createdAt)}</td>
                 </tr>
               ))
             ) : (
               <tr>
                 <td
-                  colSpan={9}
+                  colSpan={6}
                   className="no-data"
                   style={{ textAlign: "center" }}
                 >
@@ -163,8 +147,8 @@ const WebsiteSearchTracking = () => {
       {data.length > 0 && (
         <div className="pagination">
           <button
-            onClick={() => setPage((prev) => prev - 1)}
             disabled={page === 1}
+            onClick={() => setPage((prev) => prev - 1)}
           >
             Prev
           </button>
@@ -174,8 +158,8 @@ const WebsiteSearchTracking = () => {
           </span>
 
           <button
-            onClick={() => setPage((prev) => prev + 1)}
             disabled={page >= (pagination.totalPages || 1)}
+            onClick={() => setPage((prev) => prev + 1)}
           >
             Next
           </button>
@@ -187,4 +171,4 @@ const WebsiteSearchTracking = () => {
   );
 };
 
-export default WebsiteSearchTracking;
+export default UserCitiesTracking;
