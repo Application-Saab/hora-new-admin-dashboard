@@ -13,16 +13,16 @@ import {
   ADMIN_USER_SIGNUP,
   API_SUCCESS_CODE,
   PRODUCT_MEAL_TYPE,
+  CREATE_WONDERLAND_EVENT,
 } from "../../../utils/apiconstant";
 import { timeSlotOptions } from "../../../utils/timeSlots";
 import { pincodes } from "../../../utils/pincodes";
 import SearchWithDropDown from "../../component/SearchWithDropDown";
 import { eventList } from "../../../constants/eventList";
-import { formatDate } from '../../../utils/formateDate'
-
+import { formatDate } from "../../../utils/formateDate";
 
 const AddPhotoOrder = () => {
-  const [selectedTag, setSelectedTag] = useState('');
+  const [selectedTag, setSelectedTag] = useState("");
   const [products, setProducts] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState("");
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
@@ -69,15 +69,59 @@ const AddPhotoOrder = () => {
 
   // const [addOnsTotalPrice, setAddOnsTotalPrice] = useState(0);
 
-  const handleComment = (index, value) => {
-  const lines = comment.split("\n");
-  lines[index] = value;
-  setComment(lines.join("\n"));
-};
+  // Wonderland Event states
+  const [wonderlandevent, setWonderlandEvent] = useState("");
+  const [eventResponse, setEventResponse] = useState({});
+  console.log(
+    "%c [ eventResponse ]",
+    "font-size:13px; background:pink; color:#bf2c9f;",
+    eventResponse,
+  );
+  const [eventFormData, setEventFormData] = useState({
+    userId: "",
+    eventType: "",
+    hostName: "",
+    eventDate: "",
+    eventTime: "",
+    location: "",
+    googleMapLink: "",
+    fromInternational: "NO",
+    orderId: "",
+  });
 
-const addCommentField = () => {
-  setCommentFields([...commentFields, commentFields.length]);
-};
+  const createWonderlandEvent = async (orderId) => {
+    try {
+      const response = await axios.post(
+        `${BASE_URL}${CREATE_WONDERLAND_EVENT}`,
+        {
+          ...eventFormData,
+          orderId,
+        },
+      );
+      if (response.status === 200 || response.status === 201) {
+        setEventResponse(response?.data?.data);
+      }
+    } catch (error) {
+      console.error("Error creating wonderland event:", error);
+      alert("There was an error creating wonderland event.");
+    }
+  };
+
+  console.log(
+    "%c [ eventFormData ]",
+    "font-size:13px; background:pink; color:#bf2c9f;",
+    eventFormData,
+  );
+
+  const handleComment = (index, value) => {
+    const lines = comment.split("\n");
+    lines[index] = value;
+    setComment(lines.join("\n"));
+  };
+
+  const addCommentField = () => {
+    setCommentFields([...commentFields, commentFields.length]);
+  };
 
 
   useEffect(() => {
@@ -162,7 +206,7 @@ const addCommentField = () => {
   useEffect(() => {
     if (dishName && products.length > 0) {
       const selectedProduct = products.find(
-        (product) => product.name === dishName
+        (product) => product.name === dishName,
       );
 
       if (selectedProduct) {
@@ -174,14 +218,12 @@ const addCommentField = () => {
 
         const inclusions =
           selectedProduct?.inclusion?.length > 0
-            ? selectedProduct.inclusion[0]
-              .split(/<\/div><div>/)
-              .map((item) =>
+            ? selectedProduct.inclusion[0].split(/<\/div><div>/).map((item) =>
                 item
                   .replace(/<\/?div>/g, "")
                   .replace(/<\/?span>/g, "")
                   .replace(/<br\s*\/?>/g, "")
-                  .trim()
+                  .trim(),
               )
             : [];
 
@@ -215,7 +257,6 @@ const addCommentField = () => {
     }
   }, [pincode]);
 
-
   // const handleCheckCustomer = async (e) => {
   //   e.preventDefault();
   //   setMessage("");
@@ -223,8 +264,8 @@ const addCommentField = () => {
 
   //   try {
   //     const response = await axios.post(`${BASE_URL}${ADMIN_USER_LIST}`, {
-  //       phone: customerNumber,  
-  //         per_page: 1,          
+  //       phone: customerNumber,
+  //         per_page: 1,
   //         role: "customer",
   //     });
 
@@ -300,24 +341,23 @@ const addCommentField = () => {
         setShowButton(false);
         setCustomerId(null);
       }
-
     } catch (err) {
       console.error("API error:", err);
 
       // Try to get backend message
       const apiMessage =
-        err?.response?.data?.message || "An error occurred while checking the customer.";
+        err?.response?.data?.message ||
+        "An error occurred while checking the customer.";
 
       setMessage(apiMessage);
       setMessageColor("red");
-      setShowPopup(true);   // ✅ always show popup on error
+      setShowPopup(true); // ✅ always show popup on error
       setShowButton(false);
       setCustomerId(null);
     } finally {
       setLoading(false);
     }
   };
-
 
   const handleAddCustomer = async () => {
     const requestData = {
@@ -330,7 +370,7 @@ const addCommentField = () => {
     try {
       const response = await axios.post(
         `${BASE_URL}${ADMIN_USER_SIGNUP}`,
-        requestData
+        requestData,
       );
 
       setCustomerId(response.data.dataToSave);
@@ -391,7 +431,7 @@ const addCommentField = () => {
     }
   };
 
-  const handleSubmit = async (e) => { 
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setlLoading(true);
     const formattedDate = date ? formatDate(date) : null;
@@ -444,14 +484,19 @@ const addCommentField = () => {
       status: 1,
       balance_amount: balanceamount,
       order_taken_by: orderTakenBy,
-      eventName: selectedEvent
+      eventName: selectedEvent,
     };
 
     try {
       const response = await axios.post(
         `${BASE_URL}${CONFIRM_ORDER_ENDPOINT}`,
-        requestData
+        requestData,
       );
+      if (response.status === 200 || response.status === 201) {
+        if (wonderlandevent) {
+          createWonderlandEvent(response.data.data.order_id);
+        }
+      }
       alert("Order created successfully:", response.data);
     } catch (error) {
       console.error("Error creating order:", error);
@@ -465,6 +510,23 @@ const addCommentField = () => {
     const balance = totalamount - advanceamount;
     setBalanceAmount(balance);
   }, [totalamount, advanceamount]);
+
+  const convertToISO = (date) => {
+    if (!date) return "";
+    return new Date(`${date}T00:00:00.000Z`).toISOString();
+  };
+
+  useEffect(() => {
+    setEventFormData((prev) => ({
+      ...prev,
+      userId: customerId?._id || "",
+      eventType: selectedEvent || "",
+      hostName: wonderlandevent || "",
+      eventDate: (date && convertToISO(date)) || "",
+      location: address || "",
+      googleMapLink: googleLocation || "",
+    }));
+  }, [customerId, wonderlandevent, date, address, googleLocation]);
 
   const copyOrderSummary = () => {
     const orderSummary = `
@@ -593,8 +655,8 @@ const changeQuantity = (id, delta) => {
           {mealProductTypes
             .filter((type) =>
               type.configurationId?.some(
-                (config) => config.name === "Photography"
-              )
+                (config) => config.name === "Photography",
+              ),
             )
             .map((type) => (
               <option key={type._id} value={type._id}>
@@ -603,9 +665,7 @@ const changeQuantity = (id, delta) => {
             ))}
         </select>
 
-
         {isLoadingProducts && <p>Loading products...</p>}
-
 
         {/* Product Selection */}
         {products.length > 0 && (
@@ -626,7 +686,7 @@ const changeQuantity = (id, delta) => {
                 borderRadius: "5px",
                 fontSize: "16px",
                 marginBottom: "10px",
-                border: "1px solid #ccc"
+                border: "1px solid #ccc",
               }}
             >
               <option value="">Select a product</option>
@@ -645,7 +705,14 @@ const changeQuantity = (id, delta) => {
             <input type="text" id="productid" value={productid} readOnly />
             <label htmlFor="category">Product Price</label>
             <input type="text" id="category" value={category} readOnly />
-            <div className="ProductInclusions" style={{ border: "1px solid black", marginTop: "10px", padding: "10px" }}>
+            <div
+              className="ProductInclusions"
+              style={{
+                border: "1px solid black",
+                marginTop: "10px",
+                padding: "10px",
+              }}
+            >
               <label htmlFor="productid">Product Inclusions:</label>
               <ul style={{ listStyle: "disc", paddingLeft: "10px" }}>
                 {inclusion.length > 0 ? (
@@ -662,140 +729,142 @@ const changeQuantity = (id, delta) => {
               type="text"
               id="customerNumber"
               value={customerNumber}
-              onInput={(e) => setCustomerNumber(e.target.value.replace(/\D/g, ''))}
+              onInput={(e) =>
+                setCustomerNumber(e.target.value.replace(/\D/g, ""))
+              }
               placeholder="Customer Number"
               required
               maxLength={10}
               pattern="\d{10}"
               inputMode="numeric"
             />
-            <button className="orderCheck-btn" onClick={handleCheckCustomer} disabled={loading || customerNumber.length !== 10}>
+            <button
+              className="orderCheck-btn"
+              onClick={handleCheckCustomer}
+              disabled={loading || customerNumber.length !== 10}
+            >
               {loading ? "Checking..." : "Check Customer"}
             </button>
             {loading && <p>Loading...</p>}
             {<p style={{ color: messageColor }}>{message}</p>}
-
           </>
         )}
-        {message === "Customer exists."
-          ?
-          (
-            <div className='orderDeatils'>
+        {message === "Customer exists." ? (
+          <div className="orderDeatils">
+            <div
+              className="date-time-container"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "2%",
+              }}
+            >
+              <div style={{ marginRight: "18px" }}>
+                <label htmlFor="orderTakenBy">Order Taken By*</label>
+                <input
+                  type="text"
+                  id="orderTakenBy"
+                  value={orderTakenBy}
+                  onChange={(e) => setOrderTakenBy(e.target.value)}
+                  placeholder="Order Taken By"
+                  required
+                />
+              </div>
+              <div style={{ marginRight: "18px" }}>
+                <label htmlFor="date">Date *</label>
+                <input
+                  type="date"
+                  id="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  required
+                />
+              </div>
+              <div style={{ marginRight: "18px" }}>
+                <label
+                  htmlFor="timeSlot"
+                  style={{
+                    marginBottom: "10px",
+                    display: "block",
+                  }}
+                >
+                  Time Slot*
+                </label>
+                <Select
+                  options={timeSlotOptions}
+                  value={timeSlot}
+                  onChange={(selectedOption) => setTimeSlot(selectedOption)}
+                  placeholder="Select Time Slot"
+                  required
+                />
+              </div>
+            </div>
+            <div className="address-box">
+              <label htmlFor="address">Address*</label>
+              <textarea
+                type="text"
+                id="address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="Address"
+                required
+              />
+            </div>
+            <div className="googleLocation-box">
+              <label htmlFor="googleLocation">Google Location</label>
+              <textarea
+                type="text"
+                id="googleLocation"
+                value={googleLocation}
+                onChange={(e) => setGoogleLocation(e.target.value)}
+                placeholder="googleLocation"
+              />
+            </div>
+            <div className="amount-box">
+              <label htmlFor="totalamount">Total Amount*</label>
+              <input
+                type="text"
+                id="totalamount"
+                value={totalamount}
+                onChange={(e) => setTotalAmount(e.target.value)}
+                placeholder="Total Amount"
+                required
+              />
+
+              <label htmlFor="advanceamount">Advance Amount</label>
+              <input
+                type="text"
+                id="advanceamount"
+                value={advanceamount}
+                onChange={(e) => setAdvanceAmount(e.target.value)}
+                placeholder="Advance Amount"
+              />
+              <label htmlFor="balanceamount">Balance Amount</label>
+              <input
+                type="text"
+                id="balanceamount"
+                value={balanceamount}
+                placeholder="Balance Amount"
+                disabled
+              />
+            </div>
+
+            {/* Add-On Products */}
+            {addOnProducts.length > 0 && (
               <div
-                className="date-time-container"
+                className="add-on-section"
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "2%",
-                }}
-              >
-                <div style={{ marginRight: "18px" }}>
-                  <label htmlFor="orderTakenBy">Order Taken By*</label>
-                  <input
-                    type="text"
-                    id="orderTakenBy"
-                    value={orderTakenBy}
-                    onChange={(e) => setOrderTakenBy(e.target.value)}
-                    placeholder="Order Taken By"
-                    required
-                  />
-                </div>
-                <div style={{ marginRight: "18px" }}>
-                  <label
-                    htmlFor="date"
-                  >
-                    Date *
-                  </label>
-                  <input
-                    type="date"
-                    id="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    required
-                  />
-                </div>
-                <div style={{ marginRight: "18px" }}>
-                  <label
-                    htmlFor="timeSlot"
-                    style={{
-                      marginBottom: "10px",
-                      display: "block",
-                    }}
-                  >
-                    Time Slot*
-                  </label>
-                  <Select
-                    options={timeSlotOptions}
-                    value={timeSlot}
-                    onChange={(selectedOption) => setTimeSlot(selectedOption)}
-                    placeholder="Select Time Slot"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="address-box">
-                <label htmlFor="address">Address*</label>
-                <textarea
-                  type="text"
-                  id="address"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  placeholder="Address"
-                  required
-                />
-              </div>
-              <div className="googleLocation-box">
-                <label htmlFor="googleLocation">Google Location</label>
-                <textarea
-                  type="text"
-                  id="googleLocation"
-                  value={googleLocation}
-                  onChange={(e) => setGoogleLocation(e.target.value)}
-                  placeholder="googleLocation"
-                />
-              </div>
-              <div className="amount-box">
-                <label htmlFor="totalamount">Total Amount*</label>
-                <input
-                  type="text"
-                  id="totalamount"
-                  value={totalamount}
-                  onChange={(e) => setTotalAmount(e.target.value)}
-                  placeholder="Total Amount"
-                  required
-                />
-
-                <label htmlFor="advanceamount">Advance Amount</label>
-                <input
-                  type="text"
-                  id="advanceamount"
-                  value={advanceamount}
-                  onChange={(e) => setAdvanceAmount(e.target.value)}
-                  placeholder="Advance Amount"
-                />
-                <label htmlFor="balanceamount">Balance Amount</label>
-                <input
-                  type="text"
-                  id="balanceamount"
-                  value={balanceamount}
-                  placeholder="Balance Amount"
-                  disabled
-                />
-              </div>
-
-              {/* Add-On Products */}
-              {addOnProducts.length > 0 && (
-
-
-                <div className="add-on-section" style={{
                   border: "1px solid #ccc",
                   padding: "15px",
                   borderRadius: "5px",
                   marginBottom: "20px",
-                  backgroundColor: "#f9f9f9"
-                }}>
-                  <h3>Add-On Products</h3>
-                  <div className="add-on-grid" style={{
+                  backgroundColor: "#f9f9f9",
+                }}
+              >
+                <h3>Add-On Products</h3>
+                <div
+                  className="add-on-grid"
+                  style={{
                     display: "grid",
                     gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
                     gap: "15px"
@@ -893,104 +962,134 @@ const changeQuantity = (id, delta) => {
                 }}>
                   Total Add-Ons: ₹{addOnsTotalPrice}
                 </p> */}
-                    </div>
-                  )}
-                </div>
-              )}
+                  </div>
+                )}
+              </div>
+            )}
 
-
-              <div className="cityPincode-box" style={{
+            <div
+              className="cityPincode-box"
+              style={{
                 margin: "10px 0",
                 width: "100%",
                 display: "flex",
                 alignItems: "flex-start",
                 gap: "12px",
-              }}>
-                <div className="city-box" style={{ flex: 1 }}>
-                  <label
-                    htmlFor="city"
-                    style={{
-
-                      marginBottom: "5px",
-                      display: "block",
-                    }}
-                  >
-                    City *
-                  </label>
-                  <select
-                    id="city"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    required
-                    style={{
-                      width: "100%",
-                      padding: "10px",
-                      borderRadius: "5px",
-                      fontSize: "16px",
-                      transition: "border-color 0.3s",
-                    }}
-                  >
-                    <option value="" style={{ color: "#aaa" }}>
-                      Select City
-                    </option>
-                    <option value="Bangalore">Bangalore</option>
-                    <option value="Delhi">Delhi</option>
-                    <option value="Mumbai">Mumbai</option>
-                    <option value="Hyderabad">Hyderabad</option>
-                  </select>
-
-                </div>
-                <div className="pincode-box" style={{ flex: 1 }}>
-                  <label htmlFor="pincode">Pincode *</label>
-                  <input
-                    type="text"
-                    id="pincode"
-                    value={pincode}
-                    onChange={(e) => setPincode(e.target.value)}
-                    style={{ padding: "11px", borderRadius: "5px", fontSize: "16px", width: "100%", marginTop: "0px", boxSizing: "border-box" }}
-                  />
-                  <p style={{ fontWeight: "bold", fontSize: "15px", color: pincodeMessageColor }}>{pincodeMessage}</p>
-                </div>
-                <div className="event-box" style={{ flex: 1 }}>
-                  <label htmlFor="pincode">Add Event</label>
-                  <SearchWithDropDown
-                    options={eventList}
-                    selectedValue={selectedEvent}
-                    onChange={(val) => setSelectedEvent(val)}
-                    placeholder="Search event..."
-                  />
-                </div>
+              }}
+            >
+              <div className="city-box" style={{ flex: 1 }}>
+                <label
+                  htmlFor="city"
+                  style={{
+                    marginBottom: "5px",
+                    display: "block",
+                  }}
+                >
+                  City *
+                </label>
+                <select
+                  id="city"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  required
+                  style={{
+                    width: "100%",
+                    padding: "10px",
+                    borderRadius: "5px",
+                    fontSize: "16px",
+                    transition: "border-color 0.3s",
+                  }}
+                >
+                  <option value="" style={{ color: "#aaa" }}>
+                    Select City
+                  </option>
+                  <option value="Bangalore">Bangalore</option>
+                  <option value="Delhi">Delhi</option>
+                  <option value="Mumbai">Mumbai</option>
+                  <option value="Hyderabad">Hyderabad</option>
+                </select>
               </div>
-              <div className='checkoutInputType border-1 rounded-4'>
-                <h4>Share your comments (if any)</h4>
+              <div className="pincode-box" style={{ flex: 1 }}>
+                <label htmlFor="pincode">Pincode *</label>
+                <input
+                  type="text"
+                  id="pincode"
+                  value={pincode}
+                  onChange={(e) => setPincode(e.target.value)}
+                  style={{
+                    padding: "11px",
+                    borderRadius: "5px",
+                    fontSize: "16px",
+                    width: "100%",
+                    marginTop: "0px",
+                    boxSizing: "border-box",
+                  }}
+                />
+                <p
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: "15px",
+                    color: pincodeMessageColor,
+                  }}
+                >
+                  {pincodeMessage}
+                </p>
+              </div>
+              <div className="event-box" style={{ flex: 1 }}>
+                <label htmlFor="pincode">Add Event</label>
+                <SearchWithDropDown
+                  options={eventList}
+                  selectedValue={selectedEvent}
+                  onChange={(val) => setSelectedEvent(val)}
+                  placeholder="Search event..."
+                />
+              </div>
+            </div>
+            <div style={{ marginTop: "20px" }}>
+              <label htmlFor="wonderlandevent">Wonderland Occasion</label>
+              <input
+                type="text"
+                id="wonderlandevent"
+                value={wonderlandevent}
+                onChange={(e) => setWonderlandEvent(e.target.value)}
+                placeholder="Wonderland Occasion"
+              />
+            </div>
+            <div className="checkoutInputType border-1 rounded-4">
+              <h4>Share your comments (if any)</h4>
               <div className="addon-form">
-              {commentFields.map((field, index) => (
-              <div key={index} className="comment-container">
-      <input
-      style={{marginBottom : "8px"}}
-        className='comment-input'
-        value={comment.split("\n")[index] || ""}
-        onChange={(e) => handleComment(index, e.target.value)}
-        placeholder="Enter your comment."
-      />
+                {commentFields.map((field, index) => (
+                  <div key={index} className="comment-container">
+                    <input
+                      style={{ marginBottom: "8px" }}
+                      className="comment-input"
+                      value={comment.split("\n")[index] || ""}
+                      onChange={(e) => handleComment(index, e.target.value)}
+                      placeholder="Enter your comment."
+                    />
 
-      <button 
-      style={{marginBottom : "8px"}}
-      type="button" className="add-new-btn" onClick={addCommentField}>
-        Add New
-      </button>
-    </div>
-  ))}
-  </div>    
+                    <button
+                      style={{ marginBottom: "8px" }}
+                      type="button"
+                      className="add-new-btn"
+                      onClick={addCommentField}
+                    >
+                      Add New
+                    </button>
+                  </div>
+                ))}
               </div>
+            </div>
 
-              {/* Create Order */}
-              <button className="orderCheck-btn" type="submit" >
-                {lloading ? "Creating Order..." : "Create Order"}
-              </button>
-            </div>)
-          :
-          <> {lloading && <div className="loader">Loading...</div>}
+            {/* Create Order */}
+            <button className="orderCheck-btn" type="submit">
+              {lloading ? "Creating Order..." : "Create Order"}
+            </button>
+          </div>
+        ) : (
+          <>
+            {" "}
+            {lloading && <div className="loader">Loading...</div>}
             {showPopup && (
               <div className="popup">
                 <h2>Add New Customer</h2>
@@ -1005,12 +1104,13 @@ const changeQuantity = (id, delta) => {
                 <br />
                 <label>
                   Phone:
-
                   <input
                     type="text"
                     id="customerNumber"
                     value={newCustomerPhone}
-                    onInput={(e) => setNewCustomerPhone(e.target.value.replace(/\D/g, ''))}
+                    onInput={(e) =>
+                      setNewCustomerPhone(e.target.value.replace(/\D/g, ""))
+                    }
                     placeholder="Customer Number"
                     required
                     maxLength={10}
@@ -1023,16 +1123,48 @@ const changeQuantity = (id, delta) => {
                 <button onClick={() => setShowPopup(false)}>Cancel</button>
               </div>
             )}
-
           </>
-        }
-
+        )}
       </form>
 
-      {message === "Customer exists." && <button onClick={copyOrderSummary} style={style.buttonPrimary}>
-        Copy Order Summary(For Customer)
-      </button>
-      }
+      {eventResponse?._id && (
+        <p
+          className="message"
+          style={{
+            color: messageColor,
+            textAlign: "center",
+            marginTop: "15px",
+          }}
+        >
+          Invite Link Admin :{" "}
+          <a
+            target="_blank"
+            href={`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}&frompanel=true`}
+          >{`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}&frompanel=true`}</a>
+        </p>
+      )}
+      {eventResponse?._id && (
+        <p
+          className="message"
+          style={{
+            color: messageColor,
+            textAlign: "center",
+            marginTop: "15px",
+          }}
+        >
+          Invite Link To Share :{" "}
+          <a
+            target="_blank"
+            href={`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}`}
+          >{`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}`}</a>
+        </p>
+      )}
+
+      {message === "Customer exists." && (
+        <button onClick={copyOrderSummary} style={style.buttonPrimary}>
+          Copy Order Summary(For Customer)
+        </button>
+      )}
     </div>
   );
 };
@@ -1054,8 +1186,8 @@ const style = {
     borderRadius: "5px",
     cursor: "pointer",
     marginTop: "10px",
-    width: "100%"
+    width: "100%",
   },
-}
+};
 
 export default AddPhotoOrder;

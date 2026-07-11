@@ -54,8 +54,17 @@ export const GET_MATERIAL_FILTER_DATA = "/api/material-list/getMaterialFilterDat
 // Wonderland tracking routes
 export const GET_WONDERLAND_GLOBAL_STATS = '/api/customer/event/all-tracking';
 export const GET_WONDERLAND_LISTING_DATA = '/api/customer/event/admin_all_details';
+export const CREATE_WONDERLAND_EVENT = '/api/customer/event/create-event-invite';
 
 // Venue List APIs
 export const GET_VENUE_IMAGES = '/api/party-venue/venue-images';
 export const UPLOAD_VENUE_MEDIA = '/venue/upload-venue-media';
 export const GETVENUE_DETAILS_BY_ID = '/api/party-venue/venue-details';
+
+// Event Dates Tracking APIs
+export const GET_EVENT_DATES_LISTING_DATA = '/api/event-dates/list';
+
+// Website search tracking APIs
+export const GET_SEARCH_TRACKING_LIST = '/api/search-tracking/tracking-list';
+export const GET_SEARCH_TRACKING_STATS = '/api/search-tracking/stats'
+export const GET_CITY_TRACKING_LIST = "/api/event-dates/city-tracking-list";

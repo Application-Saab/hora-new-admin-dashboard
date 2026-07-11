@@ -7,7 +7,7 @@ import {
 } from "./wonderlandTrackingServices";
 import { useRouter } from "next/navigation";
 
-const AdminAnalytics = () => {
+const WonderlandTracking = () => {
   const router = useRouter();
   const [type, setType] = useState("byUsers");
   const [data, setData] = useState([]);
@@ -170,6 +170,7 @@ const AdminAnalytics = () => {
             ) : (
               <tr>
                 <th>Wonderland ID</th>
+                <th>Order ID</th>
                 <th>Event Name</th>
                 <th>Host Phone</th>
                 <th>Guests</th>
@@ -196,11 +197,12 @@ const AdminAnalytics = () => {
                 ) : (
                   <tr key={i}>
                     <td>{item.wonderland_id}</td>
+                    <td>{item.orderId && `#${item.orderId + 10800}` || "N/A"}</td>
                     <td>{item.hostName}</td>
                     <td>{item.hostPhone}</td>
                     <td>{item.guestCount}</td>
                     <td>{item.photoCount}</td>
-                    <td>{formatDateDDMMYYYY(item.eventDate)}</td>
+                    <td>{formatDateDDMMYYYY(item.eventDate) || "N/A"}</td>
                     <td>
                       <a
                         target="_blank"
@@ -271,4 +273,4 @@ const AdminAnalytics = () => {
   );
 };
 
-export default AdminAnalytics;
+export default WonderlandTracking;

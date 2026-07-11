@@ -10,14 +10,14 @@ import {
   ADMIN_USER_LIST,
   GET_MEAL_DISH_ENDPOINT,
   ADMIN_USER_SIGNUP,
+  CREATE_WONDERLAND_EVENT,
 } from "../../../utils/apiconstant";
 import axios from "axios";
 import Select from "react-select";
 import "react-datepicker/dist/react-datepicker.css";
 import { pincodes } from "../../../utils/pincodes.js";
 import { chefTimeSlots } from "../../../utils/chefTimeSlots";
-import { formatDate } from '../../../utils/formateDate'
-
+import { formatDate } from "../../../utils/formateDate";
 
 const ChefForPartyCreateOrderComponent = () => {
   const [items, setItems] = useState([]);
@@ -52,9 +52,43 @@ const ChefForPartyCreateOrderComponent = () => {
   const [newCustomerName, setNewCustomerName] = useState(""); // For name input
   const [newCustomerPhone, setNewCustomerPhone] = useState("");
 
-   const [totalamount, setTotalAmount] = useState('');
-  const [advanceamount, setAdvanceAmount] = useState('');
-  const [balanceamount1, setBalanceAmount1] = useState('');
+  const [totalamount, setTotalAmount] = useState("");
+  const [advanceamount, setAdvanceAmount] = useState("");
+  const [balanceamount1, setBalanceAmount1] = useState("");
+
+  // Wonderland Event states
+  const [wonderlandevent, setWonderlandEvent] = useState("");
+  const [eventResponse, setEventResponse] = useState({});
+
+  const [eventFormData, setEventFormData] = useState({
+    userId: "",
+    eventType: "",
+    hostName: "",
+    eventDate: "",
+    eventTime: "",
+    location: "",
+    googleMapLink: "",
+    fromInternational: "NO",
+    orderId: "",
+  });
+
+  const createWonderlandEvent = async (orderId) => {
+    try {
+      const response = await axios.post(
+        `${BASE_URL}${CREATE_WONDERLAND_EVENT}`,
+        {
+          ...eventFormData,
+          orderId,
+        },
+      );
+      if (response.status === 200 || response.status === 201) {
+        setEventResponse(response?.data?.data);
+      }
+    } catch (error) {
+      console.error("Error creating wonderland event:", error);
+      alert("There was an error creating wonderland event.");
+    }
+  };
 
   const cuisineIds = [
     "63edfa1c74aafa0d9a24cbbc",
@@ -97,14 +131,11 @@ const ChefForPartyCreateOrderComponent = () => {
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const response = await fetch(
-          BASE_URL + GET_MEAL_DISH_ENDPOINT,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ cuisineId: cuisineIds }),
-          }
-        );
+        const response = await fetch(BASE_URL + GET_MEAL_DISH_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cuisineId: cuisineIds }),
+        });
         const data = await response.json();
         const allDishes = data.data.flatMap((meal) => meal.dish);
         setItems(allDishes);
@@ -128,7 +159,7 @@ const ChefForPartyCreateOrderComponent = () => {
     setSelectedItems((prevSelected) =>
       prevSelected.includes(itemId)
         ? prevSelected.filter((id) => id !== itemId)
-        : [...prevSelected, itemId]
+        : [...prevSelected, itemId],
     );
   };
 
@@ -140,7 +171,7 @@ const ChefForPartyCreateOrderComponent = () => {
   };
 
   const filteredItems = items.filter((item) =>
-    item.name.toLowerCase().includes(searchQuery)
+    item.name.toLowerCase().includes(searchQuery),
   );
 
   useEffect(() => {
@@ -176,16 +207,21 @@ const ChefForPartyCreateOrderComponent = () => {
   //   console.log(totalPrice, "totalPrice with 700 extra charge");
   // }
   let totalPrice = parseInt(selectedDishPrice) + priceForPeople;
-console.log(totalPrice, "Initial totalPrice");
+  console.log(totalPrice, "Initial totalPrice");
 
-if (selectedItems.length <= 7) {
-  totalPrice += 49;
-  console.log(totalPrice, "TotalPrice with ₹49 extra charge (less than 7 items)");
-} else {
-  totalPrice += 750;
-  console.log(totalPrice, "TotalPrice with ₹700 extra charge (7 or more items)");
-}
-
+  if (selectedItems.length <= 7) {
+    totalPrice += 49;
+    console.log(
+      totalPrice,
+      "TotalPrice with ₹49 extra charge (less than 7 items)",
+    );
+  } else {
+    totalPrice += 750;
+    console.log(
+      totalPrice,
+      "TotalPrice with ₹700 extra charge (7 or more items)",
+    );
+  }
 
   console.log(totalPrice, "totalpricehehehehe");
   const itemTotal = selectedDishPrice;
@@ -197,8 +233,7 @@ if (selectedItems.length <= 7) {
   // Function to get total ingredients from selected dishes
   const getTotalIngredients = (data) => {
     let totalIngredients = {};
-    const defaultImage =
-      `${BASE_URL}/api/uploads/default-ingredient.png`;
+    const defaultImage = `${BASE_URL}/api/uploads/default-ingredient.png`;
 
     for (const dishId in data) {
       const dish = data[dishId];
@@ -266,7 +301,6 @@ if (selectedItems.length <= 7) {
     }
   };
 
-
   const handleComment = (e) => {
     const commentText = e.target.value;
     setComment(commentText);
@@ -298,7 +332,7 @@ if (selectedItems.length <= 7) {
     try {
       const response = await axios.post(
         BASE_URL + ADMIN_USER_SIGNUP,
-        requestData
+        requestData,
       );
 
       console.log("Customer added:", response.data.dataToSave._id);
@@ -401,8 +435,13 @@ if (selectedItems.length <= 7) {
     try {
       const response = await axios.post(
         `${BASE_URL}${CONFIRM_ORDER_ENDPOINT}`,
-        requestData
+        requestData,
       );
+      if (response.status === 200 || response.status === 201) {
+        if (wonderlandevent) {
+          createWonderlandEvent(response.data.data.order_id);
+        }
+      }
       alert("Order created successfully:", response.data);
     } catch (error) {
       console.error("Error creating order:", error);
@@ -412,11 +451,28 @@ if (selectedItems.length <= 7) {
     }
   };
 
+  const convertToISO = (date) => {
+    if (!date) return "";
+    return new Date(`${date}T00:00:00.000Z`).toISOString();
+  };
+
+  useEffect(() => {
+    setEventFormData((prev) => ({
+      ...prev,
+      userId: customerId?._id || "",
+      eventType: "",
+      hostName: wonderlandevent || "",
+      eventDate: (date && convertToISO(date)) || "",
+      location: address || "",
+      googleMapLink: googleLocation || "",
+    }));
+  }, [customerId, wonderlandevent, date, address, googleLocation]);
+
   const copyOrderSummary = () => {
     // Create selected dishes list
     let selectedDishesText = "";
     const selectedDishItems = items.filter((item) =>
-      selectedItems.includes(item._id)
+      selectedItems.includes(item._id),
     );
     if (selectedDishItems.length > 0) {
       selectedDishesText += "\n*Selected Dishes*:";
@@ -502,7 +558,7 @@ if (selectedItems.length <= 7) {
     alert("Order summary copied!");
   };
 
-   useEffect(() => {
+  useEffect(() => {
     const total = parseFloat(totalamount) || 0;
     const advance = parseFloat(advanceamount) || 0;
     const balance = total - advance;
@@ -573,9 +629,10 @@ if (selectedItems.length <= 7) {
                         />
                       </div>
                       <div className="dish-name">{item.name}</div>
-                      <div className="dish-price">₹
-                        {/* {item.price} */}
-                        {item.dish_rate}</div>
+                      <div className="dish-price">
+                        ₹{/* {item.price} */}
+                        {item.dish_rate}
+                      </div>
                       {/* <div>}</div> */}
                       <div className="dish-checkbox">
                         <input
@@ -649,7 +706,9 @@ if (selectedItems.length <= 7) {
                         />
                       </div>
                       <div className="selected-item-name">{item.name}</div>
-                      <div className="selected-item-price">₹{item.dish_rate}</div>
+                      <div className="selected-item-price">
+                        ₹{item.dish_rate}
+                      </div>
                     </div>
                   ))}
               </div>
@@ -814,40 +873,33 @@ if (selectedItems.length <= 7) {
                       placeholder="googleLocation"
                     />
                   </div>
-                   <label htmlFor="totalamount" >
-        Total Amount*
-      </label>
-      <input
-        type="text"
-        id="totalamount"
-        value={totalamount}
-        onChange={(e) => setTotalAmount(e.target.value)}
-        placeholder="Total Amount"
-        required
-      />
+                  <label htmlFor="totalamount">Total Amount*</label>
+                  <input
+                    type="text"
+                    id="totalamount"
+                    value={totalamount}
+                    onChange={(e) => setTotalAmount(e.target.value)}
+                    placeholder="Total Amount"
+                    required
+                  />
 
-      <label htmlFor="advanceamount" >
-        Advance Amount
-      </label>
-      <input
-        type="text"
-        id="advanceamount"
-        value={advanceamount}
-        onChange={(e) => setAdvanceAmount(e.target.value)}
-        placeholder="Advance Amount"
-      />
+                  <label htmlFor="advanceamount">Advance Amount</label>
+                  <input
+                    type="text"
+                    id="advanceamount"
+                    value={advanceamount}
+                    onChange={(e) => setAdvanceAmount(e.target.value)}
+                    placeholder="Advance Amount"
+                  />
 
-      <label htmlFor="balanceamount" >
-        Balance Amount
-      </label>
-      <input
-        type="text"
-        id="balanceamount"
-        value={balanceamount1}
-        placeholder="Balance Amount"
-        disabled
-      />
-                
+                  <label htmlFor="balanceamount">Balance Amount</label>
+                  <input
+                    type="text"
+                    id="balanceamount"
+                    value={balanceamount1}
+                    placeholder="Balance Amount"
+                    disabled
+                  />
 
                   <div
                     className="cityPincode-box"
@@ -904,6 +956,16 @@ if (selectedItems.length <= 7) {
                       </p>
                     </div>
                   </div>
+                  <div style={{ marginTop: "20px" }}>
+                    <label htmlFor="wonderlandevent">Wonderland Occasion</label>
+                    <input
+                      type="text"
+                      id="wonderlandevent"
+                      value={wonderlandevent}
+                      onChange={(e) => setWonderlandEvent(e.target.value)}
+                      placeholder="Wonderland Occasion"
+                    />
+                  </div>
                   <div className="checkoutInputType border-1 rounded-4">
                     <h4>Share your comments (if any)</h4>
                     <textarea
@@ -945,7 +1007,7 @@ if (selectedItems.length <= 7) {
                           value={newCustomerPhone}
                           onInput={(e) =>
                             setNewCustomerPhone(
-                              e.target.value.replace(/\D/g, "")
+                              e.target.value.replace(/\D/g, ""),
                             )
                           } // Remove non-digits as the user types
                           placeholder="Customer Number"
@@ -965,6 +1027,39 @@ if (selectedItems.length <= 7) {
                 </>
               )}
             </form>
+
+            {eventResponse?._id && (
+              <p
+                className="message"
+                style={{
+                  color: messageColor,
+                  textAlign: "center",
+                  marginTop: "15px",
+                }}
+              >
+                Invite Link Admin :{" "}
+                <a
+                  target="_blank"
+                  href={`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}&frompanel=true`}
+                >{`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}&frompanel=true`}</a>
+              </p>
+            )}
+            {eventResponse?._id && (
+              <p
+                className="message"
+                style={{
+                  color: messageColor,
+                  textAlign: "center",
+                  marginTop: "15px",
+                }}
+              >
+                Invite Link To Share :{" "}
+                <a
+                  target="_blank"
+                  href={`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}`}
+                >{`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}`}</a>
+              </p>
+            )}
             {message === "Customer exists." && (
               <button onClick={copyOrderSummary} style={style.buttonPrimary}>
                 Copy Order Summary(For Customer)

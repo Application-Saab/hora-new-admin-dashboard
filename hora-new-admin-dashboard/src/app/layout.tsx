@@ -17,8 +17,13 @@ import {
   FaChevronDown,
   FaChevronRight,
   FaListUl,
+  FaGlassCheers,
+  FaSearch,
+  FaCity 
   FaPlus,
 } from "react-icons/fa";
+import { GrAnalytics } from "react-icons/gr";
+import { BsCalendarDate } from "react-icons/bs";
 import { GiFireworkRocket } from "react-icons/gi";
 import { useRouter, usePathname } from "next/navigation";
 import { BASE_URL } from "@/utils/apiconstant";
@@ -32,7 +37,34 @@ const menuItems = [
   
   { label: "User Analysis", icon: <FaClipboardList />, url: "/dashboard/user-analysis" },
 
-  { label: "Wonderland Tracking", icon: <FaClipboardList />, url: "/dashboard/wonderland-tracking" },
+  // { label: "Wonderland Tracking", icon: <FaClipboardList />, url: "/dashboard/wonderland-tracking" },
+
+    {
+    label: "Trackings",
+    icon: <GrAnalytics />,
+    children: [
+      {
+        label: "Wonderland Tracking",
+        icon: <FaGlassCheers />,
+        url: "/dashboard/wonderland-tracking",
+      },
+      {
+        label: "Event Dates Tracking",
+        icon: <BsCalendarDate />,
+        url: "/dashboard/event-dates-tracking",
+      },
+      {
+        label: "Website Search Tracking",
+        icon: <FaSearch />,
+        url: "/dashboard/website-search-tracking",
+      },
+      {
+        label: "User Cities Tracking",
+        icon: <FaCity />,
+        url: "/dashboard/user-cities-tracking",
+      },
+    ],
+  },
 
   {
     label: "Order Details",

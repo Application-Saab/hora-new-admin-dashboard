@@ -11,8 +11,9 @@ import {
   SAVE_LOCATION_ENDPOINT,
   API_SUCCESS_CODE,
   ADMIN_USER_LIST,
+  CREATE_WONDERLAND_EVENT,
 } from "../../utils/apiconstant";
-import { formatDate } from '../../utils/formateDate'
+import { formatDate } from "../../utils/formateDate";
 // import { json } from 'stream/consumers';
 
 const CreateOrderForm = ({
@@ -25,11 +26,17 @@ const CreateOrderForm = ({
   selectedMealList,
   includeDisposable,
   includeTables,
+  setEventFormData,
+  eventFormData,
+  setEventResponse,
+  eventResponse,
+  setWonderlandEvent,
+  wonderlandevent,
 }) => {
   console.log(calculateAdvancePayment, "calculateAdvancePayment");
   console.log(calculateFinalTotal, "calculateFinalTotal");
   console.log(selectedOption, "selectedOption");
-  console.log(selectedMealList,"selectedMealList");
+  console.log(selectedMealList, "selectedMealList");
   console.log(includeDisposable, "includeDisposable");
   console.log(includeTables, "includeTables");
 
@@ -160,7 +167,7 @@ const CreateOrderForm = ({
     try {
       const response = await axios.post(
         `${BASE_URL}/api/admin/user_signup`,
-        requestData
+        requestData,
       );
       console.log(JSON.stringify(response.data), "aarti");
       console.log("Customer added:", response.data.dataToSave._id);
@@ -221,11 +228,32 @@ const CreateOrderForm = ({
   };
 
   const decoration_comments =
-  (comment || "") + (includeTables === true ? "\nYou've picked the serving table with a cloth for ₹1200." : "");
+    (comment || "") +
+    (includeTables === true
+      ? "\nYou've picked the serving table with a cloth for ₹1200."
+      : "");
 
   // Now decoration_comments includes both the comment and the booking message if applicable
 
   console.log("decoration_comments:", decoration_comments);
+
+  const createWonderlandEvent = async (orderId) => {
+    try {
+      const response = await axios.post(
+        `${BASE_URL}${CREATE_WONDERLAND_EVENT}`,
+        {
+          ...eventFormData,
+          orderId,
+        },
+      );
+      if (response.status === 200 || response.status === 201) {
+        setEventResponse(response?.data?.data);
+      }
+    } catch (error) {
+      console.error("Error creating wonderland event:", error);
+      alert("There was an error creating wonderland event.");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -242,7 +270,10 @@ const CreateOrderForm = ({
     let type;
 
     // if (selectedOption === "food-delivery") {
-        if (selectedOption === "food-delivery" || selectedOption === "food-customization") {
+    if (
+      selectedOption === "food-delivery" ||
+      selectedOption === "food-customization"
+    ) {
       type = 6;
     } else if (selectedOption === "live-catering") {
       type = 7;
@@ -282,8 +313,13 @@ const CreateOrderForm = ({
     try {
       const response = await axios.post(
         `${BASE_URL}${CONFIRM_ORDER_ENDPOINT}`,
-        requestData
+        requestData,
       );
+      if (response.status === 200 || response.status === 201) {
+        if(wonderlandevent){
+          createWonderlandEvent(response.data.data.order_id);
+        }
+      }
       alert("Order created successfully:", response.data);
     } catch (error) {
       console.error("Error creating order:", error);
@@ -292,6 +328,23 @@ const CreateOrderForm = ({
       setlLoading(false);
     }
   };
+
+  const convertToISO = (date) => {
+    if (!date) return "";
+    return new Date(`${date}T00:00:00.000Z`).toISOString();
+  };
+
+  useEffect(() => {
+    setEventFormData((prev) => ({
+      ...prev,
+      userId: customerId?._id || "",
+      eventType: "",
+      hostName: wonderlandevent || "",
+      eventDate: (date && convertToISO(date)) || "",
+      location: address || "",
+      googleMapLink: googleLocation || "",
+    }));
+  }, [customerId, wonderlandevent, date, address, googleLocation]);
 
   const copyOrderSummary = () => {
     let inclusions;
@@ -360,13 +413,13 @@ const CreateOrderForm = ({
         let quantity = parseFloat(item.quantity) * peopleCount;
         const itemCount = selectedMealList.length;
         const mainCourseItemCount = selectedMealList.filter(
-          (meal) => meal.id[0] === "63f1b6b7ed240f7a09f7e2de"
+          (meal) => meal.id[0] === "63f1b6b7ed240f7a09f7e2de",
         ).length;
         const appetizerItemCount = selectedMealList.filter(
-          (meal) => meal.id[0] === "63f1b39a4082ee76673a0a9f"
+          (meal) => meal.id[0] === "63f1b39a4082ee76673a0a9f",
         ).length;
         const breadItemCount = selectedMealList.filter(
-          (meal) => meal.id[0] === "63edc4757e1b370928b149b3"
+          (meal) => meal.id[0] === "63edc4757e1b370928b149b3",
         ).length;
 
         if (
@@ -381,14 +434,14 @@ const CreateOrderForm = ({
               itemCount === 6
                 ? 0.15
                 : itemCount === 8
-                ? 0.25
-                : itemCount === 9
-                ? 0.3
-                : itemCount === 10
-                ? 0.35
-                : itemCount >= 12
-                ? 0.5
-                : 0;
+                  ? 0.25
+                  : itemCount === 9
+                    ? 0.3
+                    : itemCount === 10
+                      ? 0.35
+                      : itemCount >= 12
+                        ? 0.5
+                        : 0;
             quantity *= 1 - adjustment;
           }
         }
@@ -569,6 +622,17 @@ const CreateOrderForm = ({
                 disabled
               />
 
+              <div style={{ marginTop: "20px" }}>
+                <label htmlFor="wonderlandevent">Wonderland Occasion</label>
+                <input
+                  type="text"
+                  id="wonderlandevent"
+                  value={wonderlandevent}
+                  onChange={(e) => setWonderlandEvent(e.target.value)}
+                  placeholder="Wonderland Occasion"
+                />
+              </div>
+
               <div className="checkoutInputType border-1 rounded-4">
                 <h4>Share your comments (if any)</h4>
                 <textarea
@@ -661,6 +725,39 @@ const CreateOrderForm = ({
           )}
         </>
       </form>
+
+      {eventResponse?._id && (
+        <p
+          className="message"
+          style={{
+            color: messageColor,
+            textAlign: "center",
+            marginTop: "15px",
+          }}
+        >
+          Invite Link Admin :{" "}
+          <a
+            target="_blank"
+            href={`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}&frompanel=true`}
+          >{`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}&frompanel=true`}</a>
+        </p>
+      )}
+      {eventResponse?._id && (
+        <p
+          className="message"
+          style={{
+            color: messageColor,
+            textAlign: "center",
+            marginTop: "15px",
+          }}
+        >
+          Invite Link To Share :{" "}
+          <a
+            target="_blank"
+            href={`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}`}
+          >{`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}`}</a>
+        </p>
+      )}
       {message === "Customer exists." && (
         <button onClick={copyOrderSummary} style={style.buttonPrimary}>
           Copy Order Summary(For Customer)
