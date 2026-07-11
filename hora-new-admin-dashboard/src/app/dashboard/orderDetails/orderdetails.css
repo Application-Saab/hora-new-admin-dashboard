@@ -994,3 +994,27 @@ display: flex;
     transform: scale(1);
   }
 }
+
+.drive-action-btn {
+  padding: 8px 16px;
+  font-weight: 700;
+  font-size: 13px;
+  border: none !important;
+  border-radius: 8px !important;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.drive-btn-red {
+  background-color: red !important;
+}
+
+.drive-btn-green {
+  background-color: #4CAF50 !important;
+}
+
+.drive-action-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.9;
+}
