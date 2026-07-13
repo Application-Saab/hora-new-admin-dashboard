@@ -3,6 +3,8 @@ export const formatDate = (dateString) => {
     const date = new Date(dateString);
 
     if (isNaN(date.getTime())) return null;
+    
+    date.setUTCHours(0, 0, 0, 0);
 
     return date.toISOString();
 };

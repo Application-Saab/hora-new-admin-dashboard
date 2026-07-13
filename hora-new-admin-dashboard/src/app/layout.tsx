@@ -19,7 +19,7 @@ import {
   FaListUl,
   FaGlassCheers,
   FaSearch,
-  FaCity 
+  FaCity,
   FaPlus,
 } from "react-icons/fa";
 import { GrAnalytics } from "react-icons/gr";
