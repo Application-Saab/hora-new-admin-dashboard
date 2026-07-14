@@ -1,0 +1,96 @@
+.pincode-container {
+    padding: 20px;
+    margin: 40px;
+    background: #fff;
+    border-radius: 10px;
+}
+
+.header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.header-section h2 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.search-input {
+    width: 300px;
+    max-width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+}
+
+.search-input:focus {
+    border-color: #97538c;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.pincode-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.pincode-table th {
+    background: #97538c;
+    color: white;
+    padding: 12px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.pincode-table td {
+    padding: 12px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+
+
+.pincode-table tr:hover {
+    background: #efecf0;
+}
+
+.pincode-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+    font-size: 20px;
+}
+
+/* Pagination */
+.vendor-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.vendor-pagination button {
+    padding: 6px 12px;
+    border: none;
+    background: #97538c !important;
+    color: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.vendor-pagination button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.vendor-pagination span {
+    font-weight: 500;
+}
