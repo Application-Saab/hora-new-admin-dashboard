@@ -689,16 +689,16 @@ const AddDecOrder = () => {
       return {
         ...item,
         quantity: selectedItems[id]?.quantity || 1,
-        totalPrice: item.price * (selectedItems[id]?.quantity || 1)
+        totalPrice: item?.price || 0 * (selectedItems[id]?.quantity || 1)
       };
     }).filter(Boolean);
 
     const addOnProduct = products
-      .filter(product => product.name && product.price)
+      .filter(product => product.name)
       .map((product) => ({
-        title: product.name,
-        price: product.price,
-        totalPrice: product.price,
+        title: product?.name,
+        price: product?.price || 0,
+        totalPrice: product?.price || 0,
         quantity: 1,
       }));
     const combinedAddOns = [...add_on, ...addOnProduct];
