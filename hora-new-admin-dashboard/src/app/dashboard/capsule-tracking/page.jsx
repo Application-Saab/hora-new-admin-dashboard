@@ -40,7 +40,6 @@ const Capsuletracking = () => {
       }
 
       alert(`Images are uploading in background, will reflect on link in less than 1 hour for Order: ${orderId}`);
-      console.log("Retry success data:", data);
 
       fetchOrders();
     } catch (error) {
