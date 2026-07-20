@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import "./capsuleTracking.css";
 import { getCapsuleTracking, getCapsuleUsers } from "../../../services/capsuleTracking";
+import { BASE_URL, DRIVE_FOLDER_UPLOAD } from "@/utils/apiconstant.jsx";
 
 const Capsuletracking = () => {
   const [activeTab, setActiveTab] = useState("capsule"); // 'capsule' or 'user'
@@ -10,6 +11,46 @@ const Capsuletracking = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [retryLoadingRow, setRetryLoadingRow] = useState(null);
+  
+
+  const handleRetryDriveUpload = async (orderId, driveUrl, index) => {
+    if (!driveUrl) {
+      alert("Google Drive Link nahi mila is order ke liye.");
+      return;
+    }
+
+    setRetryLoadingRow(index); // Sirf usi row ka loader dikhane ke liye
+    try {
+      const response = await fetch(`${BASE_URL}${DRIVE_FOLDER_UPLOAD}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          vendorId: orderId + 10800, 
+          folderUrl: driveUrl,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to create folder");
+      }
+
+      alert(`Images are uploading in background, will reflect on link in less than 1 hour for Order: ${orderId}`);
+      console.log("Retry success data:", data);
+
+      // Data successfully hit hone ke baad table data refresh karne ke liye
+      fetchOrders();
+    } catch (error) {
+      console.error("Error in retry logic:", error);
+      alert(error.message);
+    } finally {
+      setRetryLoadingRow(null);
+    }
+  };
 
   const fetchOrders = async () => {
     try {
@@ -129,9 +170,8 @@ const Capsuletracking = () => {
                   <th>Created At</th>
                   <th>Capsule Link</th>
                   <th>Total Photos</th>
+                  <th>Total From Drive</th>
                   <th>Total Likes</th>
-                  <th>Face Recognition</th>
-                  <th>Folders</th>
                   <th>Downloaded</th>
                   <th>Total Image Shared</th>
                   <th>Capsule Share Count</th>
@@ -141,6 +181,8 @@ const Capsuletracking = () => {
                   <th>Face Counts</th>
                   <th>First Device Type</th>
                   <th>Second Device Type</th>
+                  <th>Face Recognition</th>
+                  <th>Folders</th>
                 </tr>
               ) : (
                 // User Table Headers
@@ -172,37 +214,89 @@ const Capsuletracking = () => {
                 orders.map((order, index) => (
                   <tr key={index}>
                     {activeTab === "capsule" ? (
-                      <>
-                        <td>{getOrderId(order?.order_id)}</td>
-                        <td>
-                          {order?.imageUploadCounts?.driveProvidedAt
-                            ? new Date(order.imageUploadCounts.driveProvidedAt).toLocaleString("en-IN")
-                            : "-"}
-                        </td>
-                        <td>
-                          <a 
-                          href={`${order?.orderWebLink}${order?.orderWebLink?.includes('?') ? '&' : '?'}fromPanel=true`}
-                           target="_blank" rel="noreferrer">
-                            {order?.orderWebLink}
-                          </a>
-                        </td>
-                        <td>{order?.counts?.imageCount || 0}</td>
-                        <td>{order?.counts?.totalLikes || 0}</td>
-                        <td>{order?.counts?.faceRecognitionCount || 0}</td>
-                        <td>{order?.counts?.otherSubFoldersCount || 0}</td>
-                        <td>{order?.counts?.totalDownloads || 0}</td>
-                        <td>{order?.counts?.totalShares || 0}</td>
-                        <td>{order?.counts?.shareCapsuleClicks || 0}</td>
-                        <td>{order?.counts?.totalViews || 0}</td>
-                        <td>{order?.counts?.lockerImageCount || 0}</td>
-                        <td>{order?.counts?.totalClicks || 0}</td>
-                        <td>{order?.counts?.totalPersonCount || 0}</td>
-                        <td>{order?.counts?.firstDeviceType || "-"}</td>
-                        <td>{order?.counts?.secondDeviceType || "-"}</td>
-                      </>
+                      (() => {
+                        // ✅ SAFE AND BULLETPROOF DRIVE LINK RESOLUTION
+                        let driveUrl = "";
+
+                        if (order?.allDriveLinks && order.allDriveLinks.length > 0) {
+                          const foundObj = order.allDriveLinks.find(d => d.linkType === "rawPhotos") || order.allDriveLinks[0];
+                          driveUrl = foundObj?.link || order?.orderDriveLink || "";
+                        } else {
+                          driveUrl = order?.orderDriveLink || "";
+                        }
+
+                        return (
+                          <>
+                            <td>{getOrderId(order?.order_id)}</td>
+                            <td>
+                              {order?.imageUploadCounts?.driveProvidedAt
+                                ? new Date(order.imageUploadCounts.driveProvidedAt).toLocaleString("en-IN")
+                                : "-"}
+                            </td>
+                            <td>
+                              <a
+                                href={`${order?.orderWebLink}${order?.orderWebLink?.includes('?') ? '&' : '?'}fromPanel=true`}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                {order?.orderWebLink}
+                              </a>
+                            </td>
+                            <td>{order?.counts?.imageCount || 0}</td>
+
+                            {/* Drive Count aur payload handling */}
+                            <td>
+                              <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: "120px" }}>
+                                {driveUrl ? (
+                                  <a
+                                    href={driveUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    style={{ color: "#007bff", textDecoration: "underline" }}
+                                  >
+                                    {order?.imageUploadCounts?.totalFromDrive || 0}
+                                  </a>
+                                ) : (
+                                  <span>{order?.imageUploadCounts?.totalFromDrive || 0}</span>
+                                )}
+
+                                <button
+                                  onClick={() => handleRetryDriveUpload(order?.order_id, driveUrl, index)}
+                                  disabled={retryLoadingRow === index || !driveUrl}
+                                  style={{
+                                    padding: "4px 8px",
+                                    fontSize: "12px",
+                                    backgroundColor: "#97538c",
+                                    color: "#fff",
+                                    border: "none",
+                                    borderRadius: "4px",
+                                    display: "flex",
+                                    alignItems: "center"
+                                  }}
+                                >
+                                  {retryLoadingRow === index ? "..." : "🔄 Retry"}
+                                </button>
+                              </div>
+                            </td>
+
+                            <td>{order?.counts?.totalLikes || 0}</td>
+                            <td>{order?.counts?.totalDownloads || 0}</td>
+                            <td>{order?.counts?.totalShares || 0}</td>
+                            <td>{order?.counts?.shareCapsuleClicks || 0}</td>
+                            <td>{order?.counts?.totalViews || 0}</td>
+                            <td>{order?.counts?.lockerImageCount || 0}</td>
+                            <td>{order?.counts?.totalClicks || 0}</td>
+                            <td>{order?.counts?.totalPersonCount || 0}</td>
+                            <td>{order?.counts?.firstDeviceType || "-"}</td>
+                            <td>{order?.counts?.secondDeviceType || "-"}</td>
+                            <td>{order?.counts?.faceRecognitionCount || 0}</td>
+                            <td>{order?.counts?.otherSubFoldersCount || 0}</td>
+                          </>
+                        );
+                      })()
                     ) : (
+                      // User Table Body...
                       <>
-                        {/* User Table Body (Adjust keys based on your User API response) */}
                         <td>{order?.phone || "-"}</td>
                         <td>{order?.totalOrders || 0}</td>
                         <td>{order?.guestCapsulesCount || 0}</td>
