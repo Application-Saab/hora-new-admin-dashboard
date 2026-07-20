@@ -171,6 +171,8 @@ const Capsuletracking = () => {
                   <th>Capsule Link</th>
                   <th>Total Photos</th>
                   <th>Total From Drive</th>
+                  <th>Face Recognition</th>
+                  <th>Folders</th>
                   <th>Total Likes</th>
                   <th>Downloaded</th>
                   <th>Total Image Shared</th>
@@ -181,8 +183,7 @@ const Capsuletracking = () => {
                   <th>Face Counts</th>
                   <th>First Device Type</th>
                   <th>Second Device Type</th>
-                  <th>Face Recognition</th>
-                  <th>Folders</th>
+                  
                 </tr>
               ) : (
                 // User Table Headers
@@ -266,7 +267,9 @@ const Capsuletracking = () => {
                                   style={{
                                     padding: "4px 8px",
                                     fontSize: "12px",
-                                    backgroundColor: "#97538c",
+                                    backgroundColor: (order?.counts?.totalPersonCount === 0 || !order?.counts?.totalPersonCount)
+                                      ? "#d9534f"
+                                      : "#97538c",
                                     color: "#fff",
                                     border: "none",
                                     borderRadius: "4px",
@@ -274,11 +277,12 @@ const Capsuletracking = () => {
                                     alignItems: "center"
                                   }}
                                 >
-                                  {retryLoadingRow === index ? "..." : "🔄 Retry"}
+                                  {retryLoadingRow === index ? "Retring..." : "Retry"}
                                 </button>
                               </div>
                             </td>
-
+                            <td>{order?.counts?.faceRecognitionCount || 0}</td>
+                            <td>{order?.counts?.otherSubFoldersCount || 0}</td>
                             <td>{order?.counts?.totalLikes || 0}</td>
                             <td>{order?.counts?.totalDownloads || 0}</td>
                             <td>{order?.counts?.totalShares || 0}</td>
@@ -289,8 +293,7 @@ const Capsuletracking = () => {
                             <td>{order?.counts?.totalPersonCount || 0}</td>
                             <td>{order?.counts?.firstDeviceType || "-"}</td>
                             <td>{order?.counts?.secondDeviceType || "-"}</td>
-                            <td>{order?.counts?.faceRecognitionCount || 0}</td>
-                            <td>{order?.counts?.otherSubFoldersCount || 0}</td>
+                            
                           </>
                         );
                       })()
