@@ -1,4 +1,4 @@
-export const BASE_URL = 'https://horaservices.com';
+export const BASE_URL = 'http://localhost:5000';
 export const MEDIA_PROCESSING_BASE_URL = 'https://horaservices.com/media-api';
 export const GET_DECORATION_BY_NAME = '/api/Decoration/searchByName/';
 export const CONFIRM_ORDER_ENDPOINT = "/api/order/add";
@@ -68,3 +68,4 @@ export const GET_EVENT_DATES_LISTING_DATA = '/api/event-dates/list';
 export const GET_SEARCH_TRACKING_LIST = '/api/search-tracking/tracking-list';
 export const GET_SEARCH_TRACKING_STATS = '/api/search-tracking/stats'
 export const GET_CITY_TRACKING_LIST = "/api/event-dates/city-tracking-list";
+export const GET_ERROR_LOGS_LIST = "/api/error-log/list";

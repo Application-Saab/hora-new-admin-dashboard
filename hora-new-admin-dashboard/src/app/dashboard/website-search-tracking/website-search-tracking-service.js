@@ -1,5 +1,9 @@
 import axios from "axios";
-import { BASE_URL, GET_SEARCH_TRACKING_LIST, GET_SEARCH_TRACKING_STATS } from "@/utils/apiconstant";
+import {
+  BASE_URL,
+  GET_SEARCH_TRACKING_LIST,
+  GET_SEARCH_TRACKING_STATS,
+} from "@/utils/apiconstant";
 
 export const fetchWebsiteSearchTracking = async ({
   setLoading,
@@ -9,6 +13,8 @@ export const fetchWebsiteSearchTracking = async ({
   limit = 10,
   search = "",
   clickedType = "",
+  startDate,
+  endDate,
 }) => {
   try {
     setLoading(true);
@@ -19,6 +25,8 @@ export const fetchWebsiteSearchTracking = async ({
         limit,
         search,
         clickedType,
+        startDate,
+        endDate,
       },
     });
 

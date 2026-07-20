@@ -1,32 +1,30 @@
 import axios from "axios";
-import { BASE_URL, GET_CITY_TRACKING_LIST } from "@/utils/apiconstant";
+import { BASE_URL, GET_ERROR_LOGS_LIST } from "@/utils/apiconstant";
 
-export const fetchUserCitiesTracking = async ({
+export const fetchErrorLogs = async ({
   setLoading,
   setData,
   setPagination,
-  page = 1,
-  limit = 10,
-  search = "",
-  cityName = "",
+  page,
+  search,
+  type,
   startDate,
   endDate,
 }) => {
   try {
     setLoading(true);
 
-    const res = await axios.get(`${BASE_URL}${GET_CITY_TRACKING_LIST}`, {
+    const res = await axios.get(`${BASE_URL}${GET_ERROR_LOGS_LIST}`, {
       params: {
         page,
-        limit,
         search,
-        cityName,
+        type,
         startDate,
         endDate,
       },
     });
 
-    setData(res.data.data.cityList);
+    setData(res.data.data.errorLogs);
     setPagination(res.data.data.pagination);
   } catch (err) {
     console.error(err);

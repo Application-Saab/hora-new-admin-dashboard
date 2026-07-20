@@ -25,6 +25,7 @@ import {
 import { GrAnalytics } from "react-icons/gr";
 import { BsCalendarDate } from "react-icons/bs";
 import { GiFireworkRocket } from "react-icons/gi";
+import { BiErrorCircle } from "react-icons/bi";
 import { useRouter, usePathname } from "next/navigation";
 import { BASE_URL } from "@/utils/apiconstant";
 
@@ -62,6 +63,11 @@ const menuItems = [
         label: "User Cities Tracking",
         icon: <FaCity />,
         url: "/dashboard/user-cities-tracking",
+      },
+      {
+        label: "Error Logs Tracking",
+        icon: <BiErrorCircle />,
+        url: "/dashboard/error-logs-tracking",
       },
     ],
   },

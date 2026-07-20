@@ -36,6 +36,9 @@ const UserCitiesTracking = () => {
 
   const [cityName, setCityName] = useState("");
 
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
   useEffect(() => {
     fetchUserCitiesTracking({
       setLoading,
@@ -44,8 +47,10 @@ const UserCitiesTracking = () => {
       page,
       search: debouncedSearch,
       cityName,
+      startDate,
+      endDate,
     });
-  }, [page, debouncedSearch, cityName]);
+  }, [page, debouncedSearch, cityName, startDate, endDate]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -60,9 +65,20 @@ const UserCitiesTracking = () => {
 
     return new Date(date).toLocaleDateString("en-IN");
   };
+
   return (
     <div className="container">
       <h1 className="header-title">User Cities Tracking</h1>
+
+      {/* {stats && ( */}
+      <div className="stats-container">
+        <div className="card">
+          Total {cityName} Users
+          <br />
+          <strong>{!loading ? pagination?.total : "Loading..." || 0}</strong>
+        </div>
+      </div>
+      {/* )} */}
 
       <div className="filters-container">
         <input
@@ -102,6 +118,45 @@ const UserCitiesTracking = () => {
               </option>
             ))}
         </select>
+
+        <input
+          type="date"
+          value={startDate}
+          onChange={(e) => {
+            setStartDate(e.target.value);
+            setPage(1);
+          }}
+          style={{
+            padding: "7px",
+            marginLeft: "10px",
+          }}
+        />
+
+        <input
+          type="date"
+          value={endDate}
+          onChange={(e) => {
+            setEndDate(e.target.value);
+            setPage(1);
+          }}
+          style={{
+            padding: "7px",
+            marginLeft: "10px",
+          }}
+        />
+
+        <button
+          onClick={() => {
+            setSearch("");
+            setDebouncedSearch("");
+            setCityName("");
+            setStartDate("");
+            setEndDate("");
+            setPage(1);
+          }}
+        >
+          Clear Filters
+        </button>
       </div>
 
       <div className="table-container">
@@ -113,6 +168,7 @@ const UserCitiesTracking = () => {
               <th>City</th>
               <th>Visitor Id</th>
               <th>User Id</th>
+              <th>Is Searched</th>
               <th>Created At</th>
             </tr>
           </thead>
@@ -126,6 +182,7 @@ const UserCitiesTracking = () => {
                   <td>{item.cityName || "N/A"}</td>
                   <td>{item.visitorId || "N/A"}</td>
                   <td>{item?.user?._id || "N/A"}</td>
+                  <td>{item.isSearchedAnything ? "Yes" : "No"}</td>
                   <td>{formatDate(item.createdAt)}</td>
                 </tr>
               ))
