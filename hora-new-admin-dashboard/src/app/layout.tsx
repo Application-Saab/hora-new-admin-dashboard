@@ -21,6 +21,7 @@ import {
   FaSearch,
   FaCity,
   FaPlus,
+  FaMapMarkerAlt,
 } from "react-icons/fa";
 import { GrAnalytics } from "react-icons/gr";
 import { BsCalendarDate } from "react-icons/bs";
@@ -36,6 +37,8 @@ const menuItems = [
 
   
   { label: "User Analysis", icon: <FaClipboardList />, url: "/dashboard/user-analysis" },
+
+  { label: "Pincodes ", icon: <FaMapMarkerAlt />, url: "/dashboard/pincodes" },
 
   // { label: "Wonderland Tracking", icon: <FaClipboardList />, url: "/dashboard/wonderland-tracking" },
 
