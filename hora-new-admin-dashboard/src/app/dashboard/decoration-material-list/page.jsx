@@ -144,7 +144,7 @@ const DishTable = () => {
                 <tr key={dish._id}>
                   <td className="dish-image">
                     <Image
-                      src={`${BASE_URL}/api/uploads/${dish.image}`}
+                      src={`${BASE_URL}/api/uploads/${dish?.images}`}
                       alt={dish.name}
                       className="image"
                       width={40}
