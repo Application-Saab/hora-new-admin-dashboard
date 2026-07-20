@@ -20,7 +20,7 @@ const Capsuletracking = () => {
       return;
     }
 
-    setRetryLoadingRow(index); // Sirf usi row ka loader dikhane ke liye
+    setRetryLoadingRow(index); 
     try {
       const response = await fetch(`${BASE_URL}${DRIVE_FOLDER_UPLOAD}`, {
         method: "POST",
@@ -42,7 +42,6 @@ const Capsuletracking = () => {
       alert(`Images are uploading in background, will reflect on link in less than 1 hour for Order: ${orderId}`);
       console.log("Retry success data:", data);
 
-      // Data successfully hit hone ke baad table data refresh karne ke liye
       fetchOrders();
     } catch (error) {
       console.error("Error in retry logic:", error);
@@ -216,7 +215,6 @@ const Capsuletracking = () => {
                   <tr key={index}>
                     {activeTab === "capsule" ? (
                       (() => {
-                        // ✅ SAFE AND BULLETPROOF DRIVE LINK RESOLUTION
                         let driveUrl = "";
 
                         if (order?.allDriveLinks && order.allDriveLinks.length > 0) {
@@ -298,7 +296,6 @@ const Capsuletracking = () => {
                         );
                       })()
                     ) : (
-                      // User Table Body...
                       <>
                         <td>{order?.phone || "-"}</td>
                         <td>{order?.totalOrders || 0}</td>
