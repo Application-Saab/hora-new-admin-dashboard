@@ -12,7 +12,7 @@ const Capsuletracking = () => {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [retryLoadingRow, setRetryLoadingRow] = useState(null);
-  
+  const [selectedDate, setSelectedDate] = useState("");
 
   const handleRetryDriveUpload = async (orderId, driveUrl, index) => {
     if (!driveUrl) {
@@ -73,6 +73,7 @@ const Capsuletracking = () => {
           page,
           limit: 10,
           search: finalSearch,
+          date:selectedDate,
         });
       } else {
         response = await getCapsuleUsers({
@@ -96,11 +97,12 @@ const Capsuletracking = () => {
   useEffect(() => {
     setPage(1);
     setSearch("");
+    setSelectedDate("");
   }, [activeTab]);
 
   useEffect(() => {
     fetchOrders();
-  }, [page, activeTab, search]);
+  }, [page, activeTab, search, selectedDate]);
 
   const getOrderId = (e) => {
     const orderId1 = 10800 + e;
@@ -136,7 +138,7 @@ const Capsuletracking = () => {
           </button>
         </div>
 
-        <div style={{ marginBottom: "20px" }}>
+        <div style={{ marginBottom: "20px", display: "flex", gap: "10px" }}>
           <input
             type="text"
             placeholder={
@@ -156,6 +158,27 @@ const Capsuletracking = () => {
               border: "1px solid #ccc"
             }}
           />
+
+          {activeTab === "capsule" && (
+            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+              <div>
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => {
+                    setSelectedDate(e.target.value);
+                    setPage(1);
+                  }}
+                  style={{
+                    padding: "8px",
+                    borderRadius: "5px",
+                    border: "1px solid #ccc"
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
         </div>
 
         <div className="table-wrapper">
@@ -169,16 +192,16 @@ const Capsuletracking = () => {
                   <th>Capsule Link</th>
                   <th>Total Photos</th>
                   <th>Total From Drive</th>
+                  <th>Total Registered users</th>
+                  <th>Face Counts</th>
                   <th>Face Recognition</th>
                   <th>Folders</th>
                   <th>Total Likes</th>
                   <th>Downloaded</th>
                   <th>Total Image Shared</th>
                   <th>Capsule Share Count</th>
-                  <th>Total Registered users</th>
                   <th>Locker Image Count</th>
                   <th>Times link opened</th>
-                  <th>Face Counts</th>
                   <th>First Device Type</th>
                   <th>Second Device Type</th>
                   
@@ -278,16 +301,16 @@ const Capsuletracking = () => {
                                 </button>
                               </div>
                             </td>
+                            <td>{order?.counts?.totalViews || 0}</td>
+                            <td>{order?.counts?.totalPersonCount || 0}</td>
                             <td>{order?.counts?.faceRecognitionCount || 0}</td>
                             <td>{order?.counts?.otherSubFoldersCount || 0}</td>
                             <td>{order?.counts?.totalLikes || 0}</td>
                             <td>{order?.counts?.totalDownloads || 0}</td>
                             <td>{order?.counts?.totalShares || 0}</td>
                             <td>{order?.counts?.shareCapsuleClicks || 0}</td>
-                            <td>{order?.counts?.totalViews || 0}</td>
                             <td>{order?.counts?.lockerImageCount || 0}</td>
                             <td>{order?.counts?.totalClicks || 0}</td>
-                            <td>{order?.counts?.totalPersonCount || 0}</td>
                             <td>{order?.counts?.firstDeviceType || "-"}</td>
                             <td>{order?.counts?.secondDeviceType || "-"}</td>
                             

@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import "./pincodes.css";
 import { BASE_URL } from "@/utils/apiconstant";
 
+const CATEGORY_OPTIONS = ["Photography", "Decoration", "Chef", "Food"];
+
 export default function Pincodes() {
     const [pincodes, setPincodes] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -20,10 +22,10 @@ export default function Pincodes() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedRecord, setSelectedRecord] = useState(null);
     const [newStatus, setNewStatus] = useState("");
-    const [newCategory, setNewCategory] = useState("");
+
+    const [newCategory, setNewCategory] = useState([]);
     const [updateLoading, setUpdateLoading] = useState(false);
 
-    // Ek hi useEffect dependency array handle karega components ke load aur page updates ko
     useEffect(() => {
         const fetchPincodes = async () => {
             try {
@@ -50,7 +52,6 @@ export default function Pincodes() {
         fetchPincodes();
     }, [page, search, statusFilter, categoryFilter]);
 
-    // Filters change hone par direct page status 1 reset karein
     const handleSearchChange = (e) => {
         setSearch(e.target.value);
         setPage(1);
@@ -69,8 +70,24 @@ export default function Pincodes() {
     const handleEditClick = (record) => {
         setSelectedRecord(record);
         setNewStatus(record.status || "Servisable");
-        setNewCategory(record.category || "");
+
+        if (Array.isArray(record.category)) {
+            setNewCategory(record.category);
+        } else if (typeof record.category === "string" && record.category.trim() !== "") {
+            setNewCategory([record.category]);
+        } else {
+            setNewCategory([]);
+        }
+
         setIsModalOpen(true);
+    };
+
+    const handleCategoryCheckboxChange = (cat) => {
+        setNewCategory((prevCategories) =>
+            prevCategories.includes(cat)
+                ? prevCategories.filter((c) => c !== cat)
+                : [...prevCategories, cat]
+        );
     };
 
     const handleStatusUpdate = async (e) => {
@@ -112,6 +129,16 @@ export default function Pincodes() {
         }
     };
 
+    const renderCategoryCell = (catData) => {
+        if (Array.isArray(catData) && catData.length > 0) {
+            return catData.join(", ");
+        }
+        if (typeof catData === "string" && catData.trim() !== "") {
+            return catData;
+        }
+        return "N/A";
+    };
+
     return (
         <div className="pincode-container">
             <div className="header-section-pincode">
@@ -134,10 +161,9 @@ export default function Pincodes() {
                     style={{ padding: "8px", border: "1px solid #ccc", borderRadius: "4px", minWidth: "150px" }}
                 >
                     <option value="">All Categories</option>
-                    <option value="Photography">Photography</option>
-                    <option value="Decoration">Decoration</option>
-                    <option value="Chef">Chef</option>
-                    <option value="Food">Food</option>
+                    {CATEGORY_OPTIONS.map((cat) => (
+                        <option key={cat} value={cat}>{cat}</option>
+                    ))}
                 </select>
 
                 <select
@@ -152,7 +178,7 @@ export default function Pincodes() {
                 </select>
             </div>
 
-            {/* Table structure hamesha stable rahegi aur table header visible rahega */}
+            {/* TABLE */}
             <div className="table-wrapper">
                 <table className="pincode-table">
                     <thead>
@@ -169,7 +195,7 @@ export default function Pincodes() {
                         {loading ? (
                             <tr>
                                 <td colSpan="5" style={{ textAlign: "center", padding: "30px", fontSize: "16px", color: "#666" }}>
-                                Loading...
+                                    Loading...
                                 </td>
                             </tr>
                         ) : pincodes.length === 0 ? (
@@ -181,7 +207,7 @@ export default function Pincodes() {
                                 <tr key={row._id}>
                                     <td>{row.pincode || "N/A"}</td>
                                     <td>{row.city || "N/A"}</td>
-                                    <td>{row.category && row.category.trim() !== "" ? row.category : "N/A"}</td>
+                                    <td>{renderCategoryCell(row.category)}</td>
                                     <td>
                                         <span className={`status-badge ${row.status?.toLowerCase().replace(/\s+/g, '-')}`}>
                                             {row.status || "N/A"}
@@ -216,20 +242,23 @@ export default function Pincodes() {
                         <p><strong>City:</strong> {selectedRecord?.city} ({selectedRecord?.pincode})</p>
 
                         <form onSubmit={handleStatusUpdate}>
-                            <div style={{ marginBottom: "12px" }}>
-                                <label htmlFor="category-select" style={{ fontWeight: "bold", display: "block" }}>Category:</label>
-                                <select
-                                    id="category-select"
-                                    value={newCategory}
-                                    onChange={(e) => setNewCategory(e.target.value)}
-                                    style={{ width: "100%", padding: "8px", marginTop: "4px" }}
-                                >
-                                    <option value="">Select Category</option>
-                                    <option value="Photography">Photography</option>
-                                    <option value="Decoration">Decoration</option>
-                                    <option value="Chef">Chef</option>
-                                    <option value="Food">Food</option>
-                                </select>
+                            <div style={{ marginBottom: "16px" }}>
+                                <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>
+                                    Categories (Select Multiple):
+                                </label>
+                                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                                    {CATEGORY_OPTIONS.map((cat) => (
+                                        <label key={cat} style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
+                                            <input
+                                                type="checkbox"
+                                                value={cat}
+                                                checked={newCategory.includes(cat)}
+                                                onChange={() => handleCategoryCheckboxChange(cat)}
+                                            />
+                                            {cat}
+                                        </label>
+                                    ))}
+                                </div>
                             </div>
 
                             <div style={{ marginBottom: "20px" }}>
