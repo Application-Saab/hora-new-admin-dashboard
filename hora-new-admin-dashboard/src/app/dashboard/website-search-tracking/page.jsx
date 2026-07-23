@@ -25,11 +25,7 @@ const WebsiteSearchTracking = () => {
   const [endDate, setEndDate] = useState("");
 
   useEffect(() => {
-    fetchWebsiteSearchStats(
-      setStats,
-      startDate,
-      endDate,
-    );
+    fetchWebsiteSearchStats(setStats, startDate, endDate);
   }, [startDate, endDate]);
 
   useEffect(() => {
@@ -67,6 +63,8 @@ const WebsiteSearchTracking = () => {
     });
     return time;
   };
+  const sortedUrl = (data) =>
+    data ? "/" + data?.split("/")?.slice(2)?.join("/") : "N/A";
   return (
     <div className="container">
       <h1 className="header-title">Website Search Tracking</h1>
@@ -129,33 +127,46 @@ const WebsiteSearchTracking = () => {
           <option value="product">Product</option>
           <option value="category">Category</option>
         </select>
-        <input
-          type="date"
-          value={startDate}
-          onChange={(e) => {
-            setStartDate(e.target.value);
-            setPage(1);
-          }}
-          style={{
-            marginLeft: "10px",
-            padding: "6px",
-          }}
-        />
+        <div style={{ display: "block" }}>
+          <div>Start Date</div>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => {
+              setStartDate(e.target.value);
+              setPage(1);
+            }}
+            style={{
+              marginLeft: "10px",
+              padding: "6px",
+            }}
+          />
+        </div>
 
-        <input
-          type="date"
-          value={endDate}
-          onChange={(e) => {
-            setEndDate(e.target.value);
-            setPage(1);
-          }}
-          style={{
-            marginLeft: "10px",
-            padding: "6px",
-          }}
-        />
+        <div style={{ display: "block" }}>
+          <div>End Date</div>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => {
+              setEndDate(e.target.value);
+              setPage(1);
+            }}
+            style={{
+              marginLeft: "10px",
+              padding: "6px",
+            }}
+          />
+        </div>
 
         <button
+          style={{
+            backgroundColor: "blue",
+            color: "white",
+            border: "none",
+            borderRadius: "10px",
+            cursor: "pointer",
+          }}
           onClick={() => {
             setSearch("");
             setDebouncedSearch("");
@@ -164,13 +175,8 @@ const WebsiteSearchTracking = () => {
             setEndDate("");
             setPage(1);
           }}
-          style={{
-            marginLeft: "10px",
-            padding: "6px 12px",
-            cursor: "pointer",
-          }}
         >
-          Clear Filter
+          Clear Filters
         </button>
       </div>
 
@@ -181,10 +187,11 @@ const WebsiteSearchTracking = () => {
               <th>User Name</th>
               <th>Phone</th>
               <th>Search Term</th>
+              <th>Page</th>
               <th>Clicked Title</th>
               <th>Clicked Type</th>
               <th>Clicked Item Id</th>
-              <th>Created At</th>
+              <th>Create Date</th>
               <th>Visitor Id</th>
               <th>User Id</th>
             </tr>
@@ -197,6 +204,7 @@ const WebsiteSearchTracking = () => {
                   <td>{item?.user?.name || "N/A"}</td>
                   <td>{item?.user?.phone || "N/A"}</td>
                   <td>{item.searchTerm || "N/A"}</td>
+                  <td>{sortedUrl(item.pageName)}</td>
                   <td>{item.clickedTitle || "N/A"}</td>
                   <td>{item.clickedType || "N/A"}</td>
                   <td>{item.clickedItemId || "N/A"}</td>

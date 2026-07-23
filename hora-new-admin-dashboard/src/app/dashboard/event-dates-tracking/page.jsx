@@ -65,36 +65,49 @@ const EventDatesTracking = () => {
           }}
           style={{ width: "300px", marginRight: "10px", padding: "5px" }}
         />
-         
-        <input
-          type="date"
-          value={startDate}
-          max={endDate || undefined}
-          onChange={(e) => {
-            setStartDate(e.target.value);
-            setPage(1);
-          }}
-        />
 
-        <input
-          type="date"
-          value={endDate}
-          min={startDate}
-          onChange={(e) => {
-            setEndDate(e.target.value);
-            setPage(1);
-          }}
-        />
+        <div style={{ display: "block" }}>
+          <div>Event Start Date</div>
+          <input
+            type="date"
+            value={startDate}
+            max={endDate || undefined}
+            onChange={(e) => {
+              setStartDate(e.target.value);
+              setPage(1);
+            }}
+          />
+        </div>
+
+        <div style={{ display: "block" }}>
+          <div>Event End Date</div>
+          <input
+            type="date"
+            value={endDate}
+            min={startDate}
+            onChange={(e) => {
+              setEndDate(e.target.value);
+              setPage(1);
+            }}
+          />
+        </div>
 
         {(startDate || endDate) && (
           <button
+           style={{
+            backgroundColor : "blue",
+            color : "white",
+            border : 'none',
+            borderRadius : "10px",
+            cursor : "pointer"
+           }}
             onClick={() => {
               setStartDate("");
               setEndDate("");
               setPage(1);
             }}
           >
-            Clear
+            Clear Filters
           </button>
         )}
       </div>
@@ -108,7 +121,7 @@ const EventDatesTracking = () => {
               <th>Pincode</th>
               <th>Event Title</th>
               <th>Event Date</th>
-              <th>Created At</th>
+              <th>Create Date</th>
               <th>Visitor ID</th>
               <th>User ID</th>
             </tr>

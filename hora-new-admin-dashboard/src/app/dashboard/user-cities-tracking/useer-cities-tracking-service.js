@@ -11,6 +11,11 @@ export const fetchUserCitiesTracking = async ({
   cityName = "",
   startDate,
   endDate,
+  setStats,
+  searchedUsers,
+  eventDateUsers,
+  whatsappUsers,
+  loggedInUsers
 }) => {
   try {
     setLoading(true);
@@ -23,11 +28,16 @@ export const fetchUserCitiesTracking = async ({
         cityName,
         startDate,
         endDate,
+        searchedUsers,
+        eventDateUsers,
+        whatsappUsers,
+        loggedInUsers
       },
     });
 
-    setData(res.data.data.cityList);
+    setData(res.data.data.cityList || []);
     setPagination(res.data.data.pagination);
+    setStats(res.data.data.stats);
   } catch (err) {
     console.error(err);
   } finally {

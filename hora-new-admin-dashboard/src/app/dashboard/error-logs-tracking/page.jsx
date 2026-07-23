@@ -148,7 +148,7 @@ const ErrorLogs = () => {
                 <th>Browser</th>
                 <th>Device</th>
                 <th>User/Visitor ID</th>
-                <th>Created At</th>
+                <th>Create Date</th>
                 <th>Action</th>
               </tr>
             </thead>
