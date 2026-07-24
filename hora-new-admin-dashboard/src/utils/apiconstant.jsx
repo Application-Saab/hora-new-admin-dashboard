@@ -68,3 +68,4 @@ export const GET_EVENT_DATES_LISTING_DATA = '/api/event-dates/list';
 export const GET_SEARCH_TRACKING_LIST = '/api/search-tracking/tracking-list';
 export const GET_SEARCH_TRACKING_STATS = '/api/search-tracking/stats'
 export const GET_CITY_TRACKING_LIST = "/api/event-dates/city-tracking-list";
+export const GET_ERROR_LOGS_LIST = "/api/error-log/list";
