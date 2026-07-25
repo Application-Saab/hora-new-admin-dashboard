@@ -38,6 +38,18 @@ const UserCitiesTracking = () => {
 
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [stats, setStats] = useState();
+  const [filters, setFilters] = useState({
+    searchedUsers: false,
+    eventDateUsers: false,
+    whatsappUsers: false,
+    loggedInUsers: false,
+  });
+  console.log(
+    "%c [ stats ]",
+    "font-size:13px; background:pink; color:#bf2c9f;",
+    stats,
+  );
 
   useEffect(() => {
     fetchUserCitiesTracking({
@@ -49,8 +61,24 @@ const UserCitiesTracking = () => {
       cityName,
       startDate,
       endDate,
+      setStats,
+
+      searchedUsers: filters.searchedUsers,
+      eventDateUsers: filters.eventDateUsers,
+      whatsappUsers: filters.whatsappUsers,
+      loggedInUsers: filters.loggedInUsers
     });
-  }, [page, debouncedSearch, cityName, startDate, endDate]);
+  }, [
+    page,
+    debouncedSearch,
+    cityName,
+    startDate,
+    endDate,
+    filters.searchedUsers,
+    filters.eventDateUsers,
+    filters.whatsappUsers,
+    filters.loggedInUsers
+  ]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -73,9 +101,42 @@ const UserCitiesTracking = () => {
       {/* {stats && ( */}
       <div className="stats-container">
         <div className="card">
-          Total {cityName} Users
+          Total {cityName} Users | Total {cityName} Logged-In
           <br />
-          <strong>{!loading ? pagination?.total : "Loading..." || 0}</strong>
+          <strong>{!loading ? pagination?.total : "Loading..." || 0} | {stats?.loggedInUsers}</strong>
+        </div>
+        <div className="card">
+          Total {cityName} Users City Selected
+          <br />
+          <strong>
+            {!loading
+              ? pagination?.total - stats?.notSelectedUsers
+              : "Loading..." || 0}
+          </strong>
+        </div>
+        <div className="card">
+          Used search | Total Searches
+          <br />
+          <strong>
+            {!loading ? stats?.searchedUsers : "Loading..."} |{" "}
+            {stats?.totalSearchCount}
+          </strong>
+        </div>
+        <div className="card">
+          Users give dates | Total dates
+          <br />
+          <strong>
+            {!loading ? stats?.eventDateUsers : "Loading..."} |{" "}
+            {stats?.totalEventDateCount}
+          </strong>
+        </div>
+        <div className="card">
+          Users Clicked Whatsapp | Total Clicks
+          <br />
+          <strong>
+            {!loading ? stats?.whatsappUsers : "Loading..."} |{" "}
+            {stats?.totalWhatsappClicks}
+          </strong>
         </div>
       </div>
       {/* )} */}
@@ -118,21 +179,26 @@ const UserCitiesTracking = () => {
               </option>
             ))}
         </select>
+        <div style={{ display: "block" }}>
+          <div>Start Date</div>
+          <input
+            type="date"
+            name="startDate"
+            value={startDate}
+            onChange={(e) => {
+              setStartDate(e.target.value);
+              setPage(1);
+            }}
+            style={{
+              padding: "7px",
+              marginLeft: "10px",
+            }}
+          />
+        </div>
 
-        <input
-          type="date"
-          value={startDate}
-          onChange={(e) => {
-            setStartDate(e.target.value);
-            setPage(1);
-          }}
-          style={{
-            padding: "7px",
-            marginLeft: "10px",
-          }}
-        />
-
-        <input
+       <div style={{display: 'block'}}>
+        <div>End Date</div>
+         <input
           type="date"
           value={endDate}
           onChange={(e) => {
@@ -144,8 +210,15 @@ const UserCitiesTracking = () => {
             marginLeft: "10px",
           }}
         />
+       </div>
 
         <button
+          style={{backgroundColor: 'blue',
+            color: "white",
+            border: 'none',
+            borderRadius: "10px",
+            cursor: "pointer"
+          }}
           onClick={() => {
             setSearch("");
             setDebouncedSearch("");
@@ -153,10 +226,86 @@ const UserCitiesTracking = () => {
             setStartDate("");
             setEndDate("");
             setPage(1);
+            setFilters({
+              searchedUsers: false,
+              eventDateUsers: false,
+              whatsappUsers: false,
+            });
           }}
         >
           Clear Filters
         </button>
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          gap: "20px",
+          alignItems: "center",
+          // marginLeft: "15px",
+          flexWrap: "wrap",
+          marginBottom: "20px",
+        }}
+      >
+        <label>
+          <input
+            type="checkbox"
+            checked={filters.searchedUsers}
+            onChange={(e) => {
+              setFilters((prev) => ({
+                ...prev,
+                searchedUsers: e.target.checked,
+              }));
+              setPage(1);
+            }}
+          />{" "}
+          Only Searched Users
+        </label>
+
+        <label>
+          <input
+            type="checkbox"
+            checked={filters.eventDateUsers}
+            onChange={(e) => {
+              setFilters((prev) => ({
+                ...prev,
+                eventDateUsers: e.target.checked,
+              }));
+              setPage(1);
+            }}
+          />{" "}
+          Only Event Date Users
+        </label>
+
+        <label>
+          <input
+            type="checkbox"
+            checked={filters.whatsappUsers}
+            onChange={(e) => {
+              setFilters((prev) => ({
+                ...prev,
+                whatsappUsers: e.target.checked,
+              }));
+              setPage(1);
+            }}
+          />{" "}
+          Only WhatsApp Users
+        </label>
+
+        <label>
+          <input
+            type="checkbox"
+            checked={filters.loggedInUsers}
+            onChange={(e) => {
+              setFilters((prev) => ({
+                ...prev,
+                loggedInUsers: e.target.checked,
+              }));
+              setPage(1);
+            }}
+          />{" "}
+          Only Loggedin users
+        </label>
       </div>
 
       <div className="table-container">
@@ -168,8 +317,10 @@ const UserCitiesTracking = () => {
               <th>City</th>
               <th>Visitor Id</th>
               <th>User Id</th>
-              <th>Is Searched</th>
-              <th>Created At</th>
+              <th>Search Count</th>
+              <th>Event Date Count</th>
+              <th>Whatsapp Clicks</th>
+              <th>Create Date</th>
             </tr>
           </thead>
 
@@ -182,14 +333,16 @@ const UserCitiesTracking = () => {
                   <td>{item.cityName || "N/A"}</td>
                   <td>{item.visitorId || "N/A"}</td>
                   <td>{item?.user?._id || "N/A"}</td>
-                  <td>{item.isSearchedAnything ? "Yes" : "No"}</td>
+                  <td>{item.searchCount || 0}</td>
+                  <td>{item.eventDateCount || 0}</td>
+                  <td>{item?.clickCounts?.whatsapp || 0}</td>
                   <td>{formatDate(item.createdAt)}</td>
                 </tr>
               ))
             ) : (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={9}
                   className="no-data"
                   style={{ textAlign: "center" }}
                 >
