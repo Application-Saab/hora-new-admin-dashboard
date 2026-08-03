@@ -27,6 +27,7 @@ const OrderList = () => {
   const itemsPerPage = 10;
   const [searchTerm, setSearchTerm] = useState("");
   const [popupOpen, setPopupOpen] = useState(false);
+  const [refetchData, setRefetchData] = useState(false);
   const [selectedPhoneNumber, setSelectedPhoneNumber] = useState("");
   const [selectedOrderType, setSelectedOrderType] = useState("");
   const [selectedActiveStatus, setSelectedActiveStatus] = useState("");
@@ -194,6 +195,7 @@ const [order, setOrder] = useState(null);
     selectedDate,
     selectedPhoneNumber,
     createdAtDate,
+    refetchData
   ]);
 
   const getOrderStatus = (orderStatusValue) => {
@@ -957,6 +959,7 @@ useEffect(() => {
                 <th>Extra Pay</th>
                 <th>Edit Order</th>
                 <th>Add EventName</th>
+                <th>Wonderland Event Name</th>
                 <th>Add Order Image</th>
                 <th>Add Multiple Drive links</th>
               </tr>
@@ -1241,6 +1244,7 @@ useEffect(() => {
                           Add Event
                         </button>
                       )}
+                      
 
                       {isOpen && (
                         <div
@@ -1316,7 +1320,7 @@ useEffect(() => {
                         </div>
                       )}
                     </td>
-                    {/* <td>s</td> */}
+                    <td>{order?.eventData?.[0]?.hostName}</td>
                     <>
                     <td>
                         {order.type === 1 ? (
@@ -1909,6 +1913,7 @@ const filledCountForCounter = trueDynamicApiKeys.filter((linkType) => {
           actionPopupChefOrder_Id={actionPopupChefOrder_Id}
           order={order}
           onClose={closePopup}
+          setRefetchData={setRefetchData}
         />
       </div>
       {/* vendor extra amount popup */}
@@ -1998,6 +2003,7 @@ const filledCountForCounter = trueDynamicApiKeys.filter((linkType) => {
         open={showChecklist}
         data={callChecklistData}
         onClose={() => setShowChecklist(false)}
+        setRefetchData={setRefetchData}
       />
       {/* Details MODAL */}
 {linkPopupOpen && selectedOrder && (
