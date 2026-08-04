@@ -2,9 +2,9 @@ import Image from "next/image";
 import "./Actionpopup.css";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import * as XLSX from "xlsx"; 
+import * as XLSX from "xlsx";
 import CallChecklistContent from "./CallChecklistContent";
-import { BASE_URL } from "@/utils/apiconstant";
+import { BASE_URL, CREATE_WONDERLAND_EVENT } from "@/utils/apiconstant";
 
 const categoryMap = {
   "65a92271ae1586258ccd0628": "anniversary-decoration",
@@ -28,12 +28,61 @@ const ActionPopup = ({
   actionPopupChefOrder_Id,
   onClose,
   order,
+  setRefetchData
 }) => {
   const [popupType, setPopupType] = useState("");
   const [orderDetails, setOrderDetails] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showChecklist, setShowChecklist] = useState(false);
+  const [wonderlandevent, setWonderlandEvent] = useState(
+    order?.eventData?.[0]?.hostName || "",
+  );
+  const [eventResponse, setEventResponse] = useState({});
+  const [eventFormData, setEventFormData] = useState({
+    userId: "",
+    eventType: "",
+    hostName: "",
+    eventDate: "",
+    eventTime: "",
+    location: "",
+    googleMapLink: "",
+    fromInternational: "NO",
+    orderId: "",
+  });
+
+  useEffect(() => {
+    setEventFormData((prev) => ({
+      ...prev,
+      userId: order?.fromId || "",
+      eventType: order?.eventName || "",
+      hostName: wonderlandevent || "",
+      // eventDate: (order?.order_date && convertToISO(order?.order_date)) || "",
+      eventDate: order?.order_date || "",
+      location: order?.addressId[0]?.address1 || "",
+      googleMapLink: order?.addressId[0]?.address2 || "",
+    }));
+  }, [order, wonderlandevent]);
+
+  const createWonderlandEvent = async () => {
+    try {
+      const response = await axios.post(
+        `${BASE_URL}${CREATE_WONDERLAND_EVENT}`,
+        {
+          ...eventFormData,
+          orderId: order?.order_id || "",
+        },
+      );
+      if (response.status === 200 || response.status === 201) {
+        setEventResponse(response?.data?.data);
+        setRefetchData(true)
+      }
+    } catch (error) {
+      console.error("Error creating wonderland event:", error);
+      alert("There was an error creating wonderland event.");
+    }
+  };
+
   let apiUrl = "";
 
   let foodDeliveryInclusions = [
@@ -105,7 +154,7 @@ const ActionPopup = ({
   }, [actionPopupOrderId, actionPopupChefOrderId, actionPopupOrderType]);
 
   const handleCallClick = () => {
-    setShowChecklist(true); 
+    setShowChecklist(true);
   };
 
   const getOrderId = (e) => {
@@ -149,7 +198,7 @@ const ActionPopup = ({
     const withoutSpecialChars = withoutTags.replace(/&#[^;]*;/g, " "); // Replace &# sequences with space
     const statements = withoutSpecialChars.split("<div>");
     const inclusionItems = statements.flatMap((statement) =>
-      statement.split("-").filter((item) => item.trim() !== "")
+      statement.split("-").filter((item) => item.trim() !== ""),
     );
     const inclusionList = inclusionItems.map((item, index) => (
       <li key={index} className="inclusionstyle">
@@ -293,7 +342,6 @@ const ActionPopup = ({
                 ) : orderDetails?.type === 7 ? (
                   <ul className="order-items-list">
                     {orderDetails?.selecteditems?.map((item) => {
-
                       const d2 = orderDetails.items;
                       const dishDetails =
                         orderDetails?.userOrderDishImageArray[0]?.[item.name] ||
@@ -379,7 +427,7 @@ const ActionPopup = ({
                               </span>
                             </div>
                           </li>
-                        )
+                        ),
                       )}
                     </ul>
                   </div>
@@ -394,7 +442,7 @@ const ActionPopup = ({
                       <li key={index}>{item}</li>
                     ))}
                     {orderDetails?.userOrderDishImageArray[0].hasOwnProperty(
-                      "water/disposal"
+                      "water/disposal",
                     ) && <li>Disposable plates,Bisleri Water bottles</li>}
                   </ul>
                 </>
@@ -464,6 +512,47 @@ const ActionPopup = ({
               >
                 Vendor Food Report
               </button>
+              <div
+                style={{
+                  marginTop: "10px",
+                  backgroundColor: "#e46363",
+                  padding: "10px",
+                  borderRadius: "5px",
+                }}
+              >
+                <div style={{ marginBottom: "10px" }}>
+                  Wonderland Event Name
+                </div>
+                {order?.eventData?.length > 0 || eventResponse?._id ? (
+                  <div>
+                    {order?.eventData[0]?.hostName || eventResponse?.hostName}
+                  </div>
+                ) : (
+                  <div>
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="Enter Event Name"
+                        className="event-name-field"
+                        onChange={(e) => {
+                          setWonderlandEvent(e.target.value);
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <button
+                        type="button"
+                        className="event-submit-btn"
+                        onClick={() => {
+                          createWonderlandEvent();
+                        }}
+                      >
+                        Add Event Name
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -473,7 +562,6 @@ const ActionPopup = ({
 
   // share on whatsapp========================
   const sendOrderDetailsToWhatsAppDoc = () => {
-
     // Extract order details
     const orderId = getOrderId(orderDetails?.order_id) || "N/A";
     const orderDate =
@@ -486,7 +574,7 @@ const ActionPopup = ({
     const addOnItems = orderDetails?.add_on || [];
     // Create a Google Maps link
     const googleMapUrl = `https://www.google.com/maps/search/?q=${encodeURIComponent(
-      googleMapLocation
+      googleMapLocation,
     )}`;
     // Calculate balance amount
     let balanceAmount = 0;
@@ -546,7 +634,6 @@ const ActionPopup = ({
     try {
       setLoading(true);
 
-
       const orderId = getOrderId(orderDetails?.order_id) || "N/A";
       const orderDate =
         new Date(orderDetails?.order_date).toLocaleDateString() || "N/A";
@@ -556,7 +643,7 @@ const ActionPopup = ({
       const decorationComments = orderDetails?.decoration_comments || "N/A";
       const addOnItems = orderDetails?.add_on || [];
       const googleMapUrl = `https://www.google.com/maps/search/?q=${encodeURIComponent(
-        googleMapLocation
+        googleMapLocation,
       )}`;
 
       let balanceAmount = orderDetails.total_amount;
@@ -584,7 +671,7 @@ const ActionPopup = ({
         const encodedName = encodeURIComponent(dec.name);
         try {
           const response = await axios.get(
-            `${BASE_URL}/api/Decoration/searchByName/${encodedName}`
+            `${BASE_URL}/api/Decoration/searchByName/${encodedName}`,
           );
           const product = response.data.data?.[0];
 
@@ -648,7 +735,7 @@ const ActionPopup = ({
     }
 
     const googleMapUrl = `https://www.google.com/maps/search/?q=${encodeURIComponent(
-      googleMapLocation
+      googleMapLocation,
     )}`;
 
     let balanceAmount = 0;
@@ -699,7 +786,6 @@ const ActionPopup = ({
   };
 
   const sendOrderDetailsToWhatsAppchef = (orderDetails) => {
-
     // Extract details
     const orderId = getOrderId(orderDetails?.order_id) || "N/A";
     const orderDate =
@@ -710,7 +796,7 @@ const ActionPopup = ({
     const decorationComments = orderDetails?.decoration_comments || "N/A";
     // Create a Google Maps link
     const googleMapUrl = `https://www.google.com/maps/search/?q=${encodeURIComponent(
-      googleMapLocation
+      googleMapLocation,
     )}`;
     // Calculate balance amount
     const balanceAmount =
@@ -741,7 +827,6 @@ const ActionPopup = ({
   };
 
   const sendOrderDetailsToWhatsAppFood = (orderDetails) => {
-
     // Extract details
     const orderId = getOrderId(orderDetails?.order_id) || "N/A";
     const orderDate =
@@ -759,7 +844,7 @@ const ActionPopup = ({
     // Create a Google Maps link
     const googleMapUrl = orderDetails?.addressId?.address2
       ? `https://www.google.com/maps/search/?q=${encodeURIComponent(
-          googleMapLocation
+          googleMapLocation,
         )}`
       : "NA";
     // Calculate balance amount
@@ -772,7 +857,7 @@ const ActionPopup = ({
 
       if (disposalInclusion) {
         inclusions.push(
-          "Disposable plates, Fork, Spoon, Tissue papers, Bisleri Water bottles"
+          "Disposable plates, Fork, Spoon, Tissue papers, Bisleri Water bottles",
         );
       }
     } else if (orderType === "Live Catering") {
@@ -1107,7 +1192,7 @@ const ActionPopup = ({
                         <p>
                           <strong>Order Date:</strong>{" "}
                           {new Date(
-                            orderDetails.order_date
+                            orderDetails.order_date,
                           ).toLocaleDateString()}
                         </p>
                         <p>
@@ -1133,66 +1218,63 @@ const ActionPopup = ({
 
                         <p>
                           <strong>Order Add On:</strong>{" "}
-                            {orderDetails.add_on.length > 0 ? (
-                              <ul>
-                                {orderDetails.add_on.map((item, index) => {
+                          {orderDetails.add_on.length > 0 ? (
+                            <ul>
+                              {orderDetails.add_on.map((item, index) => {
+                                let rawTitle =
+                                  item?.name || item?.title || "Addon";
 
-                                  let rawTitle =
-                                    item?.name ||
-                                    item?.title ||
-                                    "Addon";
+                                const quantityMatch =
+                                  rawTitle.match(/Quantity\s*(\d+)/i);
 
-                                  const quantityMatch = rawTitle.match(/Quantity\s*(\d+)/i);
+                                const extractedQuantity = quantityMatch
+                                  ? Number(quantityMatch[1])
+                                  : null;
 
-                                  const extractedQuantity = quantityMatch
-                                    ? Number(quantityMatch[1])
-                                    : null;
+                                const cleanedTitle = rawTitle
+                                  .replace(/\s*-\s*Quantity\s*\d+/i, "")
+                                  .trim();
 
-                                  const cleanedTitle = rawTitle.replace(
-                                    /\s*-\s*Quantity\s*\d+/i,
-                                    ""
-                                  ).trim();
+                                const quantity =
+                                  extractedQuantity ||
+                                  Number(item?.quantity) ||
+                                  1;
 
-                                  const quantity =
-                                    extractedQuantity || Number(item?.quantity) || 1;
+                                const price = Number(item?.price || 0);
 
-                                  const price = Number(
-                                    item?.price ||
-                                    0
-                                  );
+                                const total = item?.totalPrice
+                                  ? Number(item.totalPrice)
+                                  : price * quantity;
 
-                                  const total =
-                                    item?.totalPrice
-                                      ? Number(item.totalPrice)
-                                      : price * quantity;
-
-                                  return (
-                                    <li key={index}>
-                                      <strong>{cleanedTitle}</strong>
-                                      : ₹{price} x {quantity} = ₹{total}
-                                    </li>
-                                  );
-                                })}
-                              </ul>
-                            ) : (
-                              "N/A"
-                            )}
+                                return (
+                                  <li key={index}>
+                                    <strong>{cleanedTitle}</strong>: ₹{price} x{" "}
+                                    {quantity} = ₹{total}
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          ) : (
+                            "N/A"
+                          )}
                         </p>
 
                         <p>
                           <strong>Order decoration_comments:</strong>{" "}
                           {orderDetails.decoration_comments ? (
-                         <ol style={{ paddingLeft: '20px', marginTop: '5px' }}>
-                         {orderDetails.decoration_comments
-                         .split('\n')
-                         .filter(comment => comment.trim() !== '')
-                         .map((comment, index) => (
-                        <li key={index}>{comment}</li>
-                      ))}
-                   </ol>
-                  ) : (
-                 <span>N/A</span>
-                )}
+                            <ol
+                              style={{ paddingLeft: "20px", marginTop: "5px" }}
+                            >
+                              {orderDetails.decoration_comments
+                                .split("\n")
+                                .filter((comment) => comment.trim() !== "")
+                                .map((comment, index) => (
+                                  <li key={index}>{comment}</li>
+                                ))}
+                            </ol>
+                          ) : (
+                            <span>N/A</span>
+                          )}
                         </p>
                         <p>
                           {orderDetails.items.map((item, itemIndex) => {
@@ -1210,7 +1292,10 @@ const ActionPopup = ({
                                 <p>
                                   <Image
                                     src={`${BASE_URL}/api/uploads/compressed_webp/${
-                                      dec.featured_images?.length > 0 && dec.featured_images[0]?.fileName?.split(".")[0]
+                                      dec.featured_images?.length > 0 &&
+                                      dec.featured_images[0]?.fileName?.split(
+                                        ".",
+                                      )[0]
                                     }.webp`}
                                     width={200}
                                     height={200}
@@ -1237,10 +1322,13 @@ const ActionPopup = ({
                           >
                             {orderDetails.userOrderDishImageArray.map(
                               (image, index) => {
-                                const imageName = typeof image === "string" ? image : image?.image;
+                                const imageName =
+                                  typeof image === "string"
+                                    ? image
+                                    : image?.image;
                                 const imageUrl = imageName
-                                ? `${BASE_URL}/api/uploads/${imageName}`
-                                 : "";             
+                                  ? `${BASE_URL}/api/uploads/${imageName}`
+                                  : "";
                                 return (
                                   <div
                                     key={index}
@@ -1261,7 +1349,7 @@ const ActionPopup = ({
                                     />
                                   </div>
                                 );
-                              }
+                              },
                             )}
                           </div>
                         </p>
@@ -1272,82 +1360,130 @@ const ActionPopup = ({
 
                     <div className="order-summary-box">
                       <div className="text-center">
-                      <h3 style={{ color: "white" }}>Order Summary</h3>
-                      <ul style={{ listStyleType: "none", padding: 0 }}>
-                        <li className="priceList">
-                          <strong>Total Amount:</strong>{" "}
-                          <span>₹{orderDetails.total_amount}</span>
-                        </li>
-                        <li className="priceList">
-                          <strong>Advance Amount:</strong>{" "}
-                          <span>₹{orderDetails.advance_amount || 0}</span>
-                        </li>
+                        <h3 style={{ color: "white" }}>Order Summary</h3>
+                        <ul style={{ listStyleType: "none", padding: 0 }}>
+                          <li className="priceList">
+                            <strong>Total Amount:</strong>{" "}
+                            <span>₹{orderDetails.total_amount}</span>
+                          </li>
+                          <li className="priceList">
+                            <strong>Advance Amount:</strong>{" "}
+                            <span>₹{orderDetails.advance_amount || 0}</span>
+                          </li>
 
-                        <li className="priceList">
-                          <span>Balance Amount</span>
-                          <span>
-                            {orderDetails?.total_amount &&
-                            orderDetails?.advance_amount
-                              ? `₹ ${
-                                  orderDetails.total_amount -
-                                  orderDetails.advance_amount
-                                }`
-                              : "N/A"}
-                          </span>
-                        </li>
+                          <li className="priceList">
+                            <span>Balance Amount</span>
+                            <span>
+                              {orderDetails?.total_amount &&
+                              orderDetails?.advance_amount
+                                ? `₹ ${
+                                    orderDetails.total_amount -
+                                    orderDetails.advance_amount
+                                  }`
+                                : "N/A"}
+                            </span>
+                          </li>
 
-                        <li className="priceList">
-                          <strong>Discount:</strong>{" "}
-                          <span>₹{orderDetails.discount || 0}</span>
-                        </li>
-                        <li className="priceList">
-                          <strong>GST:</strong>{" "}
-                          <span>₹{orderDetails.gst || 0}</span>
-                        </li>
-                        <li className="priceList">
-                          <strong>Per person cost:</strong>{" "}
-                          <span>₹{orderDetails.per_person_cost || 0}</span>
-                        </li>
-                      </ul>
-                      <button
-                        className="startbutton"
-                        onClick={sendOrderDetailsToWhatsAppDoc}
-                      >
-                        Copy Order Summary(For Vendor)
-                      </button>
-
-                      <button
-                        className="startbutton"
-                        onClick={sendOrderDetailsToWhatsAppDocUsers}
-                      >
-                        Copy Order Summary(For Users)
-                      </button>
-                      {order?.type === 1 &&
-                        <div style={{ marginTop: '10px' }}>
-                        {order?.call_checklist_exists === true ? 
-                        <button className="view-btn call-btn" onClick={() => handleCallClick()}>
-                          View Call Checklist
+                          <li className="priceList">
+                            <strong>Discount:</strong>{" "}
+                            <span>₹{orderDetails.discount || 0}</span>
+                          </li>
+                          <li className="priceList">
+                            <strong>GST:</strong>{" "}
+                            <span>₹{orderDetails.gst || 0}</span>
+                          </li>
+                          <li className="priceList">
+                            <strong>Per person cost:</strong>{" "}
+                            <span>₹{orderDetails.per_person_cost || 0}</span>
+                          </li>
+                        </ul>
+                        <button
+                          className="startbutton"
+                          onClick={sendOrderDetailsToWhatsAppDoc}
+                        >
+                          Copy Order Summary(For Vendor)
                         </button>
-                        :
-                        <button className="call-btn add-btn" onClick={() => handleCallClick()}>
-                          Call Checklist
+
+                        <button
+                          className="startbutton"
+                          onClick={sendOrderDetailsToWhatsAppDocUsers}
+                        >
+                          Copy Order Summary(For Users)
                         </button>
-                        }
+                        <div
+                          style={{
+                            marginTop: "10px",
+                            backgroundColor: "#e46363",
+                            padding: "10px",
+                            borderRadius: "5px",
+                          }}
+                        >
+                          <div style={{ marginBottom: "10px" }}>
+                            Wonderland Event Name
+                          </div>
+                          {order?.eventData?.length > 0 ||
+                          eventResponse?._id ? (
+                            <div>
+                              {order?.eventData[0]?.hostName ||
+                                eventResponse?.hostName}
+                            </div>
+                          ) : (
+                            <div>
+                              <div>
+                                <input
+                                  type="text"
+                                  placeholder="Enter Event Name"
+                                  className="event-name-field"
+                                  onChange={(e) => {
+                                    setWonderlandEvent(e.target.value);
+                                  }}
+                                />
+                              </div>
+                              <div>
+                                <button
+                                  type="button"
+                                  className="event-submit-btn"
+                                  onClick={() => {
+                                    createWonderlandEvent();
+                                  }}
+                                >
+                                  Add Event Name
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                        }
-                    </div>      
-
-                    {showChecklist && (
-                      <div className="callChecklist-container">
-                       <CallChecklistContent
-                       open={showChecklist}
-                       onClose={() => setShowChecklist(false)}
-                       data={order}
-                       cancleBtnColor="#fff"
-                      />
+                        {order?.type === 1 && (
+                          <div style={{ marginTop: "10px" }}>
+                            {order?.call_checklist_exists === true ? (
+                              <button
+                                className="view-btn call-btn"
+                                onClick={() => handleCallClick()}
+                              >
+                                View Call Checklist
+                              </button>
+                            ) : (
+                              <button
+                                className="call-btn add-btn"
+                                onClick={() => handleCallClick()}
+                              >
+                                Call Checklist
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </div>
-                    )}
 
+                      {showChecklist && (
+                        <div className="callChecklist-container">
+                          <CallChecklistContent
+                            open={showChecklist}
+                            onClose={() => setShowChecklist(false)}
+                            data={order}
+                            cancleBtnColor="#fff"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1388,7 +1524,7 @@ const ActionPopup = ({
                         <p>
                           <strong>Order Date:</strong>{" "}
                           {new Date(
-                            orderDetails.order_date
+                            orderDetails.order_date,
                           ).toLocaleDateString()}
                         </p>
                         <p>
@@ -1414,17 +1550,19 @@ const ActionPopup = ({
                         <p>
                           <strong>Order Comments:</strong>{" "}
                           {orderDetails.decoration_comments ? (
-                         <ol style={{ paddingLeft: '20px', marginTop: '5px' }}>
-                          {orderDetails.decoration_comments
-                          .split('\n')
-                          .filter(comment => comment.trim() !== '')
-                          .map((comment, index) => (
-                          <li key={index}>{comment}</li>
-                          ))}
-                        </ol>
-                      ) : (
-                     <span>N/A</span>
-                      )}
+                            <ol
+                              style={{ paddingLeft: "20px", marginTop: "5px" }}
+                            >
+                              {orderDetails.decoration_comments
+                                .split("\n")
+                                .filter((comment) => comment.trim() !== "")
+                                .map((comment, index) => (
+                                  <li key={index}>{comment}</li>
+                                ))}
+                            </ol>
+                          ) : (
+                            <span>N/A</span>
+                          )}
                         </p>
 
                         <div
@@ -1493,127 +1631,126 @@ const ActionPopup = ({
                               <strong>ADD-ON:</strong>
                             </p>
 
-                              {(() => {
-                                const addOns =
-                                  Array.isArray(orderDetails?.add_on) &&
-                                  orderDetails.add_on.filter(
-                                    (item) =>
-                                      item?.title ||
-                                      item?.name
-                                  );
+                            {(() => {
+                              const addOns =
+                                Array.isArray(orderDetails?.add_on) &&
+                                orderDetails.add_on.filter(
+                                  (item) => item?.title || item?.name,
+                                );
 
-
-                                if (!addOns || addOns.length === 0) {
-                                  return (
-                                    <p
-                                      style={{
-                                        fontSize: "12px",
-                                        color: "#6b7280",
-                                        marginTop: "6px",
-                                      }}
-                                    >
-                                      N/A
-                                    </p>
-                                  );
-                                }
-
+                              if (!addOns || addOns.length === 0) {
                                 return (
-                                  <div
+                                  <p
                                     style={{
-                                      display: "grid",
-                                      gridTemplateColumns:
-                                        "repeat(auto-fit, minmax(200px, 1fr))",
-                                      gap: "16px",
+                                      fontSize: "12px",
+                                      color: "#6b7280",
+                                      marginTop: "6px",
                                     }}
                                   >
-                                    {addOns.map((item, index) => (
+                                    N/A
+                                  </p>
+                                );
+                              }
+
+                              return (
+                                <div
+                                  style={{
+                                    display: "grid",
+                                    gridTemplateColumns:
+                                      "repeat(auto-fit, minmax(200px, 1fr))",
+                                    gap: "16px",
+                                  }}
+                                >
+                                  {addOns.map((item, index) => (
+                                    <div
+                                      key={index}
+                                      style={{
+                                        backgroundColor: "#fff",
+                                        borderRadius: "10px",
+                                        boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+                                        overflow: "hidden",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        border: "1px solid #e5e7eb",
+                                      }}
+                                    >
+                                      {/* Image */}
                                       <div
-                                        key={index}
                                         style={{
-                                          backgroundColor: "#fff",
-                                          borderRadius: "10px",
-                                          boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+                                          width: "100%",
+                                          height: "120px",
                                           overflow: "hidden",
-                                          display: "flex",
-                                          flexDirection: "column",
-                                          border: "1px solid #e5e7eb",
                                         }}
                                       >
-                                        {/* Image */}
-                                        <div
+                                        <Image
+                                          src={
+                                            item?.image
+                                              ? `https://horaservices.com/api/uploads/compressed_webp/${item.image}`
+                                              : "/placeholder.png"
+                                          }
+                                          alt={item?.title}
+                                          width={240}
+                                          height={120}
                                           style={{
                                             width: "100%",
-                                            height: "120px",
-                                            overflow: "hidden",
+                                            height: "100%",
+                                            objectFit: "cover",
                                           }}
-                                        >
-                                          <Image
-                                            src={
-                                              item?.image
-                                                ? `https://horaservices.com/api/uploads/compressed_webp/${item.image}`
-                                                : "/placeholder.png"
-                                            }
-                                            alt={item?.title}
-                                            width={240}
-                                            height={120}
-                                            style={{
-                                              width: "100%",
-                                              height: "100%",
-                                              objectFit: "cover",
-                                            }}
-                                          />
-                                        </div>
-
-                                        {/* Info */}
-                                        <div
-                                          style={{
-                                            padding: "10px",
-                                            textAlign: "left",
-                                          }}
-                                        >
-                                          <p
-                                            style={{
-                                              fontSize: "13px",
-                                              fontWeight: "600",
-                                              color: "#059669",
-                                            }}
-                                          >
-                                            {item?.price} x {item?.quantity || 1} = ₹{item?.totalPrice || item?.price}
-                                          </p>
-                                          <h3
-                                            style={{
-                                              fontSize: "13px",
-                                              fontWeight: "500",
-                                              color: "#1f2937",
-                                              marginTop: "2px",
-                                            }}
-                                          >
-                                            Name :  {item?.title}
-                                          </h3>
-                                          <p
-                                            style={{
-                                              fontSize: "12px",
-                                              color: "#6b7280",
-                                              marginTop: "4px",
-                                            }}
-                                          >
-                                            Discription : {item?.description || "N/A"}
-                                          </p>
-                                          <p
-                                            style={{
-                                              fontSize: "12px",
-                                              color: "#6b7280",
-                                              marginTop: "4px",
-                                            }}
-                                          >
-                                            quantity - {item?.quantity || 1}
-                                          </p>
-                                        </div>
+                                        />
                                       </div>
-                                    ))}
-                                  </div>
-                                );
-                              })()}
+
+                                      {/* Info */}
+                                      <div
+                                        style={{
+                                          padding: "10px",
+                                          textAlign: "left",
+                                        }}
+                                      >
+                                        <p
+                                          style={{
+                                            fontSize: "13px",
+                                            fontWeight: "600",
+                                            color: "#059669",
+                                          }}
+                                        >
+                                          {item?.price} x {item?.quantity || 1}{" "}
+                                          = ₹{item?.totalPrice || item?.price}
+                                        </p>
+                                        <h3
+                                          style={{
+                                            fontSize: "13px",
+                                            fontWeight: "500",
+                                            color: "#1f2937",
+                                            marginTop: "2px",
+                                          }}
+                                        >
+                                          Name : {item?.title}
+                                        </h3>
+                                        <p
+                                          style={{
+                                            fontSize: "12px",
+                                            color: "#6b7280",
+                                            marginTop: "4px",
+                                          }}
+                                        >
+                                          Discription :{" "}
+                                          {item?.description || "N/A"}
+                                        </p>
+                                        <p
+                                          style={{
+                                            fontSize: "12px",
+                                            color: "#6b7280",
+                                            marginTop: "4px",
+                                          }}
+                                        >
+                                          quantity - {item?.quantity || 1}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              );
+                            })()}
                           </div>
                         </div>
 
@@ -1660,6 +1797,48 @@ const ActionPopup = ({
                         <br />
                         (For Vendor)
                       </button>
+                      <div
+                        style={{
+                          marginTop: "10px",
+                          backgroundColor: "#e46363",
+                          padding: "10px",
+                          borderRadius: "5px",
+                        }}
+                      >
+                        <div style={{ marginBottom: "10px" }}>
+                          Wonderland Event Name
+                        </div>
+                        {order?.eventData?.length > 0 || eventResponse?._id ? (
+                          <div>
+                            {order?.eventData[0]?.hostName ||
+                              eventResponse?.hostName}
+                          </div>
+                        ) : (
+                          <div>
+                            <div>
+                              <input
+                                type="text"
+                                placeholder="Enter Event Name"
+                                className="event-name-field"
+                                onChange={(e) => {
+                                  setWonderlandEvent(e.target.value);
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <button
+                                type="button"
+                                className="event-submit-btn"
+                                onClick={() => {
+                                  createWonderlandEvent();
+                                }}
+                              >
+                                Add Event Name
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

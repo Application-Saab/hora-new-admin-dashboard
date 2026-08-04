@@ -59,12 +59,6 @@ const AddDecOrder = () => {
   const [messageColor, setMessageColor] = useState("");
 
   const [customerId, setCustomerId] = useState(null);
-  console.log(
-    "%c [ customerId ]",
-    "font-size:13px; background:pink; color:#bf2c9f;",
-    customerId,
-  );
-
   const [showPopup, setShowPopup] = useState(false); // For toggling the popup
   const [newCustomerName, setNewCustomerName] = useState(""); // For name input
   const [newCustomerPhone, setNewCustomerPhone] = useState("");
@@ -77,11 +71,6 @@ const AddDecOrder = () => {
   // Wonderland Event states
   const [wonderlandevent, setWonderlandEvent] = useState("");
   const [eventResponse, setEventResponse] = useState({});
-  console.log(
-    "%c [ eventResponse ]",
-    "font-size:13px; background:pink; color:#bf2c9f;",
-    eventResponse,
-  );
   const [eventFormData, setEventFormData] = useState({
     userId: "",
     eventType: "",

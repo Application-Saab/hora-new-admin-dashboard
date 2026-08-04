@@ -246,6 +246,11 @@ const Capsuletracking = () => {
                           driveUrl = order?.orderDriveLink || "";
                         }
 
+                        const isDisabled =
+                          retryLoadingRow === index ||
+                          !driveUrl ||
+                          order?.counts?.totalPersonCount !== 0;
+
                         return (
                           <>
                             <td>{getOrderId(order?.order_id)}</td>
@@ -282,22 +287,36 @@ const Capsuletracking = () => {
                                 )}
 
                                 <button
-                                  onClick={() => handleRetryDriveUpload(order?.order_id, driveUrl, index)}
-                                  disabled={retryLoadingRow === index || !driveUrl}
+                                  onClick={() =>
+                                    handleRetryDriveUpload(
+                                      order?.order_id,
+                                      driveUrl,
+                                      index,
+                                    )
+                                  }
+                                  disabled={isDisabled}
                                   style={{
                                     padding: "4px 8px",
                                     fontSize: "12px",
-                                    backgroundColor: (order?.counts?.totalPersonCount === 0 || !order?.counts?.totalPersonCount)
-                                      ? "#d9534f"
-                                      : "#97538c",
+                                    backgroundColor:
+                                      order?.counts?.totalPersonCount === 0 ||
+                                      !order?.counts?.totalPersonCount
+                                        ? "#d9534f"
+                                        : "#97538c",
                                     color: "#fff",
                                     border: "none",
                                     borderRadius: "4px",
                                     display: "flex",
-                                    alignItems: "center"
+                                    alignItems: "center",
+                                    opacity: isDisabled ? 0.5 : 1,
+                                    cursor: isDisabled
+                                      ? "not-allowed"
+                                      : "pointer",
                                   }}
                                 >
-                                  {retryLoadingRow === index ? "Retring..." : "Retry"}
+                                  {retryLoadingRow === index
+                                    ? "Retring..."
+                                    : "Retry"}
                                 </button>
                               </div>
                             </td>
