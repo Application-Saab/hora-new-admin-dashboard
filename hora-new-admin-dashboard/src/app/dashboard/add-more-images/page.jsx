@@ -84,10 +84,12 @@ const AddMoreImages = () => {
 
     const uploadPromises = selectedFiles.map(async (file) => {
       const formData = new FormData();
+      const fileId = crypto.randomUUID();
       formData.append("files", file);
       formData.append("customerId", customerId);
       formData.append("phoneNo", phoneNumber);
       formData.append("folderName", folderName);
+      formData.append("fileId", fileId);
 
       newStatuses[file.name] = "Uploading...";
       setUploadStatuses({ ...newStatuses });

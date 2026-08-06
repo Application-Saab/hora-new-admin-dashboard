@@ -53,11 +53,13 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages }
   };
 
   const uploadImage = async (image) => {
+    const fileId = crypto.randomUUID();
     const formData = new FormData();
     formData.append("folderName", folderTitle);
     formData.append("customerId", customerId);
     formData.append("files", image.file, image.name);
     formData.append("phoneNo", enteredNum);
+    formData.append("fileId", fileId);
 
     try {
       const response = await fetch(`${MEDIA_PROCESSING_BASE_URL}/upload`, {
@@ -188,10 +190,12 @@ const ImageUpload = ({ folderTitle, customerId, enteredNum, refetchDriveImages }
 
     for (let file of fileArray) {
       const formData = new FormData();
+      const fileId = crypto.randomUUID();
       formData.append("files", file);
       formData.append("customerId", customerId);
       formData.append("folderName", folderTitle);
       formData.append("phoneNo", enteredNum);
+      formData.append("fileId", fileId);
 
       try {
         const res = await fetch(`${MEDIA_PROCESSING_BASE_URL}/upload`, {
