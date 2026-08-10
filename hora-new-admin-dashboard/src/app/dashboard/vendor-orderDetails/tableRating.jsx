@@ -16,22 +16,18 @@ const AdminRatingsTable = () => {
 
   const handleDropdownChange = (e) => {
     const value = e.target.value;
-    console.log(value, "selected value");
     setSelectedKey(value);
   };
 
   const handleSubmit = async () => {
-    console.log(selectedKey,"selectedkey");
     if (!selectedKey) {
       alert('Please select an order type first.');
       return;
     }
-    console.log("handleSubmit started");
     setLoading(true);
     setAdminData([]);
   
     try {
-      console.log("Fetching orders with date range from backend...");
       
       // Prepare the request payload
       const requestPayload = {
@@ -54,10 +50,8 @@ const AdminRatingsTable = () => {
       );
   
       const orders = ordersRes.data.data?.order || [];
-      console.log("Fetched orders:", orders);
   
       if (orders.length === 0) {
-        console.log("No orders found. Stopping process.");
         setLoading(false);
         return;
       }
@@ -65,7 +59,6 @@ const AdminRatingsTable = () => {
       const vendorOrdersMap = {};
       let vendorDetailsMap = {};
       orders.forEach(order => {
-        console.log(`Processing order for vendor: ${order.toId}`);
         if (!order.toId) return;
         
         if (!vendorOrdersMap[order.toId]) {
@@ -74,12 +67,24 @@ const AdminRatingsTable = () => {
             "0-6": 0,
             "6-8": 0,
             "9-10": 0,
+            Positive: 0,
+            Negative: 0,
             "No-Rating": 0,
             totalOrders: 0,
             order_locality: order.order_locality || selectedCity || "Unknown",
           };
         }
         vendorOrdersMap[order.toId].totalOrders++;
+
+
+        // Review Status
+        if (order.reviewStatus === "positive") {
+          vendorOrdersMap[order.toId].Positive++;
+        }
+        else if (order.reviewStatus === "negative") {
+          vendorOrdersMap[order.toId].Negative++;
+        }
+
   
         if (Array.isArray(order.userReviewRatingArray) && order.userReviewRatingArray.length > 0) {
           let validRatingFound = false;
@@ -104,16 +109,11 @@ const AdminRatingsTable = () => {
       });
   
       const vendorIds = Object.keys(vendorOrdersMap);
-      console.log("Vendor IDs extracted:", vendorIds);
   
       if (vendorIds.length === 0) {
-        console.log("No vendors found in orders.");
         setLoading(false);
         return;
       }
-  
-      console.log("Fetching all vendors at once...");
-      let vendorNamesMap = {};
   
       try {
         const adminUserRes = await axios.post(
@@ -126,7 +126,6 @@ const AdminRatingsTable = () => {
         );
   
         const users = adminUserRes.data.data?.users || [];
-        console.log("Fetched all supplier users:", users);
   
         // Create a map of vendorId -> vendor name
         vendorDetailsMap = users.reduce((acc, user) => {
@@ -141,7 +140,6 @@ const AdminRatingsTable = () => {
         //   return acc;
         // }, {});
   
-        console.log("Mapped Vendor Names:", vendorNamesMap);
       } catch (error) {
         console.error("Error fetching vendor list:", error);
       }
@@ -158,7 +156,6 @@ const AdminRatingsTable = () => {
       //   name: vendorNamesMap[vendorId] || "Unknown Vendor",
       // }));
   
-      console.log("Final Vendor Data:", vendorData);
   
       // Updating state
       setAdminData((prevData) => [...prevData, ...vendorData]);
@@ -167,7 +164,6 @@ const AdminRatingsTable = () => {
       console.error("Error fetching data:", error);
     }
   
-    console.log("handleSubmit completed");
     setLoading(false);
   };
   
@@ -252,6 +248,8 @@ const AdminRatingsTable = () => {
               <th className="border p-2 w-12">0-6</th>
               <th className="border p-2 w-12">6-8</th>
               <th className="border p-2 w-14">9-10</th>
+              <th className="border p-2 w-14">Positive review</th>
+              <th className="border p-2 w-14">Negative review</th>
               <th className="border p-2 w-28">No-Rating</th>
               <th className="border p-2">Order Locality</th>
             </tr>
@@ -266,6 +264,8 @@ const AdminRatingsTable = () => {
                   <td className="border p-2">{admin["0-6"]}</td>
                   <td className="border p-2">{admin["6-8"]}</td>
                   <td className="border p-2">{admin["9-10"]}</td>
+                  <td className="border p-2">{admin.Positive}</td>
+                  <td className="border p-2">{admin.Negative}</td>
                   <td className="border p-2">{admin["No-Rating"]}</td>
                   <td className="border p-2">{admin.order_locality}</td>
                 </tr>
