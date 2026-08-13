@@ -192,6 +192,7 @@ const Capsuletracking = () => {
                   <th>Capsule Link</th>
                   <th>Total Photos</th>
                   <th>Total From Drive</th>
+                  <th>Status</th>
                   <th>Total Registered users</th>
                   <th>Face Counts</th>
                   <th>Face Recognition</th>
@@ -246,7 +247,7 @@ const Capsuletracking = () => {
                           driveUrl = order?.orderDriveLink || "";
                         }
 
-                        const isDisabled =
+                        const isDisabled = order?.folderStatus === "processing" ||
                           retryLoadingRow === index ||
                           !driveUrl ||
                           order?.counts?.totalPersonCount !== 0;
@@ -319,6 +320,31 @@ const Capsuletracking = () => {
                                     : "Retry"}
                                 </button>
                               </div>
+                            </td>
+                            <td>
+                              <span
+                                style={{
+                                  padding: "4px 8px",
+                                  borderRadius: "4px",
+                                  fontSize: "12px",
+                                  fontWeight: "500",
+                                  textTransform: "capitalize",
+                                  backgroundColor:
+                                    order?.folderStatus === "done"
+                                      ? "#d4edda"
+                                      : order?.folderStatus === "processing"
+                                        ? "#fff3cd"
+                                        : "#f8d7da",
+                                  color:
+                                    order?.folderStatus === "done"
+                                      ? "#155724"
+                                      : order?.folderStatus === "processing"
+                                        ? "#856404"
+                                        : "#721c24",
+                                }}
+                              >
+                                {order?.folderStatus || "pending"}
+                              </span>
                             </td>
                             <td>{order?.counts?.totalViews || 0}</td>
                             <td>{order?.counts?.totalPersonCount || 0}</td>
