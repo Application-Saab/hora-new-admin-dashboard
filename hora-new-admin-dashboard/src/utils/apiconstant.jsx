@@ -1,4 +1,4 @@
-export const BASE_URL = 'http://localhost:9000';
+export const BASE_URL = 'https://horaservices.com';
 export const MEDIA_PROCESSING_BASE_URL = 'https://horaservices.com/media-api';
 export const GET_DECORATION_BY_NAME = '/api/Decoration/searchByName/';
 export const CONFIRM_ORDER_ENDPOINT = "/api/order/add";
