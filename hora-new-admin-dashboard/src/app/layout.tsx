@@ -150,6 +150,11 @@ const menuItems = [
       { label: "Capsule Tracking",
          icon: <FaClipboardList />,
           url: "/dashboard/capsule-tracking" },
+      {
+        label: "Theme",
+        icon: <FaClipboardList />,
+        url: "/dashboard/photography-theme"
+      }, 
     ],
   },
 
