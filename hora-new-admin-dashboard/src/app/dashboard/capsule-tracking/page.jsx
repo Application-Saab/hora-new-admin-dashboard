@@ -247,10 +247,7 @@ const Capsuletracking = () => {
                           driveUrl = order?.orderDriveLink || "";
                         }
 
-                        const isDisabled = order?.folderStatus === "processing" ||
-                          retryLoadingRow === index ||
-                          !driveUrl ||
-                          order?.counts?.totalPersonCount !== 0;
+
 
                         return (
                           <>
@@ -295,7 +292,6 @@ const Capsuletracking = () => {
                                       index,
                                     )
                                   }
-                                  disabled={isDisabled}
                                   style={{
                                     padding: "4px 8px",
                                     fontSize: "12px",
@@ -309,10 +305,7 @@ const Capsuletracking = () => {
                                     borderRadius: "4px",
                                     display: "flex",
                                     alignItems: "center",
-                                    opacity: isDisabled ? 0.5 : 1,
-                                    cursor: isDisabled
-                                      ? "not-allowed"
-                                      : "pointer",
+                                    cursor: "pointer",
                                   }}
                                 >
                                   {retryLoadingRow === index
