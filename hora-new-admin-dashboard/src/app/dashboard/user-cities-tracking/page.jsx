@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "./user-cities-tracking.css";
 import { fetchUserCitiesTracking } from "./useer-cities-tracking-service";
 
@@ -24,6 +24,16 @@ const CityNames = {
   pune: "Pune",
 };
 
+const DEFAULT_FILTERS = {
+  cityName: "",
+  startDate: "",
+  endDate: "",
+  searchedUsers: false,
+  eventDateUsers: false,
+  whatsappUsers: false,
+  loggedInUsers: false,
+};
+
 const UserCitiesTracking = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -34,122 +44,245 @@ const UserCitiesTracking = () => {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  const [cityName, setCityName] = useState("");
+  const [pendingFilters, setPendingFilters] = useState(DEFAULT_FILTERS);
 
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [appliedFilters, setAppliedFilters] =
+    useState(DEFAULT_FILTERS);
+
   const [stats, setStats] = useState();
-  const [filters, setFilters] = useState({
-    searchedUsers: false,
-    eventDateUsers: false,
-    whatsappUsers: false,
-    loggedInUsers: false,
-  });
-  console.log(
-    "%c [ stats ]",
-    "font-size:13px; background:pink; color:#bf2c9f;",
-    stats,
-  );
 
-  useEffect(() => {
-    fetchUserCitiesTracking({
-      setLoading,
-      setData,
-      setPagination,
-      page,
-      search: debouncedSearch,
-      cityName,
-      startDate,
-      endDate,
-      setStats,
+  const hasPendingFilterChanges = useMemo(() => {
+    return (
+      JSON.stringify(pendingFilters) !==
+      JSON.stringify(appliedFilters)
+    );
+  }, [pendingFilters, appliedFilters]);
 
-      searchedUsers: filters.searchedUsers,
-      eventDateUsers: filters.eventDateUsers,
-      whatsappUsers: filters.whatsappUsers,
-      loggedInUsers: filters.loggedInUsers
-    });
-  }, [
-    page,
-    debouncedSearch,
-    cityName,
-    startDate,
-    endDate,
-    filters.searchedUsers,
-    filters.eventDateUsers,
-    filters.whatsappUsers,
-    filters.loggedInUsers
-  ]);
+  const hasAppliedFilters = useMemo(() => {
+    return (
+      appliedFilters.cityName !== "" ||
+      appliedFilters.startDate !== "" ||
+      appliedFilters.endDate !== "" ||
+      appliedFilters.searchedUsers === true ||
+      appliedFilters.eventDateUsers === true ||
+      appliedFilters.whatsappUsers === true ||
+      appliedFilters.loggedInUsers === true
+    );
+  }, [appliedFilters]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
     }, 500);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+    };
   }, [search]);
 
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetchUserCitiesTracking({
+      setLoading,
+      setData,
+      setPagination,
+      setStats,
+
+      page,
+      search: debouncedSearch,
+
+      cityName: appliedFilters.cityName,
+      startDate: appliedFilters.startDate,
+      endDate: appliedFilters.endDate,
+
+      searchedUsers: appliedFilters.searchedUsers,
+      eventDateUsers: appliedFilters.eventDateUsers,
+      whatsappUsers: appliedFilters.whatsappUsers,
+      loggedInUsers: appliedFilters.loggedInUsers,
+
+      signal: controller.signal,
+    });
+
+    return () => {
+      controller.abort();
+    };
+  }, [
+    page,
+    debouncedSearch,
+
+    appliedFilters.cityName,
+    appliedFilters.startDate,
+    appliedFilters.endDate,
+
+    appliedFilters.searchedUsers,
+    appliedFilters.eventDateUsers,
+    appliedFilters.whatsappUsers,
+    appliedFilters.loggedInUsers,
+  ]);
+
+  const handleSearchChange = (e) => {
+    setSearch(e.target.value);
+    setPage(1);
+  };
+
+  const handleCityChange = (e) => {
+    setPendingFilters((prev) => ({
+      ...prev,
+      cityName: e.target.value,
+    }));
+  };
+
+  const handleStartDateChange = (e) => {
+    setPendingFilters((prev) => ({
+      ...prev,
+      startDate: e.target.value,
+    }));
+  };
+
+  const handleEndDateChange = (e) => {
+    setPendingFilters((prev) => ({
+      ...prev,
+      endDate: e.target.value,
+    }));
+  };
+
+  const handleCheckboxChange = (filterName, checked) => {
+    setPendingFilters((prev) => ({
+      ...prev,
+      [filterName]: checked,
+    }));
+  };
+
+  const handleApplyFilters = () => {
+    if (!hasPendingFilterChanges) {
+      return;
+    }
+
+    setPage(1);
+
+    setAppliedFilters({
+      ...pendingFilters,
+    });
+  };
+
+  const handleClearFilters = () => {
+    if (!hasAppliedFilters) {
+      return;
+    }
+
+    setSearch("");
+    setDebouncedSearch("");
+
+    setPage(1);
+
+    setPendingFilters({
+      ...DEFAULT_FILTERS,
+    });
+
+    setAppliedFilters({
+      ...DEFAULT_FILTERS,
+    });
+  };
+
   const formatDate = (date) => {
-    if (!date) return "N/A";
+    if (!date) {
+      return "N/A";
+    }
 
     return new Date(date).toLocaleDateString("en-IN");
   };
 
   return (
     <div className="container">
-      <h1 className="header-title">User Cities Tracking</h1>
+      <h1 className="header-title">
+        User Cities Tracking
+      </h1>
 
-      {/* {stats && ( */}
       <div className="stats-container">
         <div className="card">
-          Total {cityName} Users | Total {cityName} Logged-In
+          Total {appliedFilters.cityName || "All"} Users | Total{" "}
+          {appliedFilters.cityName || "All"} Logged-In
           <br />
-          <strong>{!loading ? pagination?.total : "Loading..." || 0} | {stats?.loggedInUsers}</strong>
-        </div>
-        <div className="card">
-          Total {cityName} Users City Selected
-          <br />
+
           <strong>
             {!loading
-              ? pagination?.total - stats?.notSelectedUsers
-              : "Loading..." || 0}
+              ? pagination?.total ?? 0
+              : "Loading..."}{" "}
+            |{" "}
+            {!loading
+              ? stats?.loggedInUsers ?? 0
+              : "Loading..."}
           </strong>
         </div>
+
+        <div className="card">
+          Total {appliedFilters.cityName || "All"} Users City Selected
+          <br />
+
+          <strong>
+            {!loading
+              ? Math.max(
+                  0,
+                  (pagination?.total ?? 0) -
+                    (stats?.notSelectedUsers ?? 0)
+                )
+              : "Loading..."}
+          </strong>
+        </div>
+
         <div className="card">
           Used search | Total Searches
           <br />
+
           <strong>
-            {!loading ? stats?.searchedUsers : "Loading..."} |{" "}
-            {stats?.totalSearchCount}
+            {!loading
+              ? stats?.searchedUsers ?? 0
+              : "Loading..."}{" "}
+            |{" "}
+            {!loading
+              ? stats?.totalSearchCount ?? 0
+              : "Loading..."}
           </strong>
         </div>
+
         <div className="card">
           Users give dates | Total dates
           <br />
+
           <strong>
-            {!loading ? stats?.eventDateUsers : "Loading..."} |{" "}
-            {stats?.totalEventDateCount}
+            {!loading
+              ? stats?.eventDateUsers ?? 0
+              : "Loading..."}{" "}
+            |{" "}
+            {!loading
+              ? stats?.totalEventDateCount ?? 0
+              : "Loading..."}
           </strong>
         </div>
+
         <div className="card">
           Users Clicked Whatsapp | Total Clicks
           <br />
+
           <strong>
-            {!loading ? stats?.whatsappUsers : "Loading..."} |{" "}
-            {stats?.totalWhatsappClicks}
+            {!loading
+              ? stats?.whatsappUsers ?? 0
+              : "Loading..."}{" "}
+            |{" "}
+            {!loading
+              ? stats?.totalWhatsappClicks ?? 0
+              : "Loading..."}
           </strong>
         </div>
       </div>
-      {/* )} */}
 
       <div className="filters-container">
         <input
           type="text"
           placeholder="Search by user name or phone"
           value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
+          onChange={handleSearchChange}
           style={{
             width: "300px",
             marginRight: "10px",
@@ -158,11 +291,8 @@ const UserCitiesTracking = () => {
         />
 
         <select
-          value={cityName}
-          onChange={(e) => {
-            setCityName(e.target.value);
-            setPage(1);
-          }}
+          value={pendingFilters.cityName}
+          onChange={handleCityChange}
           style={{
             width: "220px",
             padding: "7px",
@@ -172,23 +302,24 @@ const UserCitiesTracking = () => {
           <option value="">All Cities</option>
 
           {Object.entries(CityNames)
-            .sort((a, b) => a[1].localeCompare(b[1]))
+            .sort((a, b) =>
+              a[1].localeCompare(b[1])
+            )
             .map(([key, value]) => (
               <option key={key} value={value}>
                 {value}
               </option>
             ))}
         </select>
+
         <div style={{ display: "block" }}>
           <div>Start Date</div>
+
           <input
             type="date"
             name="startDate"
-            value={startDate}
-            onChange={(e) => {
-              setStartDate(e.target.value);
-              setPage(1);
-            }}
+            value={pendingFilters.startDate}
+            onChange={handleStartDateChange}
             style={{
               padding: "7px",
               marginLeft: "10px",
@@ -196,41 +327,60 @@ const UserCitiesTracking = () => {
           />
         </div>
 
-       <div style={{display: 'block'}}>
-        <div>End Date</div>
-         <input
-          type="date"
-          value={endDate}
-          onChange={(e) => {
-            setEndDate(e.target.value);
-            setPage(1);
-          }}
-          style={{
-            padding: "7px",
-            marginLeft: "10px",
-          }}
-        />
-       </div>
+        <div style={{ display: "block" }}>
+          <div>End Date</div>
+
+          <input
+            type="date"
+            name="endDate"
+            value={pendingFilters.endDate}
+            onChange={handleEndDateChange}
+            style={{
+              padding: "7px",
+              marginLeft: "10px",
+            }}
+          />
+        </div>
 
         <button
-          style={{backgroundColor: 'blue',
-            color: "white",
-            border: 'none',
+          type="button"
+          disabled={!hasPendingFilterChanges}
+          onClick={handleApplyFilters}
+          style={{
+            backgroundColor: hasPendingFilterChanges
+              ? "green"
+              : "#ccc",
+            color: hasPendingFilterChanges
+              ? "white"
+              : "#666",
+            border: "none",
             borderRadius: "10px",
-            cursor: "pointer"
+            padding: "8px 15px",
+            cursor: hasPendingFilterChanges
+              ? "pointer"
+              : "not-allowed",
           }}
-          onClick={() => {
-            setSearch("");
-            setDebouncedSearch("");
-            setCityName("");
-            setStartDate("");
-            setEndDate("");
-            setPage(1);
-            setFilters({
-              searchedUsers: false,
-              eventDateUsers: false,
-              whatsappUsers: false,
-            });
+        >
+          Apply Filters
+        </button>
+
+        <button
+          type="button"
+          disabled={!hasAppliedFilters}
+          onClick={handleClearFilters}
+          style={{
+            backgroundColor: hasAppliedFilters
+              ? "blue"
+              : "#ccc",
+            color: hasAppliedFilters
+              ? "white"
+              : "#666",
+            border: "none",
+            borderRadius: "10px",
+            padding: "8px 15px",
+            cursor: hasAppliedFilters
+              ? "pointer"
+              : "not-allowed",
           }}
         >
           Clear Filters
@@ -242,7 +392,6 @@ const UserCitiesTracking = () => {
           display: "flex",
           gap: "20px",
           alignItems: "center",
-          // marginLeft: "15px",
           flexWrap: "wrap",
           marginBottom: "20px",
         }}
@@ -250,14 +399,13 @@ const UserCitiesTracking = () => {
         <label>
           <input
             type="checkbox"
-            checked={filters.searchedUsers}
-            onChange={(e) => {
-              setFilters((prev) => ({
-                ...prev,
-                searchedUsers: e.target.checked,
-              }));
-              setPage(1);
-            }}
+            checked={pendingFilters.searchedUsers}
+            onChange={(e) =>
+              handleCheckboxChange(
+                "searchedUsers",
+                e.target.checked
+              )
+            }
           />{" "}
           Only Searched Users
         </label>
@@ -265,14 +413,13 @@ const UserCitiesTracking = () => {
         <label>
           <input
             type="checkbox"
-            checked={filters.eventDateUsers}
-            onChange={(e) => {
-              setFilters((prev) => ({
-                ...prev,
-                eventDateUsers: e.target.checked,
-              }));
-              setPage(1);
-            }}
+            checked={pendingFilters.eventDateUsers}
+            onChange={(e) =>
+              handleCheckboxChange(
+                "eventDateUsers",
+                e.target.checked
+              )
+            }
           />{" "}
           Only Event Date Users
         </label>
@@ -280,14 +427,13 @@ const UserCitiesTracking = () => {
         <label>
           <input
             type="checkbox"
-            checked={filters.whatsappUsers}
-            onChange={(e) => {
-              setFilters((prev) => ({
-                ...prev,
-                whatsappUsers: e.target.checked,
-              }));
-              setPage(1);
-            }}
+            checked={pendingFilters.whatsappUsers}
+            onChange={(e) =>
+              handleCheckboxChange(
+                "whatsappUsers",
+                e.target.checked
+              )
+            }
           />{" "}
           Only WhatsApp Users
         </label>
@@ -295,16 +441,15 @@ const UserCitiesTracking = () => {
         <label>
           <input
             type="checkbox"
-            checked={filters.loggedInUsers}
-            onChange={(e) => {
-              setFilters((prev) => ({
-                ...prev,
-                loggedInUsers: e.target.checked,
-              }));
-              setPage(1);
-            }}
+            checked={pendingFilters.loggedInUsers}
+            onChange={(e) =>
+              handleCheckboxChange(
+                "loggedInUsers",
+                e.target.checked
+              )
+            }
           />{" "}
-          Only Loggedin users
+          Only Logged-in Users
         </label>
       </div>
 
@@ -325,18 +470,44 @@ const UserCitiesTracking = () => {
           </thead>
 
           <tbody>
-            {data.length ? (
+            {data.length > 0 ? (
               data.map((item) => (
                 <tr key={item._id}>
-                  <td>{item?.user?.name || "N/A"}</td>
-                  <td>{item?.user?.phone || "N/A"}</td>
-                  <td>{item.cityName || "N/A"}</td>
-                  <td>{item.visitorId || "N/A"}</td>
-                  <td>{item?.user?._id || "N/A"}</td>
-                  <td>{item.searchCount || 0}</td>
-                  <td>{item.eventDateCount || 0}</td>
-                  <td>{item?.clickCounts?.whatsapp || 0}</td>
-                  <td>{formatDate(item.createdAt)}</td>
+                  <td>
+                    {item?.user?.name || "N/A"}
+                  </td>
+
+                  <td>
+                    {item?.user?.phone || "N/A"}
+                  </td>
+
+                  <td>
+                    {item?.cityName || "N/A"}
+                  </td>
+
+                  <td>
+                    {item?.visitorId || "N/A"}
+                  </td>
+
+                  <td>
+                    {item?.user?._id || "N/A"}
+                  </td>
+
+                  <td>
+                    {item?.searchCount || 0}
+                  </td>
+
+                  <td>
+                    {item?.eventDateCount || 0}
+                  </td>
+
+                  <td>
+                    {item?.clickCounts?.whatsapp || 0}
+                  </td>
+
+                  <td>
+                    {formatDate(item?.createdAt)}
+                  </td>
                 </tr>
               ))
             ) : (
@@ -344,9 +515,15 @@ const UserCitiesTracking = () => {
                 <td
                   colSpan={9}
                   className="no-data"
-                  style={{ textAlign: "center" }}
+                  style={{
+                    textAlign: "center",
+                  }}
                 >
-                  <b>No Data Found</b>
+                  <b>
+                    {loading
+                      ? "Loading..."
+                      : "No Data Found"}
+                  </b>
                 </td>
               </tr>
             )}
@@ -357,26 +534,39 @@ const UserCitiesTracking = () => {
       {data.length > 0 && (
         <div className="pagination">
           <button
-            disabled={page === 1}
-            onClick={() => setPage((prev) => prev - 1)}
+            disabled={page === 1 || loading}
+            onClick={() =>
+              setPage((prev) => prev - 1)
+            }
           >
             Prev
           </button>
 
           <span>
-            Page {page} of {pagination.totalPages || 1}
+            Page {page} of{" "}
+            {pagination?.totalPages || 1}
           </span>
 
           <button
-            disabled={page >= (pagination.totalPages || 1)}
-            onClick={() => setPage((prev) => prev + 1)}
+            disabled={
+              loading ||
+              page >=
+                (pagination?.totalPages || 1)
+            }
+            onClick={() =>
+              setPage((prev) => prev + 1)
+            }
           >
             Next
           </button>
         </div>
       )}
 
-      {loading && <div className="loading">Loading...</div>}
+      {loading && (
+        <div className="loading">
+          Loading...
+        </div>
+      )}
     </div>
   );
 };
