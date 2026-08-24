@@ -1,15 +1,15 @@
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { BASE_URL, ADD_ADDON, PRODUCT_MEAL_TYPE, IMAGE_UPLOAD } from "../../../utils/apiconstant";
 import "./addon.css";
-import SearchWithDropDown from "@/app/component/SearchWithDropDown";
 
 const Addaddons = () => {
   const [selectedCategoryType, setSelectedCategoryType] = useState("");
-  const [selectedSubCategory, setSelectedSubCategory] = useState("");
+  const [selectedSubCategories, setSelectedSubCategories] = useState([]);
   const [mealProductTypes, setMealProductTypes] = useState([]);
   const [products, setProducts] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState("");
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [isProductDropdownOpen, setIsProductDropdownOpen] = useState(false);
 
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
@@ -18,51 +18,94 @@ const Addaddons = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectAllEvents, setSelectAllEvents] = useState(false);
   const [selectAllProducts, setSelectAllProducts] = useState(false);
+  const [isEventDropdownOpen, setIsEventDropdownOpen] = useState(false);
 
 
-  const productNames = useMemo(() => {
-    return products.map((item) => item.name);
-  }, [products]);
 
   // ---------------- FETCH MEAL TYPES ----------------
   useEffect(() => {
-    const fetchMealTypes = async () => {
-      try {
-        const response = await fetch(
-          `${BASE_URL}${PRODUCT_MEAL_TYPE}?per_page=500`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({}),
-          }
-        );
+    fetchOptions(BASE_URL + PRODUCT_MEAL_TYPE, setMealProductTypes, {
+      per_page: "500",
+    });
+  }, []);
 
-        const data = await response.json();
-        setMealProductTypes(data?.data?.meal || []);
-      } catch (error) {
-        console.error("Error fetching meals:", error);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Event dropdown ke andar click hua hai ya nahi
+      const isInsideEventDropdown =
+        event.target.closest(".event-dropdown");
+
+      // Product dropdown ke andar click hua hai ya nahi
+      const isInsideProductDropdown =
+        event.target.closest(".product-dropdown");
+
+      if (!isInsideEventDropdown) {
+        setIsEventDropdownOpen(false);
+      }
+
+      if (!isInsideProductDropdown) {
+        setIsProductDropdownOpen(false);
       }
     };
 
-    fetchMealTypes();
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
-  // ---------------- HANDLE SUBCATEGORY ----------------
-  const handleSubCategoryChange = async (e) => {
-    const subCategoryId = e.target.value;
+  const fetchOptions = async (url, setter, body) => {
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await response.json();
+      if (data.error === false && data.data) {
+        setter(
+          url.includes("admin_meals_list")
+            ? data.data.meal || []
+            : data.data.configuration || [],
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
-    setSelectedSubCategory(subCategoryId);
-    setSelectedProduct("");
+  // ---------------- HANDLE SUBCATEGORY ----------------
+  const handleSubCategoryChange = async (selectedEventIds) => {
+    setSelectedSubCategories(selectedEventIds);
+    setSelectedProducts([]);
     setProducts([]);
 
-    if (!subCategoryId || !selectedCategoryType) return;
+    if (!selectedEventIds?.length || !selectedCategoryType) {
+      return;
+    }
 
     try {
       const response = await fetch(
-        `${BASE_URL}/api/${selectedCategoryType}/searchByTag/${subCategoryId}`
+        `${BASE_URL}/api/${selectedCategoryType}/searchByTags`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            tags: selectedEventIds,
+          }),
+        }
       );
 
       const data = await response.json();
+
+      if (!response.ok || data.error) {
+        setProducts([]);
+        return;
+      }
+
       setProducts(data?.data || []);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -84,7 +127,7 @@ const Addaddons = () => {
     selectedCategoryType &&
     (
       selectAllEvents ||
-      (selectedSubCategory && (selectAllProducts || selectedProduct))
+      selectedSubCategories.length > 0
     ) &&
     title.trim() !== "" &&
     price !== "" &&
@@ -119,10 +162,26 @@ const handleSubmit = async (e) => {
       price,
       description,
       image: uploadedImageName,
-      categoryType: selectAllEvents || selectedSubCategory ? selectedCategoryType : "",
-      productType: !selectAllEvents && !selectAllProducts ? selectedCategoryType : "",
-      productId: !selectAllEvents && !selectAllProducts ? selectedProduct : "",
-      eventType: !selectAllEvents && selectAllProducts ? selectedSubCategory : "",       
+
+      categoryType:
+        selectAllEvents || selectedSubCategories.length > 0
+          ? selectedCategoryType
+          : "",
+
+      productType:
+        !selectAllEvents && selectedProducts.length > 0
+          ? selectedCategoryType
+          : "",
+
+      productId:
+        !selectAllEvents
+          ? selectedProducts
+          : [],
+
+      eventType:
+        !selectAllEvents
+          ? selectedSubCategories
+          : [],
     };
 
     const response = await fetch(`${BASE_URL}${ADD_ADDON}`, {
@@ -144,8 +203,8 @@ const handleSubmit = async (e) => {
     setPrice("");
     setDescription("");
     setImageFile(null);
-    setSelectedProduct("");
-    setSelectedSubCategory("");
+    setSelectedProducts([]);
+    setSelectedSubCategories([]);
     setSelectAllEvents(false);
     setSelectAllProducts(false);
     setProducts([]);
@@ -171,9 +230,13 @@ const handleSubmit = async (e) => {
             value={selectedCategoryType}
             onChange={(e) => {
               setSelectedCategoryType(e.target.value);
-              setSelectedSubCategory("");
-              setSelectedProduct("");
+              setSelectedSubCategories([]);
+              setSelectedProducts([]);
               setProducts([]);
+              setSelectAllEvents(false);
+              setSelectAllProducts(false);
+              setIsEventDropdownOpen(false);
+              setIsProductDropdownOpen(false);
             }}
           >
             <option value="">Select Category</option>
@@ -184,105 +247,190 @@ const handleSubmit = async (e) => {
 
         {/* SUBCATEGORY */}
         {selectedCategoryType && (
-          <div style={{width: "35%"}} className="form-group">
+          <div className="event-dropdown-wrapper">
+            <label>Select Event</label>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              {!selectAllEvents && (
-                <label>Select Event</label>
-              )}
-             <div>
-               <input
-                type="checkbox"
-                checked={selectAllEvents}
-                className="addon-checkbox mb-4"
-                onChange={(e) => {
-                  const checked = e.target.checked;
-                  setSelectAllEvents(checked);
-
-                  if (checked) {
-                    setSelectedSubCategory("");
-                    setSelectedProduct("");
-                    setSelectAllProducts(false);
-                    setProducts([]);
-                  }
-                }}
-              />
-
-              <span className="mb-6">Select All Events</span>
-             </div>
-            </div>
-
-            {!selectAllEvents && (
-              <select
-                value={selectedSubCategory}
-                onChange={handleSubCategoryChange}
+            <div className="event-dropdown product-dropdown">
+              <button
+                type="button"
+                className="event-dropdown-button"
+                onClick={() => setIsEventDropdownOpen((prev) => !prev)}
               >
-                <option value="">Select Event</option>
-                {filteredSubCategories.map((type) => (
-                  <option key={type._id} value={type._id}>
-                    {type.name}
-                  </option>
-                ))}
-              </select>
-            )}
+                <span>
+                  {selectedSubCategories.length === 0
+                    ? "Select Event"
+                    : `${selectedSubCategories.length} Event${selectedSubCategories.length > 1 ? "s" : ""
+                    } Selected`}
+                </span>
+
+                <span>▾</span>
+              </button>
+
+              {isEventDropdownOpen && (
+                <div className="event-dropdown-menu">
+
+                  {/* SELECT ALL */}
+                  <label className="event-option">
+                    <input
+                      type="checkbox"
+                      checked={selectAllEvents}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+
+                        setSelectAllEvents(checked);
+
+                        if (checked) {
+                          const allEventIds = filteredSubCategories.map(
+                            (type) => type._id
+                          );
+
+                          setSelectedSubCategories(allEventIds);
+                        } else {
+                          setSelectedSubCategories([]);
+                        }
+                      }}
+                    />
+
+                    <span>Select All Events</span>
+                  </label>
+
+                  {/* EVENTS */}
+                  {filteredSubCategories.map((type) => (
+                    <label key={type._id} className="event-option">
+                      <input
+                        type="checkbox"
+                        checked={selectedSubCategories.includes(type._id)}
+                        onChange={(e) => {
+                          const eventId = type._id;
+
+                          setSelectedSubCategories((prev) => {
+                            let updated;
+
+                            if (prev.includes(eventId)) {
+                              updated = prev.filter((id) => id !== eventId);
+                            } else {
+                              updated = [...prev, eventId];
+                            }
+
+                            setSelectAllEvents(
+                              updated.length === filteredSubCategories.length
+                            );
+
+                            // API call with updated selected events
+                            handleSubCategoryChange(updated);
+
+                            return updated;
+                          });
+                        }}
+                      />
+
+                      <span>{type.name}</span>
+                    </label>
+                  ))}
+
+                </div>
+              )}
+            </div>
           </div>
         )}
 
-        {selectedSubCategory && !selectAllEvents && (
-        <div className="form-group" style={{ marginTop: "10px" , width: "35%"}}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            {!selectAllProducts && (
-              <label>Select Product</label>
-            )}
-            <div>
-              <input
-              type="checkbox"
-              checked={selectAllProducts}
-              className="addon-checkbox mb-4"
-              onChange={(e) => {
-                const checked = e.target.checked;
-                setSelectAllProducts(checked);
+        {selectedSubCategories.length > 0 && !selectAllEvents && (
+          <div
+            className="form-group"
+            style={{ marginTop: "10px", width: "35%" }}
+          >
+            <label>Select Product</label>
 
-                if (checked) {
-                  setSelectedProduct("");
-                }
-              }}
-            />
-            <span className="mb-6">Select All Products</span>
+            <div className="event-dropdown product-dropdown">
+              {/* PRODUCT DROPDOWN BUTTON */}
+              <button
+                type="button"
+                className="event-dropdown-button"
+                onClick={() => setIsProductDropdownOpen((prev) => !prev)}
+              >
+                <span>
+                  {selectedProducts.length === 0
+                    ? "Select Product"
+                    : `${selectedProducts.length} Product${selectedProducts.length > 1 ? "s" : ""
+                    } Selected`}
+                </span>
+
+                <span>▾</span>
+              </button>
+
+              {/* PRODUCT DROPDOWN */}
+              {isProductDropdownOpen && (
+                <div className="event-dropdown-menu">
+
+                  {/* SELECT ALL PRODUCTS */}
+                  <label className="event-option">
+                    <input
+                      type="checkbox"
+                      checked={selectAllProducts}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+
+                        setSelectAllProducts(checked);
+
+                        if (checked) {
+                          const allProductIds = products.map(
+                            (product) => product._id
+                          );
+
+                          setSelectedProducts(allProductIds);
+                        } else {
+                          setSelectedProducts([]);
+                        }
+                      }}
+                    />
+
+                    <span>Select All Products</span>
+                  </label>
+
+                  {/* PRODUCTS */}
+                  {products.map((product) => (
+                    <label
+                      key={product._id}
+                      className="event-option"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedProducts.includes(product._id)}
+                        onChange={(e) => {
+                          const productId = product._id;
+
+                          setSelectedProducts((prev) => {
+                            let updated;
+
+                            if (prev.includes(productId)) {
+                              updated = prev.filter(
+                                (id) => id !== productId
+                              );
+                            } else {
+                              updated = [...prev, productId];
+                            }
+
+                            setSelectAllProducts(
+                              updated.length === products.length
+                            );
+
+                            return updated;
+                          });
+                        }}
+                      />
+
+                      <span>{product.name}</span>
+                    </label>
+                  ))}
+
+                </div>
+              )}
             </div>
           </div>
-
-          {/* PRODUCT */}
-          {selectedSubCategory &&
-            products.length > 0 &&
-            !selectAllProducts &&
-            !selectAllEvents && (
-              <div className="form-group product-dropdown">
-
-
-                <SearchWithDropDown
-                  options={productNames}
-                  selectedValue={
-                    products.find((p) => p._id === selectedProduct)?.name || ""
-                  }
-                  placeholder="Search Product..."
-                  onChange={(selectedName) => {
-                    const selectedObj = products.find(
-                      (item) => item.name === selectedName
-                    );
-                    if (selectedObj) {
-                      setSelectedProduct(selectedObj._id);
-                    }
-                  }}
-                />
-              </div>
-            )}
-
-        </div>
         )}
       </div>
       {/* FORM */}
-      {(selectedCategoryType && (selectAllEvents || selectedProduct || selectAllProducts)) && (
+      {(selectedCategoryType && (selectAllEvents || selectedProducts.length > 0 || selectAllProducts)) && (
         <div className="formWrapper">
 
          <div className="d-flex mb-2">
