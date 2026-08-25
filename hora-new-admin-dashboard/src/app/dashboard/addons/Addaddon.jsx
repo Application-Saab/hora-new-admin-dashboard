@@ -130,8 +130,7 @@ const Addaddons = () => {
       )
     ) &&
     title.trim() !== "" &&
-    price !== "" &&
-    imageFile;
+    price !== "" 
 
   // ---------------- SUBMIT ----------------
   const handleSubmit = async (e) => {
@@ -140,28 +139,28 @@ const Addaddons = () => {
 
     try {
       // ---------------- STEP 1: UPLOAD IMAGE ----------------
-      const imageForm = new FormData();
-      imageForm.append("file", imageFile);
+      // const imageForm = new FormData();
+      // imageForm.append("file", imageFile);
 
-      const uploadResponse = await fetch(BASE_URL + IMAGE_UPLOAD, {
-        method: "POST",
-        body: imageForm,
-      });
+      // const uploadResponse = await fetch(BASE_URL + IMAGE_UPLOAD, {
+      //   method: "POST",
+      //   body: imageForm,
+      // });
 
-      const uploadData = await uploadResponse.json();
+      // const uploadData = await uploadResponse.json();
 
-      if (!uploadResponse.ok || uploadData.error) {
-        throw new Error(uploadData.message || "Image upload failed");
-      }
+      // if (!uploadResponse.ok || uploadData.error) {
+      //   throw new Error(uploadData.message || "Image upload failed");
+      // }
 
-      const uploadedImageName = uploadData.data;
+      // const uploadedImageName = uploadData.data;
 
       // ---------------- STEP 2: SEND ADDON DATA ----------------
       const payload = {
         title,
         price,
         description,
-        image: uploadedImageName,
+        image: "hello",
         categoryType: selectedCategoryType,
         productId:
           !selectAllEvents && !selectAllProducts

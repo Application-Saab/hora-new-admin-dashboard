@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
-import { BASE_URL, DELETE_THEME, EDIT_THEME, IMAGE_UPLOAD } from "../../../utils/apiconstant";
+import { BASE_URL, DELETE_THEME, EDIT_THEME, IMAGE_UPLOAD, PRODUCT_MEAL_TYPE } from "../../../utils/apiconstant";
 import { FaPen, FaTrash } from "react-icons/fa";
 import "./theme.css";
 import CommonPopup from '../../component/CommonPopup'
@@ -12,13 +12,43 @@ const ThemeList = () => {
   const [deleteModal, setDeleteModal] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [mealProductTypes, setMealProductTypes] = useState([]);
+  const [selectedEvents, setSelectedEvents] = useState([]);
+  const [isEventDropdownOpen, setIsEventDropdownOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
     price: "",
     description: "",
     image: null,
+    eventId: [],
   });
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}${PRODUCT_MEAL_TYPE}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            per_page: "500",
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.error === false) {
+          setMealProductTypes(data?.data?.meal || []);
+        }
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      }
+    };
+
+    fetchEvents();
+  }, []);
 
   useEffect(() => {
     const fetchthemes = async () => {
@@ -65,14 +95,49 @@ const ThemeList = () => {
     }
   };
 
-  const handleEditClick = (addon) => {
-    setSelectedTheme(addon);
-    setFormData({
-      title: addon.title,
-      price: addon.price,
-      description: addon.description || "",
-      image: null,
-    });
+  const handleEditClick = (theme) => {
+    setSelectedTheme(theme);
+
+    const eventIds = theme?.eventId || [];
+    const productIds = theme?.productId || [];
+
+    const isCategoryLevel =
+      eventIds.length === 0 &&
+      productIds.length === 0;
+
+    if (isCategoryLevel) {
+      const allEventIds = mealProductTypes
+        .filter(
+          (type) =>
+            Array.isArray(type.configurationId) &&
+            type.configurationId.some(
+              (config) =>
+                config.name === theme?.categoryType?.[0]
+            )
+        )
+        .map((event) => event._id);
+
+      setSelectedEvents(allEventIds);
+
+      setFormData({
+        title: theme.title,
+        price: theme.price,
+        description: theme.description || "",
+        image: null,
+        eventId: allEventIds,
+      });
+    } else {
+      setSelectedEvents(eventIds);
+
+      setFormData({
+        title: theme.title,
+        price: theme.price,
+        description: theme.description || "",
+        image: null,
+        eventId: eventIds,
+      });
+    }
+
     setEditModel(true);
   };
 
@@ -110,6 +175,7 @@ const ThemeList = () => {
         price: formData.price,
         description: formData.description,
         image: imageName,
+        eventId: selectedEvents,
       };
 
       const res = await fetch(
@@ -142,13 +208,29 @@ const ThemeList = () => {
 
   const isChanged = useMemo(() => {
     if (!selectedTheme) return false;
+
+    const oldEvents = selectedTheme?.eventId || [];
+
+    const eventsChanged =
+      JSON.stringify([...oldEvents].sort()) !==
+      JSON.stringify([...selectedEvents].sort());
+
     return (
       formData.title !== selectedTheme.title ||
       formData.price !== selectedTheme.price ||
-      formData.description !== selectedTheme.description ||
-      formData.image !== null
+      formData.description !== (selectedTheme.description || "") ||
+      formData.image !== null ||
+      eventsChanged
     );
-  }, [formData, selectedTheme]);
+  }, [formData, selectedTheme, selectedEvents]);
+
+  const filteredSubCategories = mealProductTypes.filter(
+    (type) =>
+      Array.isArray(type.configurationId) &&
+      type.configurationId.some(
+        (config) => config.name === selectedTheme?.categoryType?.[0]
+      )
+  );
 
   return (
     <div>
@@ -244,6 +326,75 @@ const ThemeList = () => {
                 rows={3}
               />
             </div>
+
+            {(!selectedTheme?.productId ||
+              selectedTheme?.productId?.length === 0) ? (
+
+              <div className="popup-form-group">
+                <label>Events</label>
+
+                <div className="event-dropdown product-dropdown">
+
+                  <button
+                    type="button"
+                    className="event-dropdown-button"
+                    onClick={() =>
+                      setIsEventDropdownOpen((prev) => !prev)
+                    }
+                  >
+                    <span>
+                      {selectedEvents.length === 0
+                        ? "Select Event"
+                        : `${selectedEvents.length} Event${selectedEvents.length > 1 ? "s" : ""
+                        } Selected`}
+                    </span>
+
+                    <span>▾</span>
+                  </button>
+
+                  {isEventDropdownOpen && (
+                    <div className="event-dropdown-menu">
+
+                      {filteredSubCategories.map((event) => (
+                        <label
+                          key={event._id}
+                          className="event-option"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedEvents.includes(event._id)}
+                            onChange={() => {
+                              setSelectedEvents((prev) =>
+                                prev.includes(event._id)
+                                  ? prev.filter((id) => id !== event._id)
+                                  : [...prev, event._id]
+                              );
+                            }}
+                          />
+
+                          <span>{event.name}</span>
+                        </label>
+                      ))}
+
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div
+                style={{
+                  padding: "10px 12px",
+                  background: "#f5f5f5",
+                  border: "1px solid #ddd",
+                  borderRadius: "6px",
+                  color: "#666",
+                  fontSize: "13px",
+                }}
+              >
+                ℹ️ This theme is linked to a specific product, so event
+                selection is not available.
+              </div>
+            )}
 
             <div className="popup-form-group">
               <label>Upload Image</label>

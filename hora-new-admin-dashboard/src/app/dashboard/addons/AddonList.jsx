@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
-import { BASE_URL, DELETE_ADDON, EDIT_ADDON, IMAGE_UPLOAD } from "../../../utils/apiconstant";
+import { BASE_URL, DELETE_ADDON, EDIT_ADDON, IMAGE_UPLOAD, PRODUCT_MEAL_TYPE } from "../../../utils/apiconstant";
 import { FaPen, FaTrash } from "react-icons/fa";
 import "./addon.css";
 import CommonPopup from '../../component/CommonPopup'
@@ -12,13 +12,70 @@ const AddonList = () => {
   const [deleteModal, setDeleteModal] = useState(false);
   const [selectedAddon, setSelectedAddon] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+    const [mealProductTypes, setMealProductTypes] = useState([]);
+    const [selectedEvents, setSelectedEvents] = useState([]);
+    const [isEventDropdownOpen, setIsEventDropdownOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
     price: "",
     description: "",
     image: null,
+    eventId: [],
   });
+
+    useEffect(() => {
+      const fetchEvents = async () => {
+        try {
+          const response = await fetch(`${BASE_URL}${PRODUCT_MEAL_TYPE}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              per_page: "500",
+            }),
+          });
+  
+          const data = await response.json();
+  
+          if (data.error === false) {
+            setMealProductTypes(data?.data?.meal || []);
+          }
+        } catch (error) {
+          console.error("Error fetching events:", error);
+        }
+      };
+  
+      fetchEvents();
+    }, []);
+
+  useEffect(() => {
+    if (!selectedAddon || mealProductTypes.length === 0) {
+      return;
+    }
+
+    const oldEventIds = selectedAddon?.eventId || [];
+    const productIds = selectedAddon?.productId || [];
+
+    const isGenericAddon =
+      oldEventIds.length === 0 &&
+      productIds.length === 0;
+
+    if (isGenericAddon) {
+      const allEventIds = mealProductTypes.map(
+        (event) => event._id
+      );
+
+      setSelectedEvents(allEventIds);
+      setFormData((prev) => ({
+        ...prev,
+        eventId: allEventIds,
+      }));
+    } else {
+      setSelectedEvents(oldEventIds);
+    }
+  }, [selectedAddon, mealProductTypes]);
 
   useEffect(() => {
     const fetchAddons = async () => {
@@ -72,6 +129,7 @@ const AddonList = () => {
       price: addon.price,
       description: addon.description || "",
       image: null,
+      eventId: addon?.eventId || [],
     });
     setEditModel(true);
   };
@@ -110,6 +168,7 @@ const AddonList = () => {
         price: formData.price,
         description: formData.description,
         image: imageName,
+        eventId: selectedEvents,
       };
 
       const res = await fetch(
@@ -142,13 +201,51 @@ const AddonList = () => {
 
   const isChanged = useMemo(() => {
     if (!selectedAddon) return false;
+
+    const oldEventIds = selectedAddon?.eventId || [];
+    const oldProductIds = selectedAddon?.productId || [];
+
+    const isGenericAddon =
+      oldEventIds.length === 0 &&
+      oldProductIds.length === 0;
+
+    let eventsChanged = false;
+
+    if (isGenericAddon) {
+      const allEventIds = mealProductTypes.map(
+        (event) => event._id
+      );
+
+      eventsChanged =
+        JSON.stringify([...selectedEvents].sort()) !==
+        JSON.stringify([...allEventIds].sort());
+    } else {
+      eventsChanged =
+        JSON.stringify([...oldEventIds].sort()) !==
+        JSON.stringify([...selectedEvents].sort());
+    }
+
     return (
       formData.title !== selectedAddon.title ||
       formData.price !== selectedAddon.price ||
-      formData.description !== selectedAddon.description ||
-      formData.image !== null
+      formData.description !== (selectedAddon.description || "") ||
+      formData.image !== null ||
+      eventsChanged
     );
-  }, [formData, selectedAddon]);
+  }, [
+    formData,
+    selectedAddon,
+    selectedEvents,
+    mealProductTypes,
+  ]);
+
+  const filteredSubCategories = mealProductTypes.filter(
+    (type) =>
+      Array.isArray(type.configurationId) &&
+      type.configurationId.some(
+        (config) => config.name === selectedAddon?.categoryType?.[0]
+      )
+  );
 
   return (
     <div>
@@ -244,6 +341,75 @@ const AddonList = () => {
                 rows={3}
               />
             </div>
+
+            {(!selectedAddon?.productId ||
+              selectedAddon?.productId?.length === 0) ? (
+
+            <div className="popup-form-group">
+              <label>Events</label>
+
+              <div className="event-dropdown product-dropdown">
+
+                <button
+                  type="button"
+                  className="event-dropdown-button"
+                  onClick={() =>
+                    setIsEventDropdownOpen((prev) => !prev)
+                  }
+                >
+                  <span>
+                    {selectedEvents.length === 0
+                      ? "Select Event"
+                      : `${selectedEvents.length} Event${selectedEvents.length > 1 ? "s" : ""
+                      } Selected`}
+                  </span>
+
+                  <span>▾</span>
+                </button>
+
+                {isEventDropdownOpen && (
+                  <div className="event-dropdown-menu">
+
+                      {filteredSubCategories.map((event) => (
+                      <label
+                        key={event._id}
+                        className="event-option"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedEvents.includes(event._id)}
+                          onChange={() => {
+                            setSelectedEvents((prev) =>
+                              prev.includes(event._id)
+                                ? prev.filter((id) => id !== event._id)
+                                : [...prev, event._id]
+                            );
+                          }}
+                        />
+
+                        <span>{event.name}</span>
+                      </label>
+                    ))}
+
+                  </div>
+                )}
+              </div>
+            </div>
+            ) : (
+            <div
+              style={{
+                padding: "10px 12px",
+                background: "#f5f5f5",
+                border: "1px solid #ddd",
+                borderRadius: "6px",
+                color: "#666",
+                fontSize: "13px",
+              }}
+            >
+              ℹ️ This add-on is linked to a specific product, so event
+              selection is not available.
+            </div>
+)}
 
             <div className="popup-form-group">
               <label>Upload Image</label>

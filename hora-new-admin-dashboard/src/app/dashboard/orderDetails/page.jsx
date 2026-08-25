@@ -18,6 +18,7 @@ import { eventList } from '../../../constants/eventList'
 import CallChecklist from '../../component/CallChecklist'
 import CommonPopup from "../../component/CommonPopup"
 import {saveOrderDriveLinks, inclusionToApiKeyMap, apiKeyToInclusionMap} from './drivelinkService';
+import { FaTrash } from "react-icons/fa";
 
 const OrderList = () => {
   const [orders, setOrders] = useState([]);
@@ -468,7 +469,7 @@ const handleDynamicLinkChange = (index, value) => {
   const [selectedOrderId, setSelectedOrderId] = useState(null);
 
   const [decorationComment, setDecorationComment] = useState("");
-  const [addOnList, setAddOnList] = useState([{ name: "", price: "" }]);
+  const [addOnList, setAddOnList] = useState([{ title: "", price: "" }]);
 
   const [totalAmountEdit, setTotalAmountEdit] = useState("");
   const [balanceAmountEdit, setBalanceAmountEdit] = useState("");
@@ -518,7 +519,7 @@ useEffect(() => {
   ) => {
     setSelectedOrderId(orderId);
     setDecorationComment(decoration_comments || "");
-    setAddOnList(add_ons.length ? add_ons : [{ name: "", price: "" }]);
+    setAddOnList(add_ons.length ? add_ons : [{ title: "", price: "" }]);
     setTotalAmountEdit(totalAmount || "");
     setBalanceAmountEdit(balanceAmount || "");
     setAdvanceAmountEdit(advanceAmount || "");
@@ -533,7 +534,7 @@ useEffect(() => {
   };
 
   const handleAddAddOn = () => {
-    setAddOnList([...addOnList, { name: "", price: "" }]);
+    setAddOnList([...addOnList, { title: "", price: "" }]);
   };
 
   const handleRemoveAddOn = (index) => {
@@ -544,11 +545,42 @@ useEffect(() => {
     );
   };
 
+  const handleQuantityChange = (index, change) => {
+    setAddOnList((prev) =>
+      prev.map((addon, i) => {
+        if (i !== index) return addon;
+
+        const currentQuantity = Number(addon.quantity) || 1;
+        const newQuantity = Math.max(1, currentQuantity + change);
+
+        const price = Number(addon.price) || 0;
+
+        return {
+          ...addon,
+          quantity: newQuantity,
+          totalPrice: price * newQuantity,
+        };
+      })
+    );
+  };
+
   const handleSave = async () => {
+
+    const updatedAddOns = addOnList.map((addon) => {
+      const quantity = Number(addon.quantity) || 1;
+      const price = Number(addon.price) || 0;
+
+      return {
+        ...addon,
+        quantity,
+        totalPrice: price * quantity,
+      };
+    });
+
     const requestData = {
       _id: selectedOrderId,
       decoration_comments: decorationFields.join("\n"),
-      add_on: addOnList, //add on list into array format
+      add_on: updatedAddOns, //add on list into array format
       total_amount: totalAmountEdit, //totalAmountEdit is when user click edit order popup
       balance_amount: balanceAmountEdit, //balanceAmountEdit is when user click edit order popup
       advance_amount: advanceAmountEdit, //advanceAmountEdit is when user click edit order popup
@@ -1801,9 +1833,9 @@ const filledCountForCounter = trueDynamicApiKeys.filter((linkType) => {
                           <input
                             type="text"
                             placeholder="Add-on Name"
-                            value={addOn.name}
+                            value={addOn?.name || addOn?.title}
                             onChange={(e) =>
-                              handleAddOnChange(index, "name", e.target.value)
+                              handleAddOnChange(index, "title", e.target.value)
                             }
                             style={{
                               padding: "8px",
@@ -1828,10 +1860,60 @@ const filledCountForCounter = trueDynamicApiKeys.filter((linkType) => {
                               width: "100px",
                             }}
                           />
+                          
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              border: "1px solid #ccc",
+                              borderRadius: "4px",
+                              overflow: "hidden",
+                            }}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => handleQuantityChange(index, -1)}
+                              style={{
+                                width: "35px",
+                                height: "35px",
+                                border: "none",
+                                background: "#eee",
+                                cursor: "pointer",
+                                fontSize: "18px",
+                              }}
+                            >
+                              −
+                            </button>
+
+                            <span
+                              style={{
+                                width: "40px",
+                                textAlign: "center",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              {addOn?.quantity || 1}
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={() => handleQuantityChange(index, 1)}
+                              style={{
+                                width: "35px",
+                                height: "35px",
+                                border: "none",
+                                background: "#eee",
+                                cursor: "pointer",
+                                fontSize: "18px",
+                              }}
+                            >
+                              +
+                            </button>
+                          </div>
                           <button
                             onClick={() => handleRemoveAddOn(index)}
                             style={{
-                              padding: "8px 12px",
+                              padding: "6px 6px",
                               backgroundColor: "#ff4d4f",
                               color: "#fff",
                               border: "none",
@@ -1839,7 +1921,7 @@ const filledCountForCounter = trueDynamicApiKeys.filter((linkType) => {
                               cursor: "pointer",
                             }}
                           >
-                            Remove
+                            <FaTrash size={12} />
                           </button>
                         </div>
                       ))}
