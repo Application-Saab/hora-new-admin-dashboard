@@ -1,15 +1,21 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { BASE_URL, ADD_THEME, PRODUCT_MEAL_TYPE, IMAGE_UPLOAD } from "../../../utils/apiconstant";
+import {
+  BASE_URL,
+  ADD_THEME,
+  PRODUCT_MEAL_TYPE,
+  IMAGE_UPLOAD,
+} from "../../../utils/apiconstant";
 import "./theme.css";
 
 const Addtheme = () => {
-  const [selectedCategoryType, setSelectedCategoryType] = useState("");
+  const [selectedCategoryType, setSelectedCategoryType] = useState([]);
   const [mealProductTypes, setMealProductTypes] = useState([]);
   const [products, setProducts] = useState([]);
   const [selectedSubCategories, setSelectedSubCategories] = useState([]);
-  const [isEventDropdownOpen, setIsEventDropdownOpen] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([]);
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+  const [isEventDropdownOpen, setIsEventDropdownOpen] = useState(false);
   const [isProductDropdownOpen, setIsProductDropdownOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
@@ -19,20 +25,23 @@ const Addtheme = () => {
   const [selectAllEvents, setSelectAllEvents] = useState(false);
   const [selectAllProducts, setSelectAllProducts] = useState(false);
 
-  // ---------------- FETCH MEAL TYPES ----------------
   const fetchOptions = async (url, setter, body) => {
     try {
       const response = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(body),
       });
+
       const data = await response.json();
+
       if (data.error === false && data.data) {
         setter(
           url.includes("admin_meals_list")
             ? data.data.meal || []
-            : data.data.configuration || [],
+            : data.data.configuration || []
         );
       }
     } catch (error) {
@@ -40,55 +49,76 @@ const Addtheme = () => {
     }
   };
   useEffect(() => {
-    fetchOptions(BASE_URL + PRODUCT_MEAL_TYPE, setMealProductTypes, {
-      per_page: "500",
-    });
+    fetchOptions(
+      BASE_URL + PRODUCT_MEAL_TYPE,
+      setMealProductTypes,
+      {
+        per_page: "500",
+      }
+    );
   }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      const isInsideEventDropdown =
-        event.target.closest(".event-dropdown");
+      if (!event.target.closest(".category-dropdown")) {
+        setIsCategoryDropdownOpen(false);
+      }
 
-      const isInsideProductDropdown =
-        event.target.closest(".product-dropdown");
-
-      if (!isInsideEventDropdown) {
+      if (!event.target.closest(".event-dropdown-wrapper")) {
         setIsEventDropdownOpen(false);
       }
 
-      if (!isInsideProductDropdown) {
+      if (!event.target.closest(".product-dropdown")) {
         setIsProductDropdownOpen(false);
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener(
+      "mousedown",
+      handleClickOutside
+    );
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
     };
   }, []);
 
-  // ---------------- HANDLE SUBCATEGORY ----------------
-  const handleSubCategoryChange = async (selectedEventIds) => {
-    setSelectedSubCategories(selectedEventIds);
-    setSelectedProducts([]);
-    setProducts([]);
+  const filteredSubCategories = mealProductTypes.filter(
+    (type) =>
+      Array.isArray(type.configurationId) &&
+      type.configurationId.some((config) =>
+        selectedCategoryType.includes(config.name)
+      )
+  );
 
-    if (!selectedEventIds?.length || !selectedCategoryType) {
+  const fetchProductsByEvents = async (events) => {
+    if (
+      !Array.isArray(events) ||
+      events.length === 0 ||
+      selectedCategoryType.length === 0
+    ) {
+      setProducts([]);
       return;
     }
 
+    const eventIds = events.map(
+      (event) => event.id
+    );
+
     try {
       const response = await fetch(
-        `${BASE_URL}/api/${selectedCategoryType}/searchByTags`,
+        `${BASE_URL}/api/photography/searchByTags`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            tags: selectedEventIds,
+            tags: eventIds,
+            categoryType: selectedCategoryType,
           }),
         }
       );
@@ -102,366 +132,668 @@ const Addtheme = () => {
 
       setProducts(data?.data || []);
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error(
+        "Error fetching products:",
+        error
+      );
+
       setProducts([]);
     }
   };
 
-  // ---------------- FILTERED SUBCATEGORIES ----------------
-  const filteredSubCategories = mealProductTypes.filter(
-    (type) =>
-      Array.isArray(type.configurationId) &&
-      type.configurationId.some(
-        (config) => config.name === selectedCategoryType
-      )
-  );
+  const handleCategoryChange = (
+    category,
+    checked
+  ) => {
+    setSelectedCategoryType((prev) => {
+      if (checked) {
+        if (prev.includes(category)) {
+          return prev;
+        }
 
-  // ---------------- VALIDATION ----------------
-  const isFormValid =
-    selectedCategoryType &&
-    (
-      selectAllEvents ||
-      (
-        selectedSubCategories.length > 0 &&
-        (
-          selectAllProducts ||
-          selectedProducts.length > 0
+        return [...prev, category];
+      }
+
+      return prev.filter(
+        (item) => item !== category
+      );
+    });
+
+    setSelectedSubCategories([]);
+    setSelectedProducts([]);
+    setProducts([]);
+
+    setSelectAllEvents(false);
+    setSelectAllProducts(false);
+  };
+
+  const handleEventChange = (type) => {
+    const eventId = type._id;
+
+    const category =
+      type.configurationId?.find((config) =>
+        selectedCategoryType.includes(
+          config.name
         )
-      )
-    ) &&
+      )?.name;
+
+    const alreadySelected =
+      selectedSubCategories.some(
+        (item) => item.id === eventId
+      );
+
+    let updatedEvents;
+
+    if (alreadySelected) {
+      updatedEvents =
+        selectedSubCategories.filter(
+          (item) => item.id !== eventId
+        );
+    } else {
+      updatedEvents = [
+        ...selectedSubCategories,
+        {
+          id: eventId,
+          category,
+        },
+      ];
+    }
+
+    setSelectedSubCategories(
+      updatedEvents
+    );
+
+    if (
+      filteredSubCategories.length > 0 &&
+      updatedEvents.length ===
+      filteredSubCategories.length
+    ) {
+      setSelectAllEvents(true);
+    } else {
+      setSelectAllEvents(false);
+    }
+
+    setSelectedProducts([]);
+    setSelectAllProducts(false);
+
+    fetchProductsByEvents(
+      updatedEvents
+    );
+  };
+
+  const handleSelectAllEvents = (
+    checked
+  ) => {
+    setSelectAllEvents(checked);
+
+    setSelectedProducts([]);
+    setSelectAllProducts(false);
+
+    if (checked) {
+      const allEvents =
+        filteredSubCategories.map(
+          (type) => {
+            const category =
+              type.configurationId?.find(
+                (config) =>
+                  selectedCategoryType.includes(
+                    config.name
+                  )
+              )?.name;
+
+            return {
+              id: type._id,
+              category,
+            };
+          }
+        );
+
+      setSelectedSubCategories(
+        allEvents
+      );
+
+      fetchProductsByEvents(
+        allEvents
+      );
+    } else {
+      setSelectedSubCategories([]);
+      setSelectedProducts([]);
+      setProducts([]);
+    }
+  };
+
+  const handleProductChange = (
+    productId
+  ) => {
+    const alreadySelected =
+      selectedProducts.includes(
+        productId
+      );
+
+    let updatedProducts;
+
+    if (alreadySelected) {
+      updatedProducts =
+        selectedProducts.filter(
+          (id) => id !== productId
+        );
+    } else {
+      updatedProducts = [
+        ...selectedProducts,
+        productId,
+      ];
+    }
+
+    setSelectedProducts(
+      updatedProducts
+    );
+
+    if (
+      products.length > 0 &&
+      updatedProducts.length ===
+      products.length
+    ) {
+      setSelectAllProducts(true);
+    } else {
+      setSelectAllProducts(false);
+    }
+  };
+
+  const handleSelectAllProducts = (
+    checked
+  ) => {
+    setSelectAllProducts(checked);
+
+    if (checked) {
+      const allProductIds =
+        products.map(
+          (product) =>
+            product._id
+        );
+
+      setSelectedProducts(
+        allProductIds
+      );
+    } else {
+      setSelectedProducts([]);
+    }
+  };
+
+  const isFormValid =
+    selectedCategoryType.length > 0 &&
+    selectedSubCategories.length > 0 &&
+    imageFile &&
+    (selectAllEvents ||
+      selectAllProducts ||
+      selectedProducts.length > 0) &&
     title.trim() !== "" &&
     price !== "";
 
-  // ---------------- SUBMIT ----------------
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!isFormValid) {
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      // ---------------- STEP 1: UPLOAD IMAGE ----------------
-      // const imageForm = new FormData();
-      // imageForm.append("file", imageFile);
 
-      // const uploadResponse = await fetch(BASE_URL + IMAGE_UPLOAD, {
-      //   method: "POST",
-      //   body: imageForm,
-      // });
+            const imageForm = new FormData();
+            imageForm.append("file", imageFile);
+      
+            const uploadResponse = await fetch(BASE_URL + IMAGE_UPLOAD, {
+              method: "POST",
+              body: imageForm,
+            });
+      
+            const uploadData = await uploadResponse.json();
+      
+            if (!uploadResponse.ok || uploadData.error) {
+              throw new Error(uploadData.message || "Image upload failed");
+            }
+      
+            const uploadedImageName = uploadData.data;
 
-      // const uploadData = await uploadResponse.json();
+      let productId = [];
 
-      // if (!uploadResponse.ok || uploadData.error) {
-      //   throw new Error(uploadData.message || "Image upload failed");
-      // }
+      if (selectAllProducts) {
+        productId = products.map(
+          (product) => product._id
+        );
+      } else {
+        productId = [...selectedProducts];
+      }
 
-      // const uploadedImageName = uploadData.data;
+      let eventType = [];
 
-      // ---------------- STEP 2: SEND Theme DATA ----------------
+      if (selectAllEvents) {
+        eventType = filteredSubCategories.map(
+          (event) => event._id
+        );
+
+        productId = products.map(
+          (product) => product._id
+        );
+
+      } else {
+        eventType = selectedSubCategories.map(
+          (event) => event.id
+        );
+      }
+
       const payload = {
         title,
         price,
         description,
-        image: "hello",
+        image: uploadedImageName,
         categoryType: selectedCategoryType,
-        productId:
-          !selectAllEvents && !selectAllProducts
-            ? selectedProducts
-            : [],
-        eventType:
-          !selectAllEvents && selectAllProducts
-            ? selectedSubCategories
-            : [],
+        productId,
+        eventType,
       };
 
-      const response = await fetch(`${BASE_URL}${ADD_THEME}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        `${BASE_URL}${ADD_THEME}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Something went wrong");
+        throw new Error(
+          data.message ||
+          "Something went wrong"
+        );
       }
 
       alert("Theme created successfully");
 
-      // ---------------- RESET ----------------
       setTitle("");
       setPrice("");
       setDescription("");
       setImageFile(null);
+
       setSelectedProducts([]);
       setSelectedSubCategories([]);
+      setProducts([]);
+
       setSelectAllEvents(false);
       setSelectAllProducts(false);
-      setProducts([]);
-      setSelectedCategoryType("");
+
+      setSelectedCategoryType([]);
+
+      setIsCategoryDropdownOpen(false);
+      setIsEventDropdownOpen(false);
+      setIsProductDropdownOpen(false);
 
     } catch (error) {
-      console.error("Error creating Theme:", error);
+      console.error(
+        "Error creating Theme:",
+        error
+      );
+
       alert(error.message);
     } finally {
       setIsLoading(false);
     }
   };
 
-
-
   return (
     <div>
       <div className="d-flex mb-2">
-        {/* CATEGORY */}
-        <div style={{ width: "35%" }} className="form-group">
+
+        <div className="event-dropdown-wrapper category-dropdown">
           <label>Select Category</label>
-          <select
-            value={selectedCategoryType}
-            onChange={(e) => {
-              setSelectedCategoryType(e.target.value);
-              setSelectedSubCategories([]);
-              setSelectedProducts([]);
-              setProducts([]);
-            }}
-          >
-            <option value="">Select Category</option>
-            <option value="Photography">Photography</option>
-          </select>
+
+          <div className="event-dropdown product-dropdown">
+            <button
+              type="button"
+              className="event-dropdown-button"
+              onClick={() =>
+                setIsCategoryDropdownOpen(
+                  (prev) => !prev
+                )
+              }
+            >
+              <span>
+                {selectedCategoryType.length ===
+                  0
+                  ? "Select Category"
+                  : `${selectedCategoryType.length} Categor${selectedCategoryType.length >
+                    1
+                    ? "ies"
+                    : "y"
+                  } Selected`}
+              </span>
+
+              <span>▾</span>
+            </button>
+
+            {isCategoryDropdownOpen && (
+              <div className="event-dropdown-menu">
+                <label className="event-option">
+                  <input
+                    type="checkbox"
+                    checked={selectedCategoryType.includes(
+                      "Photography"
+                    )}
+                    onChange={(e) =>
+                      handleCategoryChange(
+                        "Photography",
+                        e.target.checked
+                      )
+                    }
+                  />
+
+                  <span>
+                    Photography
+                  </span>
+                </label>
+
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* SUBCATEGORY */}
-        {selectedCategoryType && (
-          <div className="event-dropdown-wrapper">
-            <label>Select Event</label>
+        {selectedCategoryType.length >
+          0 && (
+            <div className="event-dropdown-wrapper">
+              <label>
+                Select Event
+              </label>
 
-            <div className="event-dropdown product-dropdown">
-              <button
-                type="button"
-                className="event-dropdown-button"
-                onClick={() => setIsEventDropdownOpen((prev) => !prev)}
-              >
-                <span>
-                  {selectedSubCategories.length === 0
-                    ? "Select Event"
-                    : `${selectedSubCategories.length} Event${selectedSubCategories.length > 1 ? "s" : ""
-                    } Selected`}
-                </span>
+              <div className="event-dropdown product-dropdown">
+                <button
+                  type="button"
+                  className="event-dropdown-button"
+                  onClick={() =>
+                    setIsEventDropdownOpen(
+                      (prev) => !prev
+                    )
+                  }
+                >
+                  <span>
+                    {selectedSubCategories.length ===
+                      0
+                      ? "Select Event"
+                      : `${selectedSubCategories.length} Event${selectedSubCategories.length >
+                        1
+                        ? "s"
+                        : ""
+                      } Selected`}
+                  </span>
 
-                <span>▾</span>
-              </button>
+                  <span>▾</span>
+                </button>
 
-              {isEventDropdownOpen && (
-                <div className="event-dropdown-menu">
+                {isEventDropdownOpen && (
+                  <div className="event-dropdown-menu">
 
-                  {/* SELECT ALL */}
-                  <label className="event-option">
-                    <input
-                      type="checkbox"
-                      checked={selectAllEvents}
-                      onChange={(e) => {
-                        const checked = e.target.checked;
 
-                        setSelectAllEvents(checked);
-
-                        if (checked) {
-                          const allEventIds = filteredSubCategories.map(
-                            (type) => type._id
-                          );
-
-                          setSelectedSubCategories(allEventIds);
-                          setSelectedProducts([]);
-                          setProducts([]);
-                          setSelectAllProducts(false);
-                        } else {
-                          setSelectedSubCategories([]);
-                          setSelectedProducts([]);
-                          setProducts([]);
-                          setSelectAllProducts(false);
-                        }
-                      }}
-                    />
-
-                    <span>Select All Events</span>
-                  </label>
-
-                  {/* EVENTS */}
-                  {filteredSubCategories.map((type) => (
-                    <label key={type._id} className="event-option">
-                      <input
-                        type="checkbox"
-                        checked={selectedSubCategories.includes(type._id)}
-                        onChange={(e) => {
-                          const eventId = type._id;
-
-                          setSelectedSubCategories((prev) => {
-                            let updated;
-
-                            if (prev.includes(eventId)) {
-                              updated = prev.filter((id) => id !== eventId);
-                            } else {
-                              updated = [...prev, eventId];
-                            }
-                            handleSubCategoryChange(updated);
-
-                            return updated;
-                          });
-                        }}
-                      />
-
-                      <span>{type.name}</span>
-                    </label>
-                  ))}
-
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {selectedSubCategories.length > 0 && !selectAllEvents && (
-          <div
-            className="form-group"
-            style={{ marginTop: "10px", width: "35%" }}
-          >
-            <label>Select Product</label>
-
-            <div className="event-dropdown product-dropdown">
-              {/* PRODUCT DROPDOWN BUTTON */}
-              <button
-                type="button"
-                className="event-dropdown-button"
-                onClick={() => setIsProductDropdownOpen((prev) => !prev)}
-              >
-                <span>
-                  {selectedProducts.length === 0
-                    ? "Select Product"
-                    : `${selectedProducts.length} Product${selectedProducts.length > 1 ? "s" : ""
-                    } Selected`}
-                </span>
-
-                <span>▾</span>
-              </button>
-
-              {/* PRODUCT DROPDOWN */}
-              {isProductDropdownOpen && (
-                <div className="event-dropdown-menu">
-
-                  {/* SELECT ALL PRODUCTS */}
-                  <label className="event-option">
-                    <input
-                      type="checkbox"
-                      checked={selectAllProducts}
-                      onChange={(e) => {
-                        const checked = e.target.checked;
-
-                        setSelectAllProducts(checked);
-
-                        if (checked) {
-                          const allProductIds = products.map(
-                            (product) => product._id
-                          );
-
-                          setSelectedProducts(allProductIds);
-                        } else {
-                          setSelectedProducts([]);
-                        }
-                      }}
-                    />
-
-                    <span>Select All Products</span>
-                  </label>
-
-                  {/* PRODUCTS */}
-                  {products.map((product) => (
                     <label
-                      key={product._id}
                       className="event-option"
+                      onMouseDown={(e) =>
+                        e.stopPropagation()
+                      }
                     >
                       <input
                         type="checkbox"
-                        checked={selectedProducts.includes(product._id)}
-                        onChange={(e) => {
-                          const productId = product._id;
-
-                          setSelectedProducts((prev) => {
-                            let updated;
-
-                            if (prev.includes(productId)) {
-                              updated = prev.filter(
-                                (id) => id !== productId
-                              );
-                            } else {
-                              updated = [...prev, productId];
-                            }
-                            return updated;
-                          });
-                        }}
+                        checked={
+                          selectAllEvents
+                        }
+                        onChange={(e) =>
+                          handleSelectAllEvents(
+                            e.target.checked
+                          )
+                        }
                       />
 
-                      <span>{product.name}</span>
+                      <span>
+                        Select All Events
+                      </span>
                     </label>
-                  ))}
 
-                </div>
-              )}
+                    {filteredSubCategories.map(
+                      (type) => {
+                        const isSelected =
+                          selectedSubCategories.some(
+                            (item) =>
+                              item.id ===
+                              type._id
+                          );
+
+                        return (
+                          <label
+                            key={type._id}
+                            className="event-option"
+                            onMouseDown={(e) =>
+                              e.stopPropagation()
+                            }
+                          >
+                            <input
+                              type="checkbox"
+                              checked={
+                                isSelected
+                              }
+                              onChange={() =>
+                                handleEventChange(
+                                  type
+                                )
+                              }
+                            />
+
+                            <span>
+                              {type.name}
+                            </span>
+                          </label>
+                        );
+                      }
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
-      </div>
-      {/* FORM */}
-      {selectedCategoryType &&
-        (
-          selectAllEvents ||
-          selectAllProducts ||
-          selectedProducts.length > 0
-        ) && (
-          <div className="formWrapper">
+          )}
 
+        {selectedSubCategories.length >
+          0 &&
+          !selectAllEvents && (
+            <div
+              className="form-group"
+              style={{
+                marginTop: "10px",
+                width: "35%",
+              }}
+            >
+              <label>
+                Select Product
+              </label>
+
+              <div className="event-dropdown product-dropdown">
+                <button
+                  type="button"
+                  className="event-dropdown-button"
+                  onClick={() =>
+                    setIsProductDropdownOpen(
+                      (prev) => !prev
+                    )
+                  }
+                >
+                  <span>
+                    {selectedProducts.length ===
+                      0
+                      ? "Select Product"
+                      : `${selectedProducts.length} Product${selectedProducts.length >
+                        1
+                        ? "s"
+                        : ""
+                      } Selected`}
+                  </span>
+
+                  <span>▾</span>
+                </button>
+                {isProductDropdownOpen && (
+                  <div className="event-dropdown-menu">
+                    <label
+                      className="event-option"
+                      onMouseDown={(e) =>
+                        e.stopPropagation()
+                      }
+                    >
+                      <input
+                        type="checkbox"
+                        checked={
+                          selectAllProducts
+                        }
+                        onChange={(e) =>
+                          handleSelectAllProducts(
+                            e.target.checked
+                          )
+                        }
+                      />
+
+                      <span>
+                        Select All Products
+                      </span>
+                    </label>
+                    {products.map(
+                      (product) => (
+                        <label
+                          key={
+                            product._id
+                          }
+                          className="event-option"
+                          onMouseDown={(e) =>
+                            e.stopPropagation()
+                          }
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedProducts.includes(
+                              product._id
+                            )}
+                            onChange={() =>
+                              handleProductChange(
+                                product._id
+                              )
+                            }
+                          />
+
+                          <span>
+                            {product.name}
+                          </span>
+                        </label>
+                      )
+                    )}
+
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+      </div>
+
+      {selectedCategoryType.length >
+        0 &&
+        (selectAllEvents ||
+          selectAllProducts ||
+          selectedProducts.length >
+          0) && (
+          <div className="formWrapper">
             <div className="d-flex mb-2">
+
               <div className="form-group">
-                <label>Theme Title</label>
+                <label>
+                  Theme Title
+                </label>
+
                 <input
                   type="text"
                   value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={(e) =>
+                    setTitle(
+                      e.target.value
+                    )
+                  }
                 />
               </div>
 
               <div className="form-group">
-                <label>Price</label>
+                <label>
+                  Price
+                </label>
+
                 <input
                   type="number"
                   value={price}
-                  onChange={(e) => setPrice(e.target.value)}
+                  onChange={(e) =>
+                    setPrice(
+                      e.target.value
+                    )
+                  }
                 />
               </div>
             </div>
-
             <div className="d-flex mb-2">
               <div className="form-group">
-                <label>Description</label>
+                <label>
+                  Description
+                </label>
+
                 <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  value={
+                    description
+                  }
+                  onChange={(e) =>
+                    setDescription(
+                      e.target.value
+                    )
+                  }
                 />
               </div>
 
               <div className="form-group">
-                <label>Upload Image</label>
+                <label>
+                  Upload Image
+                </label>
+
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={(e) => setImageFile(e.target.files[0])}
+                  onChange={(e) =>
+                    setImageFile(
+                      e.target.files?.[0] ||
+                      null
+                    )
+                  }
                 />
               </div>
             </div>
-
             <button
-              onClick={handleSubmit}
-              disabled={!isFormValid || isLoading}
-              className={`submitButton ${!isFormValid || isLoading ? "disabledButton" : ""
+              onClick={
+                handleSubmit
+              }
+              disabled={
+                !isFormValid ||
+                isLoading
+              }
+              className={`submitButton ${!isFormValid ||
+                isLoading
+                ? "disabledButton"
+                : ""
                 }`}
             >
-            {isLoading ? "Adding..." : "Add Theme"}
+              {isLoading
+                ? "Adding..."
+              : "Add Theme"}
             </button>
           </div>
         )}
@@ -470,4 +802,3 @@ const Addtheme = () => {
 };
 
 export default Addtheme;
-

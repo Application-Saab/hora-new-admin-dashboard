@@ -6,15 +6,288 @@ import "./theme.css";
 import CommonPopup from '../../component/CommonPopup'
 
 const ThemeList = () => {
-  const [themes, setthemes] = useState([]);
+  const [addons, setAddons] = useState([]);
   const [pageLoading, setPageLoading] = useState(true);
   const [editModel, setEditModel] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
-  const [selectedTheme, setSelectedTheme] = useState(null);
+  const [selectedAddon, setSelectedAddon] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [mealProductTypes, setMealProductTypes] = useState([]);
   const [selectedEvents, setSelectedEvents] = useState([]);
   const [isEventDropdownOpen, setIsEventDropdownOpen] = useState(false);
+  const [selectedCategoryType, setSelectedCategoryType] = useState([]);
+  const [selectAllProducts, setSelectAllProducts] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+  const [selectedSubCategories, setSelectedSubCategories] = useState([]);
+  const [isProductDropdownOpen, setIsProductDropdownOpen] = useState(false);
+  const [selectAllEvents, setSelectAllEvents] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState([]);
+
+  const handleCategoryChange = (
+    category,
+    checked
+  ) => {
+    setSelectedCategoryType((prev) => {
+      if (checked) {
+        if (prev.includes(category)) {
+          return prev;
+        }
+
+        return [...prev, category];
+      }
+
+      return prev.filter(
+        (item) => item !== category
+      );
+    });
+
+    setSelectedSubCategories([]);
+    setSelectedProducts([]);
+    setProducts([]);
+
+    setSelectAllEvents(false);
+    setSelectAllProducts(false);
+  };
+  const handleSelectAllEvents = (
+    checked
+  ) => {
+    setSelectAllEvents(checked);
+
+    // Reset products
+    setSelectedProducts([]);
+    setSelectAllProducts(false);
+
+    if (checked) {
+      const allEvents =
+        filteredSubCategories.map(
+          (type) => {
+            const category =
+              type.configurationId?.find(
+                (config) =>
+                  selectedCategoryType.includes(
+                    config.name
+                  )
+              )?.name;
+
+            return {
+              id: type._id,
+              category,
+            };
+          }
+        );
+
+      setSelectedSubCategories(
+        allEvents
+      );
+
+      // Fetch all products
+      fetchProductsByEvents(
+        allEvents
+      );
+    } else {
+      setSelectedSubCategories([]);
+      setSelectedProducts([]);
+      setProducts([]);
+    }
+  };
+  const handleEventChange = (type) => {
+    const eventId = type._id;
+
+    const category =
+      type.configurationId?.find((config) =>
+        selectedCategoryType.includes(
+          config.name
+        )
+      )?.name;
+
+    const alreadySelected =
+      selectedSubCategories.some(
+        (item) => item.id === eventId
+      );
+
+    let updatedEvents;
+
+    if (alreadySelected) {
+
+      updatedEvents =
+        selectedSubCategories.filter(
+          (item) => item.id !== eventId
+        );
+
+    } else {
+
+      updatedEvents = [
+        ...selectedSubCategories,
+        {
+          id: eventId,
+          category,
+        },
+      ];
+    }
+
+    setSelectedSubCategories(
+      updatedEvents
+    );
+
+    // selectedEvents IDs update
+    const updatedEventIds =
+      updatedEvents.map(
+        (event) => event.id
+      );
+
+    setSelectedEvents(
+      updatedEventIds
+    );
+
+    setFormData((prev) => ({
+      ...prev,
+      eventId: updatedEventIds,
+    }));
+
+    // Select All Events
+    setSelectAllEvents(
+      filteredSubCategories.length > 0 &&
+      updatedEvents.length ===
+      filteredSubCategories.length
+    );
+
+    fetchProductsByEvents(
+      updatedEvents
+    );
+  };
+
+  const fetchProductsByEvents = async (events) => {
+    if (!Array.isArray(events) || events.length === 0) {
+      setProducts([]);
+      setSelectedProducts([]);
+      setSelectAllProducts(false);
+      return;
+    }
+
+    if (
+      !Array.isArray(selectedCategoryType) ||
+      selectedCategoryType.length === 0
+    ) {
+      setProducts([]);
+      setSelectedProducts([]);
+      setSelectAllProducts(false);
+      return;
+    }
+
+    const eventIds = events
+      .map((event) => {
+        if (typeof event === "object" && event !== null) {
+          return event.id;
+        }
+
+        return event;
+      })
+      .filter(Boolean)
+      .map((id) => String(id));
+
+    if (eventIds.length === 0) {
+      setProducts([]);
+      setSelectedProducts([]);
+      setSelectAllProducts(false);
+      return;
+    }
+
+    try {
+      const requestBody = {
+        tags: eventIds,
+        categoryType: selectedCategoryType,
+      };
+
+      const response = await fetch(
+        `${BASE_URL}/api/photography/searchByTags`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || data.error) {
+        setProducts([]);
+        setSelectedProducts([]);
+        setSelectAllProducts(false);
+        return;
+      }
+
+      const fetchedProducts = Array.isArray(data?.data)
+        ? data.data
+        : [];
+
+      setProducts(fetchedProducts);
+
+      // Only pre-check products whose id actually came from the backend
+      // (selectedAddon.productId). Nothing gets auto-selected anymore -
+      // the user has to manually check the rest.
+      const oldProductIds = (selectedAddon?.productId || []).map((id) =>
+        String(id)
+      );
+
+      const matchingProductIds = fetchedProducts
+        .filter((product) =>
+          oldProductIds.includes(String(product._id))
+        )
+        .map((product) => String(product._id));
+
+      setSelectedProducts(matchingProductIds);
+
+      setSelectAllProducts(
+        fetchedProducts.length > 0 &&
+        matchingProductIds.length === fetchedProducts.length
+      );
+
+    } catch (error) {
+      console.error(
+        "Error fetching products:",
+        error
+      );
+
+      setProducts([]);
+      setSelectedProducts([]);
+      setSelectAllProducts(false);
+    }
+  };
+
+  const handleSelectAllProducts = (checked) => {
+    setSelectAllProducts(checked);
+
+    if (checked) {
+      const allProductIds = products.map((product) =>
+        String(product._id)
+      );
+
+      setSelectedProducts(allProductIds);
+    } else {
+      setSelectedProducts([]);
+    }
+  };
+
+  const handleProductChange = (productId) => {
+    const id = String(productId);
+
+    setSelectedProducts((prev) => {
+      const updated = prev.includes(id)
+        ? prev.filter((item) => item !== id)
+        : [...prev, id];
+
+      setSelectAllProducts(
+        products.length > 0 &&
+        updated.length === products.length
+      );
+
+      return updated;
+    });
+  };
+
 
   const [formData, setFormData] = useState({
     title: "",
@@ -49,25 +322,78 @@ const ThemeList = () => {
 
     fetchEvents();
   }, []);
+  useEffect(() => {
+    if (
+      !selectedAddon ||
+      mealProductTypes.length === 0
+    ) {
+      return;
+    }
+
+    const oldEventIds = selectedAddon?.eventId || [];
+
+    const matchingEvents =
+      mealProductTypes
+        .filter((event) =>
+          oldEventIds.includes(event._id)
+        )
+        .map((event) => {
+          const category =
+            event.configurationId?.find(
+              (config) =>
+                selectedCategoryType.includes(
+                  config.name
+                )
+            )?.name;
+
+          return {
+            id: event._id,
+            category,
+          };
+        });
+
+    setSelectedSubCategories(
+      matchingEvents
+    );
+
+    setSelectedEvents(oldEventIds);
+
+    setFormData((prev) => ({
+      ...prev,
+      eventId: oldEventIds,
+    }));
+
+    setSelectAllEvents(
+      oldEventIds.length > 0 &&
+      oldEventIds.length ===
+      filteredSubCategories.length
+    );
+    fetchProductsByEvents(matchingEvents);
+  }, [
+    selectedAddon,
+    mealProductTypes,
+    selectedCategoryType,
+  ]);
+
 
   useEffect(() => {
-    const fetchthemes = async () => {
+    const fetchAddons = async () => {
       try {
         const res = await fetch(`${BASE_URL}/api/photography-theme/getAll`);
         const data = await res.json();
-        setthemes(data?.data || []);
+        setAddons(data?.data || []);
       } catch (err) {
-        console.error("Error fetching themes:", err);
+        console.error("Error fetching addons:", err);
       } finally {
         setPageLoading(false);
       }
     };
 
-    fetchthemes();
+    fetchAddons();
   }, []);
 
   const handleDeleteClick = (addon) => {
-    setSelectedTheme(addon);
+    setSelectedAddon(addon);
     setDeleteModal(true);
   };
 
@@ -76,15 +402,15 @@ const ThemeList = () => {
       setIsLoading(true);
 
       const res = await fetch(
-        `${BASE_URL}${DELETE_THEME}/${selectedTheme._id}`,
+        `${BASE_URL}${DELETE_THEME}/${selectedAddon._id}`,
         { method: "POST" }
       );
 
       const data = await res.json();
 
       if (data?.success) {
-        setthemes((prev) =>
-          prev.filter((a) => a._id !== selectedTheme._id)
+        setAddons((prev) =>
+          prev.filter((a) => a._id !== selectedAddon._id)
         );
         setDeleteModal(false);
       }
@@ -95,48 +421,17 @@ const ThemeList = () => {
     }
   };
 
-  const handleEditClick = (theme) => {
-    setSelectedTheme(theme);
+  const handleEditClick = (addon) => {
+    setSelectedAddon(addon);
+    setSelectedCategoryType(addon?.categoryType || []);
 
-    const eventIds = theme?.eventId || [];
-    const productIds = theme?.productId || [];
-
-    const isCategoryLevel =
-      eventIds.length === 0 &&
-      productIds.length === 0;
-
-    if (isCategoryLevel) {
-      const allEventIds = mealProductTypes
-        .filter(
-          (type) =>
-            Array.isArray(type.configurationId) &&
-            type.configurationId.some(
-              (config) =>
-                config.name === theme?.categoryType?.[0]
-            )
-        )
-        .map((event) => event._id);
-
-      setSelectedEvents(allEventIds);
-
-      setFormData({
-        title: theme.title,
-        price: theme.price,
-        description: theme.description || "",
-        image: null,
-        eventId: allEventIds,
-      });
-    } else {
-      setSelectedEvents(eventIds);
-
-      setFormData({
-        title: theme.title,
-        price: theme.price,
-        description: theme.description || "",
-        image: null,
-        eventId: eventIds,
-      });
-    }
+    setFormData({
+      title: addon.title,
+      price: addon.price,
+      description: addon.description || "",
+      image: null,
+      eventId: addon?.eventId || [],
+    });
 
     setEditModel(true);
   };
@@ -167,7 +462,7 @@ const ThemeList = () => {
     try {
       setIsLoading(true);
 
-      let imageName = selectedTheme.image;
+      let imageName = selectedAddon.image;
       if (formData.image) imageName = await uploadImage();
 
       const payload = {
@@ -176,10 +471,12 @@ const ThemeList = () => {
         description: formData.description,
         image: imageName,
         eventId: selectedEvents,
+        productId: selectedProducts,
+        categoryType: selectedCategoryType,
       };
 
       const res = await fetch(
-        `${BASE_URL}${EDIT_THEME}/${selectedTheme._id}`,
+        `${BASE_URL}${EDIT_THEME}/${selectedAddon._id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -190,9 +487,9 @@ const ThemeList = () => {
       const result = await res.json();
 
       if (result.success) {
-        setthemes((prev) =>
+        setAddons((prev) =>
           prev.map((item) =>
-            item._id === selectedTheme._id
+            item._id === selectedAddon._id
               ? { ...item, ...payload }
               : item
           )
@@ -207,46 +504,72 @@ const ThemeList = () => {
   };
 
   const isChanged = useMemo(() => {
-    if (!selectedTheme) return false;
+    if (!selectedAddon) return false;
 
-    const oldEvents = selectedTheme?.eventId || [];
+    const oldEventIds = (selectedAddon?.eventId || []).map(String);
+    const oldProductIds = (selectedAddon?.productId || []).map(String);
+    const oldCategoryTypes = selectedAddon?.categoryType || [];
+
+    const currentEventIds = selectedEvents.map(String);
+    const currentProductIds = selectedProducts.map(String);
 
     const eventsChanged =
-      JSON.stringify([...oldEvents].sort()) !==
-      JSON.stringify([...selectedEvents].sort());
+      JSON.stringify([...oldEventIds].sort()) !==
+      JSON.stringify([...currentEventIds].sort());
+
+    const productsChanged =
+      JSON.stringify([...oldProductIds].sort()) !==
+      JSON.stringify([...currentProductIds].sort());
+
+    const categoriesChanged =
+      JSON.stringify(
+        [...oldCategoryTypes].sort()
+      ) !==
+      JSON.stringify(
+        [...selectedCategoryType].sort()
+      );
 
     return (
-      formData.title !== selectedTheme.title ||
-      formData.price !== selectedTheme.price ||
-      formData.description !== (selectedTheme.description || "") ||
+      formData.title !== selectedAddon.title ||
+      String(formData.price) !== String(selectedAddon.price) ||
+      formData.description !==
+      (selectedAddon.description || "") ||
       formData.image !== null ||
-      eventsChanged
+      eventsChanged ||
+      productsChanged ||
+      categoriesChanged
     );
-  }, [formData, selectedTheme, selectedEvents]);
+
+  }, [
+    formData,
+    selectedAddon,
+    selectedEvents,
+    selectedProducts,
+    selectedCategoryType,
+  ]);
 
   const filteredSubCategories = mealProductTypes.filter(
     (type) =>
       Array.isArray(type.configurationId) &&
       type.configurationId.some(
-        (config) => config.name === selectedTheme?.categoryType?.[0]
+        (config) => selectedCategoryType.includes(config.name)
       )
   );
 
   return (
     <div>
 
-      {/* CENTER MESSAGE (Loading / Empty) */}
       {pageLoading ? (
         <div className="center-message">Loading...</div>
-      ) : themes.length === 0 ? (
-        <div className="center-message">No Theme Found</div>
+      ) : addons.length === 0 ? (
+        <div className="center-message">No Addon Found</div>
       ) : (
         <div className="addon-list">
-          {themes.map((addon) => (
+          {addons.map((addon) => (
             <div key={addon._id} className="addon-item">
               <div className="image-wrapper">
                 <img
-                  src={`${BASE_URL}/api/uploads/compressed_webp/${addon.image}`}
+                  src={`https://horaservices.com/api/uploads/compressed_webp/${addon.image}`}
                   alt={addon.title}
                   className="addon-image"
                 />
@@ -256,7 +579,7 @@ const ThemeList = () => {
                 {addon.description}
               </p>
               <div>
-                <strong className="addon-label">Category :</strong> {addon?.categoryType?.[0]}
+                <strong className="addon-label">Category :</strong> {addon?.categoryType?.[0]} ,  {addon?.categoryType?.[1] || ""}
               </div>
 
               <div className="addonCard-footer">
@@ -286,11 +609,10 @@ const ThemeList = () => {
         </div>
       )}
 
-      {/* EDIT MODAL */}
       <CommonPopup
         isOpen={editModel}
         onClose={() => setEditModel(false)}
-        heading="Edit Theme"
+        heading="Edit Addon"
         buttonText={isLoading ? "Updating.." : "Update"}
         mainButtonAction={handleUpdate}
         disabled={!isChanged || isLoading}
@@ -327,74 +649,255 @@ const ThemeList = () => {
               />
             </div>
 
-            {(!selectedTheme?.productId ||
-              selectedTheme?.productId?.length === 0) ? (
+            <div className="event-dropdown-wrapper2 category-dropdown">
+              <label>Select Category</label>
 
-              <div className="popup-form-group">
-                <label>Events</label>
+              <div className="event-dropdown product-dropdown">
+                <button
+                  type="button"
+                  className="event-dropdown-button"
+                  onClick={() =>
+                    setIsCategoryDropdownOpen(
+                      (prev) => !prev
+                    )
+                  }
+                >
+                  <span>
+                    {selectedCategoryType.length ===
+                      0
+                      ? "Select Category"
+                      : `${selectedCategoryType.length} Categor${selectedCategoryType.length >
+                        1
+                        ? "ies"
+                        : "y"
+                      } Selected`}
+                  </span>
 
-                <div className="event-dropdown product-dropdown">
+                  <span>▾</span>
+                </button>
 
-                  <button
-                    type="button"
-                    className="event-dropdown-button"
-                    onClick={() =>
-                      setIsEventDropdownOpen((prev) => !prev)
-                    }
-                  >
-                    <span>
-                      {selectedEvents.length === 0
-                        ? "Select Event"
-                        : `${selectedEvents.length} Event${selectedEvents.length > 1 ? "s" : ""
-                        } Selected`}
-                    </span>
+                {isCategoryDropdownOpen && (
+                  <div className="event-dropdown-menu">
 
-                    <span>▾</span>
-                  </button>
+                    <label className="event-option">
+                      <input
+                        type="checkbox"
+                        checked={selectedCategoryType.includes(
+                          "Photography"
+                        )}
+                        onChange={(e) =>
+                          handleCategoryChange(
+                            "Photography",
+                            e.target.checked
+                          )
+                        }
+                      />
 
-                  {isEventDropdownOpen && (
-                    <div className="event-dropdown-menu">
+                      <span>
+                        Photography
+                      </span>
+                    </label>
 
-                      {filteredSubCategories.map((event) => (
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {selectedCategoryType.length >
+              0 && (
+                <div className="event-dropdown-wrapper2">
+                  <label>
+                    Select Event
+                  </label>
+
+                  <div className="event-dropdown product-dropdown">
+                    <button
+                      type="button"
+                      className="event-dropdown-button"
+                      onClick={() =>
+                        setIsEventDropdownOpen(
+                          (prev) => !prev
+                        )
+                      }
+                    >
+                      <span>
+                        {selectedSubCategories.length ===
+                          0
+                          ? "Select Event"
+                          : `${selectedSubCategories.length} Event${selectedSubCategories.length >
+                            1
+                            ? "s"
+                            : ""
+                          } Selected`}
+                      </span>
+
+                      <span>▾</span>
+                    </button>
+
+                    {isEventDropdownOpen && (
+                      <div className="event-dropdown-menu">
                         <label
-                          key={event._id}
                           className="event-option"
+                          onMouseDown={(e) =>
+                            e.stopPropagation()
+                          }
                         >
                           <input
                             type="checkbox"
-                            checked={selectedEvents.includes(event._id)}
-                            onChange={() => {
-                              setSelectedEvents((prev) =>
-                                prev.includes(event._id)
-                                  ? prev.filter((id) => id !== event._id)
-                                  : [...prev, event._id]
-                              );
-                            }}
+                            checked={
+                              selectAllEvents
+                            }
+                            onChange={(e) =>
+                              handleSelectAllEvents(
+                                e.target.checked
+                              )
+                            }
                           />
 
-                          <span>{event.name}</span>
+                          <span>
+                            Select All Events
+                          </span>
                         </label>
-                      ))}
 
-                    </div>
-                  )}
+                        {filteredSubCategories.map(
+                          (type) => {
+                            const isSelected =
+                              selectedSubCategories.some(
+                                (item) =>
+                                  item.id ===
+                                  type._id
+                              );
+
+                            return (
+                              <label
+                                key={type._id}
+                                className="event-option"
+                                onMouseDown={(e) =>
+                                  e.stopPropagation()
+                                }
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={
+                                    isSelected
+                                  }
+                                  onChange={() =>
+                                    handleEventChange(
+                                      type
+                                    )
+                                  }
+                                />
+
+                                <span>
+                                  {type.name}
+                                </span>
+                              </label>
+                            );
+                          }
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div
-                style={{
-                  padding: "10px 12px",
-                  background: "#f5f5f5",
-                  border: "1px solid #ddd",
-                  borderRadius: "6px",
-                  color: "#666",
-                  fontSize: "13px",
-                }}
-              >
-                ℹ️ This theme is linked to a specific product, so event
-                selection is not available.
-              </div>
-            )}
+              )}
+
+            {selectedSubCategories.length >
+              0 && (
+                <div
+                  className="form-group"
+                  style={{
+                    marginTop: "10px",
+                    width: "100%",
+                  }}
+                >
+                  <label>
+                    Select Product
+                  </label>
+
+                  <div className="event-dropdown product-dropdown">
+                    <button
+                      type="button"
+                      className="event-dropdown-button"
+                      onClick={() =>
+                        setIsProductDropdownOpen(
+                          (prev) => !prev
+                        )
+                      }
+                    >
+                      <span>
+                        {selectedProducts.length ===
+                          0
+                          ? "Select Product"
+                          : `${selectedProducts.length} Product${selectedProducts.length >
+                            1
+                            ? "s"
+                            : ""
+                          } Selected`}
+                      </span>
+
+                      <span>▾</span>
+                    </button>
+                    {isProductDropdownOpen && (
+                      <div className="event-dropdown-menu">
+                        <label
+                          className="event-option"
+                          onMouseDown={(e) =>
+                            e.stopPropagation()
+                          }
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              selectAllProducts
+                            }
+                            onChange={(e) =>
+                              handleSelectAllProducts(
+                                e.target.checked
+                              )
+                            }
+                          />
+
+                          <span>
+                            Select All Products
+                          </span>
+                        </label>
+
+                        {products.map(
+                          (product) => (
+                            <label
+                              key={
+                                product._id
+                              }
+                              className="event-option"
+                              onMouseDown={(e) =>
+                                e.stopPropagation()
+                              }
+                            >
+                              <input
+                                type="checkbox"
+                                checked={selectedProducts.includes(
+                                  product._id
+                                )}
+                                onChange={() =>
+                                  handleProductChange(
+                                    product._id
+                                  )
+                                }
+                              />
+
+                              <span>
+                                {product.name}
+                              </span>
+                            </label>
+                          )
+                        )}
+
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
 
             <div className="popup-form-group">
               <label>Upload Image</label>
@@ -420,7 +923,7 @@ const ThemeList = () => {
           popupBody={
             <p>
               Are you sure you want to delete{" "}
-              <strong>{selectedTheme?.title}</strong>?
+              <strong>{selectedAddon?.title}</strong>?
             </p>
           }
         />

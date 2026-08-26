@@ -401,3 +401,6 @@ textarea {
   cursor: pointer;
   flex-shrink: 0;
 }
+.event-dropdown-wrapper2{
+  width: 100%;
+}
