@@ -1754,6 +1754,146 @@ const ActionPopup = ({
                           </div>
                         </div>
 
+
+                          <div
+                            style={{
+                              backgroundColor: "#f3f4f6",
+                              padding: "16px 12px",
+                              borderRadius: "12px",
+                              boxShadow: "inset 0 1px 4px rgba(0,0,0,0.03)",
+                            }}
+                          >
+                            <div
+                              style={{
+                                backgroundColor: "#ffffff",
+                                borderRadius: "12px",
+                                boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+                                padding: "16px",
+                              }}
+                            >
+                              <p
+                                style={{
+                                  fontWeight: "600",
+                                  fontSize: "14px",
+                                  marginBottom: "12px",
+                                }}
+                              >
+                                <strong>Photography Theme:</strong>
+                              </p>
+
+                              {(() => {
+                                const themes =
+                                  Array.isArray(orderDetails?.themes) &&
+                                  orderDetails.themes.filter(
+                                    (item) => item?.title || item?.name,
+                                  );
+
+                                if (!themes || themes.length === 0) {
+                                  return (
+                                    <p
+                                      style={{
+                                        fontSize: "12px",
+                                        color: "#6b7280",
+                                        marginTop: "6px",
+                                      }}
+                                    >
+                                      N/A
+                                    </p>
+                                  );
+                                }
+
+                                return (
+                                  <div
+                                    style={{
+                                      display: "grid",
+                                      gridTemplateColumns:
+                                        "repeat(auto-fit, minmax(200px, 1fr))",
+                                      gap: "16px",
+                                    }}
+                                  >
+                                    {themes.map((item, index) => (
+                                      <div
+                                        key={index}
+                                        style={{
+                                          backgroundColor: "#fff",
+                                          borderRadius: "10px",
+                                          boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+                                          overflow: "hidden",
+                                          display: "flex",
+                                          flexDirection: "column",
+                                          border: "1px solid #e5e7eb",
+                                        }}
+                                      >
+                                        {/* Image */}
+                                        <div
+                                          style={{
+                                            width: "100%",
+                                            height: "120px",
+                                            overflow: "hidden",
+                                          }}
+                                        >
+                                          <Image
+                                            src={
+                                              item?.image
+                                                ? `http://localhost:9000/api/uploads/compressed_webp/${item.image}`
+                                                : "/placeholder.png"
+                                            }
+                                            alt={item?.title}
+                                            width={240}
+                                            height={120}
+                                            style={{
+                                              width: "100%",
+                                              height: "100%",
+                                              objectFit: "cover",
+                                            }}
+                                          />
+                                        </div>
+
+                                        {/* Info */}
+                                        <div
+                                          style={{
+                                            padding: "10px",
+                                            textAlign: "left",
+                                          }}
+                                        >
+                                          <p
+                                            style={{
+                                              fontSize: "13px",
+                                              fontWeight: "600",
+                                              color: "#059669",
+                                            }}
+                                          >
+                                           Price : {item?.price || 0 } 
+                                          </p>
+                                          <h3
+                                            style={{
+                                              fontSize: "13px",
+                                              fontWeight: "500",
+                                              color: "#1f2937",
+                                              marginTop: "2px",
+                                            }}
+                                          >
+                                            Name : {item?.title}
+                                          </h3>
+                                          <p
+                                            style={{
+                                              fontSize: "12px",
+                                              color: "#6b7280",
+                                              marginTop: "4px",
+                                            }}
+                                          >
+                                            Discription :{" "}
+                                            {item?.description || "N/A"}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                );
+                              })()}
+                            </div>
+                          </div>
+
                         {/*  */}
                       </div>
                     </div>

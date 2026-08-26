@@ -72,3 +72,6 @@ export const GET_ERROR_LOGS_LIST = "/api/error-log/list";
 export const ADD_ADDON = "/api/addon/add";
 export const DELETE_ADDON = "/api/addon/delete";
 export const EDIT_ADDON = "/api/addon/edit";
+export const ADD_THEME = "/api/photography-theme/add";
+export const DELETE_THEME = "/api/photography-theme/delete";
+export const EDIT_THEME = "/api/photography-theme/edit"

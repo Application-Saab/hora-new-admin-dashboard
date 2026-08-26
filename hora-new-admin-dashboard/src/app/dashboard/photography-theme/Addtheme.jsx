@@ -1,16 +1,14 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import {
   BASE_URL,
-  ADD_ADDON,
+  ADD_THEME,
   PRODUCT_MEAL_TYPE,
   IMAGE_UPLOAD,
 } from "../../../utils/apiconstant";
-import "./addon.css";
+import "./theme.css";
 
-const Addaddons = () => {
-
+const Addtheme = () => {
   const [selectedCategoryType, setSelectedCategoryType] = useState([]);
   const [mealProductTypes, setMealProductTypes] = useState([]);
   const [products, setProducts] = useState([]);
@@ -19,16 +17,12 @@ const Addaddons = () => {
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const [isEventDropdownOpen, setIsEventDropdownOpen] = useState(false);
   const [isProductDropdownOpen, setIsProductDropdownOpen] = useState(false);
-
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [imageFile, setImageFile] = useState(null);
-
   const [isLoading, setIsLoading] = useState(false);
-
   const [selectAllEvents, setSelectAllEvents] = useState(false);
-
   const [selectAllProducts, setSelectAllProducts] = useState(false);
 
   const fetchOptions = async (url, setter, body) => {
@@ -338,46 +332,44 @@ const Addaddons = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!isFormValid) {
       return;
     }
+
     setIsLoading(true);
 
     try {
 
-      // ---------------- STEP 1: UPLOAD IMAGE ----------------
-      const imageForm = new FormData();
-      imageForm.append("file", imageFile);
-
-      const uploadResponse = await fetch(BASE_URL + IMAGE_UPLOAD, {
-        method: "POST",
-        body: imageForm,
-      });
-
-      const uploadData = await uploadResponse.json();
-
-      if (!uploadResponse.ok || uploadData.error) {
-        throw new Error(uploadData.message || "Image upload failed");
-      }
-
-      const uploadedImageName = uploadData.data;
+            const imageForm = new FormData();
+            imageForm.append("file", imageFile);
+      
+            const uploadResponse = await fetch(BASE_URL + IMAGE_UPLOAD, {
+              method: "POST",
+              body: imageForm,
+            });
+      
+            const uploadData = await uploadResponse.json();
+      
+            if (!uploadResponse.ok || uploadData.error) {
+              throw new Error(uploadData.message || "Image upload failed");
+            }
+      
+            const uploadedImageName = uploadData.data;
 
       let productId = [];
 
       if (selectAllProducts) {
-        // ALL currently loaded products
         productId = products.map(
           (product) => product._id
         );
       } else {
-        // Only selected products
         productId = [...selectedProducts];
       }
 
       let eventType = [];
 
       if (selectAllEvents) {
-        // ALL events
         eventType = filteredSubCategories.map(
           (event) => event._id
         );
@@ -387,7 +379,6 @@ const Addaddons = () => {
         );
 
       } else {
-        // Only selected events
         eventType = selectedSubCategories.map(
           (event) => event.id
         );
@@ -404,7 +395,7 @@ const Addaddons = () => {
       };
 
       const response = await fetch(
-        `${BASE_URL}${ADD_ADDON}`,
+        `${BASE_URL}${ADD_THEME}`,
         {
           method: "POST",
           headers: {
@@ -423,7 +414,7 @@ const Addaddons = () => {
         );
       }
 
-      alert("Addon created successfully");
+      alert("Theme created successfully");
 
       setTitle("");
       setPrice("");
@@ -445,7 +436,7 @@ const Addaddons = () => {
 
     } catch (error) {
       console.error(
-        "Error creating addon:",
+        "Error creating Theme:",
         error
       );
 
@@ -457,7 +448,6 @@ const Addaddons = () => {
 
   return (
     <div>
-
       <div className="d-flex mb-2">
 
         <div className="event-dropdown-wrapper category-dropdown">
@@ -489,24 +479,6 @@ const Addaddons = () => {
 
             {isCategoryDropdownOpen && (
               <div className="event-dropdown-menu">
-                <label className="event-option">
-                  <input
-                    type="checkbox"
-                    checked={selectedCategoryType.includes(
-                      "Decoration"
-                    )}
-                    onChange={(e) =>
-                      handleCategoryChange(
-                        "Decoration",
-                        e.target.checked
-                      )
-                    }
-                  />
-
-                  <span>
-                    Decoration
-                  </span>
-                </label>
                 <label className="event-option">
                   <input
                     type="checkbox"
@@ -740,7 +712,7 @@ const Addaddons = () => {
 
               <div className="form-group">
                 <label>
-                  Addon Title
+                  Theme Title
                 </label>
 
                 <input
@@ -821,7 +793,7 @@ const Addaddons = () => {
             >
               {isLoading
                 ? "Adding..."
-                : "Add Addon"}
+              : "Add Theme"}
             </button>
           </div>
         )}
@@ -829,4 +801,4 @@ const Addaddons = () => {
   );
 };
 
-export default Addaddons;
+export default Addtheme;

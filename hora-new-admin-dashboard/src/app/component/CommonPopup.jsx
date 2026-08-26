@@ -27,7 +27,7 @@ const Popup = ({ isOpen, onClose, heading, popupBody, buttonText, mainButtonActi
                         onClick={onClose}
                         className='cancel-btn'
                     >
-                        Colse
+                        Close
                     </button>
                 </div>
             </div>
