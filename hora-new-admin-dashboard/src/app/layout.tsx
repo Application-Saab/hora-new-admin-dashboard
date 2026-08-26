@@ -246,6 +246,13 @@ const menuItems = [
     icon: <FaPlusCircle />,
     url: "/dashboard/create-dish",
   },
+
+  {
+    label: "Team",
+    icon: <FaPlusCircle />,
+    url: "/dashboard/team",
+  },
+
 ];
 
 // SIDEBAR COMPONENT WITH RIGHT-SIDE TOGGLE ICON

@@ -1,0 +1,329 @@
+.team-page {
+    width: 100%;
+    min-height: 100vh;
+    padding: 30px;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+
+.team-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 30px;
+}
+
+.team-title {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 600;
+    color: #222;
+}
+
+.team-tabs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.team-tab {
+    border: none;
+    padding: 10px 25px;
+    border-radius: 6px;
+    background: #e9ecef;
+    color: #333;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.team-tab:hover {
+    background: #dfe3e8;
+}
+
+.team-tab-active {
+    background: #97538c;
+    color: #ffffff;
+}
+
+.team-tab-active:hover {
+    background: #97538c;
+}
+
+.team-card {
+    width: 430px;
+    max-width: 100%;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 28px 30px;
+    box-sizing: border-box;
+}
+
+.team-card.flex {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.team-card2 {
+    width: 85%;
+    max-width: 1100px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 25px;
+    box-sizing: border-box;
+}
+
+.team-card-title {
+    margin: 0 0 25px;
+    font-size: 21px;
+    font-weight: 600;
+    color: #222;
+}
+
+.team-form {
+    width: 100%;
+    max-width: 100%;
+}
+
+.team-form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.team-form-group label {
+    margin-bottom: 7px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+.team-form-group input {
+    width: 100% !important;
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    outline: none;
+    font-size: 14px;
+    color: #333;
+    background: #ffffff;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.team-form-group input:focus {
+    border-color: #97538c;
+    box-shadow: 0 0 0 2px rgba(151, 83, 140, 0.10);
+}
+
+.team-form-group input::placeholder {
+    color: #9ca3af;
+}
+
+.team-submit-btn {
+    display: block;
+    margin: 16px 0 0 auto;
+    padding: 11px 28px;
+    border: none;
+    border-radius: 6px;
+    background: #97538c;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.team-submit-btn:hover {
+    background: #97538c;
+}
+
+.team-submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.team-search {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-bottom: 22px;
+}
+
+.team-search input {
+    width: 280px;
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    outline: none;
+    font-size: 14px;
+    color: #333;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+
+.team-search input:focus {
+    border-color: #97538c;
+    box-shadow: 0 0 0 2px rgba(151, 83, 140, 0.10);
+}
+
+.team-search input::placeholder {
+    color: #9ca3af;
+}
+
+.team-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.team-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+}
+
+.team-table thead {
+    background: #f3f4f6;
+}
+
+.team-table th {
+    padding: 13px 15px;
+    border: 1px solid #e5e7eb;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+.team-table td {
+    padding: 13px 15px;
+    border: 1px solid #e5e7eb;
+    text-align: left;
+    font-size: 14px;
+    color: #444;
+}
+
+.team-table tbody tr {
+    transition: background 0.15s ease;
+}
+
+.team-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.team-empty {
+    text-align: center !important;
+    padding: 30px !important;
+    color: #777 !important;
+}
+
+@media (max-width: 768px) {
+    .team-page {
+        padding: 20px;
+    }
+
+    .team-header {
+        margin-bottom: 22px;
+    }
+
+    .team-title {
+        font-size: 24px;
+    }
+
+    .team-tabs {
+        width: 100%;
+    }
+
+    .team-tab {
+        flex: 1;
+        min-width: 120px;
+        padding: 10px 15px;
+    }
+
+    .team-card {
+        width: 100%;
+        max-width: 430px;
+        padding: 22px 20px;
+    }
+
+    .team-card2 {
+        width: 100%;
+        max-width: none;
+        padding: 18px;
+    }
+
+    .team-form {
+        width: 100%;
+    }
+
+    .team-form-group input {
+        width: 100% !important;
+    }
+
+    .team-submit-btn {
+        margin-left: auto;
+        margin-right: 0;
+    }
+
+    .team-search {
+        width: 100%;
+    }
+
+    .team-search input {
+        width: 100%;
+    }
+
+    .team-table th,
+    .team-table td {
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .team-page {
+        padding: 15px;
+    }
+
+    .team-title {
+        font-size: 22px;
+    }
+
+    .team-tabs {
+        gap: 7px;
+    }
+
+    .team-tab {
+        min-width: 0;
+        padding: 9px 12px;
+        font-size: 13px;
+    }
+
+    .team-card {
+        padding: 20px 16px;
+    }
+
+    .team-card-title {
+        font-size: 19px;
+        margin-bottom: 22px;
+    }
+
+    .team-submit-btn {
+        width: auto;
+        padding: 10px 22px;
+    }
+
+    .team-table th,
+    .team-table td {
+        padding: 11px 12px;
+        font-size: 13px;
+    }
+}
