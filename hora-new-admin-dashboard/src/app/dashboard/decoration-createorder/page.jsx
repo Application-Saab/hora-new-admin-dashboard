@@ -913,6 +913,9 @@ const AddDecOrder = () => {
   }, [addonIds]);
 
   return (
+    <div
+    style={{display:"flex", gap:"10px"}}
+    >
     <div className="createDecor-container">
       <h2 className="createOrder pageHeading">Create Decoration Order</h2>
       <form className="orderCreation form" onSubmit={handleSubmit}>
@@ -988,7 +991,7 @@ const AddDecOrder = () => {
                       <option value="">Select Team</option>
 
                       {teams?.map((team) => (
-                        <option key={team._id} value={team._id}>
+                        <option key={team._id} value={team.name}>
                           {team.name}
                         </option>
                       ))}
@@ -1051,16 +1054,7 @@ const AddDecOrder = () => {
                       required
                     />
                   </div>
-                  {/* 
-                  <div className="event-box" style={{ flex: 1 }}>
-                    <label htmlFor="pincode">Add Event</label>
-                    <SearchWithDropDown
-                      options={eventList}
-                      selectedValue={selectedEvent}
-                      onChange={(val) => setSelectedEvent(val)}
-                      placeholder="Search event..."
-                    />
-                  </div> */}
+                 
                 </div>
               </>
             )}
@@ -1321,6 +1315,16 @@ const AddDecOrder = () => {
                   disabled
                 />
               </div>
+                
+                  <div className="event-box" style={{ flex: 1 }}>
+                    <label htmlFor="pincode">Add Event</label>
+                    <SearchWithDropDown
+                      options={eventList}
+                      selectedValue={selectedEvent}
+                      onChange={(val) => setSelectedEvent(val)}
+                      placeholder="Search event..."
+                    />
+                  </div>
             </div>
 
             <div
@@ -1777,24 +1781,209 @@ const AddDecOrder = () => {
           >{`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}`}</a>
         </p>
       )}
-      {message === "Customer exists." && (
-        <button onClick={copyOrderSummary} style={style.buttonPrimary}>
-          Copy Order Summary(For Customer)
-        </button>
-      )}
+
     </div>
+      {/* ================= ORDER SUMMARY ================= */}
+      <div className="createDecor-container">
+
+        <div className="summary-header">
+          <h2 className="createOrder pageHeading">Order Summary</h2>
+        </div>
+
+        {/* Product */}
+        <div className="summary-product">
+          Product Image URL: {" "}{`${BASE_URL}/api/uploads/${product?.featured_images[0]?.fileName || ""}`}
+
+          <div>
+            <div> Product Name: {" "}{dishName || "Product Name"}</div>
+            <div> Product Price: {" "}₹{product?.price || 0}</div>
+          </div>
+        </div>
+
+        <div className="summary-divider" />
+
+        {/* Customer Details */}
+        <div className="summary-section">
+          <h4>Customer Details:{" "}</h4>
+
+          <div className="summary-row">
+            <span>Contact Number:{" "}</span>
+            <span>{customerNumber || "—"}</span>
+          </div>
+
+          <div className="summary-row">
+            <span>Order Taken By:{" "}</span>
+            <span>{orderTakenBy || "—"}</span>
+          </div>
+        </div>
+
+        {/* Event Details */}
+        <div className="summary-section">
+          <h4>Event Details :{" "}</h4>
+
+
+
+          <div className="summary-row">
+            <span>Event Name :{" "}</span>
+            <span>{ wonderlandevent ||selectedEvent || "—"}</span>
+          </div>
+
+
+          <div className="summary-row">
+            <span>City :{" "}</span>
+            <span>{city || "—"}</span>
+          </div>
+
+
+          <div className="summary-row">
+            <span>Pincode :{" "}</span>
+            <span>{pincode || "—"}</span>
+          </div>
+
+          <div className="summary-row">
+            <span>Date :{" "}</span>
+            <span>{date || "—"}</span>
+          </div>
+
+          <div className="summary-row">
+            <span>Time Slot :{" "}</span>
+            <span>{timeSlot?.label || "—"}</span>
+          </div>
+
+          <div className="summary-row summary-column">
+            <span>Address :{" "}</span>
+            <span>{address || "—"}</span>
+          </div>
+
+          <div className="summary-row summary-column">
+            <span>Google Location :{" "}</span>
+            <span>{googleLocation || "—"}</span>
+          </div>
+        </div>
+
+        {/* Selected Addons */}
+        {Object.keys(selectedItems || {}).length > 0 && (
+          <div className="summary-section">
+            <h4>Selected Add-ons :</h4>
+
+            {Object.keys(selectedItems).map((id) => {
+              const item = addonData?.find(
+                (i) => String(i._id) === String(id)
+              );
+
+              if (!item) return null;
+
+              const quantity = selectedItems[id]?.quantity || 1;
+
+              return (
+                <div className="summary-item" key={id}>
+                  <div>
+                    <span>{item.title}</span>
+                  </div>
+
+                  <small style={{marginBottom:"5px", marginTop:"5px"}}>
+                      ₹{item.price} × {quantity}
+                     = 
+                    ₹{item.price * quantity}
+                  </small>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Manually Added Addons */}
+        {products?.some((item) => item.name) && (
+          <div className="summary-section">
+            <h4>Add-ons :</h4>
+
+            {products
+              .filter((item) => item.name)
+              .map((item, index) => (
+                <div className="summary-item" key={index}>
+                  <div>
+                    <span>{item.name}</span>
+                    <small>Qty: 1</small>
+                  </div>
+
+                  <strong>
+                    ₹{item.price || 0}
+                  </strong>
+                </div>
+              ))}
+          </div>
+        )}
+
+        {/* Inclusions */}
+        {product?.inclusion?.length > 0 && (
+          <div className="summary-section">
+            <h4>Inclusions :</h4>
+
+            <div className="summary-inclusions">
+              {product.inclusion.map((item, index) => (
+                <div
+                  key={index}
+                  dangerouslySetInnerHTML={{
+                    __html: item,
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Comment */}
+        {comment && (
+          <div className="summary-section">
+            <h4>Comment :</h4>
+
+            <p className="summary-comment">
+              {comment}
+            </p>
+          </div>
+        )}
+
+        {/* Amount Summary */}
+        <div className="summary-amount">
+
+          <h4>Amount Details</h4>
+
+          <div className="amount-summary-row">
+            <span>Total Amount :</span>
+            <span>
+              ₹{totalamount || 0}
+            </span>
+          </div>
+
+          <div className="amount-summary-row">
+            <span>Advance Amount :</span>
+            <span>
+              ₹{advanceamount || 0}
+            </span>
+          </div>
+
+          <div className="amount-summary-row balance-row">
+            <span>Balance Amount :</span>
+            <span>
+              ₹{balanceamount || 0}
+            </span>
+          </div>
+
+          {message === "Customer exists." && (
+            <button onClick={copyOrderSummary} style={style.buttonPrimary}>
+              Copy Order Summary(For Customer)
+            </button>
+          )}
+
+        </div>
+
+      </div>
+    </div>
+
   );
 };
 
 const style = {
-  buttonSecondary: {
-    padding: "10px 20px",
-    backgroundColor: "#9252AA",
-    color: "#fff",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-  },
   buttonPrimary: {
     padding: "10px 20px",
     backgroundColor: "#9252AA",

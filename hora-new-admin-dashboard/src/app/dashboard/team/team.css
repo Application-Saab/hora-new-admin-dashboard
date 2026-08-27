@@ -327,3 +327,90 @@
         font-size: 13px;
     }
 }
+/* =========================
+   TEAM ACTION BUTTONS
+========================= */
+
+.team-action-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.team-edit-btn,
+.team-delete-btn {
+    border: none;
+    padding: 7px 13px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.team-edit-btn {
+    background: #f1f1f1;
+    color: #444;
+}
+
+.team-edit-btn:hover {
+    background: #e4e4e4;
+}
+
+.team-delete-btn {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.team-delete-btn:hover {
+    background: #fecaca;
+}
+
+.team-delete-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
+/* =========================
+   EDIT POPUP FORM
+========================= */
+
+.team-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
+
+.team-edit-form .team-form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0;
+}
+
+.team-edit-form .team-form-group label {
+    margin-bottom: 7px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+.team-edit-form .team-form-group input {
+    width: 100% !important;
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    outline: none;
+    font-size: 14px;
+    color: #333;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+
+.team-edit-form .team-form-group input:focus {
+    border-color: #97538c;
+    box-shadow: 0 0 0 2px rgba(151, 83, 140, 0.10);
+}

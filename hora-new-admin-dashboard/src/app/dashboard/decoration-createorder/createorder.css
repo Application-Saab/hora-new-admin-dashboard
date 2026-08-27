@@ -581,7 +581,7 @@ gap: 5px;
 }
 .createDecor-container{
   background-color: white;
-  max-width: 52%;
+  min-width: 50% !important;
   padding: 30px;
 }
 .number-input{

@@ -3,12 +3,14 @@
 import React, { useEffect, useState } from "react";
 import { BASE_URL } from "../../../utils/apiconstant";
 import "./team.css";
+import CommonPopup from '../../component/CommonPopup'
+
 
 const TeamPage = () => {
     const [activeTab, setActiveTab] = useState("list");
 
     const [formData, setFormData] = useState({
-        name: "",
+        name: "", 
         number: "",
         dob: "",
     });
@@ -17,6 +19,146 @@ const TeamPage = () => {
     const [searchNumber, setSearchNumber] = useState("");
     const [loading, setLoading] = useState(false);
     const [addLoading, setAddLoading] = useState(false);
+
+    const [editModal, setEditModal] = useState(false);
+
+    const [editData, setEditData] = useState({
+        _id: "",
+        name: "",
+        number: "",
+        dob: "",
+    });
+
+    const [originalEditData, setOriginalEditData] = useState({
+        name: "",
+        number: "",
+        dob: "",
+    });
+
+    const [editLoading, setEditLoading] = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState("");
+
+
+    const handleEditClick = (item) => {
+        const data = {
+            _id: item._id,
+            name: item.name || "",
+            number: item.number ? String(item.number) : "",
+            dob: item.dob || "",
+        };
+
+        setEditData(data);
+
+        setOriginalEditData({
+            name: data.name,
+            number: data.number,
+            dob: data.dob,
+        });
+
+        setEditModal(true);
+    };
+
+    const hasEditChanges =
+        editData.name !== originalEditData.name ||
+        editData.number !== originalEditData.number ||
+        editData.dob !== originalEditData.dob;
+
+    const handleUpdateTeam = async () => {
+        if (!hasEditChanges) return;
+
+        try {
+            setEditLoading(true);
+
+            const payload = {
+                name: editData.name,
+                number: editData.number
+                    ? Number(editData.number)
+                    : undefined,
+                dob: editData.dob,
+            };
+
+            const response = await fetch(
+                `${BASE_URL}/api/team/edit/${editData._id}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(payload),
+                }
+            );
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    result.message || "Failed to update team"
+                );
+            }
+
+            alert("Team updated successfully");
+
+            setEditModal(false);
+
+            setEditData({
+                _id: "",
+                name: "",
+                number: "",
+                dob: "",
+            });
+
+            setOriginalEditData({
+                name: "",
+                number: "",
+                dob: "",
+            });
+
+            getTeams(searchNumber);
+
+        } catch (error) {
+            console.error("Update team error:", error);
+            alert(error.message);
+        } finally {
+            setEditLoading(false);
+        }
+    };
+
+    const handleDeleteTeam = async (id) => {
+        const confirmDelete = window.confirm(
+            "Are you sure you want to delete this team?"
+        );
+
+        if (!confirmDelete) return;
+
+        try {
+            setDeleteLoading(id);
+
+            const response = await fetch(
+                `${BASE_URL}/api/team/delete/${id}`,
+                {
+                    method: "POST",
+                }
+            );
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    result.message || "Failed to delete team"
+                );
+            }
+
+            alert("Team deleted successfully");
+
+            getTeams(searchNumber);
+
+        } catch (error) {
+            console.error("Delete team error:", error);
+            alert(error.message);
+        } finally {
+            setDeleteLoading("");
+        }
+    };
 
     const getTeams = async (number = "") => {
         try {
@@ -329,6 +471,7 @@ const TeamPage = () => {
                                         DOB
                                     </th>
 
+                                    <th>Action</th>
                                 </tr>
                             </thead>
 
@@ -375,6 +518,33 @@ const TeamPage = () => {
                                                     {item.dob || "-"}
                                                 </td>
 
+                                                <td>
+                                                    <div className="team-action-buttons">
+
+                                                        <button
+                                                            type="button"
+                                                            className="team-edit-btn"
+                                                            onClick={() => handleEditClick(item)}
+                                                        >
+                                                            Edit
+                                                        </button>
+
+                                                        <button
+                                                            type="button"
+                                                            className="team-delete-btn"
+                                                            onClick={() =>
+                                                                handleDeleteTeam(item._id)
+                                                            }
+                                                            disabled={deleteLoading === item._id}
+                                                        >
+                                                            {deleteLoading === item._id
+                                                                ? "Deleting..."
+                                                                : "Delete"}
+                                                        </button>
+
+                                                    </div>
+                                                </td>
+
                                             </tr>
                                         )
                                     )
@@ -388,6 +558,78 @@ const TeamPage = () => {
 
                 </div>
             )}
+
+            <CommonPopup
+                isOpen={editModal}
+                onClose={() => setEditModal(false)}
+                heading="Edit Team"
+                buttonText={editLoading ? "Updating..." : "Update"}
+                disabled={!hasEditChanges || editLoading}
+                mainButtonAction={handleUpdateTeam}
+                popupBody={
+                    <div className="team-edit-form">
+
+                        <div className="team-form-group">
+                            <label>
+                                Name
+                            </label>
+
+                            <input
+                                type="text"
+                                value={editData.name}
+                                onChange={(e) =>
+                                    setEditData({
+                                        ...editData,
+                                        name: e.target.value,
+                                    })
+                                }
+                                placeholder="Enter name"
+                            />
+                        </div>
+
+                        <div className="team-form-group">
+                            <label>
+                                Number
+                            </label>
+
+                            <input
+                                type="text"
+                                inputMode="numeric"
+                                maxLength={10}
+                                value={editData.number}
+                                onChange={(e) => {
+                                    const value =
+                                        e.target.value.replace(/\D/g, "");
+
+                                    setEditData({
+                                        ...editData,
+                                        number: value,
+                                    });
+                                }}
+                                placeholder="Enter number"
+                            />
+                        </div>
+
+                        <div className="team-form-group">
+                            <label>
+                                DOB
+                            </label>
+
+                            <input
+                                type="date"
+                                value={editData.dob}
+                                onChange={(e) =>
+                                    setEditData({
+                                        ...editData,
+                                        dob: e.target.value,
+                                    })
+                                }
+                            />
+                        </div>
+
+                    </div>
+                }
+            />
 
         </div>
     );
