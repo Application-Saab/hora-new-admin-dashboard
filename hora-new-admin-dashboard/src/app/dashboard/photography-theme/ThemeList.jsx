@@ -1,11 +1,11 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
-import { BASE_URL, DELETE_ADDON, EDIT_ADDON, IMAGE_UPLOAD, PRODUCT_MEAL_TYPE } from "../../../utils/apiconstant";
+import { BASE_URL, DELETE_THEME, EDIT_THEME, IMAGE_UPLOAD, PRODUCT_MEAL_TYPE } from "../../../utils/apiconstant";
 import { FaPen, FaTrash } from "react-icons/fa";
-import "./addon.css";
+import "./theme.css";
 import CommonPopup from '../../component/CommonPopup'
 
-const AddonList = () => {
+const ThemeList = () => {
   const [addons, setAddons] = useState([]);
   const [pageLoading, setPageLoading] = useState(true);
   const [editModel, setEditModel] = useState(false);
@@ -322,13 +322,6 @@ const AddonList = () => {
 
     fetchEvents();
   }, []);
-
-  // Whenever the addon being edited, the meal/product types list, or the
-  // currently selected category types change -> recompute which events
-  // should show as CHECKED. Only events whose id came from the backend
-  // (selectedAddon.eventId) are checked; everything else in
-  // filteredSubCategories is just shown (visible) and unchecked until the
-  // user manually ticks it.
   useEffect(() => {
     if (
       !selectedAddon ||
@@ -386,7 +379,7 @@ const AddonList = () => {
   useEffect(() => {
     const fetchAddons = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/api/addon/getAll`);
+        const res = await fetch(`${BASE_URL}/api/photography-theme/getAll`);
         const data = await res.json();
         setAddons(data?.data || []);
       } catch (err) {
@@ -409,7 +402,7 @@ const AddonList = () => {
       setIsLoading(true);
 
       const res = await fetch(
-        `${BASE_URL}${DELETE_ADDON}/${selectedAddon._id}`,
+        `${BASE_URL}${DELETE_THEME}/${selectedAddon._id}`,
         { method: "POST" }
       );
 
@@ -483,7 +476,7 @@ const AddonList = () => {
       };
 
       const res = await fetch(
-        `${BASE_URL}${EDIT_ADDON}/${selectedAddon._id}`,
+        `${BASE_URL}${EDIT_THEME}/${selectedAddon._id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -685,25 +678,6 @@ const AddonList = () => {
 
                 {isCategoryDropdownOpen && (
                   <div className="event-dropdown-menu">
-
-                    <label className="event-option">
-                      <input
-                        type="checkbox"
-                        checked={selectedCategoryType.includes(
-                          "Decoration"
-                        )}
-                        onChange={(e) =>
-                          handleCategoryChange(
-                            "Decoration",
-                            e.target.checked
-                          )
-                        }
-                      />
-
-                      <span>
-                        Decoration
-                      </span>
-                    </label>
 
                     <label className="event-option">
                       <input
@@ -958,4 +932,4 @@ const AddonList = () => {
   );
 };
 
-export default AddonList;
+export default ThemeList;

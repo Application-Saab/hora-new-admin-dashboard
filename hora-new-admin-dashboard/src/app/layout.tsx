@@ -150,6 +150,11 @@ const menuItems = [
       { label: "Capsule Tracking",
          icon: <FaClipboardList />,
           url: "/dashboard/capsule-tracking" },
+      {
+        label: "Theme",
+        icon: <FaClipboardList />,
+        url: "/dashboard/photography-theme"
+      }, 
     ],
   },
 
@@ -246,6 +251,13 @@ const menuItems = [
     icon: <FaPlusCircle />,
     url: "/dashboard/create-dish",
   },
+
+  {
+    label: "Team",
+    icon: <FaPlusCircle />,
+    url: "/dashboard/team",
+  },
+
 ];
 
 // SIDEBAR COMPONENT WITH RIGHT-SIDE TOGGLE ICON

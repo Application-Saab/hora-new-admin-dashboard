@@ -65,6 +65,10 @@ const AddPhotoOrder = () => {
   const [selectedAddOns, setSelectedAddOns] = useState([]);
   const [addOnProducts, setAddOnProducts] = useState([]);
   const [addonIds, setAddonIds] = useState([]);
+  const [themeIds, setThemeIds] = useState([]);
+  const [themeProducts, setThemeProducts] = useState([]);
+  const [selectedTheme, setSelectedTheme] = useState([]);
+  const [selectedThemeItems, setSelectedThemeItems] = useState({});
 
   // const [addOnsTotalPrice, setAddOnsTotalPrice] = useState(0);
 
@@ -153,6 +157,35 @@ const AddPhotoOrder = () => {
   }, [addonIds]);
 
   useEffect(() => {
+    if (!themeIds || themeIds.length === 0) return; 
+
+    const getThemes = async () => {
+      try {
+        const query = new URLSearchParams();
+        themeIds.forEach(id => {
+          if (id) query.append("ids", id);
+        });
+
+        if ([...query].length === 0) return; // no valid IDs
+
+        const url = `${BASE_URL}/api/photography-theme/get?${query.toString()}`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (!response.ok || data.error) {
+          throw new Error(data.message || "Failed to fetch addons");
+        }
+
+        setThemeProducts(data.data || []);
+      } catch (error) {
+        console.error("Error fetching addons:", error);
+      }
+    };
+
+    getThemes();
+  }, [themeIds]);
+
+  useEffect(() => {
     if (selectedTag) {
       const fetchProductsByTag = async () => {
         setIsLoadingProducts(true);
@@ -212,6 +245,7 @@ const AddPhotoOrder = () => {
         console.log(selectedProduct, "productdata");
         setProduct(selectedProduct);
         setAddonIds(selectedProduct.addons || []);
+        setThemeIds(selectedProduct.ThemesId || []);
         setCategory(selectedProduct.price);
 
         const inclusions =
@@ -455,8 +489,21 @@ const AddPhotoOrder = () => {
 
     }).filter(Boolean);
 
+    const themes = Object.keys(selectedThemeItems).map((id) => {
+
+      const item = themeProducts.find((i) => i._id === id);
+
+      if (!item) return null;
+
+      return {
+        ...item,
+      };
+
+    }).filter(Boolean);
+
     const requestData = {
       add_on: add_on,
+      themes: themes,
       inclusion: inclusion,
       selecteditems: dishName,
       phone_no: customerNumber,
@@ -582,6 +629,30 @@ const handleAddOnChange = (addOn, isChecked) => {
     return updated;
   });
 };
+
+
+  const handleThemeChange = (theme, isChecked) => {
+    setSelectedTheme(prev => {
+      if (isChecked) {
+        return [...prev, theme];
+      } else {
+        return prev.filter(item => item._id !== theme._id);
+      }
+    });
+
+    setSelectedThemeItems(prev => {
+      const updated = { ...prev };
+
+      if (isChecked) {
+        updated[theme._id] = { quantity: 1 };
+      } else {
+        delete updated[theme._id];
+      }
+
+      return updated;
+    });
+  };
+
 
 
 const changeQuantity = (id, delta) => {
@@ -912,7 +983,7 @@ const changeQuantity = (id, delta) => {
                             style={{ transform: "scale(1.2)" }}
                           />
                           <img
-                            src={`https://horaservices.com/api/uploads/compressed_webp/${addOn.image}`}
+                            src={`${BASE_URL}/api/uploads/compressed_webp/${addOn.image}`}
                             alt={addOn.title}
                             style={{
                               width: "60px",
@@ -978,6 +1049,116 @@ const changeQuantity = (id, delta) => {
 
                       </ul>
                       {/* <p style={{ 
+                  margin: "10px 0 0 0", 
+                  fontWeight: "bold", 
+                  fontSize: "16px",
+                  color: "#28a745"
+                }}>
+                  Total Add-Ons: ₹{addOnsTotalPrice}
+                </p> */}
+                  </div>
+                )}
+              </div>
+            )}
+
+
+            {themeProducts.length > 0 && (
+              <div
+                className="add-on-section"
+                style={{
+                  border: "1px solid #ccc",
+                  padding: "15px",
+                  borderRadius: "5px",
+                  marginBottom: "20px",
+                  backgroundColor: "#f9f9f9",
+                }}
+              >
+                <h3>Themes</h3>
+                <div
+                  className="add-on-grid"
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                    gap: "15px"
+                  }}>
+                  {themeProducts.map((theme, index) => {
+                    return (
+                      <div key={index} className="add-on-card" style={{
+                        border: "1px solid #ddd",
+                        borderRadius: "8px",
+                        padding: "12px",
+                        backgroundColor: "white",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px"
+                      }}>
+                        <input
+                          type="checkbox"
+                          id={`addon-${index}`}
+                          checked={selectedTheme.some(item => item.title === theme.title)}
+                          onChange={(e) => handleThemeChange(theme, e.target.checked)}
+                          style={{ transform: "scale(1.2)" }}
+                        />
+                        <img
+                          src={`${BASE_URL}/api/uploads/compressed_webp/${theme.image}`}
+                          alt={theme.title}
+                          style={{
+                            width: "60px",
+                            height: "60px",
+                            objectFit: "cover",
+                            borderRadius: "4px"
+                          }}
+                        />
+                        <div style={{ flex: 1 }}>
+                          <label htmlFor={`addon-${index}`} style={{
+                            fontWeight: "bold",
+                            cursor: "pointer",
+                            display: "block",
+                            marginBottom: "4px"
+                          }}>
+                            {theme.title}
+                          </label>
+                          <p style={{
+                            margin: "0",
+                            fontSize: "12px",
+                            color: "#666",
+                            marginBottom: "4px"
+                          }}>
+                            {theme.description}
+                          </p>
+                          <p style={{
+                            margin: "0",
+                            fontWeight: "bold",
+                            color: "#28a745",
+                            fontSize: "14px"
+                          }}>
+                            ₹{theme.price}
+                          </p>
+                        </div>
+
+                      </div>
+                    )
+                  })}               </div>
+                {selectedTheme.length > 0 && (
+                  <div style={{
+                    marginTop: "15px",
+                    padding: "10px",
+                    backgroundColor: "#e8f5e8",
+                    borderRadius: "5px",
+                    border: "1px solid #28a745"
+                  }}>
+                    <h4 style={{ margin: "0 0 10px 0", color: "#28a745" }}>Selected Themes:</h4>
+                    <ul style={{ margin: "0", paddingLeft: "20px" }}>
+                      {selectedTheme.map((theme, index) => {
+                        return (
+                          <li key={index} style={{ marginBottom: "5px" }}>
+                            {theme.title} - ₹{theme.price || "N/A"} 
+                          </li>
+                        );
+                      })}
+
+                    </ul>
+                    {/* <p style={{ 
                   margin: "10px 0 0 0", 
                   fontWeight: "bold", 
                   fontSize: "16px",
