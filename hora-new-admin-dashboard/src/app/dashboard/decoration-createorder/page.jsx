@@ -22,7 +22,6 @@ import { formatDate } from "../../../utils/formateDate";
 
 const AddDecOrder = () => {
   const [dishName, setDishName] = useState("");
-  const [productid, setProductID] = useState("");
   const [productprice, setProductPrice] = useState("");
   const [date, setDate] = useState("");
   console.log(
@@ -534,7 +533,6 @@ const AddDecOrder = () => {
           const productData = response.data?.data?.[0];
           if (productData) {
             setProduct(productData);
-            setProductID(productData._id);
             setAddonIds(productData.addons || []);
             setProductPrice(productData.price);
             setShowProductDetails(true);
@@ -872,116 +870,131 @@ const AddDecOrder = () => {
 
   return (
     <div className="container">
-      <h1 className="createOrder pageHeading">Create Decoration Order</h1>
+      <h2 className="createOrder pageHeading">Create Decoration Order</h2>
       <form className="orderCreation form" onSubmit={handleSubmit}>
         {/* product check */}
-        <label htmlFor="dishName">Product Name *</label>
-        <input
-          type="text"
-          id="dishName"
-          value={dishName}
-          onChange={(e) => {
-            setDishName(e.target.value);
-            setIsFetched(false);
-            setIsContinueClicked(false);
-            setShowProductDetails(false);
-          }}
-          placeholder="Product Name"
-          required
-        />
+        <div className="top-product-details">
+<div>
+          <label htmlFor="dishName">Product Name *</label>
+          <input
+            type="text"
+            id="dishName"
+            className="product-input"
+            value={dishName}
+            onChange={(e) => {
+              setDishName(e.target.value);
+              setIsFetched(false);
+              setIsContinueClicked(false);
+              setShowProductDetails(false);
+            }}
+            placeholder="Product Name"
+            required
+          />
 
-        {!showProductDetails && (
-          <button
-            type="button"
-            className="orderCheck-btn"
-            onClick={handleContinueClick}
-            style={{ marginTop: "10px" }}
-            disabled={dishName === "" ? true : false}
-          >
-            Continue
-          </button>
-        )}
-        {
-          <p className="error-msg" style={{ color: " red" }}>
-            {dishName && isContinueClicked ? dishNameError : ""}
-          </p>
-        }
+          {!showProductDetails && (
+            <div>
+            <button
+              type="button"
+              className="orderCheck-btn"
+              onClick={handleContinueClick}
+              style={{ marginTop: "10px" }}
+              disabled={dishName === "" ? true : false}
+            >
+              Continue
+            </button>
+            </div>
+          )}
+          {
+            <p className="error-msg" style={{ color: " red" }}>
+              {dishName && isContinueClicked ? dishNameError : ""}
+            </p>
+          }
+
+            {showProductDetails && product && (
+              <>
+                {/* costumer chcek======================== */}
+                <label htmlFor="customerNumber">Customer Number*</label>
+                <input
+                  type="text"
+                  id="customerNumber"
+                  className="product-input"
+                  value={customerNumber}
+                  onInput={(e) =>
+                    setCustomerNumber(e.target.value.replace(/\D/g, ""))
+                  } // Remove non-digits as the user types
+                  placeholder="Customer Number"
+                  required
+                  maxLength={10} // Limit to 10 digits
+                  pattern="\d{10}" // Enforce exactly 10 digits
+                  inputMode="numeric" // Optimize for numeric input on mobile devices
+                />
+     
+                { message === "Customer exists." &&
+                <div >
+                  <label htmlFor="orderTakenBy">Order Taken By*</label>
+                  <input
+                    type="text"
+                    id="orderTakenBy"
+                    value={orderTakenBy}
+                    onChange={(e) => setOrderTakenBy(e.target.value)}
+                    placeholder="Order Taken By"
+                    required
+                  />
+                </div>
+}
+                <div>
+                  {message !== "Customer exists." ?
+                  <div>
+                      <button
+                        className="orderCheck-btn"
+                        onClick={handleCheckCustomer}
+                        disabled={loading || customerNumber.length !== 10}
+                      >
+                        {loading ? "Checking..." : "Check Customer"}
+                      </button>
+                      {<p style={{ color: messageColor }}>{message}</p>}
+                  </div>
+                  :
+                  <div></div>
+                }
+                
+                </div>
+              </>
+            )}
+</div>
+          {showProductDetails &&
+        <div className="product-image">
+          <div>
+            <Image
+              src={`${BASE_URL}/api/uploads/${product.featured_image}`}
+              alt="Product"
+              width={200}
+              height={200}
+              onError={(e) => (e.target.style.display = "none")}
+            />
+          </div>
+            <div style={{ fontSize: "18px" }}>₹ {productprice}</div>
+        </div>
+}
+        </div>
 
         {/* product details =================================================*/}
 
-        {showProductDetails && product && (
-          <>
-            <label htmlFor="productid">Product ID</label>
-            <input type="text" id="productid" value={productid} readOnly />
-            <label htmlFor="productprice">Product Price</label>
-            <input
-              type="text"
-              id="productprice"
-              value={productprice}
-              readOnly
-            />
-            <div style={{ marginTop: "10px" }}>
-              <label htmlFor="featuredImage">Product Image</label>
-              <div>
-                <Image
-                  src={`${BASE_URL}/api/uploads/${product.featured_image}`}
-                  alt="Product"
-                  width={200}
-                  height={200}
-                  onError={(e) => (e.target.style.display = "none")}
-                />
-              </div>
-            </div>
-            {/* costumer chcek======================== */}
-            <label htmlFor="customerNumber">Customer Number*</label>
-            <input
-              type="text"
-              id="customerNumber"
-              value={customerNumber}
-              onInput={(e) =>
-                setCustomerNumber(e.target.value.replace(/\D/g, ""))
-              } // Remove non-digits as the user types
-              placeholder="Customer Number"
-              required
-              maxLength={10} // Limit to 10 digits
-              pattern="\d{10}" // Enforce exactly 10 digits
-              inputMode="numeric" // Optimize for numeric input on mobile devices
-            />
-            <button
-              className="orderCheck-btn"
-              onClick={handleCheckCustomer}
-              disabled={loading || customerNumber.length !== 10}
-            >
-              {loading ? "Checking..." : "Check Customer"}
-            </button>
-            {loading && <p>Loading...</p>} {/* Loader */}
-            {<p style={{ color: messageColor }}>{message}</p>}
-          </>
-        )}
+
         {/* order details ==========================.Customer does not exist */}
         {message === "Customer exists." ? (
           <div className="orderDeatils">
             <div
-              className="date-time-container"
+              className="amount-box"
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: "2%",
               }}
             >
-              <div style={{ marginRight: "18px" }}>
-                <label htmlFor="orderTakenBy">Order Taken By*</label>
-                <input
-                  type="text"
-                  id="orderTakenBy"
-                  value={orderTakenBy}
-                  onChange={(e) => setOrderTakenBy(e.target.value)}
-                  placeholder="Order Taken By"
-                  required
-                />
-              </div>
 
-              <div style={{ marginRight: "18px" }}>
+
+              <div >
                 <label htmlFor="date">Date *</label>
                 <input
                   type="date"
@@ -993,7 +1006,7 @@ const AddDecOrder = () => {
                 />
               </div>
 
-              <div style={{ marginRight: "18px" }}>
+              <div >
                 <label
                   htmlFor="timeSlot"
                   style={{
@@ -1011,8 +1024,18 @@ const AddDecOrder = () => {
                   required
                 />
               </div>
-            </div>
 
+              <div className="event-box" style={{ flex: 1 }}>
+                <label htmlFor="pincode">Add Event</label>
+                <SearchWithDropDown
+                  options={eventList}
+                  selectedValue={selectedEvent}
+                  onChange={(val) => setSelectedEvent(val)}
+                  placeholder="Search event..."
+                />
+              </div>
+            </div>
+            <div className="amount-box">
             <div className="address-box">
               <label htmlFor="address">Address*</label>
               <textarea
@@ -1033,6 +1056,7 @@ const AddDecOrder = () => {
                 onChange={(e) => setGoogleLocation(e.target.value)}
                 placeholder="googleLocation"
               />
+            </div>
             </div>
             <div className="addon-container">
               <label htmlFor="addOn">Add On</label>
@@ -1063,7 +1087,7 @@ const AddDecOrder = () => {
                       className="add-new-btn"
                       onClick={addProduct}
                     >
-                      Add New
+                      Add
                     </button>
                   </div>
                 ))}
@@ -1073,9 +1097,17 @@ const AddDecOrder = () => {
             <div className="dropdown-container">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="orderCheck-btn"
+                className="selectAddon-btn"
               >
-                Select AddOn ▼
+                <div className="addon-inner-text">
+                  <span>Select Addon</span>
+
+                  <span
+                    className={`item-arrow ${dropdownOpen ? "arrow-down" : ""}`}
+                  >
+                    ›
+                  </span>
+                </div>
               </button>
 
               {dropdownOpen && (
@@ -1131,6 +1163,7 @@ const AddDecOrder = () => {
             )}
 
             <div className="amount-box">
+              <div>
               <label htmlFor="totalamount">Total Amount*</label>
               <input
                 type="text"
@@ -1140,7 +1173,8 @@ const AddDecOrder = () => {
                 placeholder="Total Amount"
                 required
               />
-
+              </div>
+              <div>
               <label htmlFor="advanceamount">Advance Amount</label>
               <input
                 type="text"
@@ -1149,7 +1183,8 @@ const AddDecOrder = () => {
                 onChange={(e) => setAdvanceAmount(e.target.value)}
                 placeholder="Advance Amount"
               />
-
+              </div>
+              <div>
               <label htmlFor="balanceamount">Balance Amount</label>
               <input
                 type="text"
@@ -1158,29 +1193,14 @@ const AddDecOrder = () => {
                 placeholder="Balance Amount"
                 disabled
               />
+              </div>
             </div>
 
             <div
-              className="cityPincode-box"
-              style={{
-                marginTop: "10px",
-                width: "100%",
-                display: "flex",
-                alignItems: "flex-start",
-                gap: "10px",
-                alignItems: "flex-start",
-                flexWrap: "nowrap",
-              }}
+              className="amount-box"
             >
               <div className="city-box" style={{ flex: 1 }}>
-                <label
-                  htmlFor="city"
-                  style={{
-                    width: "100%",
-                    marginBottom: "5px",
-                    display: "block",
-                  }}
-                >
+                <label htmlFor="city">
                   City *
                 </label>
                 <select
@@ -1233,28 +1253,19 @@ const AddDecOrder = () => {
                   {pincodeMessage}
                 </p>
               </div>
-              <div className="event-box" style={{ flex: 1 }}>
-                <label htmlFor="pincode">Add Event</label>
-                <SearchWithDropDown
-                  options={eventList}
-                  selectedValue={selectedEvent}
-                  onChange={(val) => setSelectedEvent(val)}
-                  placeholder="Search event..."
+              <div>
+                <label htmlFor="wonderlandevent">Wonderland Occasion</label>
+                <input
+                  type="text"
+                  id="wonderlandevent"
+                  value={wonderlandevent}
+                  onChange={(e) => setWonderlandEvent(e.target.value)}
+                  placeholder="Wonderland Occasion"
                 />
               </div>
             </div>
-            <div style={{ marginTop: "20px" }}>
-              <label htmlFor="wonderlandevent">Wonderland Occasion</label>
-              <input
-                type="text"
-                id="wonderlandevent"
-                value={wonderlandevent}
-                onChange={(e) => setWonderlandEvent(e.target.value)}
-                placeholder="Wonderland Occasion"
-              />
-            </div>
             <div className="checkoutInputType border-1 rounded-4 ">
-              <h4>Share your comments (if any)</h4>
+              <h4 className="comments-heading">Share your comments (if any)</h4>
               <div className="addon-form">
                 {commentFields.map((field, index) => (
                   <div key={index} className="comment-container">
@@ -1559,7 +1570,7 @@ const AddDecOrder = () => {
 
             {!isOrderCreated && (
               <button
-                className="orderCheck-btn"
+                className="createOrder-btn"
                 type="submit"
                 disabled={lloading}
               >
@@ -1671,7 +1682,7 @@ const style = {
 
 const container = {
   maxWidth: "1450px",
-  margin: "40px auto",
+  margin: "10px auto",
   padding: "2px",
   fontFamily: "Segoe UI, sans-serif",
 };

@@ -27,7 +27,6 @@ const AddPhotoOrder = () => {
   const [selectedEvent, setSelectedEvent] = useState("");
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const [dishName, setDishName] = useState("");
-  const [productid, setProductID] = useState("");
   const [category, setCategory] = useState("");
   const [inclusion, setInclusion] = useState("");
   const [date, setDate] = useState("");
@@ -212,7 +211,6 @@ const AddPhotoOrder = () => {
       if (selectedProduct) {
         console.log(selectedProduct, "productdata");
         setProduct(selectedProduct);
-        setProductID(selectedProduct._id);
         setAddonIds(selectedProduct.addons || []);
         setCategory(selectedProduct.price);
 
@@ -600,8 +598,10 @@ const changeQuantity = (id, delta) => {
 
   return (
     <div className="container">
-      <h1>Photography 📸</h1>
-      <form onSubmit={handleSubmit}>
+      <h2 className="createOrder pageHeading">Create Photography Order</h2>
+      <form className="" onSubmit={handleSubmit}>
+        <div className="category-product-row" >
+        <div>
         {/* Tag Selection */}
         <label htmlFor="tagSelect">Select Category *</label>
         {/* <select
@@ -667,6 +667,8 @@ const changeQuantity = (id, delta) => {
 
         {isLoadingProducts && <p>Loading products...</p>}
 
+        </div>
+       <div>
         {/* Product Selection */}
         {products.length > 0 && (
           <>
@@ -698,19 +700,55 @@ const changeQuantity = (id, delta) => {
             </select>
           </>
         )}
+        </div>
+        </div>
 
+        <div className="" >
         {showProductDetails && product && (
           <>
-            <label htmlFor="productid">Product ID</label>
-            <input type="text" id="productid" value={productid} readOnly />
+              <div className="category-product-row">
+          <div>
             <label htmlFor="category">Product Price</label>
             <input type="text" id="category" value={category} readOnly />
+              </div>
+
+<div>
+
+              <label htmlFor="customerNumber">Customer Number*</label>
+              <input
+                type="text"
+                id="customerNumber"
+                value={customerNumber}
+                onInput={(e) =>
+                  setCustomerNumber(e.target.value.replace(/\D/g, ""))
+                }
+                placeholder="Customer Number"
+                required
+                maxLength={10}
+                pattern="\d{10}"
+                inputMode="numeric"
+              />
+                  {message !== "Customer exists." &&
+                  <div>
+              <button
+                className="orderCheck-btn"
+                onClick={handleCheckCustomer}
+                disabled={loading || customerNumber.length !== 10}
+              >
+                {loading ? "Checking..." : "Check Customer"}
+              </button>
+              {<p style={{ color: messageColor }}>{message}</p>}
+                    </div>
+                  }
+              </div>
+              </div>
             <div
               className="ProductInclusions"
               style={{
-                border: "1px solid black",
+                border: "1px solid #ccc",
                 marginTop: "10px",
                 padding: "10px",
+                borderRadius:"6px",
               }}
             >
               <label htmlFor="productid">Product Inclusions:</label>
@@ -723,43 +761,19 @@ const changeQuantity = (id, delta) => {
               </ul>
             </div>
             {/* customer check  */}
-
-            <label htmlFor="customerNumber">Customer Number*</label>
-            <input
-              type="text"
-              id="customerNumber"
-              value={customerNumber}
-              onInput={(e) =>
-                setCustomerNumber(e.target.value.replace(/\D/g, ""))
-              }
-              placeholder="Customer Number"
-              required
-              maxLength={10}
-              pattern="\d{10}"
-              inputMode="numeric"
-            />
-            <button
-              className="orderCheck-btn"
-              onClick={handleCheckCustomer}
-              disabled={loading || customerNumber.length !== 10}
-            >
-              {loading ? "Checking..." : "Check Customer"}
-            </button>
-            {loading && <p>Loading...</p>}
-            {<p style={{ color: messageColor }}>{message}</p>}
           </>
         )}
         {message === "Customer exists." ? (
           <div className="orderDeatils">
             <div
-              className="date-time-container"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "2%",
-              }}
+                className="amount-box"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "2%",
+                }}
             >
-              <div style={{ marginRight: "18px" }}>
+              <div >
                 <label htmlFor="orderTakenBy">Order Taken By*</label>
                 <input
                   type="text"
@@ -770,7 +784,7 @@ const changeQuantity = (id, delta) => {
                   required
                 />
               </div>
-              <div style={{ marginRight: "18px" }}>
+              <div >
                 <label htmlFor="date">Date *</label>
                 <input
                   type="date"
@@ -780,7 +794,7 @@ const changeQuantity = (id, delta) => {
                   required
                 />
               </div>
-              <div style={{ marginRight: "18px" }}>
+              <div >
                 <label
                   htmlFor="timeSlot"
                   style={{
@@ -799,7 +813,9 @@ const changeQuantity = (id, delta) => {
                 />
               </div>
             </div>
-            <div className="address-box">
+              <div
+                className="address-row" >
+            <div>
               <label htmlFor="address">Address*</label>
               <textarea
                 type="text"
@@ -810,7 +826,7 @@ const changeQuantity = (id, delta) => {
                 required
               />
             </div>
-            <div className="googleLocation-box">
+            <div>
               <label htmlFor="googleLocation">Google Location</label>
               <textarea
                 type="text"
@@ -820,7 +836,9 @@ const changeQuantity = (id, delta) => {
                 placeholder="googleLocation"
               />
             </div>
-            <div className="amount-box">
+              </div>
+              <div className="address-row">
+              <div>
               <label htmlFor="totalamount">Total Amount*</label>
               <input
                 type="text"
@@ -830,7 +848,8 @@ const changeQuantity = (id, delta) => {
                 placeholder="Total Amount"
                 required
               />
-
+                </div>
+                <div>
               <label htmlFor="advanceamount">Advance Amount</label>
               <input
                 type="text"
@@ -839,6 +858,8 @@ const changeQuantity = (id, delta) => {
                 onChange={(e) => setAdvanceAmount(e.target.value)}
                 placeholder="Advance Amount"
               />
+              </div>
+              <div>
               <label htmlFor="balanceamount">Balance Amount</label>
               <input
                 type="text"
@@ -847,6 +868,7 @@ const changeQuantity = (id, delta) => {
                 placeholder="Balance Amount"
                 disabled
               />
+            </div>
             </div>
 
             {/* Add-On Products */}
@@ -857,11 +879,12 @@ const changeQuantity = (id, delta) => {
                   border: "1px solid #ccc",
                   padding: "15px",
                   borderRadius: "5px",
-                  marginBottom: "20px",
+                  marginBottom: "10px",
+                  marginTop:"15px",
                   backgroundColor: "#f9f9f9",
                 }}
               >
-                <h3>Add-On Products</h3>
+                <div style={{fontSize:"18px", fontWeight:"600", marginBottom:"8px"}}>Add-On Products</div>
                 <div
                   className="add-on-grid"
                   style={{
@@ -1045,7 +1068,7 @@ const changeQuantity = (id, delta) => {
                 />
               </div>
             </div>
-            <div style={{ marginTop: "20px" }}>
+            <div style={{ marginTop: "10px" }}>
               <label htmlFor="wonderlandevent">Wonderland Occasion</label>
               <input
                 type="text"
@@ -1056,7 +1079,7 @@ const changeQuantity = (id, delta) => {
               />
             </div>
             <div className="checkoutInputType border-1 rounded-4">
-              <h4>Share your comments (if any)</h4>
+                <div style={{ fontSize: "18px", fontWeight: "600", marginBottom: "8px", marginTop:"12px" }}>Share your comments (if any)</div>
               <div className="addon-form">
                 {commentFields.map((field, index) => (
                   <div key={index} className="comment-container">
@@ -1082,7 +1105,7 @@ const changeQuantity = (id, delta) => {
             </div>
 
             {/* Create Order */}
-            <button className="orderCheck-btn" type="submit">
+              <button className="createOrder-btn" type="submit">
               {lloading ? "Creating Order..." : "Create Order"}
             </button>
           </div>
@@ -1125,6 +1148,7 @@ const changeQuantity = (id, delta) => {
             )}
           </>
         )}
+        </div>
       </form>
 
       {eventResponse?._id && (

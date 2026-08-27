@@ -1,3 +1,7 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
   box-sizing: border-box;
 }
@@ -17,7 +21,7 @@ body {
 }
 
 .pageHeading {
-  font-size: calc(12px + 8 * ((100vw - 360px) / (768 - 360)));
+  font-size: 30px;
   text-align: center;
 }
 
@@ -46,18 +50,14 @@ textarea {
 }
 
 .orderCheck-btn {
-  margin-top: 20px;
+  margin-top: 10px;
   padding: 10px;
-  background-color: #5cb85c;
+  background-color: #97538c;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  width: 100%;
-}
-
-.button1:hover {
-  background-color: #4cae4c;
+  width:max-content;
 }
 
 label {
@@ -90,7 +90,7 @@ button[disabled] {
 
 .form_css button[type="button"] {
   padding: 10px 20px;
-  background-color: #4CAF50;
+  background-color: #97538c;
   color: #fff;
   border: none;
   border-radius: 5px;
@@ -98,12 +98,21 @@ button[disabled] {
 }
 
 .amount-box {
-
   display: flex;
-  gap: 10px;
-  margin: 10px 0;
-  ;
+  gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
 
+.amount-box>div {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.amount-box input {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .addon-form {
@@ -130,15 +139,11 @@ button[disabled] {
 }
 .add-new-btn {
   padding: 8px 16px;
-  background-color: #4CAF50;
+  background-color: #97538c;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-}
-
-.add-new-btn:hover {
-  background-color: #45a049;
 }
 
 .loader {
@@ -218,7 +223,7 @@ button[disabled] {
 }
 
 .popup input:focus {
-  border-color: #4caf50;
+  border-color: #97538c;
   /* Soft green for focus */
   box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
 }
@@ -230,7 +235,7 @@ button[disabled] {
   margin: 10px 1%;
   border: none;
   border-radius: 12px;
-  background: #4caf50;
+  background: #97538c;
   /* Light green button */
   color: #ffffff;
   font-size: 1rem;
@@ -239,23 +244,11 @@ button[disabled] {
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.popup button:hover {
-  background-color: #45a049;
-  /* Darker green hover effect */
-  transform: translateY(-2px);
-  /* Slight lift on hover */
-}
-
 /* Cancel Button */
 .popup button.cancel {
   background: #e0e0e0;
   /* Light grey for cancel */
   color: #333;
-}
-
-.popup button.cancel:hover {
-  background: #d6d6d6;
-  /* Darker grey on hover */
 }
 
 .buttonSecondary {
@@ -308,9 +301,7 @@ button[disabled] {
 /* new css */
 .dropdown-container {
   position: relative;
-  width: 550px;
-  font-family: Arial, sans-serif;
-  margin: 20px auto;
+  width: 100% !important;
 }
 
 .dropdown-btn {
@@ -398,7 +389,7 @@ button[disabled] {
   padding: 12px;
   border: 1px solid #ccc;
   border-radius: 6px;
-  margin-bottom: 15px;
+  margin: 15px 0px;
 }
 
 .selected-summary h4 {
@@ -482,4 +473,103 @@ gap: 5px;
   border: 1px solid #ccc;
   border-radius: 4px;
   width: 80%;
+}
+.error-msg{
+  margin: 0px;
+}
+.product-input{
+  width: 400px !important;
+}
+.selectAddon-btn{
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: transparent;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 8px 10px;
+  cursor: pointer;
+  text-align: left;
+  margin-top: 15px;
+}
+
+.addon-inner-text {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.item-arrow {
+  display: inline-block;
+  font-size: 24px;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.item-arrow.arrow-down {
+  transform: rotate(90deg);
+}
+.comments-heading{
+  margin: 15px 0px;
+}
+.createOrder-btn{
+    margin-top: 20px;
+      padding: 10px;
+      background-color: #5cb85c;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+}
+.top-product-details{
+  display: flex;
+  /* justify-content: center; */
+  gap:100px;
+}
+.product-image{
+  background-color: white;
+  padding: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  border-radius: 6px;
+}
+
+.category-product-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  width: 100%;
+}
+
+.category-product-row>div {
+  flex: 1;
+  min-width: 0;
+}
+
+.category-product-row label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.category-product-row select {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.address-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  width: 100%;
+}
+
+.address-row>div {
+  flex: 1;
+  min-width: 0;
+}
+
+.address-row label {
+  display: block;
+  margin-bottom: 8px;
 }
