@@ -46,7 +46,7 @@ const AddDecOrder = () => {
   const [advanceamount, setAdvanceAmount] = useState("");
   const [balanceamount, setBalanceAmount] = useState("");
   const [orderTakenBy, setOrderTakenBy] = useState("");
-
+  const [inclusion, setInclusion] = useState([]);
   const [products, setProducts] = useState([{ name: "", price: "" }]);
   const [comment, setComment] = useState("");
   const [dishNameError, setDishNameError] = useState("");
@@ -63,7 +63,7 @@ const AddDecOrder = () => {
   const [newCustomerPhone, setNewCustomerPhone] = useState("");
 
   const [selectedItems, setSelectedItems] = useState({});
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [teams, setTeams] = useState([]);
 
   const [isOrderCreated, setIsOrderCreated] = useState(false);
 
@@ -165,6 +165,50 @@ const AddDecOrder = () => {
 
     fetchMaterialFilterData();
   }, []);
+
+      const getTeams = async (number = "") => {
+          try {
+              setLoading(true);
+  
+              let url = `${BASE_URL}/api/team/getAll`;
+  
+              if (number) {
+                  url += `?number=${encodeURIComponent(number)}`;
+              }
+  
+              const response = await fetch(url);
+  
+              const contentType = response.headers.get("content-type");
+  
+              if (!contentType || !contentType.includes("application/json")) {
+                  const text = await response.text();
+  
+                  console.error("API returned non-JSON response:", text);
+  
+                  throw new Error(
+                      "Invalid API response. Please check BASE_URL and API route."
+                  );
+              }
+  
+              const result = await response.json();
+  
+              if (!response.ok) {
+                  throw new Error(
+                      result.message || "Failed to fetch teams"
+                  );
+              }
+  
+              setTeams(result.data || []);
+          } catch (error) {
+              console.error("Get team error:", error);
+              alert(error.message);
+          } finally {
+              setLoading(false);
+          }
+      };
+      useEffect(() => {
+          getTeams();
+      }, []);
 
   const buildPreviewText = (item) => {
     let previewText = `${item.specs || "-"} ${item.type || "-"} ${item.material || "-"}`;
@@ -534,6 +578,7 @@ const AddDecOrder = () => {
             setProduct(productData);
             setAddonIds(productData.addons || []);
             setProductPrice(productData.price);
+            setInclusion(productData?.inclusion || []);
             setShowProductDetails(true);
             setDishNameError("");
           } else {
@@ -933,14 +978,21 @@ const AddDecOrder = () => {
 
                   <div>
                     <label htmlFor="orderTakenBy">Order Taken By*</label>
-                    <input
-                      type="text"
+
+                    <select
                       id="orderTakenBy"
                       value={orderTakenBy}
                       onChange={(e) => setOrderTakenBy(e.target.value)}
-                      placeholder="Order Taken By"
                       required
-                    />
+                    >
+                      <option value="">Select Team</option>
+
+                      {teams?.map((team) => (
+                        <option key={team._id} value={team._id}>
+                          {team.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
                 <div>
@@ -1031,6 +1083,32 @@ const AddDecOrder = () => {
 
         {/* product details =================================================*/}
 
+        {message === "Customer exists." && (
+          <div
+            className="ProductInclusions"
+            style={{
+              border: "1px solid #ccc",
+              marginTop: "10px",
+              padding: "10px",
+              borderRadius: "6px",
+            }}
+          >
+            <label>Product Inclusions:</label>
+
+            {inclusion?.length > 0 ? (
+              <div
+                style={{ marginTop: "8px" }}
+                dangerouslySetInnerHTML={{
+                  __html: inclusion.join(""),
+                }}
+              />
+            ) : (
+              <div style={{ marginTop: "8px" }}>
+                No inclusions available
+              </div>
+            )}
+          </div>
+        )}
 
         {/* order details ==========================.Customer does not exist */}
         {message === "Customer exists." ? (
