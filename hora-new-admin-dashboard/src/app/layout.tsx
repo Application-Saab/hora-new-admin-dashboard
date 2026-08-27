@@ -255,7 +255,18 @@ const menuItems = [
   {
     label: "Team",
     icon: <FaPlusCircle />,
-    url: "/dashboard/team",
+    children: [
+      {
+        label: "Add Team",
+        icon: <FaPlusCircle />,
+        url: "/dashboard/team",
+      },
+      {
+        label: "Leave System",
+        icon: <FaPlusCircle />,
+        url: "/dashboard/leave-system",
+      },
+    ],
   },
 
 ];

@@ -327,3 +327,30 @@
         font-size: 13px;
     }
 }
+
+.leave-popup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.leave-popup-form .team-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.leave-popup-form .team-form-group label {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.leave-popup-form .team-form-group input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.leave-popup-form .team-form-group input:disabled {
+    background: #f5f5f5;
+    cursor: not-allowed;
+}
