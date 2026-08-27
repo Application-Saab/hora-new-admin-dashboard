@@ -82,6 +82,10 @@ const AddDecOrder = () => {
     orderId: "",
   });
 
+  const [productSuggestions, setProductSuggestions] = useState([]);
+  const [showProductDropdown, setShowProductDropdown] = useState(false);
+  const [isProductSelected, setIsProductSelected] = useState(false);
+
   const createWonderlandEvent = async (orderId) => {
     try {
       const response = await axios.post(
@@ -567,32 +571,69 @@ const AddDecOrder = () => {
     setCommentFields([...commentFields, commentFields.length]);
   };
 
-  useEffect(() => {
-    if (dishName && isContinueClicked && !isFetched) {
-      const fetchProductDetails = async () => {
-        try {
-          const url = `${BASE_URL}${GET_DECORATION_BY_NAME}${encodeURIComponent(dishName)}`;
-          const response = await axios.get(url);
-          const productData = response.data?.data?.[0];
-          if (productData) {
-            setProduct(productData);
-            setAddonIds(productData.addons || []);
-            setProductPrice(productData.price);
-            setInclusion(productData?.inclusion || []);
-            setShowProductDetails(true);
-            setDishNameError("");
-          } else {
-            setShowProductDetails(false);
-            setDishNameError("No product found");
-          }
-        } catch (error) {
-          console.error("Error fetching product:", error.message);
-        }
-      };
-
-      fetchProductDetails();
+  const fetchProducts = async () => {
+    if (!dishName.trim()) {
+      setDishNameError("Please enter product name");
+      return;
     }
-  }, [dishName, isContinueClicked, isFetched]);
+
+    try {
+      setLoading(true);
+      setDishNameError("");
+
+      const url = `${BASE_URL}${GET_DECORATION_BY_NAME}${encodeURIComponent(
+        dishName.trim()
+      )}`;
+
+      const response = await axios.get(url);
+
+      const products = response.data?.data || [];
+
+      setProductSuggestions(products);
+      setShowProductDropdown(products.length > 0);
+      setIsContinueClicked(true);
+
+      if (products.length === 0) {
+        setDishNameError("No product found");
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error.message);
+      setProductSuggestions([]);
+      setShowProductDropdown(false);
+      setDishNameError("Unable to fetch products");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleProductInputChange = (e) => {
+    const value = e.target.value;
+
+    setDishName(value);
+
+    // Product change ke time purani selection reset
+    setProduct(null);
+    setIsProductSelected(false);
+    setShowProductDetails(false);
+    setIsFetched(false);
+    setIsContinueClicked(false);
+    setProductSuggestions([]);
+    setDishNameError("");
+  };
+
+  const handleProductInputClick = () => {
+    // Product already selected hai to input click par
+    // dropdown dobara open ho jayega
+    if (isProductSelected) {
+      setShowProductDropdown(true);
+      return;
+    }
+
+    // Continue ke baad suggestions already hain
+    if (isContinueClicked && productSuggestions.length > 0) {
+      setShowProductDropdown(true);
+    }
+  };
 
   useEffect(() => {
     if (pincode) {
@@ -922,40 +963,79 @@ const AddDecOrder = () => {
         {/* product check */}
         <div className="top-product-details">
           <div>
-            <label htmlFor="dishName">Product Name *</label>
-            <input
-              type="text"
-              id="dishName"
-              className="product-input"
-              value={dishName}
-              onChange={(e) => {
-                setDishName(e.target.value);
-                setIsFetched(false);
-                setIsContinueClicked(false);
-                setShowProductDetails(false);
-              }}
-              placeholder="Product Name"
-              required
-            />
+              <div className="product-search-wrapper">
+                <label htmlFor="dishName">Product Name *</label>
 
-            {!showProductDetails && (
-              <div>
-                <button
-                  type="button"
-                  className="orderCheck-btn"
-                  onClick={handleContinueClick}
-                  style={{ marginTop: "10px" }}
-                  disabled={dishName === "" ? true : false}
-                >
-                  Continue
-                </button>
+                <input
+                  type="text"
+                  id="dishName"
+                  className="product-input"
+                  value={dishName}
+                  onChange={handleProductInputChange}
+                  onClick={handleProductInputClick}
+                  placeholder="Product Name"
+                  required
+                />
+
+                {/* Continue button */}
+                <span style={{marginLeft:"10px"}}>
+                {!isProductSelected && (
+                  <button
+                    type="button"
+                    className="orderCheck-btn"
+                    onClick={fetchProducts}
+                    disabled={loading || !dishName.trim()}
+                    style={{ marginTop: "10px" }}
+                  >
+                    {loading ? "Searching..." : "Continue"}
+                  </button>
+                )}
+                </span>
+
+                {dishNameError && (
+                  <p style={{ color: "red", marginTop: "5px" }}>
+                    {dishNameError}
+                  </p>
+                )}
+
+                {/* Product Dropdown */}
+                {showProductDropdown && productSuggestions.length > 0 && (
+                  <div className="product-suggestions-dropdown">
+                    {productSuggestions.map((item) => (
+                      <div
+                        key={item._id}
+                        className="product-suggestion-item"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+
+                          setDishName(item.name);
+                          setProduct(item);
+                          setAddonIds(item.addons || []);
+                          setProductPrice(item.price);
+                          setInclusion(item.inclusion || []);
+
+                          setShowProductDetails(true);
+                          setShowProductDropdown(false);
+                          setDishNameError("");
+                          setIsFetched(true);
+                          setIsProductSelected(true);
+                          setIsContinueClicked(true);
+                        }}
+                      >
+                        <span className="product-suggestion-name">
+                          {item.name}
+                        </span>
+
+                        {item.price !== undefined && item.price !== null && (
+                          <span className="product-suggestion-price">
+                            ₹{item.price}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
-            {
-              <p className="error-msg" style={{ color: " red" }}>
-                {dishName && isContinueClicked ? dishNameError : ""}
-              </p>
-            }
 
             {showProductDetails && product && (
               <>
@@ -1015,6 +1095,7 @@ const AddDecOrder = () => {
                   }
 
                 </div>
+                  {message == "Customer exists." &&
                 <div
                   style={{
                     display: "flex",
@@ -1056,6 +1137,7 @@ const AddDecOrder = () => {
                   </div>
                  
                 </div>
+}
               </>
             )}
           </div>
@@ -1795,7 +1877,7 @@ const AddDecOrder = () => {
           Product Image URL: {" "}{`${BASE_URL}/api/uploads/${product?.featured_images[0]?.fileName || ""}`}
 
           <div>
-            <div> Product Name: {" "}{dishName || "Product Name"}</div>
+            <div> Product Name: {" "}{product?.name || "Product Name"}</div>
             <div> Product Price: {" "}₹{product?.price || 0}</div>
           </div>
         </div>
