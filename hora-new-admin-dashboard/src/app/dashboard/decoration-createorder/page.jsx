@@ -375,9 +375,8 @@ const AddDecOrder = () => {
     setInclusions((prev) =>
       prev.map((i) => {
         if (i.id === id) {
-          let previewText = `${i.specs || "-"} ${i.type || "-"} ${
-            i.material || "-"
-          }`;
+          let previewText = `${i.specs || "-"} ${i.type || "-"} ${i.material || "-"
+            }`;
           if (i.rentedConsumable === "Rented") {
             previewText += ` ${i.moq || "-"}`;
           } else if (i.rentedConsumable === "Consumable") {
@@ -869,82 +868,84 @@ const AddDecOrder = () => {
   }, [addonIds]);
 
   return (
-    <div className="container">
+    <div className="createDecor-container">
       <h2 className="createOrder pageHeading">Create Decoration Order</h2>
       <form className="orderCreation form" onSubmit={handleSubmit}>
         {/* product check */}
         <div className="top-product-details">
-<div>
-          <label htmlFor="dishName">Product Name *</label>
-          <input
-            type="text"
-            id="dishName"
-            className="product-input"
-            value={dishName}
-            onChange={(e) => {
-              setDishName(e.target.value);
-              setIsFetched(false);
-              setIsContinueClicked(false);
-              setShowProductDetails(false);
-            }}
-            placeholder="Product Name"
-            required
-          />
+          <div>
+            <label htmlFor="dishName">Product Name *</label>
+            <input
+              type="text"
+              id="dishName"
+              className="product-input"
+              value={dishName}
+              onChange={(e) => {
+                setDishName(e.target.value);
+                setIsFetched(false);
+                setIsContinueClicked(false);
+                setShowProductDetails(false);
+              }}
+              placeholder="Product Name"
+              required
+            />
 
-          {!showProductDetails && (
-            <div>
-            <button
-              type="button"
-              className="orderCheck-btn"
-              onClick={handleContinueClick}
-              style={{ marginTop: "10px" }}
-              disabled={dishName === "" ? true : false}
-            >
-              Continue
-            </button>
-            </div>
-          )}
-          {
-            <p className="error-msg" style={{ color: " red" }}>
-              {dishName && isContinueClicked ? dishNameError : ""}
-            </p>
-          }
+            {!showProductDetails && (
+              <div>
+                <button
+                  type="button"
+                  className="orderCheck-btn"
+                  onClick={handleContinueClick}
+                  style={{ marginTop: "10px" }}
+                  disabled={dishName === "" ? true : false}
+                >
+                  Continue
+                </button>
+              </div>
+            )}
+            {
+              <p className="error-msg" style={{ color: " red" }}>
+                {dishName && isContinueClicked ? dishNameError : ""}
+              </p>
+            }
 
             {showProductDetails && product && (
               <>
-                {/* costumer chcek======================== */}
-                <label htmlFor="customerNumber">Customer Number*</label>
-                <input
-                  type="text"
-                  id="customerNumber"
-                  className="product-input"
-                  value={customerNumber}
-                  onInput={(e) =>
-                    setCustomerNumber(e.target.value.replace(/\D/g, ""))
-                  } // Remove non-digits as the user types
-                  placeholder="Customer Number"
-                  required
-                  maxLength={10} // Limit to 10 digits
-                  pattern="\d{10}" // Enforce exactly 10 digits
-                  inputMode="numeric" // Optimize for numeric input on mobile devices
-                />
-     
-                { message === "Customer exists." &&
-                <div >
-                  <label htmlFor="orderTakenBy">Order Taken By*</label>
-                  <input
-                    type="text"
-                    id="orderTakenBy"
-                    value={orderTakenBy}
-                    onChange={(e) => setOrderTakenBy(e.target.value)}
-                    placeholder="Order Taken By"
-                    required
-                  />
+                <div style={{ display: "flex", gap: "10px" }}>
+                  <div>
+                    {/* costumer chcek======================== */}
+                    <label htmlFor="customerNumber">Customer Number*</label>
+                    <input
+                      type="text"
+                      id="customerNumber"
+                      className="number-input"
+                      value={customerNumber}
+                      onInput={(e) =>
+                        setCustomerNumber(e.target.value.replace(/\D/g, ""))
+                      } // Remove non-digits as the user types
+                      placeholder="Customer Number"
+                      required
+                      maxLength={10} // Limit to 10 digits
+                      pattern="\d{10}" // Enforce exactly 10 digits
+                      inputMode="numeric" // Optimize for numeric input on mobile devices
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="orderTakenBy">Order Taken By*</label>
+                    <input
+                      type="text"
+                      id="orderTakenBy"
+                      value={orderTakenBy}
+                      onChange={(e) => setOrderTakenBy(e.target.value)}
+                      placeholder="Order Taken By"
+                      required
+                    />
+                  </div>
                 </div>
-}
                 <div>
                   {message !== "Customer exists." ?
-                  <div>
+                    <div>
                       <button
                         className="orderCheck-btn"
                         onClick={handleCheckCustomer}
@@ -953,29 +954,79 @@ const AddDecOrder = () => {
                         {loading ? "Checking..." : "Check Customer"}
                       </button>
                       {<p style={{ color: messageColor }}>{message}</p>}
+                    </div>
+                    :
+                    <div></div>
+                  }
+
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                  }}
+                >
+
+
+                  <div >
+                    <label htmlFor="date">Date *</label>
+                    <input
+                      type="date"
+                      id="date"
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                      // min={new Date().toISOString().split("T")[0]} // Directly setting min date is this need?
+                      required
+                    />
                   </div>
-                  :
-                  <div></div>
-                }
-                
+
+                  <div >
+                    <label
+                      htmlFor="timeSlot"
+                      style={{
+                        display: "block",
+                        marginBottom: "10px",
+                      }}
+                    >
+                      Time Slot*
+                    </label>
+                    <Select
+                      options={timeSlotOptions}
+                      value={timeSlot}
+                      onChange={(selectedOption) => setTimeSlot(selectedOption)}
+                      placeholder="Select Time Slot"
+                      required
+                    />
+                  </div>
+                  {/* 
+                  <div className="event-box" style={{ flex: 1 }}>
+                    <label htmlFor="pincode">Add Event</label>
+                    <SearchWithDropDown
+                      options={eventList}
+                      selectedValue={selectedEvent}
+                      onChange={(val) => setSelectedEvent(val)}
+                      placeholder="Search event..."
+                    />
+                  </div> */}
                 </div>
               </>
             )}
-</div>
-          {showProductDetails &&
-        <div className="product-image">
-          <div>
-            <Image
-              src={`${BASE_URL}/api/uploads/${product.featured_image}`}
-              alt="Product"
-              width={200}
-              height={200}
-              onError={(e) => (e.target.style.display = "none")}
-            />
           </div>
-            <div style={{ fontSize: "18px" }}>₹ {productprice}</div>
-        </div>
-}
+          {showProductDetails &&
+            <div className="product-image">
+              <div>
+                <Image
+                  src={`${BASE_URL}/api/uploads/${product.featured_image}`}
+                  alt="Product"
+                  width={200}
+                  height={200}
+                  onError={(e) => (e.target.style.display = "none")}
+                />
+              </div>
+              <div style={{ fontSize: "18px" }}>₹ {productprice}</div>
+            </div>
+          }
         </div>
 
         {/* product details =================================================*/}
@@ -984,81 +1035,31 @@ const AddDecOrder = () => {
         {/* order details ==========================.Customer does not exist */}
         {message === "Customer exists." ? (
           <div className="orderDeatils">
-            <div
-              className="amount-box"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "2%",
-              }}
-            >
 
-
-              <div >
-                <label htmlFor="date">Date *</label>
-                <input
-                  type="date"
-                  id="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  // min={new Date().toISOString().split("T")[0]} // Directly setting min date is this need?
-                  required
-                />
-              </div>
-
-              <div >
-                <label
-                  htmlFor="timeSlot"
-                  style={{
-                    display: "block",
-                    marginBottom: "10px",
-                  }}
-                >
-                  Time Slot*
-                </label>
-                <Select
-                  options={timeSlotOptions}
-                  value={timeSlot}
-                  onChange={(selectedOption) => setTimeSlot(selectedOption)}
-                  placeholder="Select Time Slot"
-                  required
-                />
-              </div>
-
-              <div className="event-box" style={{ flex: 1 }}>
-                <label htmlFor="pincode">Add Event</label>
-                <SearchWithDropDown
-                  options={eventList}
-                  selectedValue={selectedEvent}
-                  onChange={(val) => setSelectedEvent(val)}
-                  placeholder="Search event..."
-                />
-              </div>
-            </div>
             <div className="amount-box">
-            <div className="address-box">
-              <label htmlFor="address">Address*</label>
-              <textarea
-                type="text"
-                id="address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="Address"
-                required
-              />
+              <div className="address-box">
+                <label htmlFor="address">Address*</label>
+                <textarea
+                  type="text"
+                  id="address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="Address"
+                  required
+                />
+              </div>
+              <div className="googleLocation-box">
+                <label htmlFor="googleLocation">Google Location</label>
+                <textarea
+                  type="text"
+                  id="googleLocation"
+                  value={googleLocation}
+                  onChange={(e) => setGoogleLocation(e.target.value)}
+                  placeholder="googleLocation"
+                />
+              </div>
             </div>
-            <div className="googleLocation-box">
-              <label htmlFor="googleLocation">Google Location</label>
-              <textarea
-                type="text"
-                id="googleLocation"
-                value={googleLocation}
-                onChange={(e) => setGoogleLocation(e.target.value)}
-                placeholder="googleLocation"
-              />
-            </div>
-            </div>
-            <div className="addon-container">
+            <div className="">
               <label htmlFor="addOn">Add On</label>
 
               <div className="addon-form">
@@ -1093,9 +1094,10 @@ const AddDecOrder = () => {
                 ))}
               </div>
             </div>
+            <div className="addon-heading">Select Addon Products</div>
 
             <div className="dropdown-container">
-              <button
+              {/* <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="selectAddon-btn"
               >
@@ -1108,40 +1110,87 @@ const AddDecOrder = () => {
                     ›
                   </span>
                 </div>
-              </button>
+              </button> */}
 
-              {dropdownOpen && (
-                <div className="dropdown-menu">
-                  {addonData && addonData.map((item) => {
+              <div className="addon-menu">
 
-                    const selected = selectedItems[item._id];
-                    return (
-                      <div className="item-row" key={item._id}>
-                        <div className="left-section">
-                          <input
-                            type="checkbox"
-                            checked={!!selected}
-                            onChange={() => toggleItem(item._id)}
-                          />
-                          <div>
-                            <div className="item-title">{item.title}</div>
-                            <div className="item-price">₹{item.price}</div>
+                <div className="addon-grid">
+                  {addonData &&
+                    addonData.map((item) => {
+                      const selected = selectedItems[item._id];
+
+                      return (
+                        <div className="item-row" key={item._id}>
+
+                          {/* PRODUCT SECTION */}
+                          <div className="left-section">
+
+                            <input
+                              type="checkbox"
+                              checked={!!selected}
+                              onChange={() => toggleItem(item._id)}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+
+                            <div
+                              className="addon-product-clickable"
+                              onClick={() => toggleItem(item._id)}
+                            >
+                              <img
+                                src={`${BASE_URL}/api/uploads/compressed_webp/${item.image}`}
+                                alt={item.title}
+                                className="addon-product-image"
+                              />
+
+                              <div className="addon-product-info">
+                                <div className="item-title">
+                                  {item.title}
+                                </div>
+
+                                <div className="item-price">
+                                  ₹{item.price}
+                                </div>
+                              </div>
+                            </div>
+
                           </div>
+
+                          {/* QUANTITY SECTION */}
+                          {selected && (
+                            <div className="right-section">
+
+                              <button
+                                type="button"
+                                onClick={() => changeQuantity(item._id, -1)}
+                                className="qty-btn"
+                              >
+                                −
+                              </button>
+
+                              <span className="qty">
+                                {selected.quantity}
+                              </span>
+
+                              <button
+                                type="button"
+                                onClick={() => changeQuantity(item._id, 1)}
+                                className="qty-btn"
+                              >
+                                +
+                              </button>
+
+                              <div className="total-price">
+                                ₹{item.price * selected.quantity}
+                              </div>
+
+                            </div>
+                          )}
+
                         </div>
-
-                        {selected && (
-                          <div className="right-section">
-                            <button type="button" onClick={() => changeQuantity(item._id, -1)} className="qty-btn">−</button>
-                            <span className="qty">{selected.quantity}</span>
-                            <button type="button" onClick={() => changeQuantity(item._id, 1)} className="qty-btn">+</button>
-                            <div className="total-price">₹{item.price * selected.quantity}</div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
                 </div>
-              )}
+              </div>
             </div>
             {Object.keys(selectedItems).length > 0 && (
               <div className="selected-summary">
@@ -1154,7 +1203,7 @@ const AddDecOrder = () => {
 
                     return (
                       <li key={id}>
-                        {item.title} — ₹{item.price} × {selectedItems[id].quantity}
+                        {item.title} — ₹{item.price} × {selectedItems[id]?.quantity}
                       </li>
                     );
                   })}
@@ -1164,35 +1213,35 @@ const AddDecOrder = () => {
 
             <div className="amount-box">
               <div>
-              <label htmlFor="totalamount">Total Amount*</label>
-              <input
-                type="text"
-                id="totalamount"
-                value={totalamount}
-                onChange={(e) => setTotalAmount(e.target.value)}
-                placeholder="Total Amount"
-                required
-              />
+                <label htmlFor="totalamount">Total Amount*</label>
+                <input
+                  type="text"
+                  id="totalamount"
+                  value={totalamount}
+                  onChange={(e) => setTotalAmount(e.target.value)}
+                  placeholder="Total Amount"
+                  required
+                />
               </div>
               <div>
-              <label htmlFor="advanceamount">Advance Amount</label>
-              <input
-                type="text"
-                id="advanceamount"
-                value={advanceamount}
-                onChange={(e) => setAdvanceAmount(e.target.value)}
-                placeholder="Advance Amount"
-              />
+                <label htmlFor="advanceamount">Advance Amount</label>
+                <input
+                  type="text"
+                  id="advanceamount"
+                  value={advanceamount}
+                  onChange={(e) => setAdvanceAmount(e.target.value)}
+                  placeholder="Advance Amount"
+                />
               </div>
               <div>
-              <label htmlFor="balanceamount">Balance Amount</label>
-              <input
-                type="text"
-                id="balanceamount"
-                value={balanceamount}
-                placeholder="Balance Amount"
-                disabled
-              />
+                <label htmlFor="balanceamount">Balance Amount</label>
+                <input
+                  type="text"
+                  id="balanceamount"
+                  value={balanceamount}
+                  placeholder="Balance Amount"
+                  disabled
+                />
               </div>
             </div>
 
@@ -1492,9 +1541,9 @@ const AddDecOrder = () => {
                       {advancePercent >= 100
                         ? "Invalid %"
                         : (
-                            (totalPrice + executionPrice) /
-                            (1 - advancePercent / 100)
-                          ).toFixed(2)}
+                          (totalPrice + executionPrice) /
+                          (1 - advancePercent / 100)
+                        ).toFixed(2)}
                     </div>
 
                     {/* Advance Amount Calculation */}
@@ -1503,10 +1552,10 @@ const AddDecOrder = () => {
                       {advancePercent >= 100
                         ? "Invalid %"
                         : (
-                            ((totalPrice + executionPrice) /
-                              (1 - advancePercent / 100)) *
-                            (advancePercent / 100)
-                          ).toFixed(2)}
+                          ((totalPrice + executionPrice) /
+                            (1 - advancePercent / 100)) *
+                          (advancePercent / 100)
+                        ).toFixed(2)}
                     </div>
                   </div>
 

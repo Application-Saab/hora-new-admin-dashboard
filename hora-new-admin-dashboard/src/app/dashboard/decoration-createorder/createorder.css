@@ -365,6 +365,9 @@ button[disabled] {
   border: 1px solid #ccc;
   cursor: pointer;
   border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .qty {
@@ -572,4 +575,119 @@ gap: 5px;
 .address-row label {
   display: block;
   margin-bottom: 8px;
+}
+.createDecor-container{
+  background-color: white;
+  max-width: 52%;
+  padding: 30px;
+}
+.number-input{
+  width: 150px !important;
+}
+.addon-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 24px;
+  align-items: start;
+}
+
+.item-row {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  gap: 15px;
+}
+
+.left-section {
+  width: 100%;
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.addon-product-clickable {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  flex: 1;
+  min-width: 0;
+
+  cursor: pointer;
+}
+
+.addon-product-clickable img {
+  width: 60px !important;
+  height: 60px !important;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.item-title {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.item-price {
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.right-section {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+}
+
+.qty-btn {
+  width: 26px;
+  height: 26px;
+
+  border: 1px solid #ccc;
+  background: #fff;
+  border-radius: 4px;
+
+  cursor: pointer;
+}
+
+.qty {
+  min-width: 20px;
+  text-align: center;
+}
+
+.total-price {
+  font-size: 13px;
+  font-weight: 600;
+  margin-left: 5px;
+}
+.addon-menu {
+  background-color: rgb(249, 249, 249);
+  border: 1px solid #ccc;
+  padding: 15px;
+  border-radius: 6px;
+  margin: 15px 0;
+
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.addon-heading {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 15px;
+  margin-bottom: 10px;
 }
