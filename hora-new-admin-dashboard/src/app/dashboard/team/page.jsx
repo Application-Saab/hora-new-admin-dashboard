@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { BASE_URL } from "../../../utils/apiconstant";
+import AttendancePage from "./AttendancePage"
 import "./team.css";
 
 const TeamPage = () => {
@@ -151,6 +152,11 @@ const TeamPage = () => {
         setActiveTab("add");
     };
 
+
+    const handleAttendanceClick = () => {
+        setActiveTab("attendance");
+    };
+
     return (
         <div className="team-page">
 
@@ -182,6 +188,14 @@ const TeamPage = () => {
                             }`}
                     >
                         Team List
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={handleAttendanceClick}
+                        className={`team-tab ${activeTab === "attendance" ? "team-tab-active" : ""}`}
+                    >
+                        Attendance Sheet
                     </button>
 
                 </div>
@@ -387,6 +401,10 @@ const TeamPage = () => {
                     </div>
 
                 </div>
+            )}
+
+            {activeTab === "attendance" && (
+                <AttendancePage />
             )}
 
         </div>
