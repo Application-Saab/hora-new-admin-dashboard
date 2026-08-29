@@ -1866,6 +1866,7 @@ const AddDecOrder = () => {
 
     </div>
       {/* ================= ORDER SUMMARY ================= */}
+      {product &&
       <div className="createDecor-container">
 
         <div className="summary-header">
@@ -1877,7 +1878,7 @@ const AddDecOrder = () => {
           Product Image URL: {" "}{`${BASE_URL}/api/uploads/${product?.featured_images[0]?.fileName || ""}`}
 
           <div>
-            <div> Product Name: {" "}{product?.name || "Product Name"}</div>
+            <div> Product Name: {" "}{product?.name || ""}</div>
             <div> Product Price: {" "}₹{product?.price || 0}</div>
           </div>
         </div>
@@ -2060,6 +2061,7 @@ const AddDecOrder = () => {
         </div>
 
       </div>
+}
     </div>
 
   );
