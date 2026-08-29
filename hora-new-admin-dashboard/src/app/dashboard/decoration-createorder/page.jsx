@@ -39,7 +39,6 @@ const AddDecOrder = () => {
   const [product, setProduct] = useState(null);
   const [isContinueClicked, setIsContinueClicked] = useState(false);
   const [showProductDetails, setShowProductDetails] = useState(false);
-  const [isFetched, setIsFetched] = useState(false);
   const [pincodeMessage, setPincodeMessage] = useState("");
   const [pincodeMessageColor, setPincodeMessageColor] = useState("");
   const [totalamount, setTotalAmount] = useState("");
@@ -51,6 +50,7 @@ const AddDecOrder = () => {
   const [comment, setComment] = useState("");
   const [dishNameError, setDishNameError] = useState("");
   const [commentFields, setCommentFields] = useState([0]);
+  const [discountAmount, setDiscountAmount] = useState("");
   // const [error, setError] = useState(null);
 
   const [loading, setLoading] = useState(false);
@@ -130,7 +130,7 @@ const AddDecOrder = () => {
   const [executionPrice, setExecutionPrice] = useState(0);
   const [advancePercent, setAdvancePercent] = useState(0);
   const [nextId, setNextId] = useState(2);
-  const [mode, setMode] = useState("Option1");
+  const [mode, setMode] = useState("Option2");
   const [option2Text, setOption2Text] = useState("");
 
   useEffect(() => {
@@ -615,7 +615,6 @@ const AddDecOrder = () => {
     setProduct(null);
     setIsProductSelected(false);
     setShowProductDetails(false);
-    setIsFetched(false);
     setIsContinueClicked(false);
     setProductSuggestions([]);
     setDishNameError("");
@@ -705,10 +704,6 @@ const AddDecOrder = () => {
       setMessage("Failed to add customer.");
       setMessageColor("red");
     }
-  };
-
-  const handleContinueClick = () => {
-    setIsContinueClicked(true);
   };
 
   const saveAddress = async () => {
@@ -881,13 +876,46 @@ const AddDecOrder = () => {
     let addons = "";
     const inclusionSummary = proDuctInclusions(product);
 
-    // Check if products exist and loop over them
-    if (products && products.length > 0) {
-      products.forEach((item, index) => {
-        addons += `\n  ${index + 1}. ${item.name}: ₹${item.price}`;
-      });
-    } else {
-      addons += " None"; // Show "None" directly if there are no add-ons
+    const selectedAddonItems = Object.keys(selectedItems || {})
+      .map((id) => {
+        const item = addonData?.find(
+          (addon) => String(addon._id) === String(id)
+        );
+
+        if (!item) return null;
+
+        const quantity = selectedItems[id]?.quantity || 1;
+        const price = Number(item.price) || 0;
+        const totalPrice = price * quantity;
+
+        return {
+          title: item.title,
+          price,
+          quantity,
+          totalPrice,
+        };
+      })
+      .filter(Boolean);
+
+    // Selected API Addons
+    selectedAddonItems.forEach((item, index) => {
+      addons += `\n  ${index + 1}. ${item.title}: ₹${item.price} × ${item.quantity} = ₹${item.totalPrice}`;
+    });
+
+    // Manually added addons
+    const manualAddons = products?.filter(
+      (item) => item.name?.trim()
+    ) || [];
+
+    manualAddons.forEach((item, index) => {
+      const addonIndex = selectedAddonItems.length + index + 1;
+
+      addons += `\n  ${addonIndex}. ${item.name}: ₹${Number(item.price) || 0}`;
+    });
+
+    // No addons
+    if (!addons) {
+      addons = "\n  None";
     }
 
     // Create the order summary string
@@ -904,6 +932,7 @@ const AddDecOrder = () => {
   Advance Amount: ₹${advanceamount || "N/A"}
   Balance Amount: ₹${balanceamount || "N/A"}
   
+  Product site Url :${product?.productUrl || "N/A"}
   *Product Name*: ${dishName}
   Product Image URL: ${BASE_URL}/api/uploads/${product?.featured_images.length > 0 ? product?.featured_images[0]?.fileName : ""}
   
@@ -1017,20 +1046,34 @@ const AddDecOrder = () => {
                           setShowProductDetails(true);
                           setShowProductDropdown(false);
                           setDishNameError("");
-                          setIsFetched(true);
                           setIsProductSelected(true);
                           setIsContinueClicked(true);
                         }}
                       >
-                        <span className="product-suggestion-name">
-                          {item.name}
-                        </span>
+                        {/* Product Image */}
+                        <div className="product-suggestion-image-wrapper">
+                          <img
+                            src={`${BASE_URL}/api/uploads/${product?.featured_images.length > 0 ? product?.featured_images[0]?.fileName : item.featured_image}`}
+                            alt={item.name || "Product"}
+                            className="product-suggestion-image"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                            }}
+                          />
+                        </div>
 
-                        {item.price !== undefined && item.price !== null && (
-                          <span className="product-suggestion-price">
-                            ₹{item.price}
-                          </span>
-                        )}
+                        {/* Product Details */}
+                        <div className="product-suggestion-details">
+                          <div className="product-suggestion-name">
+                            {item.name}
+                          </div>
+
+                          {item.price !== undefined && item.price !== null && (
+                            <div className="product-suggestion-price">
+                              ₹{item.price}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1059,24 +1102,16 @@ const AddDecOrder = () => {
                     />
                   </div>
 
-                  <div>
-                    <label htmlFor="orderTakenBy">Order Taken By*</label>
+                    <div>
+                      <label htmlFor="orderTakenBy">Order Taken By*</label>
 
-                    <select
-                      id="orderTakenBy"
-                      value={orderTakenBy}
-                      onChange={(e) => setOrderTakenBy(e.target.value)}
-                      required
-                    >
-                      <option value="">Select Team</option>
-
-                      {teams?.map((team) => (
-                        <option key={team._id} value={team.name}>
-                          {team.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                      <SearchWithDropDown
+                        options={teams?.map((team) => team.name) || []}
+                        selectedValue={orderTakenBy}
+                        onChange={(value) => setOrderTakenBy(value)}
+                        placeholder="Search Team..."
+                      />
+                    </div>
                 </div>
                 <div>
                   {message !== "Customer exists." ?
@@ -1185,6 +1220,66 @@ const AddDecOrder = () => {
             )}
           </div>
         )}
+          {message === "Customer exists." && (
+          <div
+            className="amount-box"
+          >
+            <div className="city-box" style={{ flex: 1 }}>
+              <label htmlFor="city">
+                City *
+              </label>
+              <select
+                id="city"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                required
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  borderRadius: "5px",
+                  fontSize: "16px",
+                  transition: "border-color 0.3s",
+                }}
+              >
+                <option value="" style={{ color: "#aaa" }}>
+                  Select City
+                </option>
+                <option value="Bangalore">Bangalore</option>
+                <option value="Delhi">Delhi</option>
+                <option value="Mumbai">Mumbai</option>
+                <option value="Hyderabad">Hyderabad</option>
+              </select>
+            </div>
+            <div className="pincode-box" style={{ flex: 1 }}>
+              <label htmlFor="pincode">Pincode *</label>
+              <input
+                type="text"
+                id="pincode"
+                value={pincode}
+                style={{
+                  padding: "11px",
+                  borderRadius: "5px",
+                  fontSize: "16px",
+                  marginTop: "0px",
+                  width: "100%",
+                  boxSizing: "border-box",
+                }}
+                onChange={(e) => setPincode(e.target.value)}
+              />
+              <p
+                style={{
+                  fontWeight: "bold",
+                  marginTop: "5px",
+                  marginBottom: "5px",
+                  fontSize: "15px",
+                  color: pincodeMessageColor,
+                }}
+              >
+                {pincodeMessage}
+              </p>
+            </div>
+          </div>
+          )}
 
         {/* order details ==========================.Customer does not exist */}
         {message === "Customer exists." ? (
@@ -1346,24 +1441,6 @@ const AddDecOrder = () => {
                 </div>
               </div>
             </div>
-            {Object.keys(selectedItems).length > 0 && (
-              <div className="selected-summary">
-                <h4>Selected Add-ons</h4>
-                <ul>
-                  {Object.keys(selectedItems).map((id) => {
-                    const item = addonData?.find((i) => String(i._id) === String(id));
-
-                    if (!item) return null;
-
-                    return (
-                      <li key={id}>
-                        {item.title} — ₹{item.price} × {selectedItems[id]?.quantity}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            )}
 
             <div className="amount-box">
               <div>
@@ -1377,6 +1454,17 @@ const AddDecOrder = () => {
                   required
                 />
               </div>
+                <div>
+                  <label htmlFor="discountamount">Discount Amount*</label>
+                  <input
+                    type="text"
+                    id="discountamount"
+                    value={discountAmount}
+                    onChange={(e) => setDiscountAmount(e.target.value)}
+                    placeholder="Discount Amount"
+                    required
+                  />
+                </div>
               <div>
                 <label htmlFor="advanceamount">Advance Amount</label>
                 <input
@@ -1398,74 +1486,10 @@ const AddDecOrder = () => {
                 />
               </div>
                 
-                  <div className="event-box" style={{ flex: 1 }}>
-                    <label htmlFor="pincode">Add Event</label>
-                    <SearchWithDropDown
-                      options={eventList}
-                      selectedValue={selectedEvent}
-                      onChange={(val) => setSelectedEvent(val)}
-                      placeholder="Search event..."
-                    />
-                  </div>
+
             </div>
 
-            <div
-              className="amount-box"
-            >
-              <div className="city-box" style={{ flex: 1 }}>
-                <label htmlFor="city">
-                  City *
-                </label>
-                <select
-                  id="city"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  required
-                  style={{
-                    width: "100%",
-                    padding: "10px",
-                    borderRadius: "5px",
-                    fontSize: "16px",
-                    transition: "border-color 0.3s",
-                  }}
-                >
-                  <option value="" style={{ color: "#aaa" }}>
-                    Select City
-                  </option>
-                  <option value="Bangalore">Bangalore</option>
-                  <option value="Delhi">Delhi</option>
-                  <option value="Mumbai">Mumbai</option>
-                  <option value="Hyderabad">Hyderabad</option>
-                </select>
-              </div>
-              <div className="pincode-box" style={{ flex: 1 }}>
-                <label htmlFor="pincode">Pincode *</label>
-                <input
-                  type="text"
-                  id="pincode"
-                  value={pincode}
-                  style={{
-                    padding: "11px",
-                    borderRadius: "5px",
-                    fontSize: "16px",
-                    marginTop: "0px",
-                    width: "100%",
-                    boxSizing: "border-box",
-                  }}
-                  onChange={(e) => setPincode(e.target.value)}
-                />
-                <p
-                  style={{
-                    fontWeight: "bold",
-                    marginTop: "5px",
-                    marginBottom: "5px",
-                    fontSize: "15px",
-                    color: pincodeMessageColor,
-                  }}
-                >
-                  {pincodeMessage}
-                </p>
-              </div>
+            <div className="amount-box">
               <div>
                 <label htmlFor="wonderlandevent">Wonderland Occasion</label>
                 <input
@@ -1476,6 +1500,15 @@ const AddDecOrder = () => {
                   placeholder="Wonderland Occasion"
                 />
               </div>
+                <div className="event-box" style={{ flex: 1 }}>
+                  <label htmlFor="pincode">Add Event</label>
+                  <SearchWithDropDown
+                    options={eventList}
+                    selectedValue={selectedEvent}
+                    onChange={(val) => setSelectedEvent(val)}
+                    placeholder="Search event..."
+                  />
+                </div>
             </div>
             <div className="checkoutInputType border-1 rounded-4 ">
               <h4 className="comments-heading">Share your comments (if any)</h4>
@@ -1775,7 +1808,7 @@ const AddDecOrder = () => {
                     value={option2Text}
                     onChange={(e) => setOption2Text(e.target.value)}
                     placeholder="Enter your text here..."
-                    style={{ ...summary, height: "200px" }}
+                    style={{ ...summary, height: "100px" }}
                   />
                 </div>
               )}
@@ -1867,7 +1900,7 @@ const AddDecOrder = () => {
     </div>
       {/* ================= ORDER SUMMARY ================= */}
       {product &&
-      <div className="createDecor-container">
+        <div className="createDecor-container order-summary-container">
 
         <div className="summary-header">
           <h2 className="createOrder pageHeading">Order Summary</h2>
@@ -1875,7 +1908,7 @@ const AddDecOrder = () => {
 
         {/* Product */}
         <div className="summary-product">
-          Product Image URL: {" "}{`${BASE_URL}/api/uploads/${product?.featured_images[0]?.fileName || ""}`}
+            Product URL: {" "}{`${product?.productUrl || ""}`}
 
           <div>
             <div> Product Name: {" "}{product?.name || ""}</div>
@@ -1945,57 +1978,52 @@ const AddDecOrder = () => {
         </div>
 
         {/* Selected Addons */}
-        {Object.keys(selectedItems || {}).length > 0 && (
-          <div className="summary-section">
-            <h4>Selected Add-ons :</h4>
+          {(Object.keys(selectedItems || {}).length > 0 ||
+            products?.some((item) => item.name)) && (
+              <div className="summary-section">
+                <h4>Add-ons :</h4>
 
-            {Object.keys(selectedItems).map((id) => {
-              const item = addonData?.find(
-                (i) => String(i._id) === String(id)
-              );
+                <ul style={{ margin: 0, paddingLeft: "20px" }}>
+                  {/* Selected Add-ons */}
+                  {Object.keys(selectedItems || {}).map((id) => {
+                    const item = addonData?.find(
+                      (i) => String(i._id) === String(id)
+                    );
 
-              if (!item) return null;
+                    if (!item) return null;
 
-              const quantity = selectedItems[id]?.quantity || 1;
+                    const quantity = selectedItems[id]?.quantity || 1;
 
-              return (
-                <div className="summary-item" key={id}>
-                  <div>
-                    <span>{item.title}</span>
-                  </div>
+                    return (
+                      <li key={`selected-${id}`} style={{ marginBottom: "8px" }}>
+                        <div>
+                          <span>{item.title}</span>
+                        </div>
 
-                  <small style={{marginBottom:"5px", marginTop:"5px"}}>
-                      ₹{item.price} × {quantity}
-                     = 
-                    ₹{item.price * quantity}
-                  </small>
-                </div>
-              );
-            })}
-          </div>
-        )}
+                        <small>
+                          ₹{item.price} × {quantity} = ₹{item.price * quantity}
+                        </small>
+                      </li>
+                    );
+                  })}
 
-        {/* Manually Added Addons */}
-        {products?.some((item) => item.name) && (
-          <div className="summary-section">
-            <h4>Add-ons :</h4>
+                  {/* Manually Added Add-ons */}
+                  {products
+                    ?.filter((item) => item.name)
+                    .map((item, index) => (
+                      <li key={`manual-${index}`} style={{ marginBottom: "8px" }}>
+                        <div>
+                          <span>{item.name}</span>
+                        </div>
 
-            {products
-              .filter((item) => item.name)
-              .map((item, index) => (
-                <div className="summary-item" key={index}>
-                  <div>
-                    <span>{item.name}</span>
-                    <small>Qty: 1</small>
-                  </div>
-
-                  <strong>
-                    ₹{item.price || 0}
-                  </strong>
-                </div>
-              ))}
-          </div>
-        )}
+                        <small>
+                          ₹{item.price || 0} × 1 = ₹{item.price || 0}
+                        </small>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            )}
 
         {/* Inclusions */}
         {product?.inclusion?.length > 0 && (
@@ -2016,15 +2044,22 @@ const AddDecOrder = () => {
         )}
 
         {/* Comment */}
-        {comment && (
-          <div className="summary-section">
-            <h4>Comment :</h4>
+          {comment && (
+            <div className="summary-section">
+              <h4>Comments :</h4>
 
-            <p className="summary-comment">
-              {comment}
-            </p>
-          </div>
-        )}
+              <ul style={{ margin: 0, paddingLeft: "22px" }}>
+                {comment
+                  .split("\n")
+                  .filter((item) => item.trim())
+                  .map((item, index) => (
+                    <li key={index} style={{ marginBottom: "6px" }}>
+                      {item}
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          )}
 
         {/* Amount Summary */}
         <div className="summary-amount">
