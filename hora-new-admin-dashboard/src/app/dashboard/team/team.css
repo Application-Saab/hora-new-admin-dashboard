@@ -327,3 +327,258 @@
         font-size: 13px;
     }
 }
+/* =========================
+   TEAM ACTION BUTTONS
+========================= */
+
+.team-action-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.team-edit-btn,
+.team-delete-btn {
+    border: none;
+    padding: 7px 13px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.team-edit-btn {
+    background: #f1f1f1;
+    color: #444;
+}
+
+.team-edit-btn:hover {
+    background: #e4e4e4;
+}
+
+.team-delete-btn {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.team-delete-btn:hover {
+    background: #fecaca;
+}
+
+.team-delete-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
+/* =========================
+   EDIT POPUP FORM
+========================= */
+
+.team-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
+
+.team-edit-form .team-form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0;
+}
+
+.team-edit-form .team-form-group label {
+    margin-bottom: 7px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+.team-edit-form .team-form-group input {
+    width: 100% !important;
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    outline: none;
+    font-size: 14px;
+    color: #333;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+
+.team-edit-form .team-form-group input:focus {
+    border-color: #97538c;
+    box-shadow: 0 0 0 2px rgba(151, 83, 140, 0.10);
+}
+/* =========================
+   VIEW BUTTON
+========================= */
+
+.team-view-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background: #f3f4f6;
+    color: #333;
+    font-size: 13px;
+}
+
+.team-view-btn:hover {
+    background: #e5e7eb;
+}
+
+
+/* =========================
+   ACTION BUTTONS
+========================= */
+
+.team-action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+
+/* =========================
+   EDIT FORM
+========================= */
+
+.team-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.team-edit-form .team-form-group {
+    width: 100%;
+}
+
+.team-edit-form .team-form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.team-edit-form .team-form-group input,
+.team-edit-form .team-form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    outline: none;
+    font-size: 14px;
+}
+
+.team-edit-form .team-form-group input:focus,
+.team-edit-form .team-form-group textarea:focus {
+    border-color: #999;
+}
+
+.team-edit-form .team-form-group textarea {
+    min-height: 80px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.team-view-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+}
+
+.team-view-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 11px 0;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.team-view-row span {
+    min-width: 150px;
+    color: #666;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.team-view-row strong {
+    color: #222;
+    font-size: 14px;
+    text-align: right;
+    word-break: break-word;
+}
+
+.team-view-leaves {
+    margin-top: 18px;
+}
+
+.team-view-leaves h4 {
+    margin: 0 0 12px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.team-leave-card {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1px solid #eeeeee;
+    border-radius: 6px;
+    background: #fafafa;
+}
+
+.team-leave-card div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.team-leave-card span {
+    font-size: 12px;
+    color: #777;
+}
+
+.team-leave-card strong {
+    font-size: 14px;
+    color: #222;
+}
+
+.team-no-leave {
+    margin: 0;
+    padding: 10px 0;
+    color: #777;
+    font-size: 14px;
+}
+
+@media (max-width: 600px) {
+
+    .team-action-buttons {
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .team-view-row {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .team-view-row strong {
+        text-align: left;
+    }
+
+    .team-leave-card {
+        grid-template-columns: 1fr;
+    }
+
+}
