@@ -234,6 +234,7 @@ export default function AttendancePage() {
         let present = 0;
         let absent = 0;
         let leave = 0;
+        let holiday = 0;
 
         monthDays.forEach(day => {
             const record = memberRecords[day.dateString];
@@ -250,10 +251,13 @@ export default function AttendancePage() {
                         leave += 1;
                     }
                 }
+                else if (record.status === 'Holiday') {
+                    holiday++;
+                }
             }
         });
 
-        return { present, leave, totalWorking: present + absent + leave };
+        return { present, leave, holiday, totalWorking: present + absent + leave };
     };
 
     const selectedEmployeeForLeave = teamData?.find(
@@ -333,9 +337,10 @@ export default function AttendancePage() {
                                                 <div className="day-name">{day.dayName}</div>
                                             </th>
                                         ))}
-                                        <th className="summary-header summary-present">P</th>
+                                        <th className="summary-header summary-present">Total Present</th>
                                         <th className="summary-header summary-leave">Total Leave</th>
-                                        <th className="summary-header summary-total">Total</th>
+                                        <th className="summary-header summary-holiday">Total Holiday</th>
+                                        <th className="summary-header summary-total">Total Working Days</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -399,6 +404,7 @@ export default function AttendancePage() {
 
                                                 <td className="summary-cell summary-present">{summary.present}</td>
                                                 <td className="summary-cell summary-leave">{summary.leave}</td>
+                                                <td className="summary-cell summary-holiday">{summary.holiday}</td>
                                                 <td className="summary-cell summary-total">{summary.totalWorking}</td>
                                             </tr>
                                         );
