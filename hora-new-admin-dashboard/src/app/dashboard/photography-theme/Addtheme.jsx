@@ -18,7 +18,6 @@ const Addtheme = () => {
   const [isEventDropdownOpen, setIsEventDropdownOpen] = useState(false);
   const [isProductDropdownOpen, setIsProductDropdownOpen] = useState(false);
   const [title, setTitle] = useState("");
-  const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -326,9 +325,7 @@ const Addtheme = () => {
     (selectAllEvents ||
       selectAllProducts ||
       selectedProducts.length > 0) &&
-    title.trim() !== "" &&
-    price !== "";
-
+    title.trim() !== "";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -386,7 +383,6 @@ const Addtheme = () => {
 
       const payload = {
         title,
-        price,
         description,
         image: uploadedImageName,
         categoryType: selectedCategoryType,
@@ -417,7 +413,6 @@ const Addtheme = () => {
       alert("Theme created successfully");
 
       setTitle("");
-      setPrice("");
       setDescription("");
       setImageFile(null);
 
@@ -726,56 +721,41 @@ const Addtheme = () => {
                 />
               </div>
 
-              <div className="form-group">
-                <label>
-                  Price
-                </label>
+            <div className="form-group">
+              <label>
+                Upload Image
+              </label>
 
-                <input
-                  type="number"
-                  value={price}
-                  onChange={(e) =>
-                    setPrice(
-                      e.target.value
-                    )
-                  }
-                />
-              </div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) =>
+                  setImageFile(
+                    e.target.files?.[0] ||
+                    null
+                  )
+                }
+              />
             </div>
-            <div className="d-flex mb-2">
-              <div className="form-group">
-                <label>
-                  Description
-                </label>
+            
 
-                <textarea
-                  value={
-                    description
-                  }
-                  onChange={(e) =>
-                    setDescription(
-                      e.target.value
-                    )
-                  }
-                />
-              </div>
+            <div className="form-group">
+              <label>
+                Description
+              </label>
 
-              <div className="form-group">
-                <label>
-                  Upload Image
-                </label>
-
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) =>
-                    setImageFile(
-                      e.target.files?.[0] ||
-                      null
-                    )
-                  }
-                />
-              </div>
+              <textarea
+                value={
+                  description
+                }
+                onChange={(e) =>
+                  setDescription(
+                    e.target.value
+                  )
+                }
+                rows={2}
+              />
+            </div>
             </div>
             <button
               onClick={

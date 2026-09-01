@@ -1856,15 +1856,6 @@ const ActionPopup = ({
                                             textAlign: "left",
                                           }}
                                         >
-                                          <p
-                                            style={{
-                                              fontSize: "13px",
-                                              fontWeight: "600",
-                                              color: "#059669",
-                                            }}
-                                          >
-                                           Price : {item?.price || 0 } 
-                                          </p>
                                           <h3
                                             style={{
                                               fontSize: "13px",

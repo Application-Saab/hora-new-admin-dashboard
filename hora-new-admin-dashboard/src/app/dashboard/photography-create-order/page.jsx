@@ -1126,14 +1126,6 @@ const changeQuantity = (id, delta) => {
                           }}>
                             {theme.description}
                           </p>
-                          <p style={{
-                            margin: "0",
-                            fontWeight: "bold",
-                            color: "#28a745",
-                            fontSize: "14px"
-                          }}>
-                            ₹{theme.price}
-                          </p>
                         </div>
 
                       </div>
@@ -1152,7 +1144,7 @@ const changeQuantity = (id, delta) => {
                       {selectedTheme.map((theme, index) => {
                         return (
                           <li key={index} style={{ marginBottom: "5px" }}>
-                            {theme.title} - ₹{theme.price || "N/A"} 
+                            {theme.title}
                           </li>
                         );
                       })}

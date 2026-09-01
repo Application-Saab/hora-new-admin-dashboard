@@ -14,6 +14,7 @@ const TeamPage = () => {
         alternativeNumber: "",
         dob: "",
         address: "",
+        weekOff: "",
     });
 
     const [teams, setTeams] = useState([]);
@@ -254,6 +255,7 @@ const handleAddTeam = async (e) => {
                 : 0,
             dob: formData.dob,
             address: formData.address,
+            weekOff: formData.weekOff || "",
         };
 
         const response = await fetch(`${BASE_URL}/api/team/add`, {
@@ -440,6 +442,21 @@ return (
                             }
                             placeholder="Enter address"
                             rows={3}
+                        />
+                    </div>
+
+                    <div className="team-form-group">
+                        <label>WeekOff</label>
+                        <input
+                            type="text"
+                            value={formData.weekOff}
+                            onChange={(e) =>
+                                setFormData({
+                                    ...formData,
+                                    weekOff: e.target.value,
+                                })
+                            }
+                            placeholder="Enter week off days"
                         />
                     </div>
 
