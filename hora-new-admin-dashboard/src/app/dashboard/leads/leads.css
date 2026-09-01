@@ -210,3 +210,80 @@
     cursor: pointer;
     font-weight: 600;
 }
+.date-filter {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+}
+
+.date-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.date-field label {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.date-field input {
+    height: 38px;
+    padding: 0 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+}
+
+.apply-btn,
+.clear-btn {
+    height: 38px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.apply-btn {
+    background: #111827;
+    color: #fff;
+}
+
+.clear-btn {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+.analytics-summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.summary-box {
+    min-width: 150px;
+    padding: 10px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 7px;
+    background: #fff;
+}
+
+.summary-box span {
+    display: block;
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+
+.summary-box strong {
+    display: block;
+    font-size: 20px;
+    color: #111827;
+}
