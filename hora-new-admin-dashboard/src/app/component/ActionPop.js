@@ -1835,7 +1835,7 @@ const ActionPopup = ({
                                           <Image
                                             src={
                                               item?.image
-                                                ? `http://localhost:9000/api/uploads/compressed_webp/${item.image}`
+                                                ? `https://horaservices.com/api/uploads/compressed_webp/${item.image}`
                                                 : "/placeholder.png"
                                             }
                                             alt={item?.title}

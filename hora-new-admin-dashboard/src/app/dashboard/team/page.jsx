@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { BASE_URL } from "../../../utils/apiconstant";
 import AttendancePage from "./AttendancePage"
 import "./team.css";
+import CommonPopup from "../../component/CommonPopup";
 
 const TeamPage = () => {
     const [activeTab, setActiveTab] = useState("list");
@@ -11,13 +12,194 @@ const TeamPage = () => {
     const [formData, setFormData] = useState({
         name: "",
         number: "",
+        alternativeNumber: "",
         dob: "",
+        address: "",
     });
 
     const [teams, setTeams] = useState([]);
     const [searchNumber, setSearchNumber] = useState("");
     const [loading, setLoading] = useState(false);
     const [addLoading, setAddLoading] = useState(false);
+
+    const [editModal, setEditModal] = useState(false);
+
+    const [editData, setEditData] = useState({
+        _id: "",
+        name: "",
+        number: "",
+        alternativeNumber: "",
+        dob: "",
+        address: "",
+    });
+
+    const [originalEditData, setOriginalEditData] = useState({
+        name: "",
+        number: "",
+        alternativeNumber: "",
+        dob: "",
+        address: "",
+    });
+
+    const [editLoading, setEditLoading] = useState(false);
+
+    const [viewModal, setViewModal] = useState(false);
+    const [viewData, setViewData] = useState(null);
+
+    const [deleteLoading, setDeleteLoading] = useState("");
+
+    const handleEditClick = (item) => {
+        const data = {
+            _id: item._id,
+            name: item.name || "",
+            number: item.number ? String(item.number) : "",
+            alternativeNumber: item.alternativeNumber
+                ? String(item.alternativeNumber)
+                : "",
+            dob: item.dob || "",
+            address: item.address || "",
+        };
+
+        setEditData(data);
+
+        setOriginalEditData({
+            name: data.name,
+            number: data.number,
+            alternativeNumber: data.alternativeNumber,
+            dob: data.dob,
+            address: data.address,
+        });
+
+        setEditModal(true);
+    };
+
+    const handleViewClick = (item) => {
+        setViewData(item);
+        setViewModal(true);
+    };
+
+    const hasEditChanges =
+        editData.name !== originalEditData.name ||
+        editData.number !== originalEditData.number ||
+        editData.alternativeNumber !== originalEditData.alternativeNumber ||
+        editData.dob !== originalEditData.dob ||
+        editData.address !== originalEditData.address;
+
+    const handleUpdateTeam = async () => {
+        if (!hasEditChanges) return;
+
+        try {
+            setEditLoading(true);
+
+            const payload = {
+                name: editData.name,
+                number: editData.number ? Number(editData.number) : 0,
+                alternativeNumber: editData.alternativeNumber
+                    ? Number(editData.alternativeNumber)
+                    : 0,
+                dob: editData.dob,
+                address: editData.address,
+            };
+
+            const response = await fetch(
+                `${BASE_URL}/api/team/edit/${editData._id} `,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(payload),
+                }
+            );
+
+            const contentType = response.headers.get("content-type");
+
+            if (!contentType || !contentType.includes("application/json")) {
+                const text = await response.text();
+                console.error("API returned non-JSON response:", text);
+                throw new Error(
+                    "Invalid API response. Please check BASE_URL and API route."
+                );
+            }
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || "Failed to update team");
+            }
+
+            alert("Team updated successfully");
+
+            setEditModal(false);
+
+            setEditData({
+                _id: "",
+                name: "",
+                number: "",
+                alternativeNumber: "",
+                dob: "",
+                address: "",
+            });
+
+            setOriginalEditData({
+                name: "",
+                number: "",
+                alternativeNumber: "",
+                dob: "",
+                address: "",
+            });
+
+            getTeams(searchNumber);
+        } catch (error) {
+            console.error("Update team error:", error);
+            alert(error.message);
+        } finally {
+            setEditLoading(false);
+        }
+    };
+
+    const handleDeleteTeam = async (id) => {
+        const confirmDelete = window.confirm(
+            "Are you sure you want to delete this team?"
+        );
+
+        if (!confirmDelete) return;
+
+        try {
+            setDeleteLoading(id);
+
+            const response = await fetch(
+                `${BASE_URL}/api/team/delete/${id}`,
+                {
+                    method: "POST",
+                }
+            );
+
+            const contentType = response.headers.get("content-type");
+
+            if (!contentType || !contentType.includes("application/json")) {
+                const text = await response.text();
+                console.error("API returned non-JSON response:", text);
+                throw new Error(
+                    "Invalid API response. Please check BASE_URL and API route."
+                );
+            }
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || "Failed to delete team");
+            }
+
+            alert("Team deleted successfully");
+            getTeams(searchNumber);
+        } catch (error) {
+            console.error("Delete team error:", error);
+            alert(error.message);
+        } finally {
+            setDeleteLoading("");
+        }
+    };
 
     const getTeams = async (number = "") => {
         try {
@@ -30,14 +212,11 @@ const TeamPage = () => {
             }
 
             const response = await fetch(url);
-
             const contentType = response.headers.get("content-type");
 
             if (!contentType || !contentType.includes("application/json")) {
                 const text = await response.text();
-
                 console.error("API returned non-JSON response:", text);
-
                 throw new Error(
                     "Invalid API response. Please check BASE_URL and API route."
                 );
@@ -46,9 +225,7 @@ const TeamPage = () => {
             const result = await response.json();
 
             if (!response.ok) {
-                throw new Error(
-                    result.message || "Failed to fetch teams"
-                );
+                throw new Error(result.message || "Failed to fetch teams");
             }
 
             setTeams(result.data || []);
@@ -59,9 +236,11 @@ const TeamPage = () => {
             setLoading(false);
         }
     };
+
     useEffect(() => {
         getTeams();
     }, []);
+
     const handleAddTeam = async (e) => {
         e.preventDefault();
 
@@ -70,33 +249,27 @@ const TeamPage = () => {
 
             const payload = {
                 name: formData.name,
-                number: formData.number
-                    ? Number(formData.number)
-                    : undefined,
+                number: formData.number ? Number(formData.number) : 0,
+                alternativeNumber: formData.alternativeNumber
+                    ? Number(formData.alternativeNumber)
+                    : 0,
                 dob: formData.dob,
+                address: formData.address,
             };
 
-            const response = await fetch(
-                `${BASE_URL}/api/team/add`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(payload),
-                }
-            );
+            const response = await fetch(`${BASE_URL}/api/team/add`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+            });
 
             const contentType = response.headers.get("content-type");
 
             if (!contentType || !contentType.includes("application/json")) {
                 const text = await response.text();
-
-                console.error(
-                    "API returned non-JSON response:",
-                    text
-                );
-
+                console.error("API returned non-JSON response:", text);
                 throw new Error(
                     "Invalid API response. Please check BASE_URL and API route."
                 );
@@ -105,41 +278,26 @@ const TeamPage = () => {
             const result = await response.json();
 
             if (!response.ok) {
-                throw new Error(
-                    result.message || "Failed to add team"
-                );
+                throw new Error(result.message || "Failed to add team");
             }
 
             alert("Team added successfully");
 
-            // Reset form
             setFormData({
                 name: "",
                 number: "",
+                alternativeNumber: "",
                 dob: "",
+                address: "",
             });
 
-            // Go to list
             setActiveTab("list");
-
-            // Refresh list
             getTeams();
         } catch (error) {
             console.error("Add team error:", error);
             alert(error.message);
         } finally {
             setAddLoading(false);
-        }
-    };
-    const handleNumberSearch = (e) => {
-        const value = e.target.value.replace(/\D/g, "");
-
-        setSearchNumber(value);
-        if (value.length === 10) {
-            getTeams(value);
-        }
-        if (value.length === 0) {
-            getTeams();
         }
     };
     const handleListClick = () => {
@@ -151,43 +309,44 @@ const TeamPage = () => {
     const handleAddClick = () => {
         setActiveTab("add");
     };
-
-
     const handleAttendanceClick = () => {
         setActiveTab("attendance");
     };
 
+    const handleNumberSearch = (e) => {
+        const value = e.target.value.replace(/\D/g, "");
+        setSearchNumber(value);
+        if (value.length === 10) {
+            getTeams(value);
+        }
+
+        if (value.length === 0) {
+            getTeams();
+        }
+    };
+
     return (
         <div className="team-page">
-
             <div className="team-header">
-
-                <h1 className="team-title">
-                    Team
-                </h1>
+                <h1 className="team-title">Team</h1>
 
                 <div className="team-tabs">
-
                     <button
                         type="button"
                         onClick={handleAddClick}
-                        className={`team-tab ${activeTab === "add"
-                            ? "team-tab-active"
-                            : ""
+                        className={`team-tab ${activeTab === "add" ? "team-tab-active" : ""
                             }`}
                     >
-                        Add Team
+                        Add Member
                     </button>
 
                     <button
                         type="button"
                         onClick={handleListClick}
-                        className={`team-tab ${activeTab === "list"
-                            ? "team-tab-active"
-                            : ""
+                        className={`team-tab ${activeTab === "list" ? "team-tab-active" : ""
                             }`}
                     >
-                        Team List
+                        Member List
                     </button>
 
                     <button
@@ -197,29 +356,16 @@ const TeamPage = () => {
                     >
                         Attendance Sheet
                     </button>
-
                 </div>
-
             </div>
+
             {activeTab === "add" && (
                 <div className="team-card flex">
+                    <h2 className="team-card-title">Add Team</h2>
 
-                    <h2 className="team-card-title">
-                        Add Team
-                    </h2>
-
-                    <form
-                        onSubmit={handleAddTeam}
-                        className="team-form"
-                    >
-
-                        {/* NAME */}
+                    <form onSubmit={handleAddTeam} className="team-form">
                         <div className="team-form-group">
-
-                            <label>
-                                Name
-                            </label>
-
+                            <label>Name</label>
                             <input
                                 type="text"
                                 value={formData.name}
@@ -231,27 +377,20 @@ const TeamPage = () => {
                                 }
                                 placeholder="Enter name"
                             />
-
                         </div>
 
-                        {/* NUMBER */}
                         <div className="team-form-group">
-
-                            <label>
-                                Number
-                            </label>
-
+                            <label>Number</label>
                             <input
                                 type="text"
                                 inputMode="numeric"
                                 value={formData.number}
                                 maxLength={10}
                                 onChange={(e) => {
-                                    const value =
-                                        e.target.value.replace(
-                                            /\D/g,
-                                            ""
-                                        );
+                                    const value = e.target.value.replace(
+                                        /\D/g,
+                                        ""
+                                    );
 
                                     setFormData({
                                         ...formData,
@@ -260,16 +399,32 @@ const TeamPage = () => {
                                 }}
                                 placeholder="Enter number"
                             />
-
                         </div>
 
-                        {/* DOB */}
                         <div className="team-form-group">
+                            <label>Alternative Number</label>
+                            <input
+                                type="text"
+                                inputMode="numeric"
+                                value={formData.alternativeNumber}
+                                maxLength={10}
+                                onChange={(e) => {
+                                    const value = e.target.value.replace(
+                                        /\D/g,
+                                        ""
+                                    );
 
-                            <label>
-                                DOB
-                            </label>
+                                    setFormData({
+                                        ...formData,
+                                        alternativeNumber: value,
+                                    });
+                                }}
+                                placeholder="Enter alternative number"
+                            />
+                        </div>
 
+                        <div className="team-form-group">
+                            <label>DOB</label>
                             <input
                                 type="date"
                                 value={formData.dob}
@@ -280,34 +435,39 @@ const TeamPage = () => {
                                     })
                                 }
                             />
-
                         </div>
 
-                        {/* SUBMIT */}
+                        <div className="team-form-group">
+                            <label>Address</label>
+                            <textarea
+                                value={formData.address}
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        address: e.target.value,
+                                    })
+                                }
+                                placeholder="Enter address"
+                                rows={3}
+                            />
+                        </div>
+
                         <button
                             type="submit"
                             disabled={addLoading}
                             className="team-submit-btn"
                         >
-                            {addLoading
-                                ? "Adding..."
-                                : "Add Team"}
+                            {addLoading ? "Adding..." : "Add Team"}
                         </button>
-
                     </form>
-
                 </div>
             )}
+
             {activeTab === "list" && (
                 <div className="team-card2">
+                    <h2 className="team-card-title">Team List</h2>
 
-                    <h2 className="team-card-title">
-                        Team List
-                    </h2>
-
-                    {/* SEARCH */}
                     <div className="team-search">
-
                         <input
                             type="text"
                             inputMode="numeric"
@@ -316,96 +476,238 @@ const TeamPage = () => {
                             onChange={handleNumberSearch}
                             placeholder="Search by 10 digit number"
                         />
-
                     </div>
 
-                    {/* TABLE */}
                     <div className="team-table-wrapper">
-
                         <table className="team-table">
-
                             <thead>
                                 <tr>
-
-                                    <th>
-                                        #
-                                    </th>
-
-                                    <th>
-                                        Name
-                                    </th>
-
-                                    <th>
-                                        Number
-                                    </th>
-
-                                    <th>
-                                        DOB
-                                    </th>
-
+                                    <th>#</th>
+                                    <th>Name</th>
+                                    <th>Number</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
 
                             <tbody>
-
                                 {loading ? (
                                     <tr>
-                                        <td
-                                            colSpan="4"
-                                            className="team-empty"
-                                        >
+                                        <td colSpan="4" className="team-empty">
                                             Loading...
                                         </td>
                                     </tr>
                                 ) : teams.length === 0 ? (
                                     <tr>
-                                        <td
-                                            colSpan="4"
-                                            className="team-empty"
-                                        >
+                                        <td colSpan="4" className="team-empty">
                                             No team found
                                         </td>
                                     </tr>
                                 ) : (
-                                    teams.map(
-                                        (item, index) => (
-                                            <tr
-                                                key={item._id}
-                                            >
+                                    teams.map((item, index) => (
+                                        <tr key={item._id}>
+                                            <td>{index + 1}</td>
+                                            <td>{item.name || "-"}</td>
+                                            <td>{item.number || "-"}</td>
+                                            <td>
+                                                <div className="team-action-buttons">
+                                                    <button
+                                                        type="button"
+                                                        className="team-view-btn"
+                                                        onClick={() =>
+                                                            handleViewClick(item)
+                                                        }
+                                                    >
+                                                        View
+                                                    </button>
 
-                                                <td>
-                                                    {index + 1}
-                                                </td>
+                                                    <button
+                                                        type="button"
+                                                        className="team-edit-btn"
+                                                        onClick={() =>
+                                                            handleEditClick(item)
+                                                        }
+                                                    >
+                                                        Edit
+                                                    </button>
 
-                                                <td>
-                                                    {item.name || "-"}
-                                                </td>
-
-                                                <td>
-                                                    {item.number || "-"}
-                                                </td>
-
-                                                <td>
-                                                    {item.dob || "-"}
-                                                </td>
-
-                                            </tr>
-                                        )
-                                    )
+                                                    <button
+                                                        type="button"
+                                                        className="team-delete-btn"
+                                                        onClick={() =>
+                                                            handleDeleteTeam(
+                                                                item._id
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            deleteLoading ===
+                                                            item._id
+                                                        }
+                                                    >
+                                                        {deleteLoading ===
+                                                            item._id
+                                                            ? "Deleting..."
+                                                            : "Delete"}
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
                                 )}
-
                             </tbody>
-
                         </table>
-
                     </div>
-
                 </div>
             )}
 
             {activeTab === "attendance" && (
                 <AttendancePage />
             )}
+
+            <CommonPopup
+                isOpen={editModal}
+                onClose={() => setEditModal(false)}
+                heading="Edit Team"
+                buttonText={editLoading ? "Updating..." : "Update"}
+                disabled={!hasEditChanges || editLoading}
+                mainButtonAction={handleUpdateTeam}
+                popupBody={
+                    <div className="team-edit-form">
+                        <div className="team-form-group">
+                            <label>Name</label>
+                            <input
+                                type="text"
+                                value={editData.name}
+                                onChange={(e) =>
+                                    setEditData({
+                                        ...editData,
+                                        name: e.target.value,
+                                    })
+                                }
+                                placeholder="Enter name"
+                            />
+                        </div>
+
+                        <div className="team-form-group">
+                            <label>Number</label>
+                            <input
+                                type="text"
+                                inputMode="numeric"
+                                maxLength={10}
+                                value={editData.number}
+                                onChange={(e) => {
+                                    const value = e.target.value.replace(
+                                        /\D/g,
+                                        ""
+                                    );
+
+                                    setEditData({
+                                        ...editData,
+                                        number: value,
+                                    });
+                                }}
+                                placeholder="Enter number"
+                            />
+                        </div>
+
+                        <div className="team-form-group">
+                            <label>Alternative Number</label>
+                            <input
+                                type="text"
+                                inputMode="numeric"
+                                maxLength={10}
+                                value={editData.alternativeNumber}
+                                onChange={(e) => {
+                                    const value = e.target.value.replace(
+                                        /\D/g,
+                                        ""
+                                    );
+
+                                    setEditData({
+                                        ...editData,
+                                        alternativeNumber: value,
+                                    });
+                                }}
+                                placeholder="Enter alternative number"
+                            />
+                        </div>
+
+                        <div className="team-form-group">
+                            <label>DOB</label>
+                            <input
+                                type="date"
+                                value={editData.dob}
+                                onChange={(e) =>
+                                    setEditData({
+                                        ...editData,
+                                        dob: e.target.value,
+                                    })
+                                }
+                            />
+                        </div>
+
+                        <div className="team-form-group">
+                            <label>Address</label>
+                            <textarea
+                                value={editData.address}
+                                onChange={(e) =>
+                                    setEditData({
+                                        ...editData,
+                                        address: e.target.value,
+                                    })
+                                }
+                                placeholder="Enter address"
+                                rows={3}
+                            />
+                        </div>
+                    </div>
+                }
+            />
+            <CommonPopup
+                isOpen={viewModal}
+                onClose={() => {
+                    setViewModal(false);
+                    setViewData(null);
+                }}
+                heading="Member Details"
+                buttonText="Close"
+                mainButtonAction={() => {
+                    setViewModal(false);
+                    setViewData(null);
+                }}
+                popupBody={
+                    viewData && (
+                        <div className="team-view-details">
+                            <div className="team-view-row">
+                                <span>Name</span>
+                                <strong>{viewData.name || "-"}</strong>
+                            </div>
+
+                            <div className="team-view-row">
+                                <span>Number</span>
+                                <strong>{viewData.number || "-"}</strong>
+                            </div>
+
+                            <div className="team-view-row">
+                                <span>Alternative Number</span>
+                                <strong>
+                                    {viewData.alternativeNumber || "-"}
+                                </strong>
+                            </div>
+
+                            <div className="team-view-row">
+                                <span>DOB</span>
+                                <strong>{viewData.dob || "-"}</strong>
+                            </div>
+
+                            <div className="team-view-row">
+                                <span>Address</span>
+                                <strong>{viewData.address || "-"}</strong>
+                            </div>
+                        </div>
+                    )
+                }
+            />
+
 
         </div>
     );
