@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { BASE_URL } from "../../../utils/apiconstant";
+import AttendancePage from "./AttendancePage"
 import "./team.css";
 import CommonPopup from "../../component/CommonPopup";
 
@@ -329,6 +330,10 @@ const handleAddClick = () => {
     setActiveTab("add");
 };
 
+    const handleAttendanceClick = () => {
+        setActiveTab("attendance");
+    };
+
 return (
     <div className="team-page">
         <div className="team-header">
@@ -352,6 +357,15 @@ return (
                 >
                     Member List
                 </button>
+
+                <button
+                    type="button"
+                    onClick={handleAttendanceClick}
+                    className={`team-tab ${activeTab === "attendance" ? "team-tab-active" : ""}`}
+                >
+                    Attendance Sheet
+                </button>
+
             </div>
         </div>
 
@@ -575,6 +589,10 @@ return (
                     </table>
                 </div>
             </div>
+        )}
+
+        {activeTab === "attendance" && (
+            <AttendancePage />
         )}
 
         <CommonPopup
