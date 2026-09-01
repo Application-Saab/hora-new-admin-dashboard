@@ -14,6 +14,7 @@ const TeamPage = () => {
         alternativeNumber: "",
         dob: "",
         address: "",
+        weekOff: "",
     });
 
     const [teams, setTeams] = useState([]);
@@ -82,7 +83,9 @@ const TeamPage = () => {
         editData.number !== originalEditData.number ||
         editData.alternativeNumber !== originalEditData.alternativeNumber ||
         editData.dob !== originalEditData.dob ||
-        editData.address !== originalEditData.address;
+        editData.address !== originalEditData.address ||
+        editData.weekOff !== originalEditData.weekOff
+        ;
 
     const handleUpdateTeam = async () => {
         if (!hasEditChanges) return;
@@ -98,6 +101,7 @@ const TeamPage = () => {
                     : 0,
                 dob: editData.dob,
                 address: editData.address,
+                weekOff: editData.weekOff || "",
             };
 
             const response = await fetch(
@@ -254,6 +258,7 @@ const handleAddTeam = async (e) => {
                 : 0,
             dob: formData.dob,
             address: formData.address,
+            weekOff: formData.weekOff || "",
         };
 
         const response = await fetch(`${BASE_URL}/api/team/add`, {
@@ -441,6 +446,28 @@ return (
                             placeholder="Enter address"
                             rows={3}
                         />
+                    </div>
+
+                    <div className="team-form-group">
+                        <label>WeekOff</label>
+                        <select
+                            value={formData.weekOff}
+                            onChange={(e) =>
+                                setFormData({
+                                    ...formData,
+                                    weekOff: e.target.value,
+                                })
+                            }
+                        >
+                            <option value="">Select Week Off</option>
+                            <option value="Sunday">Sunday</option>
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                        </select>
                     </div>
 
                     <button
@@ -646,6 +673,28 @@ return (
                             rows={3}
                         />
                     </div>
+
+                    <div className="team-form-group">
+                        <label>WeekOff</label>
+                        <select
+                            value={editData.weekOff || ""}
+                            onChange={(e) =>
+                                setEditData({
+                                    ...editData,
+                                    weekOff: e.target.value,
+                                })
+                            }
+                        >
+                            <option value="">Select Week Off</option>
+                            <option value="Sunday">Sunday</option>
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                        </select>
+                    </div>
                 </div>
             }
         />
@@ -690,6 +739,11 @@ return (
                         <div className="team-view-row">
                             <span>Address</span>
                             <strong>{viewData.address || "-"}</strong>
+                        </div>
+
+                        <div className="team-view-row">
+                            <span>Week Off</span>
+                            <strong>{viewData.weekOff || "-"}</strong>
                         </div>
                     </div>
                 )

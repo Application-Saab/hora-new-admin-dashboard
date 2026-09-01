@@ -291,7 +291,6 @@ const ThemeList = () => {
 
   const [formData, setFormData] = useState({
     title: "",
-    price: "",
     description: "",
     image: null,
     eventId: [],
@@ -427,7 +426,6 @@ const ThemeList = () => {
 
     setFormData({
       title: addon.title,
-      price: addon.price,
       description: addon.description || "",
       image: null,
       eventId: addon?.eventId || [],
@@ -467,7 +465,6 @@ const ThemeList = () => {
 
       const payload = {
         title: formData.title,
-        price: formData.price,
         description: formData.description,
         image: imageName,
         eventId: selectedEvents,
@@ -531,7 +528,6 @@ const ThemeList = () => {
 
     return (
       formData.title !== selectedAddon.title ||
-      String(formData.price) !== String(selectedAddon.price) ||
       formData.description !==
       (selectedAddon.description || "") ||
       formData.image !== null ||
@@ -579,14 +575,11 @@ const ThemeList = () => {
                 {addon.description}
               </p>
               <div>
-                <strong className="addon-label">Category :</strong> {addon?.categoryType?.[0]} ,  {addon?.categoryType?.[1] || ""}
+                <strong className="addon-label">Category :</strong> {addon?.categoryType?.[0]}
               </div>
 
               <div className="addonCard-footer">
 
-                <div>
-                  <strong className="addon-label">Price :</strong> {addon?.price}
-                </div>
 
                 <div className="action-buttons">
                   <div
@@ -625,16 +618,6 @@ const ThemeList = () => {
                 type="text"
                 name="title"
                 value={formData.title}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="popup-form-group">
-              <label>Price</label>
-              <input
-                type="number"
-                name="price"
-                value={formData.price}
                 onChange={handleChange}
               />
             </div>
