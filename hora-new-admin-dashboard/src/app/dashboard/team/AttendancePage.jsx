@@ -82,13 +82,25 @@ export default function AttendancePage() {
 
                 members.forEach(member => {
                     let defaultStatus = 'Present';
+                    let defaultReason = '-';
+
+                    const dayNameFull = dateObj.toLocaleDateString('en-US', {
+                        weekday: 'long'
+                    });
+
                     if (isFuture) {
                         defaultStatus = '-';
+                    } else if (
+                        member.weekOff &&
+                        member.weekOff.toLowerCase() === dayNameFull.toLowerCase()
+                    ) {
+                        defaultStatus = 'Week Off';
+                        defaultReason = `${member.weekOff} Week Off`;
                     }
 
                     initialMap[member._id][dateString] = {
                         status: defaultStatus,
-                        reason: defaultStatus === 'Week Off' ? 'Sunday Week Off' : '-',
+                        reason: defaultReason,
                         leaveType: '',
                         halfDayType: ''
                     };
@@ -127,43 +139,6 @@ export default function AttendancePage() {
         fetchData();
     }, [fetchData]);
 
-    // 2. Toggle Status (Present/Absent) via API
-    const toggleStatus = async (memberId, dateString, isFuture) => {
-        if (isFuture) return;
-
-        const currentObj = attendanceMap[memberId]?.[dateString];
-        if (!currentObj) return;
-
-        let nextStatus = 'Present';
-        if (currentObj.status === 'Present') nextStatus = 'Absent';
-        else if (currentObj.status === 'Absent') nextStatus = 'Present';
-        else if (currentObj.status === 'Week Off' || currentObj.status === 'Holiday') nextStatus = 'Present';
-
-        setAttendanceMap(prev => ({
-            ...prev,
-            [memberId]: {
-                ...prev[memberId],
-                [dateString]: { ...currentObj, status: nextStatus }
-            }
-        }));
-
-        try {
-            const res = await fetch(`${BASE_URL_TEAM}/mark`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    memberId,
-                    date: dateString,
-                    status: nextStatus
-                })
-            });
-
-            if (!res.ok) throw new Error('Failed to update status');
-        } catch (err) {
-            console.error("Toggle Status API Error:", err);
-            fetchData();
-        }
-    };
 
     const handleApplyLeave = async () => {
         if (!leaveForm.date || !leaveForm.memberId) return;
@@ -176,6 +151,10 @@ export default function AttendancePage() {
         } else if (leaveForm.leaveType === 'Week Off') {
             finalStatus = 'Week Off';
             leaveLabel = 'Week Off';
+        }
+        else if (leaveForm.leaveType === 'Present') {
+            finalStatus = 'Present';
+            leaveLabel = 'Present';
         }
 
         try {
@@ -376,7 +355,6 @@ export default function AttendancePage() {
                                                         <td
                                                             key={day.dateString}
                                                             className={`status-cell ${day.isSunday ? 'sunday-cell' : ''} ${day.isFuture ? 'future-cell' : ''}`}
-                                                            onClick={() => toggleStatus(member._id, day.dateString, day.isFuture)}
                                                         >
                                                             <div className="cell-content">
                                                                 <span className={badgeClass}>{displayStatus}</span>
@@ -503,6 +481,7 @@ export default function AttendancePage() {
                                         <option value="Full Day">Full Day Leave</option>
                                         <option value="Half Day">Half Day Leave</option>
                                         <option value="Week Off">Week Off</option>
+                                        <option value="Present">Present</option>
                                     </select>
                                 </div>
 

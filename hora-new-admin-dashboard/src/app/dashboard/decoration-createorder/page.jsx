@@ -730,7 +730,6 @@ const AddDecOrder = () => {
       });
 
       if (response.status === API_SUCCESS_CODE) {
-        setIsOrderCreated(true);
         return response.data.data._id;
       } else {
         console.error("Failed to save address", response.status);
@@ -818,6 +817,7 @@ const AddDecOrder = () => {
           createWonderlandEvent(response.data.data.order_id);
         }
       }
+      setIsOrderCreated(true);
       alert("Order created successfully:", response.data);
     } catch (error) {
       console.error("Error creating order:", error);
@@ -1817,7 +1817,8 @@ const AddDecOrder = () => {
             {!isOrderCreated && (
               <button
                 className="createOrder-btn"
-                type="submit"
+                type="button"
+                onClick={handleSubmit}
                 disabled={lloading}
               >
                 {lloading ? "Creating Order..." : "Create Order"}
