@@ -349,7 +349,7 @@ button[disabled] {
 
 .item-price {
   font-size: 14px;
-  color: #777;
+  color: #28a745;
 }
 
 .right-section {
@@ -826,4 +826,21 @@ gap: 5px;
   font-size: 14px;
   font-weight: 600;
   color: #9252aa;
+}
+.summary-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.summary-list .summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.summary-list .summary-row:last-child {
+  border-bottom: none;
 }

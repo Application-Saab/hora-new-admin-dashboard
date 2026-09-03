@@ -1303,6 +1303,18 @@ const ActionPopup = ({
                                   />
                                 </p>
                                 <div>{getItemInclusion(dec.inclusion)}</div>
+
+                                {orderDetails.customInclusion?.length > 0 && (
+                                  <div>
+                                    <strong>Custom Inclusions:</strong>
+
+                                    <ul>
+                                      {orderDetails.customInclusion.map((item, index) => (
+                                        <li key={index}>{item}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
                               </div>
                             );
                           })}
