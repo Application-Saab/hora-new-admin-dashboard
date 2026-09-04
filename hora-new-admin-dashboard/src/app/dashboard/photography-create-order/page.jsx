@@ -624,6 +624,8 @@ const AddPhotoOrder = () => {
       Date: ${date}
       Time Slot: ${timeSlot?.label || "N/A"}
 
+
+      Product Site Url: ${product?.productUrl || "N/A"}
       *Product Name*: ${dishName}
       Product Price: ${category || "N/A"}
       Product Inclusions:
