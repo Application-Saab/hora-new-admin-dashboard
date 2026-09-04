@@ -53,7 +53,7 @@ const AddPhotoOrder = () => {
   const [message, setMessage] = useState("");
   const [messageColor, setMessageColor] = useState("");
   const [selectedItems, setSelectedItems] = useState({});
-
+  const [teams, setTeams] = useState([]);
   const [customerId, setCustomerId] = useState(null);
 
   const [showPopup, setShowPopup] = useState(false);
@@ -288,6 +288,51 @@ const AddPhotoOrder = () => {
       setPincodeMessageColor("");
     }
   }, [pincode]);
+
+
+        const getTeams = async (number = "") => {
+            try {
+                setLoading(true);
+    
+                let url = `${BASE_URL}/api/team/getAll`;
+    
+                if (number) {
+                    url += `?number=${encodeURIComponent(number)}`;
+                }
+    
+                const response = await fetch(url);
+    
+                const contentType = response.headers.get("content-type");
+    
+                if (!contentType || !contentType.includes("application/json")) {
+                    const text = await response.text();
+    
+                    console.error("API returned non-JSON response:", text);
+    
+                    throw new Error(
+                        "Invalid API response. Please check BASE_URL and API route."
+                    );
+                }
+    
+                const result = await response.json();
+    
+                if (!response.ok) {
+                    throw new Error(
+                        result.message || "Failed to fetch teams"
+                    );
+                }
+    
+                setTeams(result.data || []);
+            } catch (error) {
+                console.error("Get team error:", error);
+                alert(error.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+        useEffect(() => {
+            getTeams();
+        }, []);
 
   // const handleCheckCustomer = async (e) => {
   //   e.preventDefault();
@@ -668,7 +713,10 @@ const changeQuantity = (id, delta) => {
 
 
   return (
-    <div className="container">
+    <div
+      style={{ display: "flex", gap: "10px" }}
+    >
+    <div className="createDecor-container">
       <h2 className="createOrder pageHeading">Create Photography Order</h2>
       <form className="" onSubmit={handleSubmit}>
         <div className="category-product-row" >
@@ -812,12 +860,22 @@ const changeQuantity = (id, delta) => {
                     </div>
                   }
               </div>
+                  <div>
+                    <label htmlFor="orderTakenBy">Order Taken By*</label>
+
+                    <SearchWithDropDown
+                      options={teams?.map((team) => team.name) || []}
+                      selectedValue={orderTakenBy}
+                      onChange={(value) => setOrderTakenBy(value)}
+                      placeholder="Search Team..."
+                    />
+                  </div>
               </div>
             <div
               className="ProductInclusions"
               style={{
                 border: "1px solid #ccc",
-                marginTop: "10px",
+                marginTop: "15px",
                 padding: "10px",
                 borderRadius:"6px",
               }}
@@ -832,8 +890,77 @@ const changeQuantity = (id, delta) => {
               </ul>
             </div>
             {/* customer check  */}
-          </>
-        )}
+          
+        
+
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "2%",
+            }}>
+              <div className="city-box" style={{ flex: 1 }}>
+                <label
+                  htmlFor="city"
+                  style={{
+                    marginTop: "0px",
+                    marginBottom: "5px",
+                    display: "block",
+                  }}
+                >
+                  City *
+                </label>
+                <select
+                  id="city"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  required
+                  style={{
+                    width: "100%",
+                    padding: "10px",
+                    borderRadius: "5px",
+                    fontSize: "16px",
+                    transition: "border-color 0.3s",
+                  }}
+                >
+                  <option value="" style={{ color: "#aaa" }}>
+                    Select City
+                  </option>
+                  <option value="Bangalore">Bangalore</option>
+                  <option value="Delhi">Delhi</option>
+                  <option value="Mumbai">Mumbai</option>
+                  <option value="Hyderabad">Hyderabad</option>
+                </select>
+              </div>
+              <div className="pincode-box" style={{ flex: 1 }}>
+                <label htmlFor="pincode">Pincode *</label>
+                <input
+                  type="text"
+                  id="pincode"
+                  value={pincode}
+                  onChange={(e) => setPincode(e.target.value)}
+                  style={{
+                    padding: "11px",
+                    borderRadius: "5px",
+                    fontSize: "16px",
+                    width: "100%",
+                    marginTop: "0px",
+                    boxSizing: "border-box",
+                  }}
+                />
+                <p
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: "15px",
+                    color: pincodeMessageColor,
+                    margin:"0px",
+                  }}
+                >
+                  {pincodeMessage}
+                </p>
+              </div>
+        </div>
+              </>
+            )}
         {message === "Customer exists." ? (
           <div className="orderDeatils">
             <div
@@ -844,17 +971,6 @@ const changeQuantity = (id, delta) => {
                   gap: "2%",
                 }}
             >
-              <div >
-                <label htmlFor="orderTakenBy">Order Taken By*</label>
-                <input
-                  type="text"
-                  id="orderTakenBy"
-                  value={orderTakenBy}
-                  onChange={(e) => setOrderTakenBy(e.target.value)}
-                  placeholder="Order Taken By"
-                  required
-                />
-              </div>
               <div >
                 <label htmlFor="date">Date *</label>
                 <input
@@ -943,30 +1059,22 @@ const changeQuantity = (id, delta) => {
             </div>
 
             {/* Add-On Products */}
+            <div className="addon-heading">Select Addon Products</div>
             {addOnProducts.length > 0 && (
-              <div
-                className="add-on-section"
-                style={{
-                  border: "1px solid #ccc",
-                  padding: "15px",
-                  borderRadius: "5px",
-                  marginBottom: "10px",
-                  marginTop:"15px",
-                  backgroundColor: "#f9f9f9",
-                }}
-              >
-                <div style={{fontSize:"18px", fontWeight:"600", marginBottom:"8px"}}>Add-On Products</div>
-                <div
-                  className="add-on-grid"
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                    gap: "15px"
-                  }}>
+              <div className="addon-menu">
+                <div className="addon-grid">
                     {addOnProducts.map((addOn, index) => {
                       const selected = selectedItems[addOn._id];
                       return (
-                        <div key={index} className="add-on-card" style={{
+                        <div key={index} className="add-on-card"
+                          onClick={() => {
+                            const isSelected = selectedAddOns.some(
+                              (item) => item._id === addOn._id
+                            );
+
+                            handleAddOnChange(addOn, !isSelected);
+                          }}
+                         style={{
                           border: "1px solid #ddd",
                           borderRadius: "8px",
                           padding: "12px",
@@ -978,8 +1086,13 @@ const changeQuantity = (id, delta) => {
                           <input
                             type="checkbox"
                             id={`addon-${index}`}
-                            checked={selectedAddOns.some(item => item.title === addOn.title)}
-                            onChange={(e) => handleAddOnChange(addOn, e.target.checked)}
+                            checked={selectedAddOns.some(
+                              (item) => item._id === addOn._id
+                            )}
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={(e) =>
+                              handleAddOnChange(addOn, e.target.checked)
+                            }
                             style={{ transform: "scale(1.2)" }}
                           />
                           <img
@@ -992,95 +1105,39 @@ const changeQuantity = (id, delta) => {
                               borderRadius: "4px"
                             }}
                           />
-                          <div style={{ flex: 1 }}>
-                            <label htmlFor={`addon-${index}`} style={{
-                              fontWeight: "bold",
-                              cursor: "pointer",
-                              display: "block",
-                              marginBottom: "4px"
-                            }}>
-                              {addOn.title}
-                            </label>
-                            <p style={{
-                              margin: "0",
-                              fontSize: "12px",
-                              color: "#666",
-                              marginBottom: "4px"
-                            }}>
-                              {addOn.description}
-                            </p>
-                            <p style={{
-                              margin: "0",
-                              fontWeight: "bold",
-                              color: "#28a745",
-                              fontSize: "14px"
-                            }}>
-                              ₹{addOn.price}
-                            </p>
+                          <div className="addon-product-info">
+                            <div className="item-title">
+                              {addOn?.title}
+                            </div>
+
+                            <div className="item-price">
+                              ₹{addOn?.price}
+                            </div>
                           </div>
                           <div className="right-section">
-                            <button onClick={() => changeQuantity(addOn._id, -1)} className="qty-btn">−</button>
+                            <button onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              changeQuantity(addOn._id, -1);
+                            }} className="qty-btn">−</button>
                             <span className="qty">{selected?.quantity || 1}</span>
-                            <button onClick={() => changeQuantity(addOn._id, 1)} className="qty-btn">+</button>
+                            <button onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              changeQuantity(addOn._id, 1);
+                            }} className="qty-btn">+</button>
                             <div className="total-price">₹{addOn.price * (selected?.quantity || 1)}</div>
                           </div>
                         </div>
                       )
                     })}               </div>
-                  {selectedAddOns.length > 0 && (
-                    <div style={{
-                      marginTop: "15px",
-                      padding: "10px",
-                      backgroundColor: "#e8f5e8",
-                      borderRadius: "5px",
-                      border: "1px solid #28a745"
-                    }}>
-                      <h4 style={{ margin: "0 0 10px 0", color: "#28a745" }}>Selected Add-Ons:</h4>
-                      <ul style={{ margin: "0", paddingLeft: "20px" }}>
-                        {selectedAddOns.map((addOn, index) => {
-                          const qty = selectedItems[addOn._id]?.quantity || 1;
-
-                          return (
-                            <li key={index} style={{ marginBottom: "5px" }}>
-                              {addOn.title} - ₹{addOn.price} × {qty}
-                            </li>
-                          );
-                        })}
-
-                      </ul>
-                      {/* <p style={{ 
-                  margin: "10px 0 0 0", 
-                  fontWeight: "bold", 
-                  fontSize: "16px",
-                  color: "#28a745"
-                }}>
-                  Total Add-Ons: ₹{addOnsTotalPrice}
-                </p> */}
-                  </div>
-                )}
               </div>
             )}
 
-
+            {themeProducts.length > 0 && (<div className="addon-heading">Select Theme </div>)}
             {themeProducts.length > 0 && (
-              <div
-                className="add-on-section"
-                style={{
-                  border: "1px solid #ccc",
-                  padding: "15px",
-                  borderRadius: "5px",
-                  marginBottom: "20px",
-                  backgroundColor: "#f9f9f9",
-                }}
-              >
-                <h3>Themes</h3>
-                <div
-                  className="add-on-grid"
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                    gap: "15px"
-                  }}>
+              <div className="addon-menu">
+                <div className="addon-grid">
                   {themeProducts.map((theme, index) => {
                     return (
                       <div key={index} className="add-on-card" style={{
@@ -1094,9 +1151,13 @@ const changeQuantity = (id, delta) => {
                       }}>
                         <input
                           type="checkbox"
-                          id={`addon-${index}`}
-                          checked={selectedTheme.some(item => item.title === theme.title)}
-                          onChange={(e) => handleThemeChange(theme, e.target.checked)}
+                          id={`theme-${index}`}
+                          checked={selectedTheme.some(
+                            (item) => item._id === theme._id
+                          )}
+                          onChange={(e) =>
+                            handleThemeChange(theme, e.target.checked)
+                          }
                           style={{ transform: "scale(1.2)" }}
                         />
                         <img
@@ -1110,7 +1171,7 @@ const changeQuantity = (id, delta) => {
                           }}
                         />
                         <div style={{ flex: 1 }}>
-                          <label htmlFor={`addon-${index}`} style={{
+                          <label htmlFor={`theme-${index}`} style={{
                             fontWeight: "bold",
                             cursor: "pointer",
                             display: "block",
@@ -1163,75 +1224,18 @@ const changeQuantity = (id, delta) => {
               </div>
             )}
 
-            <div
-              className="cityPincode-box"
-              style={{
-                margin: "10px 0",
-                width: "100%",
-                display: "flex",
-                alignItems: "flex-start",
-                gap: "12px",
-              }}
-            >
-              <div className="city-box" style={{ flex: 1 }}>
-                <label
-                  htmlFor="city"
-                  style={{
-                    marginBottom: "5px",
-                    display: "block",
-                  }}
-                >
-                  City *
-                </label>
-                <select
-                  id="city"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  required
-                  style={{
-                    width: "100%",
-                    padding: "10px",
-                    borderRadius: "5px",
-                    fontSize: "16px",
-                    transition: "border-color 0.3s",
-                  }}
-                >
-                  <option value="" style={{ color: "#aaa" }}>
-                    Select City
-                  </option>
-                  <option value="Bangalore">Bangalore</option>
-                  <option value="Delhi">Delhi</option>
-                  <option value="Mumbai">Mumbai</option>
-                  <option value="Hyderabad">Hyderabad</option>
-                </select>
-              </div>
-              <div className="pincode-box" style={{ flex: 1 }}>
-                <label htmlFor="pincode">Pincode *</label>
-                <input
-                  type="text"
-                  id="pincode"
-                  value={pincode}
-                  onChange={(e) => setPincode(e.target.value)}
-                  style={{
-                    padding: "11px",
-                    borderRadius: "5px",
-                    fontSize: "16px",
-                    width: "100%",
-                    marginTop: "0px",
-                    boxSizing: "border-box",
-                  }}
-                />
-                <p
-                  style={{
-                    fontWeight: "bold",
-                    fontSize: "15px",
-                    color: pincodeMessageColor,
-                  }}
-                >
-                  {pincodeMessage}
-                </p>
-              </div>
-              <div className="event-box" style={{ flex: 1 }}>
+            <div className="amount-box">
+                  <div>
+                    <label htmlFor="wonderlandevent">Wonderland Occasion</label>
+                    <input
+                      type="text"
+                      id="wonderlandevent"
+                      value={wonderlandevent}
+                      onChange={(e) => setWonderlandEvent(e.target.value)}
+                      placeholder="Wonderland Occasion"
+                    />
+                  </div>
+                  <div className="event-box" style={{ flex: 1 }}>
                 <label htmlFor="pincode">Add Event</label>
                 <SearchWithDropDown
                   options={eventList}
@@ -1241,16 +1245,7 @@ const changeQuantity = (id, delta) => {
                 />
               </div>
             </div>
-            <div style={{ marginTop: "10px" }}>
-              <label htmlFor="wonderlandevent">Wonderland Occasion</label>
-              <input
-                type="text"
-                id="wonderlandevent"
-                value={wonderlandevent}
-                onChange={(e) => setWonderlandEvent(e.target.value)}
-                placeholder="Wonderland Occasion"
-              />
-            </div>
+
             <div className="checkoutInputType border-1 rounded-4">
                 <div style={{ fontSize: "18px", fontWeight: "600", marginBottom: "8px", marginTop:"12px" }}>Share your comments (if any)</div>
               <div className="addon-form">
@@ -1356,12 +1351,209 @@ const changeQuantity = (id, delta) => {
           >{`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}`}</a>
         </p>
       )}
+    </div>
+      {product &&
+        <div className="createDecor-container order-summary-container">
 
-      {message === "Customer exists." && (
-        <button onClick={copyOrderSummary} style={style.buttonPrimary}>
-          Copy Order Summary(For Customer)
-        </button>
-      )}
+          <div className="summary-header">
+            <h2 className="createOrder pageHeading">Order Summary</h2>
+          </div>
+
+          {/* Product */}
+          <div className="summary-product">
+            Product URL: {" "}{`${product?.productUrl || ""}`}
+
+            <div>
+              <div> Product Name: {" "}{product?.name || ""}</div>
+              <div> Product Price: {" "}₹{product?.price || 0}</div>
+            </div>
+          </div>
+
+          <div className="summary-divider" />
+
+          {/* Customer Details */}
+          <div className="summary-section">
+            <h4>Customer Details:{" "}</h4>
+
+            <div className="summary-row">
+              <span>Contact Number:{" "}</span>
+              <span>{customerNumber || "—"}</span>
+            </div>
+
+            <div className="summary-row">
+              <span>Order Taken By:{" "}</span>
+              <span>{orderTakenBy || "—"}</span>
+            </div>
+          </div>
+
+          {/* Event Details */}
+          <div className="summary-section">
+            <h4>Event Details :{" "}</h4>
+
+
+
+            <div className="summary-row">
+              <span>Event Name :{" "}</span>
+              <span>{wonderlandevent || selectedEvent || "—"}</span>
+            </div>
+
+
+            <div className="summary-row">
+              <span>City :{" "}</span>
+              <span>{city || "—"}</span>
+            </div>
+
+
+            <div className="summary-row">
+              <span>Pincode :{" "}</span>
+              <span>{pincode || "—"}</span>
+            </div>
+
+            <div className="summary-row">
+              <span>Date :{" "}</span>
+              <span>{date || "—"}</span>
+            </div>
+
+            <div className="summary-row">
+              <span>Time Slot :{" "}</span>
+              <span>{timeSlot?.label || "—"}</span>
+            </div>
+
+            <div className="summary-row summary-column">
+              <span>Address :{" "}</span>
+              <span>{address || "—"}</span>
+            </div>
+
+            <div className="summary-row summary-column">
+              <span>Google Location :{" "}</span>
+              <span>{googleLocation || "—"}</span>
+            </div>
+          </div>
+
+          
+
+          {/* Inclusions */}
+          {product?.inclusion?.length > 0 && (
+            <div className="summary-section">
+              <h4>Inclusions :</h4>
+
+              <div className="summary-inclusions">
+                {product.inclusion.map((item, index) => (
+                  <div
+                    key={index}
+                    dangerouslySetInnerHTML={{
+                      __html: item,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Selected Add-Ons */}
+          {/* Selected Add-Ons */}
+          {selectedAddOns.length > 0 && (
+            <div className="summary-section">
+              <h4>Add-Ons :</h4>
+
+              <ul className="summary-list">
+                {selectedAddOns.map((addOn, index) => {
+                  const quantity =
+                    selectedItems[addOn._id]?.quantity || 1;
+
+                  const totalPrice =
+                    Number(addOn.price || 0) * quantity;
+
+                  return (
+                    <li key={addOn._id} className="summary-row">
+                      <span>
+                        {index + 1}. {addOn.title} × {quantity}
+                      </span>
+
+                      <span>
+                        ₹{totalPrice}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+
+          {/* Selected Themes */}
+          {selectedTheme.length > 0 && (
+            <div className="summary-section">
+              <h4>Themes :</h4>
+
+              <ul className="summary-list">
+                {selectedTheme.map((theme, index) => (
+                  <li
+                    key={theme._id}
+                    className="summary-row"
+                  >
+                    <span>
+                      {index + 1}. {theme.title}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Comment */}
+          {comment && (
+            <div className="summary-section">
+              <h4>Comments :</h4>
+
+              <ul style={{ margin: 0, paddingLeft: "22px" }}>
+                {comment
+                  .split("\n")
+                  .filter((item) => item.trim())
+                  .map((item, index) => (
+                    <li key={index} style={{ marginBottom: "6px" }}>
+                      {item}
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Amount Summary */}
+          <div className="summary-amount">
+
+            <h4>Amount Details</h4>
+
+            <div className="amount-summary-row">
+              <span>Total Amount :</span>
+              <span>
+                ₹{totalamount || 0}
+              </span>
+            </div>
+
+            <div className="amount-summary-row">
+              <span>Advance Amount :</span>
+              <span>
+                ₹{advanceamount || 0}
+              </span>
+            </div>
+
+            <div className="amount-summary-row balance-row">
+              <span>Balance Amount :</span>
+              <span>
+                ₹{balanceamount || 0}
+              </span>
+            </div>
+
+            {message === "Customer exists." && (
+              <button onClick={copyOrderSummary} style={style.buttonPrimary}>
+                Copy Order Summary(For Customer)
+              </button>
+            )}
+
+          </div>
+
+        </div>
+      }
     </div>
   );
 };

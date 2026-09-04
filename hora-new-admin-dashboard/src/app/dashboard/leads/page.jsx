@@ -41,7 +41,7 @@ export default function LeadAnalytics() {
 
         const query = params.toString();
 
-        return query ? `? ${query} ` : "";
+        return query ? `?${query}` : "";
     };
 
     const fetchAgentData = async () => {
@@ -52,7 +52,7 @@ export default function LeadAnalytics() {
             const query = getDateQuery();
 
             const response = await fetch(
-                `${BASE_URL}/api/leads/agent-analytics${query} `
+                `${BASE_URL}/api/leads/agent-analytics${query}`
             );
 
             const result = await response.json();
