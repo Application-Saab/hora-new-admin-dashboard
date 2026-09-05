@@ -22,7 +22,9 @@ const TeamPage = () => {
     const [searchNumber, setSearchNumber] = useState("");
     const [loading, setLoading] = useState(false);
     const [addLoading, setAddLoading] = useState(false);
-
+    const [deleteLoading, setDeleteLoading] = useState("");
+    const [deleteModal, setDeleteModal] = useState(false);
+    const [deleteTeamId, setDeleteTeamId] = useState("");
     const [editModal, setEditModal] = useState(false);
 
     const [editData, setEditData] = useState({
@@ -47,8 +49,6 @@ const TeamPage = () => {
     const [viewModal, setViewModal] = useState(false);
     const [viewData, setViewData] = useState(null);
 
-    const [deleteLoading, setDeleteLoading] = useState("");
-
     const handleEditClick = (item) => {
         const data = {
             _id: item._id,
@@ -59,6 +59,7 @@ const TeamPage = () => {
                 : "",
             dob: item.dob || "",
             address: item.address || "",
+            weekOff: item.weekOff || "",
         };
 
         setEditData(data);
@@ -69,6 +70,7 @@ const TeamPage = () => {
             alternativeNumber: data.alternativeNumber,
             dob: data.dob,
             address: data.address,
+            weekOff: data.weekOff,
         });
 
         setEditModal(true);
@@ -163,46 +165,45 @@ const TeamPage = () => {
     };
 
     const handleDeleteTeam = async (id) => {
-        const confirmDelete = window.confirm(
-            "Are you sure you want to delete this team?"
-        );
-
-        if (!confirmDelete) return;
-
         try {
             setDeleteLoading(id);
 
             const response = await fetch(
-                `${ BASE_URL }/api/team/delete/${id}`,
-{
-    method: "POST",
+                `${BASE_URL}/api/team/delete/${id}`,
+                {
+                    method: "POST",
                 }
             );
 
-const contentType = response.headers.get("content-type");
+            const contentType = response.headers.get("content-type");
 
-if (!contentType || !contentType.includes("application/json")) {
-    const text = await response.text();
-    console.error("API returned non-JSON response:", text);
-    throw new Error(
-        "Invalid API response. Please check BASE_URL and API route."
-    );
-}
+            if (!contentType || !contentType.includes("application/json")) {
+                const text = await response.text();
+                console.error("API returned non-JSON response:", text);
 
-const result = await response.json();
+                throw new Error(
+                    "Invalid API response. Please check BASE_URL and API route."
+                );
+            }
 
-if (!response.ok) {
-    throw new Error(result.message || "Failed to delete team");
-}
+            const result = await response.json();
 
-alert("Team deleted successfully");
-getTeams(searchNumber);
+            if (!response.ok) {
+                throw new Error(result.message || "Failed to delete team");
+            }
+
+            setDeleteModal(false);
+            setDeleteTeamId("");
+
+            alert("Team deleted successfully");
+
+            getTeams(searchNumber);
         } catch (error) {
-    console.error("Delete team error:", error);
-    alert(error.message);
-} finally {
-    setDeleteLoading("");
-}
+            console.error("Delete team error:", error);
+            alert(error.message);
+        } finally {
+            setDeleteLoading("");
+        }
     };
 
 const getTeams = async (number = "") => {
@@ -565,11 +566,10 @@ return (
                                                 <button
                                                     type="button"
                                                     className="team-delete-btn"
-                                                    onClick={() =>
-                                                        handleDeleteTeam(
-                                                            item._id
-                                                        )
-                                                    }
+                                                    onClick={() => {
+                                                        setDeleteTeamId(item._id);
+                                                        setDeleteModal(true);
+                                                    }}
                                                     disabled={
                                                         deleteLoading ===
                                                         item._id
@@ -729,6 +729,7 @@ return (
                 setViewModal(false);
                 setViewData(null);
             }}
+            mainBtnVisible={false}
             popupBody={
                 viewData && (
                     <div className="team-view-details">
@@ -765,6 +766,25 @@ return (
                         </div>
                     </div>
                 )
+            }
+        />
+
+        <CommonPopup
+            isOpen={deleteModal}
+            onClose={() => {
+                setDeleteModal(false);
+                setDeleteTeamId("");
+            }}
+            heading="Delete Team"
+            buttonText={deleteLoading ? "Deleting..." : "Delete"}
+            mainButtonAction={() => handleDeleteTeam(deleteTeamId)}
+            disabled={deleteLoading === deleteTeamId}
+            popupBody={
+                <div className="team-delete-popup">
+                    <p>
+                        Are you sure you want to delete this team member?
+                    </p>
+                </div>
             }
         />
     </div>
