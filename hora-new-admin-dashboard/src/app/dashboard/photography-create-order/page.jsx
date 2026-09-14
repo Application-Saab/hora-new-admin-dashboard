@@ -508,7 +508,7 @@ const AddPhotoOrder = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e,isEmergency = false) => {
     e.preventDefault();
     setlLoading(true);
     const formattedDate = date ? formatDate(date) : null;
@@ -571,10 +571,12 @@ const AddPhotoOrder = () => {
       order_type: true,
       items: [product?._id],
       decoration_comments: comment,
-      status: 1,
+      status: isEmergency ? 0 : 1, 
       balance_amount: balanceamount,
       order_taken_by: orderTakenBy,
       eventName: selectedEvent,
+      isPaymentDone: !isEmergency,
+      isEmergencyOrder: isEmergency,
     };
 
     try {
@@ -862,6 +864,7 @@ const changeQuantity = (id, delta) => {
                     </div>
                   }
               </div>
+                  {message == "Customer exists." &&
                   <div>
                     <label htmlFor="orderTakenBy">Order Taken By*</label>
 
@@ -872,7 +875,9 @@ const changeQuantity = (id, delta) => {
                       placeholder="Search Team..."
                     />
                   </div>
+}
               </div>
+                {message == "Customer exists." &&
             <div
               className="ProductInclusions"
               style={{
@@ -891,10 +896,11 @@ const changeQuantity = (id, delta) => {
                 )}
               </ul>
             </div>
+}
             {/* customer check  */}
           
         
-
+                {message == "Customer exists." &&
             <div style={{
               display: "flex",
               alignItems: "center",
@@ -961,6 +967,7 @@ const changeQuantity = (id, delta) => {
                 </p>
               </div>
         </div>
+}
               </>
             )}
         {message === "Customer exists." ? (
@@ -1275,9 +1282,21 @@ const changeQuantity = (id, delta) => {
             </div>
 
             {/* Create Order */}
-              <button className="createOrder-btn" type="submit">
+                <button onClick={handleSubmit} className="createOrder-btn">
               {lloading ? "Creating Order..." : "Create Order"}
             </button>
+
+
+            <button
+                className="createOrder-btn"
+                type="button"
+                onClick={(e) => {
+                  handleSubmit(e, true);
+                }}
+              disabled={lloading}
+            >
+            {lloading ? "Creating Emergency Order..." : "Create Emergency Order"}
+          </button>
           </div>
         ) : (
           <>

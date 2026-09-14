@@ -262,7 +262,7 @@ const [order, setOrder] = useState(null);
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ _id: orderId, status: status }),
+          body: JSON.stringify({ _id: orderId, status: status, isPaymentDone: true }),
         }
       );
 
@@ -990,6 +990,7 @@ useEffect(() => {
                 <th>Rating</th>
                 <th>Extra Pay</th>
                 <th>Edit Order</th>
+                <th>Payment Status</th>
                 <th>Add EventName</th>
                 <th>Wonderland Event Name</th>
                 <th>Add Order Image</th>
@@ -1234,6 +1235,25 @@ useEffect(() => {
                           </button>
                         )}
                     </td>
+                    <th style={{ textAlign: "center" }}>
+                      {order?.isEmergencyOrder ? (
+                        <span
+                          style={{
+                            display: "inline-block",
+                            padding: "8px 16px",
+                            borderRadius: "20px",
+                            backgroundColor: order?.isPaymentDone ? "#dcfce7" : "#fff3cd",
+                            color: order?.isPaymentDone ? "#16a34a" : "#d97706",
+                            fontWeight: "600",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {order?.isPaymentDone ? "Paid" : "Pending"}
+                        </span>
+                      ) : (
+                        "-"
+                      )}
+                    </th>
                     <td style={{ padding: "10px" }}>
                       {/* <button
                         onClick={() => handleOpen(order._id)}
