@@ -239,10 +239,6 @@ export default function AttendancePage() {
         return { present, leave, holiday, totalWorking: present + absent + leave };
     };
 
-    const selectedEmployeeForLeave = teamData?.find(
-        (member) => member._id === leaveForm.memberId
-    );
-
     const selectedEmployeeForHoliday = holidayForm.memberId === 'all'
         ? null
         : teamData?.find((member) => member._id === holidayForm.memberId);
@@ -438,11 +434,7 @@ export default function AttendancePage() {
                                         options={teamData.map(
                                             (member) => `${member.name?.trim()} (${member.number})`
                                         )}
-                                        selectedValue={
-                                            selectedEmployeeForLeave
-                                                ? `${selectedEmployeeForLeave.name?.trim()} (${selectedEmployeeForLeave.number})`
-                                                : ""
-                                        }
+                                        selectedValue=""
                                         onChange={(selectedEmployeeText) => {
                                             const member = teamData.find(
                                                 (item) =>
@@ -457,7 +449,7 @@ export default function AttendancePage() {
                                                 }));
                                             }
                                         }}
-                                        placeholder="Search Employee..."
+                                        placeholder="Select Employee..."
                                     />
                                 </div>
 

@@ -18,6 +18,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { pincodes } from "../../../utils/pincodes.js";
 import { chefTimeSlots } from "../../../utils/chefTimeSlots";
 import { formatDate } from "../../../utils/formateDate";
+import SearchWithDropDown from "@/app/component/SearchWithDropDown";
 
 const ChefForPartyCreateOrderComponent = () => {
   const [items, setItems] = useState([]);
@@ -30,7 +31,7 @@ const ChefForPartyCreateOrderComponent = () => {
   const [ingredients, setIngredients] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
   const [totalDishes, setTotalDishes] = useState(0);
-
+  const [teams, setTeams] = useState([]);
   const [customerNumber, setCustomerNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -99,6 +100,52 @@ const ChefForPartyCreateOrderComponent = () => {
     "63f08ebe1976aaf885f16234",
     "63f08e4d1976aaf885f16207",
   ];
+
+    
+      const getTeams = async (number = "") => {
+        try {
+          setLoading(true);
+    
+          let url = `${BASE_URL}/api/team/getAll`;
+    
+          if (number) {
+            url += `?number=${encodeURIComponent(number)}`;
+          }
+    
+          const response = await fetch(url);
+    
+          const contentType = response.headers.get("content-type");
+    
+          if (!contentType || !contentType.includes("application/json")) {
+            const text = await response.text();
+    
+            console.error("API returned non-JSON response:", text);
+    
+            throw new Error(
+              "Invalid API response. Please check BASE_URL and API route."
+            );
+          }
+    
+          const result = await response.json();
+    
+          if (!response.ok) {
+            throw new Error(
+              result.message || "Failed to fetch teams"
+            );
+          }
+    
+          setTeams(result.data || []);
+        } catch (error) {
+          console.error("Get team error:", error);
+          alert(error.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+      useEffect(() => {
+        getTeams();
+      }, []);
+    
 
   useEffect(() => {
     // Check if window is available (client-side)
@@ -801,13 +848,12 @@ const ChefForPartyCreateOrderComponent = () => {
               {message === "Customer exists." ? (
                 <div className="orderDeatils">
                   <label htmlFor="orderTakenBy">Order Taken By*</label>
-                  <input
-                    type="text"
-                    id="orderTakenBy"
-                    value={orderTakenBy}
-                    onChange={(e) => setOrderTakenBy(e.target.value)}
-                    placeholder="Order Taken By"
-                    required
+
+                  <SearchWithDropDown
+                    options={teams?.map((team) => team.name) || []}
+                    selectedValue={orderTakenBy}
+                    onChange={(value) => setOrderTakenBy(value)}
+                    placeholder="Search Team..."
                   />
 
                   <div
