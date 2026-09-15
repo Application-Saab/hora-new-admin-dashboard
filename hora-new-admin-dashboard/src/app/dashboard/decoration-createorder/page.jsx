@@ -436,6 +436,7 @@ const AddDecOrder = () => {
       customInclusion: customInclusion.filter((item) => item.trim() !== ""),
       isPaymentDone: !isEmergency,
       isEmergencyOrder: isEmergency,
+      order_status: isEmergency ? 7 : 0,
     };
 
     try {

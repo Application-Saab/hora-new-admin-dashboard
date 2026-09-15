@@ -215,6 +215,8 @@ const [order, setOrder] = useState(null);
         return { status: "", className: "status-empty" };
       case 6:
         return { status: "Expired", className: "status-expired" };
+      case 7:
+        return { status: "Emeregency", className: "status-expired" };
       default:
         return { status: "Unknown", className: "status-unknown" };
     }
@@ -968,6 +970,7 @@ useEffect(() => {
                       <option value="3">Completed</option>
                       <option value="6">Expired</option>
                       <option value="4">Cancelled</option>
+                      <option value="7">Emergency</option>
                     </select>
                   </span>
                 </th>
