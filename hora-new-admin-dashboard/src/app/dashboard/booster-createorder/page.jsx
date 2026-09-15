@@ -47,7 +47,7 @@ const AddDecOrder = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [messageColor, setMessageColor] = useState("");
-
+  const [teams, setTeams] = useState([]);
   const [customerId, setCustomerId] = useState(null);
 
   const [showPopup, setShowPopup] = useState(false);
@@ -97,6 +97,51 @@ const AddDecOrder = () => {
     const commentText = e.target.value;
     setComment(commentText);
   };
+
+
+  const getTeams = async (number = "") => {
+    try {
+      setLoading(true);
+
+      let url = `${BASE_URL}/api/team/getAll`;
+
+      if (number) {
+        url += `?number=${encodeURIComponent(number)}`;
+      }
+
+      const response = await fetch(url);
+
+      const contentType = response.headers.get("content-type");
+
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+
+        console.error("API returned non-JSON response:", text);
+
+        throw new Error(
+          "Invalid API response. Please check BASE_URL and API route."
+        );
+      }
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message || "Failed to fetch teams"
+        );
+      }
+
+      setTeams(result.data || []);
+    } catch (error) {
+      console.error("Get team error:", error);
+      alert(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    getTeams();
+  }, []);
 
   useEffect(() => {
     if (dishName && isContinueClicked && !isFetched) {
@@ -351,7 +396,7 @@ Order Taken By: ${orderTakenBy}
   return (
     <div className="container">
       <h1 className="createOrder pageHeading">
-        Create celebration Booster Order
+        Create celebration Booster Order 
       </h1>
       <form className="orderCreation form" onSubmit={handleSubmit}>
         {/* product check */}
@@ -450,15 +495,14 @@ Order Taken By: ${orderTakenBy}
               }}
             >
               <div style={{ marginRight: "18px" }}>
-                <label htmlFor="orderTakenBy">Order Taken By*</label>
-                <input
-                  type="text"
-                  id="orderTakenBy"
-                  value={orderTakenBy}
-                  onChange={(e) => setOrderTakenBy(e.target.value)}
-                  placeholder="Order Taken By"
-                  required
-                />
+                  <label htmlFor="orderTakenBy">Order Taken By*</label>
+
+                  <SearchWithDropDown
+                    options={teams?.map((team) => team.name) || []}
+                    selectedValue={orderTakenBy}
+                    onChange={(value) => setOrderTakenBy(value)}
+                    placeholder="Search Team..."
+                  />
               </div>
 
               <div style={{ marginRight: "18px" }}>

@@ -862,6 +862,7 @@ const changeQuantity = (id, delta) => {
                     </div>
                   }
               </div>
+                  {message == "Customer exists." &&
                   <div>
                     <label htmlFor="orderTakenBy">Order Taken By*</label>
 
@@ -872,7 +873,9 @@ const changeQuantity = (id, delta) => {
                       placeholder="Search Team..."
                     />
                   </div>
+}
               </div>
+                {message == "Customer exists." &&
             <div
               className="ProductInclusions"
               style={{
@@ -891,10 +894,11 @@ const changeQuantity = (id, delta) => {
                 )}
               </ul>
             </div>
+}
             {/* customer check  */}
           
         
-
+                {message == "Customer exists." &&
             <div style={{
               display: "flex",
               alignItems: "center",
@@ -961,6 +965,7 @@ const changeQuantity = (id, delta) => {
                 </p>
               </div>
         </div>
+}
               </>
             )}
         {message === "Customer exists." ? (

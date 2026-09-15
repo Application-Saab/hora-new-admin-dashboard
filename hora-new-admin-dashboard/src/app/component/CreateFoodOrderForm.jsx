@@ -14,6 +14,7 @@ import {
   CREATE_WONDERLAND_EVENT,
 } from "../../utils/apiconstant";
 import { formatDate } from "../../utils/formateDate";
+import SearchWithDropDown from "./SearchWithDropDown"
 // import { json } from 'stream/consumers';
 
 const CreateOrderForm = ({
@@ -49,7 +50,7 @@ const CreateOrderForm = ({
   const [timeSlot, setTimeSlot] = useState("");
   const [city, setCity] = useState("");
   const [pincode, setPincode] = useState("");
-
+  const [teams, setTeams] = useState([]);
   const [pincodeMessage, setPincodeMessage] = useState("");
   const [pincodeMessageColor, setPincodeMessageColor] = useState("");
   const [totalamount, setTotalAmount] = useState();
@@ -116,6 +117,51 @@ const CreateOrderForm = ({
     setBalanceAmount(remainingAmount);
     // setTotalDiscount(Number(deliveryCharges) + Number(totalPrice - discountedPrice));
   }, [calculateFinalTotal, calculateAdvancePayment, deliveryCharges]);
+  
+    const getTeams = async (number = "") => {
+      try {
+        setLoading(true);
+  
+        let url = `${BASE_URL}/api/team/getAll`;
+  
+        if (number) {
+          url += `?number=${encodeURIComponent(number)}`;
+        }
+  
+        const response = await fetch(url);
+  
+        const contentType = response.headers.get("content-type");
+  
+        if (!contentType || !contentType.includes("application/json")) {
+          const text = await response.text();
+  
+          console.error("API returned non-JSON response:", text);
+  
+          throw new Error(
+            "Invalid API response. Please check BASE_URL and API route."
+          );
+        }
+  
+        const result = await response.json();
+  
+        if (!response.ok) {
+          throw new Error(
+            result.message || "Failed to fetch teams"
+          );
+        }
+  
+        setTeams(result.data || []);
+      } catch (error) {
+        console.error("Get team error:", error);
+        alert(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    useEffect(() => {
+      getTeams();
+    }, []);
+  
 
   useEffect(() => {
     const final = parseFloat(totalamount) || 0;
@@ -520,18 +566,14 @@ const CreateOrderForm = ({
           {<p style={{ color: messageColor }}>{message}</p>}
           {message === "Customer exists." ? (
             <div className="orderDeatils">
-              <label htmlFor="orderTakenBy" style={style.label}>
-                Order Taken By*
-              </label>
-              <input
-                type="text"
-                id="orderTakenBy"
-                value={orderTakenBy}
-                onChange={(e) => setOrderTakenBy(e.target.value)}
-                placeholder="Order Taken By"
-                required
-              />
+              <label htmlFor="orderTakenBy">Order Taken By*</label>
 
+              <SearchWithDropDown
+                options={teams?.map((team) => team.name) || []}
+                selectedValue={orderTakenBy}
+                onChange={(value) => setOrderTakenBy(value)}
+                placeholder="Search Team..."
+              />
               <div
                 className="date-time-container"
                 style={style.dateTimeContainer}
