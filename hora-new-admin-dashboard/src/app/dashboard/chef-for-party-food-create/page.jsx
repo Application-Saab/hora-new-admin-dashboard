@@ -425,9 +425,12 @@ const ChefForPartyCreateOrderComponent = () => {
       order_type: true,
       items: selectedItems,
       decoration_comments: comment,
-      status: 1,
+      status: isEmergency ? 0 : 1,
       balance_amount: balanceamount1,
       order_taken_by: orderTakenBy,
+      isPaymentDone: !isEmergency,
+      isEmergencyOrder: isEmergency,
+      order_status: isEmergency ? 7 : 0,
     };
 
     console.log(requestData, "requestData decoration");
@@ -977,11 +980,26 @@ const ChefForPartyCreateOrderComponent = () => {
                       placeholder="Enter your comment."
                     />
                   </div>
-
+                  <div className="createOrderBtn-container">
+                    <div style={{ flex: "1" }}>
                   <button className="orderCheck-btn" type="submit">
                     {/* Create Order */}
                     {lloading ? "Creating Order..." : "Create Order"}
                   </button>
+                  </div>
+                    <div style={{ flex: "1" }}>
+                      <button
+                        className="createOrder-btn"
+                        type="button"
+                        onClick={(e) => {
+                          handleSubmit(e, true);
+                        }}
+                        disabled={lloading}
+                      >
+                        {lloading ? "Creating Emergency Order..." : "Create Emergency Order"}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <>

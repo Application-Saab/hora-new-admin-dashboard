@@ -577,6 +577,7 @@ const AddPhotoOrder = () => {
       eventName: selectedEvent,
       isPaymentDone: !isEmergency,
       isEmergencyOrder: isEmergency,
+      order_status: isEmergency ? 7 : 0,
     };
 
     try {
@@ -1280,13 +1281,14 @@ const changeQuantity = (id, delta) => {
                 ))}
               </div>
             </div>
-
+                <div className="createOrderBtn-container">
+                <div style={{ flex: "1" }}>
             {/* Create Order */}
                 <button onClick={handleSubmit} className="createOrder-btn">
               {lloading ? "Creating Order..." : "Create Order"}
             </button>
-
-
+                </div>
+                <div style={{ flex: "1" }}>
             <button
                 className="createOrder-btn"
                 type="button"
@@ -1297,6 +1299,8 @@ const changeQuantity = (id, delta) => {
             >
             {lloading ? "Creating Emergency Order..." : "Create Emergency Order"}
           </button>
+                </div>
+                </div>
           </div>
         ) : (
           <>

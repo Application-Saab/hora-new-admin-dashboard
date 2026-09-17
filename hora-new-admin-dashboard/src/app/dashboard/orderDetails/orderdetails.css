@@ -144,6 +144,10 @@ th.order-type-header span {
   background-color: #5cb85c;
 }
 
+.assigningBtn.pre-assigned {
+  background-color:coral;
+}
+
 
 /* input date and time */
 .filter-container {

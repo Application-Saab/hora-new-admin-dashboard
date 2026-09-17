@@ -1230,6 +1230,8 @@ ${inclusionText}
               </div>
               )}
 
+              <div className="createOrderBtn-container">
+                <div style={{flex:"1"}}>
               {!isOrderCreated && (
                 <button
                   className="createOrder-btn"
@@ -1240,7 +1242,8 @@ ${inclusionText}
                   {lloading ? "Creating Order..." : "Create Order"}
                 </button>
               )}
-
+                </div>
+                <div style={{ flex: "1" }}>
             {!isOrderCreated && (
               <button
                 className="createOrder-btn"
@@ -1253,6 +1256,8 @@ ${inclusionText}
                 {lloading ? "Creating Emergency Order..." : "Create Emergency Order"}
               </button>
             )}
+                </div>
+            </div>
           </div>
         ) : (
           <>
