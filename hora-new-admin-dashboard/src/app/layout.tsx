@@ -344,8 +344,15 @@ export default function RootLayout({
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const isSupplierRoute = pathname.startsWith("/supplier");
 
   useEffect(() => {
+
+    if (isSupplierRoute) {
+      setIsLoggedIn(false);
+      return;
+    }
+
     const token = localStorage.getItem("authToken");
     if (token) {
       setIsLoggedIn(true);
@@ -356,7 +363,7 @@ export default function RootLayout({
       setIsLoggedIn(false);
       router.replace("/dashboard-login");
     }
-  }, [pathname]);
+  }, [pathname, isSupplierRoute]);
 
   useEffect(() => {
     const intervalId = setInterval(async () => {
