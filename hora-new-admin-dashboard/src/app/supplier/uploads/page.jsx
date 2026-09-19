@@ -1,6 +1,8 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useSearchParams } from "next/navigation";
+import { BASE_URL, GET_GALLERY_DATA } from "@/utils/apiconstant";
 
 
 const CapsuleUpload = () => {
@@ -12,12 +14,14 @@ const CapsuleUpload = () => {
     const [galleryDetails, setGalleryDetails] = useState(null);
     const searchParams = useSearchParams();
 
+    const toId = localStorage.getItem("supplierId")
+
     const orderId = searchParams.get("orderId");
 
     const fetchGalleryDetails = async () => {
         try {
             const response = await fetch(
-                `${BASE_URL}${GET_GALLERY_DATA}/${orderId}`
+                `${BASE_URL}${GET_GALLERY_DATA}/${orderId}?toId=${toId}`
             );
 
             const responseData = await response.json();
@@ -310,6 +314,21 @@ const CapsuleUpload = () => {
         }
     };
 
+    const handleRetryUpload = async (item, index) => {
+        if (!item?.file) {
+            console.error("Original file not found for retry");
+            return;
+        }
+
+        setUploadingFiles(true);
+
+        try {
+            await uploadEventCapsuleFile(item.file, index);
+        } finally {
+            setUploadingFiles(false);
+        }
+    };
+
     return (
         <div className="actual-image-container">
 
@@ -550,24 +569,29 @@ const CapsuleUpload = () => {
 
                                     {/* FAILED */}
                                     {item.status === "failed" && (
-                                        <div
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRetryUpload(item, index)}
+                                            disabled={uploadingFiles}
                                             style={{
                                                 position: "absolute",
                                                 bottom: "35px",
                                                 left: "7px",
                                                 right: "7px",
-                                                padding: "4px",
-                                                backgroundColor:
-                                                    "rgba(220,53,69,0.9)",
+                                                padding: "5px",
+                                                backgroundColor: "rgba(220,53,69,0.9)",
                                                 color: "#fff",
+                                                border: "none",
                                                 borderRadius: "4px",
                                                 fontSize: "10px",
+                                                fontWeight: "600",
                                                 textAlign: "center",
+                                                cursor: uploadingFiles ? "not-allowed" : "pointer",
                                                 zIndex: 5,
                                             }}
                                         >
-                                            Upload Failed
-                                        </div>
+                                            Retry Upload
+                                        </button>
                                     )}
                                 </div>
                             ))}

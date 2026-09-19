@@ -75,3 +75,5 @@ export const EDIT_ADDON = "/api/addon/edit";
 export const ADD_THEME = "/api/photography-theme/add";
 export const DELETE_THEME = "/api/photography-theme/delete";
 export const EDIT_THEME = "/api/photography-theme/edit"
+
+export const GET_GALLERY_DATA = "/api/internal/gallery-details";

@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import axios from "axios";
 import "./login.css";
 import { BASE_URL } from "@/utils/apiconstant";
+import { useTimer } from "../../../utils/useTimer";
 
 const SEND_OTP_API = "/api/user/otp_generate";
 const VERIFY_OTP_API = "/api/user/otp_verify";
@@ -11,6 +13,7 @@ const VERIFY_OTP_API = "/api/user/otp_verify";
 export default function SupplierLogin() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { resetTimer } = useTimer(30);
 
     const orderId = searchParams.get("orderId");
 
@@ -23,6 +26,9 @@ export default function SupplierLogin() {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
 
+    // =========================
+    // SEND OTP
+    // =========================
     const sendOtp = async () => {
         setError("");
         setSuccess("");
@@ -33,84 +39,123 @@ export default function SupplierLogin() {
         }
 
         try {
+            setLoading(true);
+
             const body = {
-                phone: mobile, role: "supplier"
-            }
+                phone: mobile,
+                role: "supplier",
+            };
+
             const response = await axios.post(
                 `${BASE_URL}${SEND_OTP_API}`,
                 body,
-                { headers: { "Content-Type": "application/json" } }
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
             );
 
-            if (response.data.status === API_SUCCESS_CODE) {
-                setIsOtpSent(true);
+            console.log("OTP response:", response.data);
+
+            if (response.data?.status === 200) {
+                setOtpSent(true);
                 setError("");
                 resetTimer();
             } else {
-                setError("Failed to send OTP. Please try again.");
+                setError(
+                    response.data?.message ||
+                    "Failed to send OTP. Please try again."
+                );
             }
-        } catch {
-            setError("Error sending OTP. Please try again.");
+        } catch (error) {
+            console.log("OTP error:", error);
+
+            setError(
+                error?.response?.data?.message ||
+                "Error sending OTP. Please try again."
+            );
         } finally {
             setLoading(false);
         }
     };
 
+    // =========================
+    // VERIFY OTP
+    // =========================
     const verifyOtp = async () => {
         setError("");
         setSuccess("");
 
-        if (!otp || otp.length !== 6) {
-            setError("Please enter a valid 6 digit OTP");
+        if (!otp || otp.length !== 4) {
+            setError("Please enter a valid 4 digit OTP");
             return;
         }
-
 
         try {
             setLoading(true);
 
-            const response = await fetch(`${BASE_URL}${VERIFY_OTP_API}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    phone: mobile,
-                    role: "supplier",
-                    otp,
-                }),
-            });
+            const response = await fetch(
+                `${BASE_URL}${VERIFY_OTP_API}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        phone: mobile,
+                        role: "supplier",
+                        otp,
+                    }),
+                }
+            );
 
             const data = await response.json();
 
-            if (!response.ok || !data.success) {
-                setError(data.message || "Invalid OTP");
+            console.log("Verify OTP response:", data);
+
+            // Correct status check
+            if (data?.status !== 200) {
+                setError(data?.message || "Invalid OTP");
                 return;
             }
 
-            /*
-             * Agar backend token return karta hai,
-             * toh yahan save kar sakte ho.
-             */
-            if (data.token) {
-                sessionStorage.setItem("supplierToken", data.token);
+            // =========================
+            // SAVE SUPPLIER ID
+            // =========================
+            if (data?.data?._id) {
+                localStorage.setItem(
+                    "supplierID",
+                    data.data._id
+                );
             }
 
-            sessionStorage.setItem("supplierMobile", mobile);
-
+            // =========================
+            // REDIRECT
+            // =========================
             if (orderId) {
-                router.push(`/supplier/upload/${orderId}`);
+                router.push(
+                    `/supplier/uploads?orderId=${orderId}`
+                );
             } else {
-                router.push("/supplier/upload");
+                router.push("/supplier/uploads");
             }
+
         } catch (error) {
-            console.log(error);
-            setError("Something went wrong. Please try again.");
+            console.log("Verify OTP error:", error);
+
+            setError(
+                error?.message ||
+                "Something went wrong. Please try again."
+            );
         } finally {
             setLoading(false);
         }
     };
 
+    // =========================
+    // CHANGE MOBILE NUMBER
+    // =========================
     const changeNumber = () => {
         setOtpSent(false);
         setOtp("");
@@ -121,8 +166,11 @@ export default function SupplierLogin() {
     return (
         <main className="supplier-login-page">
             <div className="supplier-login-card">
+
+                {/* HEADER */}
                 <div className="supplier-login-header">
                     <h1>Supplier Login</h1>
+
                     <p>
                         {otpSent
                             ? "Enter the OTP sent to your mobile number"
@@ -130,8 +178,12 @@ export default function SupplierLogin() {
                     </p>
                 </div>
 
+                {/* =========================
+                    MOBILE NUMBER
+                ========================= */}
                 {!otpSent ? (
                     <div className="supplier-form">
+
                         <label>Mobile Number</label>
 
                         <div className="mobile-input-wrapper">
@@ -143,7 +195,12 @@ export default function SupplierLogin() {
                                 maxLength={10}
                                 placeholder="Enter mobile number"
                                 onChange={(e) => {
-                                    const value = e.target.value.replace(/\D/g, "");
+                                    const value =
+                                        e.target.value.replace(
+                                            /\D/g,
+                                            ""
+                                        );
+
                                     setMobile(value);
                                 }}
                             />
@@ -155,27 +212,42 @@ export default function SupplierLogin() {
                             onClick={sendOtp}
                             disabled={loading}
                         >
-                            {loading ? "Sending OTP..." : "Send OTP"}
+                            {loading
+                                ? "Sending OTP..."
+                                : "Send OTP"}
                         </button>
                     </div>
                 ) : (
+
+                    /* =========================
+                       OTP
+                    ========================= */
                     <div className="supplier-form">
+
                         <label>Enter OTP</label>
 
                         <input
                             type="tel"
                             className="otp-input"
                             value={otp}
-                            maxLength={6}
-                            placeholder="Enter 6 digit OTP"
+                            maxLength={4}
+                            placeholder="Enter 4 digit OTP"
                             onChange={(e) => {
-                                const value = e.target.value.replace(/\D/g, "");
+                                const value =
+                                    e.target.value.replace(
+                                        /\D/g,
+                                        ""
+                                    );
+
                                 setOtp(value);
                             }}
                         />
 
                         <div className="otp-mobile">
-                            OTP sent to <strong>+91 {mobile}</strong>
+                            OTP sent to{" "}
+                            <strong>
+                                +91 {mobile}
+                            </strong>
                         </div>
 
                         <button
@@ -184,7 +256,9 @@ export default function SupplierLogin() {
                             onClick={verifyOtp}
                             disabled={loading}
                         >
-                            {loading ? "Verifying..." : "Verify OTP"}
+                            {loading
+                                ? "Verifying..."
+                                : "Verify OTP"}
                         </button>
 
                         <button
@@ -197,9 +271,20 @@ export default function SupplierLogin() {
                     </div>
                 )}
 
-                {error && <div className="supplier-error">{error}</div>}
+                {/* ERROR */}
+                {error && (
+                    <div className="supplier-error">
+                        {error}
+                    </div>
+                )}
 
-                {success && <div className="supplier-success">{success}</div>}
+                {/* SUCCESS */}
+                {success && (
+                    <div className="supplier-success">
+                        {success}
+                    </div>
+                )}
+
             </div>
         </main>
     );
