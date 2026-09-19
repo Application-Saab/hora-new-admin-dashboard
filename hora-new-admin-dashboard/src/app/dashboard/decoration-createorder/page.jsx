@@ -349,13 +349,9 @@ const AddDecOrder = () => {
         userId: customerId,
       };
 
-      const token =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2YTdmMDlhMDExNDQ2NjUwMjVjODhkOGUiLCJuYW1lIjoidGVzdGluZyIsImVtYWlsIjoiIiwicGhvbmUiOiI5NDA2NzU0MzcyIiwicm9sZSI6ImN1c3RvbWVyIiwiaWF0IjoxNzg5MDIyNzE1LCJleHAiOjE4MjA1NTg3MTV9.FDOBFKHsk-_d2EIb5Z9HCcpenuj9fIc--xB0Mu7R6xA";
-
       const response = await axios.post(url, requestDataa, {
         headers: {
           "Content-Type": "application/json",
-          authorization: token,
         },
       });
 
