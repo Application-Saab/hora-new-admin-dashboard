@@ -47,6 +47,7 @@ const [order, setOrder] = useState(null);
   const [actionPopupChefOrder_Id, setActionPopupChefOrder_Id] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedPreassignedSupplier, setSelectedPreassignedSupplier] = useState({});
+  console.log('%c [ selectedPreassignedSupplier ]', 'font-size:13px; background:pink; color:#bf2c9f;', selectedPreassignedSupplier)
   const [preAssignedSuppliers, setPreAssignedSuppliers] = useState([]);
   const [showPreAssginedPopup, setShowPreAssginedPopup] = useState(false);
   const [preAssignedLoading, setPreAssignedLoading] = useState(false);
