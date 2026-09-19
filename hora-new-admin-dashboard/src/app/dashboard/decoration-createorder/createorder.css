@@ -844,3 +844,8 @@ gap: 5px;
 .summary-list .summary-row:last-child {
   border-bottom: none;
 }
+.createOrderBtn-container{
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}

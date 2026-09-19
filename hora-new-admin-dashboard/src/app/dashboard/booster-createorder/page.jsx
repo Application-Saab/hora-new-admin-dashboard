@@ -279,7 +279,7 @@ const AddDecOrder = () => {
   };
 
   const [lloading, setlLoading] = useState(false);
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, isEmergency = false) => {
     e.preventDefault();
     setlLoading(true);
 
@@ -307,9 +307,12 @@ const AddDecOrder = () => {
       balance_amount: balanceamount,
       items: [product._id],
       decoration_comments: comment,
-      status: 1,
+      status: isEmergency ? 0 : 1,
       order_taken_by: orderTakenBy,
       eventName: selectedEvent,
+      isPaymentDone: !isEmergency,
+      isEmergencyOrder: isEmergency,
+      order_status: isEmergency ? 7 : 0,
     };
 
     try {
@@ -691,16 +694,31 @@ Order Taken By: ${orderTakenBy}
                 placeholder="Enter your comment."
               />
             </div>
-
+            <div className="createOrderBtn-container">
+            <div style={{ flex: "1" }}>
             {!isOrderCreated && (
               <button
                 className="orderCheck-btn"
-                type="submit"
                 disabled={lloading}
+                onClick={handleSubmit}
               >
                 {lloading ? "Creating Order..." : "Create Order"}
               </button>
             )}
+            </div>
+              <div style={{ flex: "1" }}>
+                <button
+                  className="createOrder-btn"
+                  type="button"
+                  onClick={(e) => {
+                    handleSubmit(e, true);
+                  }}
+                  disabled={lloading}
+                >
+                  {lloading ? "Creating Emergency Order..." : "Create Emergency Order"}
+                </button>
+              </div>
+            </div>
           </div>
         ) : (
           <>

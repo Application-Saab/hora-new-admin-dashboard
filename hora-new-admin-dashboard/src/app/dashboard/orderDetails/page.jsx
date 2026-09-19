@@ -46,6 +46,10 @@ const [reviewValue, setReviewValue] = useState("");
 const [order, setOrder] = useState(null);
   const [actionPopupChefOrder_Id, setActionPopupChefOrder_Id] = useState("");
   const [loading, setLoading] = useState(false);
+  const [selectedPreassignedSupplier, setSelectedPreassignedSupplier] = useState({});
+  const [preAssignedSuppliers, setPreAssignedSuppliers] = useState([]);
+  const [showPreAssginedPopup, setShowPreAssginedPopup] = useState(false);
+  const [preAssignedLoading, setPreAssignedLoading] = useState(false);
 
   // supplier
   const [isSupplierAssigned, setIsSupplierAssigned] = useState(false);
@@ -215,6 +219,8 @@ const [order, setOrder] = useState(null);
         return { status: "", className: "status-empty" };
       case 6:
         return { status: "Expired", className: "status-expired" };
+      case 7:
+        return { status: "Emeregency", className: "status-expired" };
       default:
         return { status: "Unknown", className: "status-unknown" };
     }
@@ -262,14 +268,17 @@ const [order, setOrder] = useState(null);
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ _id: orderId, status: status }),
+          body: JSON.stringify({ _id: orderId, status: status, isPaymentDone: true }),
         }
       );
 
-      // const data = await response.json();
+      const data = await response.json();
+
+      console.log(response)
 
       if (response.ok) {
         fetchOrders();
+        alert(data?.message)
       } else {
         console.error("Failed to update order status.");
       }
@@ -322,6 +331,60 @@ const [order, setOrder] = useState(null);
     console.log(order, "orderrr");
     setSelectedSupplierOrder(order);
     setIsModalOpen(true);
+  };
+
+  const openPreAssignedPopup = async (order) => {
+    try {
+      setSelectedPreassignedSupplier(order);
+      setPreAssignedSuppliers([]);
+      setPreAssignedLoading(true);
+      setShowPreAssginedPopup(true);
+
+      const processedBy = order?.processedBy || [];
+
+      const supplierIds = processedBy
+        .map((item) => item.id)
+        .filter(Boolean);
+
+      if (supplierIds.length === 0) {
+        setPreAssignedLoading(false);
+        return;
+      }
+
+      const response = await fetch(`${BASE_URL}/api/admin/getMultipleUserDetails`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ids: supplierIds,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!result.error) {
+        const supplierData = result.data || [];
+
+        const finalData = supplierData.map((supplier) => {
+          const processedData = processedBy.find(
+            (item) => item.id === supplier._id
+          );
+
+          return {
+            ...supplier,
+            action: processedData?.action || "",
+            responseTime: processedData?.time || "",
+          };
+        });
+
+        setPreAssignedSuppliers(finalData);
+      }
+    } catch (error) {
+      console.error("Error fetching pre-assigned suppliers:", error);
+    } finally {
+      setPreAssignedLoading(false);
+    }
   };
 
   // const CloseSupplierAssignPopup = () => {
@@ -968,6 +1031,7 @@ useEffect(() => {
                       <option value="3">Completed</option>
                       <option value="6">Expired</option>
                       <option value="4">Cancelled</option>
+                      <option value="7">Emergency</option>
                     </select>
                   </span>
                 </th>
@@ -990,6 +1054,7 @@ useEffect(() => {
                 <th>Rating</th>
                 <th>Extra Pay</th>
                 <th>Edit Order</th>
+                <th>Payment Status</th>
                 <th>Add EventName</th>
                 <th>Wonderland Event Name</th>
                 <th>Add Order Image</th>
@@ -1040,7 +1105,14 @@ useEffect(() => {
                             ✏️
                           </span>
                         </>
-                      ) : (
+                      ) : (order.isEmergencyOrder === true && order.processedBy.length > 0)  ? (
+                      <button className="assigningBtn pre-assigned" 
+                      onClick={() => openPreAssignedPopup(order)} >
+                         Pre Assigned
+                          </button>
+                          ) 
+                          :
+                          (
                         <>
                           <button
                             className="assigningBtn not-assigned"
@@ -1234,6 +1306,25 @@ useEffect(() => {
                           </button>
                         )}
                     </td>
+                    <th style={{ textAlign: "center" }}>
+                      {order?.isEmergencyOrder ? (
+                        <span
+                          style={{
+                            display: "inline-block",
+                            padding: "8px 16px",
+                            borderRadius: "20px",
+                            backgroundColor: order?.isPaymentDone ? "#dcfce7" : "#fff3cd",
+                            color: order?.isPaymentDone ? "#16a34a" : "#d97706",
+                            fontWeight: "600",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {order?.isPaymentDone ? "Paid" : "Pending"}
+                        </span>
+                      ) : (
+                        "-"
+                      )}
+                    </th>
                     <td style={{ padding: "10px" }}>
                       {/* <button
                         onClick={() => handleOpen(order._id)}
@@ -2265,6 +2356,78 @@ const filledCountForCounter = trueDynamicApiKeys.filter((linkType) => {
     </div>
   </div>
 )}
+      <CommonPopup
+        isOpen={showPreAssginedPopup}
+        onClose={() => {
+          setShowPreAssginedPopup(false);
+          setSelectedPreassignedSupplier({});
+          setPreAssignedSuppliers([]);
+        }}
+        heading="Pre Assigned Suppliers"
+        mainBtnVisible={false}
+        popupBody={
+          <div>
+            {preAssignedLoading ? (
+              <div style={{ textAlign: "center", padding: "20px" }}>
+                Loading suppliers...
+              </div>
+            ) : preAssignedSuppliers.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "20px" }}>
+                No supplier response found.
+              </div>
+            ) : (
+              preAssignedSuppliers.map((supplier) => (
+                <div
+                  key={supplier._id}
+                  style={{
+                    padding: "15px 0",
+                    borderBottom: "1px solid #ddd",
+                  }}
+                >
+                  <div style={{ marginBottom: "6px" }}>
+                    <strong>
+                      Name: {supplier.name ||
+                        `${supplier.firstName || ""} ${supplier.lastName || ""
+                          }`.trim() ||
+                        "N/A"}
+                    </strong>
+                  </div>
+
+                  <div style={{ marginBottom: "4px" }}>
+                    City: {supplier.city || "N/A"}
+                  </div>
+
+                  <div style={{ marginBottom: "4px" }}>
+                    Number:{" "}
+                    {supplier.phone ||  "N/A"}
+                  </div>
+
+                  <div style={{ marginBottom: "4px" }}>
+                    Response:{" "}
+                    <strong>
+                      {supplier.action === "yes"
+                        ? "Yes"
+                        : supplier.action === "no"
+                          ? "No"
+                          : "N/A"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    Replied At:{" "}
+                    {supplier.responseTime
+                      ? new Date(supplier.responseTime).toLocaleString("en-IN", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })
+                      : "N/A"}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        }
+      />
 
     </div>
   );

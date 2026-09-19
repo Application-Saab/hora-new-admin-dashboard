@@ -82,7 +82,6 @@ const AddDecOrder = () => {
     fromInternational: "NO",
     orderId: "",
   });
-
   const [productSuggestions, setProductSuggestions] = useState([]);
   const [showProductDropdown, setShowProductDropdown] = useState(false);
   const [isProductSelected, setIsProductSelected] = useState(false);
@@ -373,7 +372,7 @@ const AddDecOrder = () => {
   };
 
   const [lloading, setlLoading] = useState(false);
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, isEmergency = false) => {
     e.preventDefault();
     setlLoading(true);
 
@@ -430,11 +429,14 @@ const AddDecOrder = () => {
       order_type: true,
       items: [product._id],
       decoration_comments: comment,
-      status: 1,
+      status: isEmergency ? 0 : 1, 
       balance_amount: balanceamount,
       order_taken_by: orderTakenBy,
       eventName: selectedEvent,
       customInclusion: customInclusion.filter((item) => item.trim() !== ""),
+      isPaymentDone: !isEmergency,
+      isEmergencyOrder: isEmergency,
+      order_status: isEmergency ? 7 : 0,
     };
 
     try {
@@ -1228,16 +1230,34 @@ ${inclusionText}
               </div>
               )}
 
+              <div className="createOrderBtn-container">
+                <div style={{flex:"1"}}>
+              {!isOrderCreated && (
+                <button
+                  className="createOrder-btn"
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={lloading}
+                >
+                  {lloading ? "Creating Order..." : "Create Order"}
+                </button>
+              )}
+                </div>
+                <div style={{ flex: "1" }}>
             {!isOrderCreated && (
               <button
                 className="createOrder-btn"
                 type="button"
-                onClick={handleSubmit}
+                  onClick={(e) => {
+                    handleSubmit(e, true);
+                  }}
                 disabled={lloading}
               >
-                {lloading ? "Creating Order..." : "Create Order"}
+                {lloading ? "Creating Emergency Order..." : "Create Emergency Order"}
               </button>
             )}
+                </div>
+            </div>
           </div>
         ) : (
           <>

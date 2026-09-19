@@ -190,6 +190,8 @@ const OrderDashboard = () => {
         return { status: "", className: "status-empty" };
       case 6:
         return { status: "Expired", className: "status-expired" };
+      case 7:
+        return { status: "Emeregency", className: "status-expired" };
       default:
         return { status: "Unknown", className: "status-unknown" };
     }
