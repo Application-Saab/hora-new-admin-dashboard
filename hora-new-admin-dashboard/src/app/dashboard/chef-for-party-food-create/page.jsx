@@ -431,7 +431,7 @@ const ChefForPartyCreateOrderComponent = () => {
   };
 
   const [lloading, setlLoading] = useState(false);
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, isEmergency = false) => {
     e.preventDefault();
     setlLoading(true);
     console.log("handlesubmit");
