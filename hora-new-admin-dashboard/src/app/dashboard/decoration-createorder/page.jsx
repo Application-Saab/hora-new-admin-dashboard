@@ -48,6 +48,7 @@ const AddDecOrder = () => {
   const [products, setProducts] = useState([{ name: "", price: "" }]);
   const [comment, setComment] = useState("");
   const [dishNameError, setDishNameError] = useState("");
+  const [formErrors, setFormErrors] = useState({});
   const [commentFields, setCommentFields] = useState([0]);
   const [inclusionFields, setInclusionFields] = useState([0]);
   const [customInclusion, setCustomInclusion] = useState([""]);
@@ -248,6 +249,11 @@ const AddDecOrder = () => {
     setIsContinueClicked(false);
     setProductSuggestions([]);
     setDishNameError("");
+
+    setFormErrors((prev) => ({
+      ...prev,
+      dishName: "",
+    }));
   };
 
   const handleProductInputClick = () => {
@@ -370,6 +376,50 @@ const AddDecOrder = () => {
   const [lloading, setlLoading] = useState(false);
   const handleSubmit = async (e, isEmergency = false) => {
     e.preventDefault();
+    const errors = {};
+
+    if (!dishName.trim() || !product) {
+      errors.dishName = "Please select a product";
+    }
+
+    if (!customerNumber.trim() || customerNumber.length !== 10) {
+      errors.customerNumber = "Please enter 10 digit customer number";
+    }
+
+    if (!orderTakenBy.trim()) {
+      errors.orderTakenBy = "Please select order taken by";
+    }
+
+    if (!date) {
+      errors.date = "Please select date";
+    }
+
+    if (!timeSlot) {
+      errors.timeSlot = "Please select time slot";
+    }
+
+    if (!city) {
+      errors.city = "Please select city";
+    }
+
+    if (!pincode.trim()) {
+      errors.pincode = "Please enter pincode";
+    }
+
+    if (!address.trim()) {
+      errors.address = "Please enter address";
+    }
+
+    if (!totalamount.trim()) {
+      errors.totalamount = "Please enter total amount";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
+    setFormErrors({});
     setlLoading(true);
 
     const add_on = Object.keys(selectedItems).map((id) => {
@@ -628,15 +678,13 @@ ${inclusionText}
   }, [addonIds]);
 
   return (
-    <div
-    style={{display:"flex", gap:"10px"}}
-    >
-    <div className="createDecor-container">
-      <h2 className="createOrder pageHeading">Create Decoration Order</h2>
-      <form className="orderCreation form" onSubmit={handleSubmit}>
-        {/* product check */}
-        <div className="top-product-details">
-          <div>
+    <div style={{ display: "flex", gap: "10px" }}>
+      <div className="createDecor-container">
+        <h2 className="createOrder pageHeading">Create Decoration Order</h2>
+        <form className="orderCreation form" onSubmit={handleSubmit}>
+          {/* product check */}
+          <div className="top-product-details">
+            <div>
               <div className="product-search-wrapper">
                 <label htmlFor="dishName">Product Name *</label>
 
@@ -652,18 +700,18 @@ ${inclusionText}
                 />
 
                 {/* Continue button */}
-                <span style={{marginLeft:"10px"}}>
-                {!isProductSelected && (
-                  <button
-                    type="button"
-                    className="orderCheck-btn"
-                    onClick={fetchProducts}
-                    disabled={loading || !dishName.trim()}
-                    style={{ marginTop: "10px" }}
-                  >
-                    {loading ? "Searching..." : "Continue"}
-                  </button>
-                )}
+                <span style={{ marginLeft: "10px" }}>
+                  {!isProductSelected && (
+                    <button
+                      type="button"
+                      className="orderCheck-btn"
+                      onClick={fetchProducts}
+                      disabled={loading || !dishName.trim()}
+                      style={{ marginTop: "10px" }}
+                    >
+                      {loading ? "Searching..." : "Continue"}
+                    </button>
+                  )}
                 </span>
 
                 {dishNameError && (
@@ -725,27 +773,38 @@ ${inclusionText}
                 )}
               </div>
 
-            {showProductDetails && product && (
-              <>
-                <div style={{ display: "flex", gap: "10px" }}>
-                  <div>
-                    {/* costumer chcek======================== */}
-                    <label htmlFor="customerNumber">Customer Number*</label>
-                    <input
-                      type="text"
-                      id="customerNumber"
-                      className="number-input"
-                      value={customerNumber}
-                      onInput={(e) =>
-                        setCustomerNumber(e.target.value.replace(/\D/g, ""))
-                      } // Remove non-digits as the user types
-                      placeholder="Customer Number"
-                      required
-                      maxLength={10} // Limit to 10 digits
-                      pattern="\d{10}" // Enforce exactly 10 digits
-                      inputMode="numeric" // Optimize for numeric input on mobile devices
-                    />
-                  </div>
+              {showProductDetails && product && (
+                <>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <div>
+                      {/* costumer chcek======================== */}
+                      <label htmlFor="customerNumber">Customer Number*</label>
+                      <input
+                        type="text"
+                        id="customerNumber"
+                        className="number-input"
+                        value={customerNumber}
+                        onInput={(e) => {
+                          const value = e.target.value.replace(/\D/g, "");
+                          setCustomerNumber(value);
+
+                          setFormErrors((prev) => ({
+                            ...prev,
+                            customerNumber: "",
+                          }));
+                        }} // Remove non-digits as the user types
+                        placeholder="Customer Number"
+                        required
+                        maxLength={10} // Limit to 10 digits
+                        pattern="\d{10}" // Enforce exactly 10 digits
+                        inputMode="numeric" // Optimize for numeric input on mobile devices
+                      />
+                      {formErrors.customerNumber && (
+                        <p style={{ color: "red", marginTop: "5px" }}>
+                          {formErrors.customerNumber}
+                        </p>
+                      )}
+                    </div>
 
                     <div>
                       <label htmlFor="orderTakenBy">Order Taken By*</label>
@@ -753,119 +812,148 @@ ${inclusionText}
                       <SearchWithDropDown
                         options={teams?.map((team) => team.name) || []}
                         selectedValue={orderTakenBy}
-                        onChange={(value) => setOrderTakenBy(value)}
+                        onChange={(value) => {
+                          setOrderTakenBy(value);
+
+                          setFormErrors((prev) => ({
+                            ...prev,
+                            orderTakenBy: "",
+                          }));
+                        }}
                         placeholder="Search Team..."
                       />
+                      {formErrors.orderTakenBy && (
+                        <p style={{ color: "red", marginTop: "5px" }}>
+                          {formErrors.orderTakenBy}
+                        </p>
+                      )}
                     </div>
-                </div>
-                <div>
-                  {message !== "Customer exists." ?
-                    <div>
-                      <button
-                        className="orderCheck-btn"
-                        onClick={handleCheckCustomer}
-                        disabled={loading || customerNumber.length !== 10}
-                      >
-                        {loading ? "Checking..." : "Check Customer"}
-                      </button>
-                      {<p style={{ color: messageColor }}>{message}</p>}
-                    </div>
-                    :
-                    <div></div>
-                  }
-
-                </div>
-                  {message == "Customer exists." &&
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                  }}
-                >
-
-
-                  <div >
-                    <label htmlFor="date">Date *</label>
-                    <input
-                      type="date"
-                      id="date"
-                      value={date}
-                      onChange={(e) => setDate(e.target.value)}
-                      // min={new Date().toISOString().split("T")[0]} // Directly setting min date is this need?
-                      required
-                    />
                   </div>
-
-                  <div >
-                    <label
-                      htmlFor="timeSlot"
+                  <div>
+                    {message !== "Customer exists." ? (
+                      <div>
+                        <button
+                          className="orderCheck-btn"
+                          onClick={handleCheckCustomer}
+                          disabled={loading || customerNumber.length !== 10}
+                        >
+                          {loading ? "Checking..." : "Check Customer"}
+                        </button>
+                        {<p style={{ color: messageColor }}>{message}</p>}
+                      </div>
+                    ) : (
+                      <div></div>
+                    )}
+                  </div>
+                  {message == "Customer exists." && (
+                    <div
                       style={{
-                        display: "block",
-                        marginBottom: "10px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
                       }}
                     >
-                      Time Slot*
-                    </label>
-                    <Select
-                      options={timeSlotOptions}
-                      value={timeSlot}
-                      onChange={(selectedOption) => setTimeSlot(selectedOption)}
-                      placeholder="Select Time Slot"
-                      required
-                    />
-                  </div>
-                 
+                      <div>
+                        <label htmlFor="date">Date *</label>
+                        <input
+                          type="date"
+                          id="date"
+                          value={date}
+                          onChange={(e) => {
+                            setDate(e.target.value);
+
+                            setFormErrors((prev) => ({
+                              ...prev,
+                              date: "",
+                            }));
+                          }}
+                          // min={new Date().toISOString().split("T")[0]} // Directly setting min date is this need?
+                          required
+                        />
+                        {formErrors.date && (
+                          <p style={{ color: "red", marginTop: "5px" }}>
+                            {formErrors.date}
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="timeSlot"
+                          style={{
+                            display: "block",
+                            marginBottom: "10px",
+                          }}
+                        >
+                          Time Slot*
+                        </label>
+                        <Select
+                          options={timeSlotOptions}
+                          value={timeSlot}
+                          onChange={(selectedOption) => {
+                            setTimeSlot(selectedOption);
+
+                            setFormErrors((prev) => ({
+                              ...prev,
+                              timeSlot: "",
+                            }));
+                          }}
+                          placeholder="Select Time Slot"
+                          required
+                        />
+                        {formErrors.timeSlot && (
+                          <p style={{ color: "red", marginTop: "5px" }}>
+                            {formErrors.timeSlot}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+            {showProductDetails && (
+              <div className="product-image">
+                <div>
+                  <Image
+                    src={`${BASE_URL}/api/uploads/${product.featured_image}`}
+                    alt="Product"
+                    width={200}
+                    height={200}
+                    onError={(e) => (e.target.style.display = "none")}
+                  />
                 </div>
-}
-              </>
+                <div style={{ fontSize: "18px" }}>₹ {productprice}</div>
+              </div>
             )}
           </div>
-          {showProductDetails &&
-            <div className="product-image">
-              <div>
-                <Image
-                  src={`${BASE_URL}/api/uploads/${product.featured_image}`}
-                  alt="Product"
-                  width={200}
-                  height={200}
-                  onError={(e) => (e.target.style.display = "none")}
+
+          {/* product details =================================================*/}
+
+          {message === "Customer exists." && (
+            <div
+              className="ProductInclusions"
+              style={{
+                border: "1px solid #ccc",
+                marginTop: "10px",
+                padding: "10px",
+                borderRadius: "6px",
+              }}
+            >
+              <label>Product Inclusions:</label>
+
+              {inclusion?.length > 0 ? (
+                <div
+                  style={{ marginTop: "8px" }}
+                  dangerouslySetInnerHTML={{
+                    __html: inclusion.join(""),
+                  }}
                 />
-              </div>
-              <div style={{ fontSize: "18px" }}>₹ {productprice}</div>
-            </div>
-          }
-        </div>
-
-        {/* product details =================================================*/}
-
-        {message === "Customer exists." && (
-          <div
-            className="ProductInclusions"
-            style={{
-              border: "1px solid #ccc",
-              marginTop: "10px",
-              padding: "10px",
-              borderRadius: "6px",
-            }}
-          >
-            <label>Product Inclusions:</label>
-
-            {inclusion?.length > 0 ? (
-              <div
-                style={{ marginTop: "8px" }}
-                dangerouslySetInnerHTML={{
-                  __html: inclusion.join(""),
-                }}
-              />
-            ) : (
-              <div style={{ marginTop: "8px" }}>
-                No inclusions available
-              </div>
-            )}
+              ) : (
+                <div style={{ marginTop: "8px" }}>No inclusions available</div>
+              )}
               {customInclusion?.some((item) => item.trim() !== "") && (
                 <div style={{ marginTop: "15px" }}>
-
                   <ul style={{ paddingLeft: "22px" }}>
                     {customInclusion
                       .filter((item) => item.trim() !== "")
@@ -877,135 +965,167 @@ ${inclusionText}
                   </ul>
                 </div>
               )}
-          </div>
-        )}
+            </div>
+          )}
           {message === "Customer exists." && (
-          <div
-            className="amount-box"
-          >
-            <div className="city-box" style={{ flex: 1 }}>
-              <label htmlFor="city">
-                City *
-              </label>
-              <select
-                id="city"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                required
-                style={{
-                  width: "100%",
-                  padding: "10px",
-                  borderRadius: "5px",
-                  fontSize: "16px",
-                  transition: "border-color 0.3s",
-                }}
-              >
-                <option value="" style={{ color: "#aaa" }}>
-                  Select City
-                </option>
-                <option value="Bangalore">Bangalore</option>
-                <option value="Delhi">Delhi</option>
-                <option value="Mumbai">Mumbai</option>
-                <option value="Hyderabad">Hyderabad</option>
-              </select>
+            <div className="amount-box">
+              <div className="city-box" style={{ flex: 1 }}>
+                <label htmlFor="city">City *</label>
+                <select
+                  id="city"
+                  value={city}
+                  onChange={(e) => {
+                    setCity(e.target.value);
+
+                    setFormErrors((prev) => ({
+                      ...prev,
+                      city: "",
+                    }));
+                  }}
+                  required
+                  style={{
+                    width: "100%",
+                    padding: "10px",
+                    borderRadius: "5px",
+                    fontSize: "16px",
+                    transition: "border-color 0.3s",
+                  }}
+                >
+                  <option value="" style={{ color: "#aaa" }}>
+                    Select City
+                  </option>
+                  <option value="Bangalore">Bangalore</option>
+                  <option value="Delhi">Delhi</option>
+                  <option value="Mumbai">Mumbai</option>
+                  <option value="Hyderabad">Hyderabad</option>
+                </select>
+                {formErrors.city && (
+                  <p style={{ color: "red", marginTop: "5px" }}>
+                    {formErrors.city}
+                  </p>
+                )}
+              </div>
+              <div className="pincode-box" style={{ flex: 1 }}>
+                <label htmlFor="pincode">Pincode *</label>
+                <input
+                  type="text"
+                  id="pincode"
+                  value={pincode}
+                  style={{
+                    padding: "11px",
+                    borderRadius: "5px",
+                    fontSize: "16px",
+                    marginTop: "0px",
+                    width: "100%",
+                    boxSizing: "border-box",
+                  }}
+                  onChange={(e) => {
+                    setPincode(e.target.value);
+
+                    setFormErrors((prev) => ({
+                      ...prev,
+                      pincode: "",
+                    }));
+                  }}
+                />
+
+                {formErrors.pincode && (
+                  <p style={{ color: "red", marginTop: "5px" }}>
+                    {formErrors.pincode}
+                  </p>
+                )}
+                <p
+                  style={{
+                    fontWeight: "bold",
+                    marginTop: "5px",
+                    marginBottom: "5px",
+                    fontSize: "15px",
+                    color: pincodeMessageColor,
+                  }}
+                >
+                  {pincodeMessage}
+                </p>
+              </div>
             </div>
-            <div className="pincode-box" style={{ flex: 1 }}>
-              <label htmlFor="pincode">Pincode *</label>
-              <input
-                type="text"
-                id="pincode"
-                value={pincode}
-                style={{
-                  padding: "11px",
-                  borderRadius: "5px",
-                  fontSize: "16px",
-                  marginTop: "0px",
-                  width: "100%",
-                  boxSizing: "border-box",
-                }}
-                onChange={(e) => setPincode(e.target.value)}
-              />
-              <p
-                style={{
-                  fontWeight: "bold",
-                  marginTop: "5px",
-                  marginBottom: "5px",
-                  fontSize: "15px",
-                  color: pincodeMessageColor,
-                }}
-              >
-                {pincodeMessage}
-              </p>
-            </div>
-          </div>
           )}
 
-        {/* order details ==========================.Customer does not exist */}
-        {message === "Customer exists." ? (
-          <div className="orderDeatils">
+          {/* order details ==========================.Customer does not exist */}
+          {message === "Customer exists." ? (
+            <div className="orderDeatils">
+              <div className="amount-box">
+                <div className="address-box">
+                  <label htmlFor="address">Address*</label>
+                  <textarea
+                    type="text"
+                    id="address"
+                    value={address}
+                    onChange={(e) => {
+                      setAddress(e.target.value);
 
-            <div className="amount-box">
-              <div className="address-box">
-                <label htmlFor="address">Address*</label>
-                <textarea
-                  type="text"
-                  id="address"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  placeholder="Address"
-                  required
-                />
+                      setFormErrors((prev) => ({
+                        ...prev,
+                        address: "",
+                      }));
+                    }}
+                    placeholder="Address"
+                    required
+                  />
+                  {formErrors.address && (
+                    <p style={{ color: "red", marginTop: "5px" }}>
+                      {formErrors.address}
+                    </p>
+                  )}
+                </div>
+                <div className="googleLocation-box">
+                  <label htmlFor="googleLocation">Google Location</label>
+                  <textarea
+                    type="text"
+                    id="googleLocation"
+                    value={googleLocation}
+                    onChange={(e) => setGoogleLocation(e.target.value)}
+                    placeholder="googleLocation"
+                  />
+                </div>
               </div>
-              <div className="googleLocation-box">
-                <label htmlFor="googleLocation">Google Location</label>
-                <textarea
-                  type="text"
-                  id="googleLocation"
-                  value={googleLocation}
-                  onChange={(e) => setGoogleLocation(e.target.value)}
-                  placeholder="googleLocation"
-                />
-              </div>
-            </div>
-            <div className="">
-              <label htmlFor="addOn">Add On</label>
+              <div className="">
+                <label htmlFor="addOn">Add On</label>
 
-              <div className="addon-form">
-                {products.map((product, index) => (
-                  <div className="addon-row" key={index}>
-                    <input
-                      type="text"
-                      className="addon-input name-input"
-                      placeholder="Name"
-                      value={product.name}
-                      onChange={(e) =>
-                        handleInputChange(index, "name", e.target.value)
-                      }
-                    />
-                    <input
-                      type="number"
-                      className="addon-input price-input"
-                      placeholder="Price"
-                      value={product.price}
-                      onChange={(e) =>
-                        handleInputChange(index, "price", e.target.value)
-                      }
-                    />
-                    <button
-                      type="button"
-                      className="add-new-btn"
-                      onClick={addProduct}
-                    >
-                      Add
-                    </button>
-                  </div>
-                ))}
+                <div className="addon-form">
+                  {products.map((product, index) => (
+                    <div className="addon-row" key={index}>
+                      <input
+                        type="text"
+                        className="addon-input name-input"
+                        placeholder="Name"
+                        value={product.name}
+                        onChange={(e) =>
+                          handleInputChange(index, "name", e.target.value)
+                        }
+                      />
+                      <input
+                        type="number"
+                        className="addon-input price-input"
+                        placeholder="Price"
+                        value={product.price}
+                        onChange={(e) =>
+                          handleInputChange(index, "price", e.target.value)
+                        }
+                      />
+                      <button
+                        type="button"
+                        className="add-new-btn"
+                        onClick={addProduct}
+                      >
+                        Add
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div className="addon-heading">Select Addon Products</div>
+              <div className="addon-heading">Select Addon Products</div>
 
-            <div className="dropdown-container">
-              {/* <button
+              <div className="dropdown-container">
+                {/* <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="selectAddon-btn"
               >
@@ -1020,101 +1140,102 @@ ${inclusionText}
                 </div>
               </button> */}
 
-              <div className="addon-menu">
+                <div className="addon-menu">
+                  <div className="addon-grid">
+                    {addonData &&
+                      addonData.map((item) => {
+                        const selected = selectedItems[item._id];
 
-                <div className="addon-grid">
-                  {addonData &&
-                    addonData.map((item) => {
-                      const selected = selectedItems[item._id];
-
-                      return (
-                        <div className="item-row" key={item._id}>
-
-                          {/* PRODUCT SECTION */}
-                          <div className="left-section">
-
-                            <input
-                              type="checkbox"
-                              checked={!!selected}
-                              onChange={() => toggleItem(item._id)}
-                              onClick={(e) => e.stopPropagation()}
-                            />
-
-                            <div
-                              className="addon-product-clickable"
-                              onClick={() => toggleItem(item._id)}
-                            >
-                              <img
-                                src={`${BASE_URL}/api/uploads/compressed_webp/${item.image}`}
-                                alt={item.title}
-                                className="addon-product-image"
+                        return (
+                          <div className="item-row" key={item._id}>
+                            {/* PRODUCT SECTION */}
+                            <div className="left-section">
+                              <input
+                                type="checkbox"
+                                checked={!!selected}
+                                onChange={() => toggleItem(item._id)}
+                                onClick={(e) => e.stopPropagation()}
                               />
 
-                              <div className="addon-product-info">
-                                <div className="item-title">
-                                  {item.title}
-                                </div>
+                              <div
+                                className="addon-product-clickable"
+                                onClick={() => toggleItem(item._id)}
+                              >
+                                <img
+                                  src={`${BASE_URL}/api/uploads/compressed_webp/${item.image}`}
+                                  alt={item.title}
+                                  className="addon-product-image"
+                                />
 
-                                <div className="item-price">
-                                  ₹{item.price}
+                                <div className="addon-product-info">
+                                  <div className="item-title">{item.title}</div>
+
+                                  <div className="item-price">
+                                    ₹{item.price}
+                                  </div>
                                 </div>
                               </div>
                             </div>
 
+                            {/* QUANTITY SECTION */}
+                            {selected && (
+                              <div className="right-section">
+                                <button
+                                  type="button"
+                                  onClick={() => changeQuantity(item._id, -1)}
+                                  className="qty-btn"
+                                >
+                                  −
+                                </button>
+
+                                <span className="qty">{selected.quantity}</span>
+
+                                <button
+                                  type="button"
+                                  onClick={() => changeQuantity(item._id, 1)}
+                                  className="qty-btn"
+                                >
+                                  +
+                                </button>
+
+                                <div className="total-price">
+                                  ₹{item.price * selected.quantity}
+                                </div>
+                              </div>
+                            )}
                           </div>
-
-                          {/* QUANTITY SECTION */}
-                          {selected && (
-                            <div className="right-section">
-
-                              <button
-                                type="button"
-                                onClick={() => changeQuantity(item._id, -1)}
-                                className="qty-btn"
-                              >
-                                −
-                              </button>
-
-                              <span className="qty">
-                                {selected.quantity}
-                              </span>
-
-                              <button
-                                type="button"
-                                onClick={() => changeQuantity(item._id, 1)}
-                                className="qty-btn"
-                              >
-                                +
-                              </button>
-
-                              <div className="total-price">
-                                ₹{item.price * selected.quantity}
-                              </div>
-
-                            </div>
-                          )}
-
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="amount-box">
-              <div>
-                <label htmlFor="totalamount">Total Amount*</label>
-                <input
-                  type="text"
-                  id="totalamount"
-                  value={totalamount}
-                  onChange={(e) => setTotalAmount(e.target.value)}
-                  placeholder="Total Amount"
-                  required
-                />
-              </div>
+              <div className="amount-box">
                 <div>
-                  <label htmlFor="discountamount">Discount Amount*</label>
+                  <label htmlFor="totalamount">Total Amount*</label>
+                  <input
+                    type="text"
+                    id="totalamount"
+                    value={totalamount}
+                    onChange={(e) => {
+                      setTotalAmount(e.target.value);
+
+                      setFormErrors((prev) => ({
+                        ...prev,
+                        totalamount: "",
+                      }));
+                    }}
+                    placeholder="Total Amount"
+                    required
+                  />
+                  {formErrors.totalamount && (
+                    <p style={{ color: "red", marginTop: "5px" }}>
+                      {formErrors.totalamount}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label htmlFor="discountamount">Discount Amount</label>
                   <input
                     type="text"
                     id="discountamount"
@@ -1124,41 +1245,39 @@ ${inclusionText}
                     required
                   />
                 </div>
-              <div>
-                <label htmlFor="advanceamount">Advance Amount</label>
-                <input
-                  type="text"
-                  id="advanceamount"
-                  value={advanceamount}
-                  onChange={(e) => setAdvanceAmount(e.target.value)}
-                  placeholder="Advance Amount"
-                />
+                <div>
+                  <label htmlFor="advanceamount">Advance Amount</label>
+                  <input
+                    type="text"
+                    id="advanceamount"
+                    value={advanceamount}
+                    onChange={(e) => setAdvanceAmount(e.target.value)}
+                    placeholder="Advance Amount"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="balanceamount">Balance Amount</label>
+                  <input
+                    type="text"
+                    id="balanceamount"
+                    value={balanceamount}
+                    placeholder="Balance Amount"
+                    disabled
+                  />
+                </div>
               </div>
-              <div>
-                <label htmlFor="balanceamount">Balance Amount</label>
-                <input
-                  type="text"
-                  id="balanceamount"
-                  value={balanceamount}
-                  placeholder="Balance Amount"
-                  disabled
-                />
-              </div>
-                
 
-            </div>
-
-            <div className="amount-box">
-              <div>
-                <label htmlFor="wonderlandevent">Wonderland Occasion</label>
-                <input
-                  type="text"
-                  id="wonderlandevent"
-                  value={wonderlandevent}
-                  onChange={(e) => setWonderlandEvent(e.target.value)}
-                  placeholder="Wonderland Occasion"
-                />
-              </div>
+              <div className="amount-box">
+                <div>
+                  <label htmlFor="wonderlandevent">Wonderland Occasion</label>
+                  <input
+                    type="text"
+                    id="wonderlandevent"
+                    value={wonderlandevent}
+                    onChange={(e) => setWonderlandEvent(e.target.value)}
+                    placeholder="Wonderland Occasion"
+                  />
+                </div>
                 <div className="event-box" style={{ flex: 1 }}>
                   <label htmlFor="pincode">Add Event</label>
                   <SearchWithDropDown
@@ -1168,55 +1287,29 @@ ${inclusionText}
                     placeholder="Search event..."
                   />
                 </div>
-            </div>
-            <div className="checkoutInputType border-1 rounded-4 ">
-              <h4 className="comments-heading">Share your comments (if any)</h4>
-              <div className="addon-form">
-                {commentFields.map((field, index) => (
-                  <div key={index} className="comment-container">
-                    <input
-                      style={{ marginBottom: "8px" }}
-                      className="comment-input"
-                      value={comment.split("\n")[index] || ""}
-                      onChange={(e) => handleComment(index, e.target.value)}
-                      cols={90}
-                      rows={4}
-                      placeholder="Enter your comment."
-                    />
-
-                    <button
-                      style={{ marginBottom: "8px" }}
-                      type="button"
-                      className="add-new-btn"
-                      onClick={addCommentField}
-                    >
-                      Add New
-                    </button>
-                  </div>
-                ))}
               </div>
-            </div>
-              {product?.name === "Custom Product" && (
-              <div className="checkoutInputType border-1 rounded-4">
-                <h4 className="comments-heading">Add Inclusion</h4>
+              <div className="checkoutInputType border-1 rounded-4 ">
+                <h4 className="comments-heading">
+                  Share your comments (if any)
+                </h4>
                 <div className="addon-form">
-                  {inclusionFields.map((field, index) => (
+                  {commentFields.map((field, index) => (
                     <div key={index} className="comment-container">
                       <input
                         style={{ marginBottom: "8px" }}
                         className="comment-input"
-                        value={customInclusion[index] || ""}
-                        onChange={(e) =>
-                          handleInclusionChange(index, e.target.value)
-                        }
-                        placeholder="Enter your inclusion."
+                        value={comment.split("\n")[index] || ""}
+                        onChange={(e) => handleComment(index, e.target.value)}
+                        cols={90}
+                        rows={4}
+                        placeholder="Enter your comment."
                       />
 
                       <button
                         style={{ marginBottom: "8px" }}
                         type="button"
                         className="add-new-btn"
-                        onClick={addInclusionField}
+                        onClick={addCommentField}
                       >
                         Add New
                       </button>
@@ -1224,252 +1317,275 @@ ${inclusionText}
                   ))}
                 </div>
               </div>
+              {product?.name === "Custom Product" && (
+                <div className="checkoutInputType border-1 rounded-4">
+                  <h4 className="comments-heading">Add Inclusion</h4>
+                  <div className="addon-form">
+                    {inclusionFields.map((field, index) => (
+                      <div key={index} className="comment-container">
+                        <input
+                          style={{ marginBottom: "8px" }}
+                          className="comment-input"
+                          value={customInclusion[index] || ""}
+                          onChange={(e) =>
+                            handleInclusionChange(index, e.target.value)
+                          }
+                          placeholder="Enter your inclusion."
+                        />
+
+                        <button
+                          style={{ marginBottom: "8px" }}
+                          type="button"
+                          className="add-new-btn"
+                          onClick={addInclusionField}
+                        >
+                          Add New
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
 
               <div className="createOrderBtn-container">
-                <div style={{flex:"1"}}>
-              {!isOrderCreated && (
-                <button
-                  className="createOrder-btn"
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={lloading}
-                >
-                  {lloading ? "Creating Order..." : "Create Order"}
-                </button>
-              )}
+                <div style={{ flex: "1" }}>
+                  {!isOrderCreated && (
+                    <button
+                      className="createOrder-btn"
+                      type="button"
+                      onClick={handleSubmit}
+                      disabled={lloading}
+                    >
+                      {lloading ? "Creating Order..." : "Create Order"}
+                    </button>
+                  )}
                 </div>
                 <div style={{ flex: "1" }}>
-            {!isOrderCreated && (
-              <button
-                className="createOrder-btn"
-                type="button"
-                  onClick={(e) => {
-                    handleSubmit(e, true);
-                  }}
-                disabled={lloading}
-              >
-                {lloading ? "Creating Emergency Order..." : "Create Emergency Order"}
-              </button>
-            )}
+                  {!isOrderCreated && (
+                    <button
+                      className="createOrder-btn"
+                      type="button"
+                      onClick={(e) => {
+                        handleSubmit(e, true);
+                      }}
+                      disabled={lloading}
+                    >
+                      {lloading
+                        ? "Creating Emergency Order..."
+                        : "Create Emergency Order"}
+                    </button>
+                  )}
                 </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              {" "}
+              {lloading && <div className="loader">Loading...</div>}
+              {showPopup && (
+                <div className="popup">
+                  <h2>Add New Customer</h2>
+                  <label>
+                    Name:
+                    <input
+                      type="text"
+                      value={newCustomerName}
+                      onChange={(e) => setNewCustomerName(e.target.value)}
+                    />
+                  </label>
+                  <br />
+                  <label>
+                    Phone:
+                    <input
+                      type="text"
+                      id="customerNumber"
+                      value={newCustomerPhone}
+                      onInput={(e) =>
+                        setNewCustomerPhone(e.target.value.replace(/\D/g, ""))
+                      } // Remove non-digits as the user types
+                      placeholder="Customer Number"
+                      required
+                      maxLength={10} // Limit to 10 digits
+                      pattern="\d{10}" // Enforce exactly 10 digits
+                      inputMode="numeric" // Optimize for numeric input on mobile devices
+                    />
+                  </label>
+                  <br />
+                  <button onClick={handleAddCustomer}>Add Customer</button>
+                  <button onClick={() => setShowPopup(false)}>Cancel</button>
+                </div>
+              )}
+            </>
+          )}
+        </form>
+        {eventResponse?._id && (
+          <p
+            className="message"
+            style={{
+              color: messageColor,
+              textAlign: "center",
+              marginTop: "15px",
+            }}
+          >
+            Invite Link Admin :{" "}
+            <a
+              target="_blank"
+              href={`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}&frompanel=true`}
+            >{`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}&frompanel=true`}</a>
+          </p>
+        )}
+        {eventResponse?._id && (
+          <p
+            className="message"
+            style={{
+              color: messageColor,
+              textAlign: "center",
+              marginTop: "15px",
+            }}
+          >
+            Invite Link To Share :{" "}
+            <a
+              target="_blank"
+              href={`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}`}
+            >{`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}`}</a>
+          </p>
+        )}
+      </div>
+      {/* ================= ORDER SUMMARY ================= */}
+      {product && (
+        <div className="createDecor-container order-summary-container">
+          <div className="summary-header">
+            <h2 className="createOrder pageHeading">Order Summary</h2>
+          </div>
+
+          {/* Product */}
+          <div className="summary-product">
+            Product URL: {`${product?.productUrl || ""}`}
+            <div>
+              <div> Product Name: {product?.name || ""}</div>
+              <div> Product Price: ₹{product?.price || 0}</div>
             </div>
           </div>
-        ) : (
-          <>
-            {" "}
-            {lloading && <div className="loader">Loading...</div>}
-            {showPopup && (
-              <div className="popup">
-                <h2>Add New Customer</h2>
-                <label>
-                  Name:
-                  <input
-                    type="text"
-                    value={newCustomerName}
-                    onChange={(e) => setNewCustomerName(e.target.value)}
-                  />
-                </label>
-                <br />
-                <label>
-                  Phone:
-                  <input
-                    type="text"
-                    id="customerNumber"
-                    value={newCustomerPhone}
-                    onInput={(e) =>
-                      setNewCustomerPhone(e.target.value.replace(/\D/g, ""))
-                    } // Remove non-digits as the user types
-                    placeholder="Customer Number"
-                    required
-                    maxLength={10} // Limit to 10 digits
-                    pattern="\d{10}" // Enforce exactly 10 digits
-                    inputMode="numeric" // Optimize for numeric input on mobile devices
-                  />
-                </label>
-                <br />
-                <button onClick={handleAddCustomer}>Add Customer</button>
-                <button onClick={() => setShowPopup(false)}>Cancel</button>
-              </div>
-            )}
-          </>
-        )}
-      </form>
-      {eventResponse?._id && (
-        <p
-          className="message"
-          style={{
-            color: messageColor,
-            textAlign: "center",
-            marginTop: "15px",
-          }}
-        >
-          Invite Link Admin :{" "}
-          <a
-            target="_blank"
-            href={`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}&frompanel=true`}
-          >{`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}&frompanel=true`}</a>
-        </p>
-      )}
-      {eventResponse?._id && (
-        <p
-          className="message"
-          style={{
-            color: messageColor,
-            textAlign: "center",
-            marginTop: "15px",
-          }}
-        >
-          Invite Link To Share :{" "}
-          <a
-            target="_blank"
-            href={`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}`}
-          >{`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}`}</a>
-        </p>
-      )}
 
-    </div>
-      {/* ================= ORDER SUMMARY ================= */}
-      {product &&
-        <div className="createDecor-container order-summary-container">
+          <div className="summary-divider" />
 
-        <div className="summary-header">
-          <h2 className="createOrder pageHeading">Order Summary</h2>
-        </div>
+          {/* Customer Details */}
+          <div className="summary-section">
+            <h4>Customer Details: </h4>
 
-        {/* Product */}
-        <div className="summary-product">
-            Product URL: {" "}{`${product?.productUrl || ""}`}
+            <div className="summary-row">
+              <span>Contact Number: </span>
+              <span>{customerNumber || "—"}</span>
+            </div>
 
-          <div>
-            <div> Product Name: {" "}{product?.name || ""}</div>
-            <div> Product Price: {" "}₹{product?.price || 0}</div>
-          </div>
-        </div>
-
-        <div className="summary-divider" />
-
-        {/* Customer Details */}
-        <div className="summary-section">
-          <h4>Customer Details:{" "}</h4>
-
-          <div className="summary-row">
-            <span>Contact Number:{" "}</span>
-            <span>{customerNumber || "—"}</span>
+            <div className="summary-row">
+              <span>Order Taken By: </span>
+              <span>{orderTakenBy || "—"}</span>
+            </div>
           </div>
 
-          <div className="summary-row">
-            <span>Order Taken By:{" "}</span>
-            <span>{orderTakenBy || "—"}</span>
-          </div>
-        </div>
+          {/* Event Details */}
+          <div className="summary-section">
+            <h4>Event Details : </h4>
 
-        {/* Event Details */}
-        <div className="summary-section">
-          <h4>Event Details :{" "}</h4>
+            <div className="summary-row">
+              <span>Event Name : </span>
+              <span>{wonderlandevent || selectedEvent || "—"}</span>
+            </div>
 
+            <div className="summary-row">
+              <span>City : </span>
+              <span>{city || "—"}</span>
+            </div>
 
+            <div className="summary-row">
+              <span>Pincode : </span>
+              <span>{pincode || "—"}</span>
+            </div>
 
-          <div className="summary-row">
-            <span>Event Name :{" "}</span>
-            <span>{ wonderlandevent ||selectedEvent || "—"}</span>
-          </div>
+            <div className="summary-row">
+              <span>Date : </span>
+              <span>{date || "—"}</span>
+            </div>
 
+            <div className="summary-row">
+              <span>Time Slot : </span>
+              <span>{timeSlot?.label || "—"}</span>
+            </div>
 
-          <div className="summary-row">
-            <span>City :{" "}</span>
-            <span>{city || "—"}</span>
-          </div>
+            <div className="summary-row summary-column">
+              <span>Address : </span>
+              <span>{address || "—"}</span>
+            </div>
 
-
-          <div className="summary-row">
-            <span>Pincode :{" "}</span>
-            <span>{pincode || "—"}</span>
-          </div>
-
-          <div className="summary-row">
-            <span>Date :{" "}</span>
-            <span>{date || "—"}</span>
-          </div>
-
-          <div className="summary-row">
-            <span>Time Slot :{" "}</span>
-            <span>{timeSlot?.label || "—"}</span>
-          </div>
-
-          <div className="summary-row summary-column">
-            <span>Address :{" "}</span>
-            <span>{address || "—"}</span>
+            <div className="summary-row summary-column">
+              <span>Google Location : </span>
+              <span>{googleLocation || "—"}</span>
+            </div>
           </div>
 
-          <div className="summary-row summary-column">
-            <span>Google Location :{" "}</span>
-            <span>{googleLocation || "—"}</span>
-          </div>
-        </div>
-
-        {/* Selected Addons */}
+          {/* Selected Addons */}
           {(Object.keys(selectedItems || {}).length > 0 ||
             products?.some((item) => item.name)) && (
-              <div className="summary-section">
-                <h4>Add-ons :</h4>
+            <div className="summary-section">
+              <h4>Add-ons :</h4>
 
-                <ul style={{ margin: 0, paddingLeft: "20px" }}>
-                  {/* Selected Add-ons */}
-                  {Object.keys(selectedItems || {}).map((id) => {
-                    const item = addonData?.find(
-                      (i) => String(i._id) === String(id)
-                    );
+              <ul style={{ margin: 0, paddingLeft: "20px" }}>
+                {/* Selected Add-ons */}
+                {Object.keys(selectedItems || {}).map((id) => {
+                  const item = addonData?.find(
+                    (i) => String(i._id) === String(id),
+                  );
 
-                    if (!item) return null;
+                  if (!item) return null;
 
-                    const quantity = selectedItems[id]?.quantity || 1;
+                  const quantity = selectedItems[id]?.quantity || 1;
 
-                    return (
-                      <li key={`selected-${id}`} style={{ marginBottom: "8px" }}>
-                        <div>
-                          <span>{item.title}</span>
-                        </div>
+                  return (
+                    <li key={`selected-${id}`} style={{ marginBottom: "8px" }}>
+                      <div>
+                        <span>{item.title}</span>
+                      </div>
 
-                        <small>
-                          ₹{item.price} × {quantity} = ₹{item.price * quantity}
-                        </small>
-                      </li>
-                    );
-                  })}
+                      <small>
+                        ₹{item.price} × {quantity} = ₹{item.price * quantity}
+                      </small>
+                    </li>
+                  );
+                })}
 
-                  {/* Manually Added Add-ons */}
-                  {products
-                    ?.filter((item) => item.name)
-                    .map((item, index) => (
-                      <li key={`manual-${index}`} style={{ marginBottom: "8px" }}>
-                        <div>
-                          <span>{item.name}</span>
-                        </div>
+                {/* Manually Added Add-ons */}
+                {products
+                  ?.filter((item) => item.name)
+                  .map((item, index) => (
+                    <li key={`manual-${index}`} style={{ marginBottom: "8px" }}>
+                      <div>
+                        <span>{item.name}</span>
+                      </div>
 
-                        <small>
-                          ₹{item.price || 0} × 1 = ₹{item.price || 0}
-                        </small>
-                      </li>
-                    ))}
-                </ul>
-              </div>
-            )}
+                      <small>
+                        ₹{item.price || 0} × 1 = ₹{item.price || 0}
+                      </small>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          )}
 
-        {/* Inclusions */}
-        {product?.inclusion?.length > 0 && (
-          <div className="summary-section">
-            <h4>Inclusions :</h4>
+          {/* Inclusions */}
+          {product?.inclusion?.length > 0 && (
+            <div className="summary-section">
+              <h4>Inclusions :</h4>
 
-            <div className="summary-inclusions">
-              {product.inclusion.map((item, index) => (
-                <div
-                  key={index}
-                  dangerouslySetInnerHTML={{
-                    __html: item,
-                  }}
-                />
-              ))}
+              <div className="summary-inclusions">
+                {product.inclusion.map((item, index) => (
+                  <div
+                    key={index}
+                    dangerouslySetInnerHTML={{
+                      __html: item,
+                    }}
+                  />
+                ))}
                 {customInclusion
                   ?.filter((item) => item.trim() !== "")
                   .map((item, index) => (
@@ -1482,11 +1598,11 @@ ${inclusionText}
                       • {item}
                     </div>
                   ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Comment */}
+          {/* Comment */}
           {comment && (
             <div className="summary-section">
               <h4>Comments :</h4>
@@ -1504,44 +1620,34 @@ ${inclusionText}
             </div>
           )}
 
-        {/* Amount Summary */}
-        <div className="summary-amount">
+          {/* Amount Summary */}
+          <div className="summary-amount">
+            <h4>Amount Details</h4>
 
-          <h4>Amount Details</h4>
+            <div className="amount-summary-row">
+              <span>Total Amount :</span>
+              <span>₹{totalamount || 0}</span>
+            </div>
 
-          <div className="amount-summary-row">
-            <span>Total Amount :</span>
-            <span>
-              ₹{totalamount || 0}
-            </span>
+            <div className="amount-summary-row">
+              <span>Advance Amount :</span>
+              <span>₹{advanceamount || 0}</span>
+            </div>
+
+            <div className="amount-summary-row balance-row">
+              <span>Balance Amount :</span>
+              <span>₹{balanceamount || 0}</span>
+            </div>
+
+            {message === "Customer exists." && (
+              <button onClick={copyOrderSummary} style={style.buttonPrimary}>
+                Copy Order Summary(For Customer)
+              </button>
+            )}
           </div>
-
-          <div className="amount-summary-row">
-            <span>Advance Amount :</span>
-            <span>
-              ₹{advanceamount || 0}
-            </span>
-          </div>
-
-          <div className="amount-summary-row balance-row">
-            <span>Balance Amount :</span>
-            <span>
-              ₹{balanceamount || 0}
-            </span>
-          </div>
-
-          {message === "Customer exists." && (
-            <button onClick={copyOrderSummary} style={style.buttonPrimary}>
-              Copy Order Summary(For Customer)
-            </button>
-          )}
-
         </div>
-
-      </div>
-}
+      )}
     </div>
-
   );
 };
 
