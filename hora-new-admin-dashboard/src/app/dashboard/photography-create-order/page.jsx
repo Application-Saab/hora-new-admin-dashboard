@@ -37,9 +37,7 @@ const AddPhotoOrder = () => {
   const [city, setCity] = useState("");
   const [pincode, setPincode] = useState("");
   const [product, setProduct] = useState(null);
-  const [setIsContinueClicked] = useState(false);
   const [showProductDetails, setShowProductDetails] = useState(false);
-  const [, setIsFetched] = useState(false);
   const [pincodeMessage, setPincodeMessage] = useState("");
   const [pincodeMessageColor, setPincodeMessageColor] = useState("");
   const [totalamount, setTotalAmount] = useState("");
@@ -55,6 +53,7 @@ const AddPhotoOrder = () => {
   const [selectedItems, setSelectedItems] = useState({});
   const [teams, setTeams] = useState([]);
   const [customerId, setCustomerId] = useState(null);
+  const [formErrors, setFormErrors] = useState({});
 
   const [showPopup, setShowPopup] = useState(false);
   const [newCustomerName, setNewCustomerName] = useState("");
@@ -261,16 +260,13 @@ const AddPhotoOrder = () => {
 
         setInclusion(inclusions);
         setShowProductDetails(true);
-        setIsFetched(true);
       } else {
         setShowProductDetails(false);
         setProduct(null);
-        setIsFetched(false);
       }
     } else {
       setShowProductDetails(false);
       setProduct(null);
-      setIsFetched(false);
     }
   }, [dishName, products]);
 
@@ -507,6 +503,55 @@ const AddPhotoOrder = () => {
 
   const handleSubmit = async (e,isEmergency = false) => {
     e.preventDefault();
+
+      const errors = {};
+
+      if (!selectedTag) {
+        errors.selectedTag = "Please select photography category";
+      }
+
+      if (!dishName || !product) {
+        errors.dishName = "Please select a product";
+      }
+
+      if (!customerNumber || customerNumber.length !== 10) {
+        errors.customerNumber = "Please enter 10 digit customer number";
+      }
+
+      if (!orderTakenBy) {
+        errors.orderTakenBy = "Please select order taken by";
+      }
+
+      if (!city) {
+        errors.city = "Please select city";
+      }
+
+      if (!pincode.trim()) {
+        errors.pincode = "Please enter pincode";
+      }
+
+      if (!date) {
+        errors.date = "Please select date";
+      }
+
+      if (!timeSlot) {
+        errors.timeSlot = "Please select time slot";
+      }
+
+      if (!address.trim()) {
+        errors.address = "Please enter address";
+      }
+
+      if (!totalamount.trim()) {
+        errors.totalamount = "Please enter total amount";
+      }
+
+      if (Object.keys(errors).length > 0) {
+        setFormErrors(errors);
+        return;
+      }
+
+      setFormErrors({});
     setlLoading(true);
     const formattedDate = date ? formatDate(date) : null;
 
@@ -715,17 +760,15 @@ const changeQuantity = (id, delta) => {
 
 
   return (
-    <div
-      style={{ display: "flex", gap: "10px" }}
-    >
-    <div className="createDecor-container">
-      <h2 className="createOrder pageHeading">Create Photography Order</h2>
-      <form className="" onSubmit={handleSubmit}>
-        <div className="category-product-row" >
-        <div>
-        {/* Tag Selection */}
-        <label htmlFor="tagSelect">Select Category *</label>
-        {/* <select
+    <div style={{ display: "flex", gap: "10px" }}>
+      <div className="createDecor-container">
+        <h2 className="createOrder pageHeading">Create Photography Order</h2>
+        <form className="" onSubmit={handleSubmit}>
+          <div className="category-product-row">
+            <div>
+              {/* Tag Selection */}
+              <label htmlFor="tagSelect">Select Category *</label>
+              {/* <select
           id="tagSelect"
           value={selectedTag}
           onChange={(e) => {
@@ -752,473 +795,639 @@ const changeQuantity = (id, delta) => {
           ))}
         </select> */}
 
-        <select
-          id="tagSelect"
-          value={selectedTag}
-          onChange={(e) => {
-            setSelectedTag(e.target.value);
-            setDishName("");
-            setShowProductDetails(false);
-            setIsFetched(false);
-          }}
-          required
-          style={{
-            width: "100%",
-            padding: "10px",
-            borderRadius: "5px",
-            fontSize: "16px",
-            marginBottom: "10px",
-            border: "1px solid #ccc",
-          }}
-        >
-          <option value="">Select Photography Category</option>
-
-          {mealProductTypes
-            .filter((type) =>
-              type.configurationId?.some(
-                (config) => config.name === "Photography",
-              ),
-            )
-            .map((type) => (
-              <option key={type._id} value={type._id}>
-                {type.name}
-              </option>
-            ))}
-        </select>
-
-        {isLoadingProducts && <p>Loading products...</p>}
-
-        </div>
-       <div>
-        {/* Product Selection */}
-        {products.length > 0 && (
-          <>
-            <label htmlFor="productSelect">Select Product *</label>
-            <select
-              id="productSelect"
-              value={dishName}
-              onChange={(e) => {
-                setDishName(e.target.value);
-                setIsFetched(false);
-                setIsContinueClicked(false);
+              <select
+                id="tagSelect"
+                value={selectedTag}
+                onChange={(e) => {
+                const value = e.target.value;
+                setSelectedTag(value);
+                setDishName("");
+                setShowProductDetails(false);
+                if (value) {
+                setFormErrors((prev) => ({
+                ...prev,
+                selectedTag: "",
+              }));
+              }
               }}
-              required
-              style={{
-                width: "100%",
-                padding: "10px",
-                borderRadius: "5px",
-                fontSize: "16px",
-                marginBottom: "10px",
-                border: "1px solid #ccc",
-              }}
-            >
-              <option value="">Select a product</option>
-              {products.map((product) => (
-                <option key={product._id} value={product.name}>
-                  {product.name}
-                </option>
-              ))}
-            </select>
-          </>
-        )}
-        </div>
-        </div>
-
-        <div className="" >
-        {showProductDetails && product && (
-          <>
-              <div className="category-product-row">
-          <div>
-            <label htmlFor="category">Product Price</label>
-            <input type="text" id="category" value={category} readOnly />
-              </div>
-
-<div>
-
-              <label htmlFor="customerNumber">Customer Number*</label>
-              <input
-                type="text"
-                id="customerNumber"
-                value={customerNumber}
-                onInput={(e) =>
-                  setCustomerNumber(e.target.value.replace(/\D/g, ""))
-                }
-                placeholder="Customer Number"
                 required
-                maxLength={10}
-                pattern="\d{10}"
-                inputMode="numeric"
-              />
-                  {message !== "Customer exists." &&
-                  <div>
-              <button
-                className="orderCheck-btn"
-                onClick={handleCheckCustomer}
-                disabled={loading || customerNumber.length !== 10}
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  borderRadius: "5px",
+                  fontSize: "16px",
+                  marginBottom: "10px",
+                  border: "1px solid #ccc",
+                }}
               >
-                {loading ? "Checking..." : "Check Customer"}
-              </button>
-              {<p style={{ color: messageColor }}>{message}</p>}
-                    </div>
-                  }
-              </div>
-                  {message == "Customer exists." &&
-                  <div>
-                    <label htmlFor="orderTakenBy">Order Taken By*</label>
+                <option value="">Select Photography Category</option>
 
-                    <SearchWithDropDown
-                      options={teams?.map((team) => team.name) || []}
-                      selectedValue={orderTakenBy}
-                      onChange={(value) => setOrderTakenBy(value)}
-                      placeholder="Search Team..."
+                {mealProductTypes
+                  .filter((type) =>
+                    type.configurationId?.some(
+                      (config) => config.name === "Photography",
+                    ),
+                  )
+                  .map((type) => (
+                    <option key={type._id} value={type._id}>
+                      {type.name}
+                    </option>
+                  ))}
+              </select>
+              {formErrors.selectedTag && (
+                <p style={{ color: "red", marginTop: "5px" }}>
+                  {formErrors.selectedTag}
+                </p>
+              )}
+
+              {isLoadingProducts && <p>Loading products...</p>}
+            </div>
+            <div>
+              {/* Product Selection */}
+              {products.length > 0 && (
+                <>
+                  <label htmlFor="productSelect">Select Product *</label>
+                  <select
+                    id="productSelect"
+                    value={dishName}
+                    onChange={(e) => {
+                  const value = e.target.value;
+                  setDishName(value);
+                  if (value) {
+                    setFormErrors((prev) => ({
+                      ...prev,
+                      dishName: "",
+                    }));
+                  }
+                }}
+                    required
+                    style={{
+                      width: "100%",
+                      padding: "10px",
+                      borderRadius: "5px",
+                      fontSize: "16px",
+                      marginBottom: "10px",
+                      border: "1px solid #ccc",
+                    }}
+                  >
+                    <option value="">Select a product</option>
+                    {products.map((product) => (
+                      <option key={product._id} value={product.name}>
+                        {product.name}
+                      </option>
+                    ))}
+                  </select>
+                  {formErrors.dishName && (
+                  <p style={{ color: "red", marginTop: "5px" }}>
+                    {formErrors.dishName}
+                  </p>
+                )}
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="">
+            {showProductDetails && product && (
+              <>
+                <div className="category-product-row">
+                  <div>
+                    <label htmlFor="category">Product Price</label>
+                    <input
+                      type="text"
+                      id="category"
+                      value={category}
+                      readOnly
                     />
                   </div>
-}
-              </div>
-                {message == "Customer exists." &&
-            <div
-              className="ProductInclusions"
-              style={{
-                border: "1px solid #ccc",
-                marginTop: "15px",
-                padding: "10px",
-                borderRadius:"6px",
-              }}
-            >
-              <label htmlFor="productid">Product Inclusions:</label>
-              <ul style={{ listStyle: "disc", paddingLeft: "10px" }}>
-                {inclusion.length > 0 ? (
-                  inclusion.map((item, index) => <li key={index}>{item}</li>)
-                ) : (
-                  <li>No inclusions available</li>
+
+                  <div>
+                    <label htmlFor="customerNumber">Customer Number*</label>
+                    <input
+                      type="text"
+                      id="customerNumber"
+                      value={customerNumber}
+                      onInput={(e) => {
+                      const value = e.target.value.replace(/\D/g, "");
+                      setCustomerNumber(value);
+                      if (value.length === 10) {
+                        setFormErrors((prev) => ({
+                        ...prev,
+                        customerNumber: "",
+                      }));
+                    }
+                    }}
+                    placeholder="Customer Number"
+                      required
+                      maxLength={10}
+                      pattern="\d{10}"
+                      inputMode="numeric"
+                    />
+                    {formErrors.customerNumber && (
+                    <p style={{ color: "red", marginTop: "5px" }}>
+                    {formErrors.customerNumber}
+                    </p>
+                   )}
+                    {message !== "Customer exists." && (
+                      <div>
+                        <button
+                          className="orderCheck-btn"
+                          onClick={handleCheckCustomer}
+                          disabled={loading || customerNumber.length !== 10}
+                        >
+                          {loading ? "Checking..." : "Check Customer"}
+                        </button>
+                        {<p style={{ color: messageColor }}>{message}</p>}
+                      </div>
+                    )}
+                  </div>
+                  {message == "Customer exists." && (
+                    <div>
+                      <label htmlFor="orderTakenBy">Order Taken By*</label>
+
+                      <SearchWithDropDown
+                        options={teams?.map((team) => team.name) || []}
+                        selectedValue={orderTakenBy}
+                        onChange={(value) => {
+                        setOrderTakenBy(value);
+                        if (value) {
+                        setFormErrors((prev) => ({
+                        ...prev,
+                        orderTakenBy: "",
+                      }));
+                    }
+                  }}
+                        placeholder="Search Team..."
+                      />
+                      {formErrors.orderTakenBy && (
+                      <p style={{ color: "red", marginTop: "5px" }}>
+                       {formErrors.orderTakenBy}
+                      </p>
+                    )}
+                    </div>
+                  )}
+                </div>
+                {message == "Customer exists." && (
+                  <div
+                    className="ProductInclusions"
+                    style={{
+                      border: "1px solid #ccc",
+                      marginTop: "15px",
+                      padding: "10px",
+                      borderRadius: "6px",
+                    }}
+                  >
+                    <label htmlFor="productid">Product Inclusions:</label>
+                    <ul style={{ listStyle: "disc", paddingLeft: "10px" }}>
+                      {inclusion.length > 0 ? (
+                        inclusion.map((item, index) => (
+                          <li key={index}>{item}</li>
+                        ))
+                      ) : (
+                        <li>No inclusions available</li>
+                      )}
+                    </ul>
+                  </div>
                 )}
-              </ul>
-            </div>
-}
-            {/* customer check  */}
-          
-        
-                {message == "Customer exists." &&
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "2%",
-            }}>
-              <div className="city-box" style={{ flex: 1 }}>
-                <label
-                  htmlFor="city"
-                  style={{
-                    marginTop: "0px",
-                    marginBottom: "5px",
-                    display: "block",
-                  }}
-                >
-                  City *
-                </label>
-                <select
-                  id="city"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  required
-                  style={{
-                    width: "100%",
-                    padding: "10px",
-                    borderRadius: "5px",
-                    fontSize: "16px",
-                    transition: "border-color 0.3s",
-                  }}
-                >
-                  <option value="" style={{ color: "#aaa" }}>
-                    Select City
-                  </option>
-                  <option value="Bangalore">Bangalore</option>
-                  <option value="Delhi">Delhi</option>
-                  <option value="Mumbai">Mumbai</option>
-                  <option value="Hyderabad">Hyderabad</option>
-                </select>
-              </div>
-              <div className="pincode-box" style={{ flex: 1 }}>
-                <label htmlFor="pincode">Pincode *</label>
-                <input
-                  type="text"
-                  id="pincode"
-                  value={pincode}
-                  onChange={(e) => setPincode(e.target.value)}
-                  style={{
-                    padding: "11px",
-                    borderRadius: "5px",
-                    fontSize: "16px",
-                    width: "100%",
-                    marginTop: "0px",
-                    boxSizing: "border-box",
-                  }}
-                />
-                <p
-                  style={{
-                    fontWeight: "bold",
-                    fontSize: "15px",
-                    color: pincodeMessageColor,
-                    margin:"0px",
-                  }}
-                >
-                  {pincodeMessage}
-                </p>
-              </div>
-        </div>
-}
+                {/* customer check  */}
+
+                {message == "Customer exists." && (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "2%",
+                    }}
+                  >
+                    <div className="city-box" style={{ flex: 1 }}>
+                      <label
+                        htmlFor="city"
+                        style={{
+                          marginTop: "0px",
+                          marginBottom: "5px",
+                          display: "block",
+                        }}
+                      >
+                        City *
+                      </label>
+                      <select
+                        id="city"
+                        value={city}
+                        onChange={(e) => {
+                        const value = e.target.value;
+                        setCity(value);
+                        if (value) {
+                        setFormErrors((prev) => ({
+                         ...prev,
+                         city: "",
+                       }));
+                     }
+                    }}
+                        required
+                        style={{
+                          width: "100%",
+                          padding: "10px",
+                          borderRadius: "5px",
+                          fontSize: "16px",
+                          transition: "border-color 0.3s",
+                        }}
+                      >
+                        <option value="" style={{ color: "#aaa" }}>
+                          Select City
+                        </option>
+                        <option value="Bangalore">Bangalore</option>
+                        <option value="Delhi">Delhi</option>
+                        <option value="Mumbai">Mumbai</option>
+                        <option value="Hyderabad">Hyderabad</option>
+                      </select>
+
+                      {formErrors.city && (
+                      <p style={{ color: "red", marginTop: "5px" }}>
+                       {formErrors.city}
+                      </p>
+                      )}
+                    </div>
+                    <div className="pincode-box" style={{ flex: 1 }}>
+                      <label htmlFor="pincode">Pincode *</label>
+                      <input
+                        type="text"
+                        id="pincode"
+                        value={pincode}
+                        onChange={(e) => {
+                  const value = e.target.value;
+                  setPincode(value);
+                  if (value.trim()) {
+                    setFormErrors((prev) => ({
+                      ...prev,
+                      pincode: "",
+                    }));
+                  }
+                }}
+                        style={{
+                          padding: "11px",
+                          borderRadius: "5px",
+                          fontSize: "16px",
+                          width: "100%",
+                          marginTop: "0px",
+                          boxSizing: "border-box",
+                        }}
+                      />
+                      {formErrors.pincode && (
+                  <p style={{ color: "red", marginTop: "5px" }}>
+                    {formErrors.pincode}
+                  </p>
+                )}
+                      <p
+                        style={{
+                          fontWeight: "bold",
+                          fontSize: "15px",
+                          color: pincodeMessageColor,
+                          margin: "0px",
+                        }}
+                      >
+                        {pincodeMessage}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </>
             )}
-        {message === "Customer exists." ? (
-          <div className="orderDeatils">
-            <div
-                className="amount-box"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "2%",
-                }}
-            >
-              <div >
-                <label htmlFor="date">Date *</label>
-                <input
-                  type="date"
-                  id="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  required
-                />
-              </div>
-              <div >
-                <label
-                  htmlFor="timeSlot"
+            {message === "Customer exists." ? (
+              <div className="orderDeatils">
+                <div
+                  className="amount-box"
                   style={{
-                    marginBottom: "10px",
-                    display: "block",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "2%",
                   }}
                 >
-                  Time Slot*
-                </label>
-                <Select
-                  options={timeSlotOptions}
-                  value={timeSlot}
-                  onChange={(selectedOption) => setTimeSlot(selectedOption)}
-                  placeholder="Select Time Slot"
-                  required
-                />
-              </div>
-            </div>
-              <div
-                className="address-row" >
-            <div>
-              <label htmlFor="address">Address*</label>
-              <textarea
-                type="text"
-                id="address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="Address"
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="googleLocation">Google Location</label>
-              <textarea
-                type="text"
-                id="googleLocation"
-                value={googleLocation}
-                onChange={(e) => setGoogleLocation(e.target.value)}
-                placeholder="googleLocation"
-              />
-            </div>
-              </div>
-              <div className="address-row">
-              <div>
-              <label htmlFor="totalamount">Total Amount*</label>
-              <input
-                type="text"
-                id="totalamount"
-                value={totalamount}
-                onChange={(e) => setTotalAmount(e.target.value)}
-                placeholder="Total Amount"
-                required
-              />
+                  <div>
+                    <label htmlFor="date">Date *</label>
+                    <input
+                      type="date"
+                      id="date"
+                      value={date}
+                      onChange={(e) => {
+                  const value = e.target.value;
+                  setDate(value);
+                  if (value) {
+                    setFormErrors((prev) => ({
+                      ...prev,
+                      date: "",
+                    }));
+                  }
+                }}
+                      required
+                    />
+                    {formErrors.date && (
+                  <p style={{ color: "red", marginTop: "5px" }}>
+                    {formErrors.date}
+                  </p>
+                )}
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="timeSlot"
+                      style={{
+                        marginBottom: "10px",
+                        display: "block",
+                      }}
+                    >
+                      Time Slot*
+                    </label>
+                    <Select
+                      options={timeSlotOptions}
+                      value={timeSlot}
+                      onChange={(selectedOption) => {
+                  setTimeSlot(selectedOption);
+
+                  if (selectedOption) {
+                    setFormErrors((prev) => ({
+                      ...prev,
+                      timeSlot: "",
+                    }));
+                  }
+                }}
+                      placeholder="Select Time Slot"
+                      required
+                    />
+                    {formErrors.timeSlot && (
+                  <p style={{ color: "red", marginTop: "5px" }}>
+                    {formErrors.timeSlot}
+                  </p>
+                )}
+                  </div>
                 </div>
-                <div>
-              <label htmlFor="advanceamount">Advance Amount</label>
-              <input
-                type="text"
-                id="advanceamount"
-                value={advanceamount}
-                onChange={(e) => setAdvanceAmount(e.target.value)}
-                placeholder="Advance Amount"
-              />
-              </div>
-              <div>
-              <label htmlFor="balanceamount">Balance Amount</label>
-              <input
-                type="text"
-                id="balanceamount"
-                value={balanceamount}
-                placeholder="Balance Amount"
-                disabled
-              />
-            </div>
-            </div>
+                <div className="address-row">
+                  <div>
+                    <label htmlFor="address">Address*</label>
+                    <textarea
+                      type="text"
+                      id="address"
+                      value={address}
+                      onChange={(e) => {
+                  const value = e.target.value;
 
-            {/* Add-On Products */}
-            <div className="addon-heading">Select Addon Products</div>
-            {addOnProducts.length > 0 && (
-              <div className="addon-menu">
-                <div className="addon-grid">
-                    {addOnProducts.map((addOn, index) => {
-                      const selected = selectedItems[addOn._id];
-                      return (
-                        <div key={index} className="add-on-card"
-                          onClick={() => {
-                            const isSelected = selectedAddOns.some(
-                              (item) => item._id === addOn._id
-                            );
+                  setAddress(value);
 
-                            handleAddOnChange(addOn, !isSelected);
-                          }}
-                         style={{
-                          border: "1px solid #ddd",
-                          borderRadius: "8px",
-                          padding: "12px",
-                          backgroundColor: "white",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "10px"
-                        }}>
-                          <input
-                            type="checkbox"
-                            id={`addon-${index}`}
-                            checked={selectedAddOns.some(
-                              (item) => item._id === addOn._id
-                            )}
-                            onClick={(e) => e.stopPropagation()}
-                            onChange={(e) =>
-                              handleAddOnChange(addOn, e.target.checked)
-                            }
-                            style={{ transform: "scale(1.2)" }}
-                          />
-                          <img
-                            src={`${BASE_URL}/api/uploads/compressed_webp/${addOn.image}`}
-                            alt={addOn.title}
-                            style={{
-                              width: "60px",
-                              height: "60px",
-                              objectFit: "cover",
-                              borderRadius: "4px"
-                            }}
-                          />
-                          <div className="addon-product-info">
-                            <div className="item-title">
-                              {addOn?.title}
-                            </div>
+                  if (value.trim()) {
+                    setFormErrors((prev) => ({
+                      ...prev,
+                      address: "",
+                    }));
+                  }
+                }}
+                      placeholder="Address"
+                      required
+                    />
+                    {formErrors.address && (
+                  <p style={{ color: "red", marginTop: "5px" }}>
+                    {formErrors.address}
+                  </p>
+                )}
+                  </div>
+                  <div>
+                    <label htmlFor="googleLocation">Google Location</label>
+                    <textarea
+                      type="text"
+                      id="googleLocation"
+                      value={googleLocation}
+                      onChange={(e) => setGoogleLocation(e.target.value)}
+                      placeholder="googleLocation"
+                    />
+                  </div>
+                </div>
+                <div className="address-row">
+                  <div>
+                    <label htmlFor="totalamount">Total Amount*</label>
+                    <input
+                      type="text"
+                      id="totalamount"
+                      value={totalamount}
+                      onChange={(e) => {
+                  const value = e.target.value;
+                  setTotalAmount(value);
+                  if (value.trim()) {
+                    setFormErrors((prev) => ({
+                      ...prev,
+                      totalamount: "",
+                    }));
+                  }
+                }}
+                      placeholder="Total Amount"
+                      required
+                    />
+                    {formErrors.totalamount && (
+                  <p style={{ color: "red", marginTop: "5px" }}>
+                    {formErrors.totalamount}
+                  </p>
+                )}
+                  </div>
+                  <div>
+                    <label htmlFor="advanceamount">Advance Amount</label>
+                    <input
+                      type="text"
+                      id="advanceamount"
+                      value={advanceamount}
+                      onChange={(e) => setAdvanceAmount(e.target.value)}
+                      placeholder="Advance Amount"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="balanceamount">Balance Amount</label>
+                    <input
+                      type="text"
+                      id="balanceamount"
+                      value={balanceamount}
+                      placeholder="Balance Amount"
+                      disabled
+                    />
+                  </div>
+                </div>
 
-                            <div className="item-price">
-                              ₹{addOn?.price}
-                            </div>
-                          </div>
-                          <div className="right-section">
-                            <button onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              changeQuantity(addOn._id, -1);
-                            }} className="qty-btn">−</button>
-                            <span className="qty">{selected?.quantity || 1}</span>
-                            <button onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              changeQuantity(addOn._id, 1);
-                            }} className="qty-btn">+</button>
-                            <div className="total-price">₹{addOn.price * (selected?.quantity || 1)}</div>
-                          </div>
-                        </div>
-                      )
-                    })}               </div>
-              </div>
-            )}
-
-            {themeProducts.length > 0 && (<div className="addon-heading">Select Theme </div>)}
-            {themeProducts.length > 0 && (
-              <div className="addon-menu">
-                <div className="addon-grid">
-                  {themeProducts.map((theme, index) => {
-                    return (
-                      <div key={index} className="add-on-card" style={{
-                        border: "1px solid #ddd",
-                        borderRadius: "8px",
-                        padding: "12px",
-                        backgroundColor: "white",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "10px"
-                      }}>
-                        <input
-                          type="checkbox"
-                          id={`theme-${index}`}
-                          checked={selectedTheme.some(
-                            (item) => item._id === theme._id
-                          )}
-                          onChange={(e) =>
-                            handleThemeChange(theme, e.target.checked)
-                          }
-                          style={{ transform: "scale(1.2)" }}
-                        />
-                        <img
-                          src={`${BASE_URL}/api/uploads/compressed_webp/${theme.image}`}
-                          alt={theme.title}
-                          style={{
-                            width: "60px",
-                            height: "60px",
-                            objectFit: "cover",
-                            borderRadius: "4px"
-                          }}
-                        />
-                        <div style={{ flex: 1 }}>
-                          <label htmlFor={`theme-${index}`} style={{
-                            fontWeight: "bold",
-                            cursor: "pointer",
-                            display: "block",
-                            marginBottom: "4px"
-                          }}>
-                            {theme.title}
-                          </label>
-                          <p style={{
-                            margin: "0",
-                            fontSize: "12px",
-                            color: "#666",
-                            marginBottom: "4px"
-                          }}>
-                            {theme.description}
-                          </p>
-                        </div>
-
-                      </div>
-                    )
-                  })}               </div>
-                {selectedTheme.length > 0 && (
-                  <div style={{
-                    marginTop: "15px",
-                    padding: "10px",
-                    backgroundColor: "#e8f5e8",
-                    borderRadius: "5px",
-                    border: "1px solid #28a745"
-                  }}>
-                    <h4 style={{ margin: "0 0 10px 0", color: "#28a745" }}>Selected Themes:</h4>
-                    <ul style={{ margin: "0", paddingLeft: "20px" }}>
-                      {selectedTheme.map((theme, index) => {
+                {/* Add-On Products */}
+                <div className="addon-heading">Select Addon Products</div>
+                {addOnProducts.length > 0 && (
+                  <div className="addon-menu">
+                    <div className="addon-grid">
+                      {addOnProducts.map((addOn, index) => {
+                        const selected = selectedItems[addOn._id];
                         return (
-                          <li key={index} style={{ marginBottom: "5px" }}>
-                            {theme.title}
-                          </li>
-                        );
-                      })}
+                          <div
+                            key={index}
+                            className="add-on-card"
+                            onClick={() => {
+                              const isSelected = selectedAddOns.some(
+                                (item) => item._id === addOn._id,
+                              );
 
-                    </ul>
-                    {/* <p style={{ 
+                              handleAddOnChange(addOn, !isSelected);
+                            }}
+                            style={{
+                              border: "1px solid #ddd",
+                              borderRadius: "8px",
+                              padding: "12px",
+                              backgroundColor: "white",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "10px",
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              id={`addon-${index}`}
+                              checked={selectedAddOns.some(
+                                (item) => item._id === addOn._id,
+                              )}
+                              onClick={(e) => e.stopPropagation()}
+                              onChange={(e) =>
+                                handleAddOnChange(addOn, e.target.checked)
+                              }
+                              style={{ transform: "scale(1.2)" }}
+                            />
+                            <img
+                              src={`${BASE_URL}/api/uploads/compressed_webp/${addOn.image}`}
+                              alt={addOn.title}
+                              style={{
+                                width: "60px",
+                                height: "60px",
+                                objectFit: "cover",
+                                borderRadius: "4px",
+                              }}
+                            />
+                            <div className="addon-product-info">
+                              <div className="item-title">{addOn?.title}</div>
+
+                              <div className="item-price">₹{addOn?.price}</div>
+                            </div>
+                            <div className="right-section">
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  changeQuantity(addOn._id, -1);
+                                }}
+                                className="qty-btn"
+                              >
+                                −
+                              </button>
+                              <span className="qty">
+                                {selected?.quantity || 1}
+                              </span>
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  changeQuantity(addOn._id, 1);
+                                }}
+                                className="qty-btn"
+                              >
+                                +
+                              </button>
+                              <div className="total-price">
+                                ₹{addOn.price * (selected?.quantity || 1)}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}{" "}
+                    </div>
+                  </div>
+                )}
+
+                {themeProducts.length > 0 && (
+                  <div className="addon-heading">Select Theme </div>
+                )}
+                {themeProducts.length > 0 && (
+                  <div className="addon-menu">
+                    <div className="addon-grid">
+                      {themeProducts.map((theme, index) => {
+                        return (
+                          <div
+                            key={index}
+                            className="add-on-card"
+                            style={{
+                              border: "1px solid #ddd",
+                              borderRadius: "8px",
+                              padding: "12px",
+                              backgroundColor: "white",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "10px",
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              id={`theme-${index}`}
+                              checked={selectedTheme.some(
+                                (item) => item._id === theme._id,
+                              )}
+                              onChange={(e) =>
+                                handleThemeChange(theme, e.target.checked)
+                              }
+                              style={{ transform: "scale(1.2)" }}
+                            />
+                            <img
+                              src={`${BASE_URL}/api/uploads/compressed_webp/${theme.image}`}
+                              alt={theme.title}
+                              style={{
+                                width: "60px",
+                                height: "60px",
+                                objectFit: "cover",
+                                borderRadius: "4px",
+                              }}
+                            />
+                            <div style={{ flex: 1 }}>
+                              <label
+                                htmlFor={`theme-${index}`}
+                                style={{
+                                  fontWeight: "bold",
+                                  cursor: "pointer",
+                                  display: "block",
+                                  marginBottom: "4px",
+                                }}
+                              >
+                                {theme.title}
+                              </label>
+                              <p
+                                style={{
+                                  margin: "0",
+                                  fontSize: "12px",
+                                  color: "#666",
+                                  marginBottom: "4px",
+                                }}
+                              >
+                                {theme.description}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}{" "}
+                    </div>
+                    {selectedTheme.length > 0 && (
+                      <div
+                        style={{
+                          marginTop: "15px",
+                          padding: "10px",
+                          backgroundColor: "#e8f5e8",
+                          borderRadius: "5px",
+                          border: "1px solid #28a745",
+                        }}
+                      >
+                        <h4 style={{ margin: "0 0 10px 0", color: "#28a745" }}>
+                          Selected Themes:
+                        </h4>
+                        <ul style={{ margin: "0", paddingLeft: "20px" }}>
+                          {selectedTheme.map((theme, index) => {
+                            return (
+                              <li key={index} style={{ marginBottom: "5px" }}>
+                                {theme.title}
+                              </li>
+                            );
+                          })}
+                        </ul>
+                        {/* <p style={{ 
                   margin: "10px 0 0 0", 
                   fontWeight: "bold", 
                   fontSize: "16px",
@@ -1226,12 +1435,12 @@ const changeQuantity = (id, delta) => {
                 }}>
                   Total Add-Ons: ₹{addOnsTotalPrice}
                 </p> */}
+                      </div>
+                    )}
                   </div>
                 )}
-              </div>
-            )}
 
-            <div className="amount-box">
+                <div className="amount-box">
                   <div>
                     <label htmlFor="wonderlandevent">Wonderland Occasion</label>
                     <input
@@ -1243,151 +1452,160 @@ const changeQuantity = (id, delta) => {
                     />
                   </div>
                   <div className="event-box" style={{ flex: 1 }}>
-                <label htmlFor="pincode">Add Event</label>
-                <SearchWithDropDown
-                  options={eventList}
-                  selectedValue={selectedEvent}
-                  onChange={(val) => setSelectedEvent(val)}
-                  placeholder="Search event..."
-                />
-              </div>
-            </div>
-
-            <div className="checkoutInputType border-1 rounded-4">
-                <div style={{ fontSize: "18px", fontWeight: "600", marginBottom: "8px", marginTop:"12px" }}>Share your comments (if any)</div>
-              <div className="addon-form">
-                {commentFields.map((field, index) => (
-                  <div key={index} className="comment-container">
-                    <input
-                      style={{ marginBottom: "8px" }}
-                      className="comment-input"
-                      value={comment.split("\n")[index] || ""}
-                      onChange={(e) => handleComment(index, e.target.value)}
-                      placeholder="Enter your comment."
+                    <label htmlFor="pincode">Add Event</label>
+                    <SearchWithDropDown
+                      options={eventList}
+                      selectedValue={selectedEvent}
+                      onChange={(val) => setSelectedEvent(val)}
+                      placeholder="Search event..."
                     />
+                  </div>
+                </div>
 
-                    <button
-                      style={{ marginBottom: "8px" }}
-                      type="button"
-                      className="add-new-btn"
-                      onClick={addCommentField}
-                    >
-                      Add New
+                <div className="checkoutInputType border-1 rounded-4">
+                  <div
+                    style={{
+                      fontSize: "18px",
+                      fontWeight: "600",
+                      marginBottom: "8px",
+                      marginTop: "12px",
+                    }}
+                  >
+                    Share your comments (if any)
+                  </div>
+                  <div className="addon-form">
+                    {commentFields.map((field, index) => (
+                      <div key={index} className="comment-container">
+                        <input
+                          style={{ marginBottom: "8px" }}
+                          className="comment-input"
+                          value={comment.split("\n")[index] || ""}
+                          onChange={(e) => handleComment(index, e.target.value)}
+                          placeholder="Enter your comment."
+                        />
+
+                        <button
+                          style={{ marginBottom: "8px" }}
+                          type="button"
+                          className="add-new-btn"
+                          onClick={addCommentField}
+                        >
+                          Add New
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="createOrderBtn-container">
+                  <div style={{ flex: "1" }}>
+                    {/* Create Order */}
+                    <button onClick={handleSubmit} className="createOrder-btn">
+                      {lloading ? "Creating Order..." : "Create Order"}
                     </button>
                   </div>
-                ))}
+                  <div style={{ flex: "1" }}>
+                    <button
+                      className="createOrder-btn"
+                      type="button"
+                      onClick={(e) => {
+                        handleSubmit(e, true);
+                      }}
+                      disabled={lloading}
+                    >
+                      {lloading
+                        ? "Creating Emergency Order..."
+                        : "Create Emergency Order"}
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-                <div className="createOrderBtn-container">
-                <div style={{ flex: "1" }}>
-            {/* Create Order */}
-                <button onClick={handleSubmit} className="createOrder-btn">
-              {lloading ? "Creating Order..." : "Create Order"}
-            </button>
-                </div>
-                <div style={{ flex: "1" }}>
-            <button
-                className="createOrder-btn"
-                type="button"
-                onClick={(e) => {
-                  handleSubmit(e, true);
-                }}
-              disabled={lloading}
-            >
-            {lloading ? "Creating Emergency Order..." : "Create Emergency Order"}
-          </button>
-                </div>
-                </div>
-          </div>
-        ) : (
-          <>
-            {" "}
-            {lloading && <div className="loader">Loading...</div>}
-            {showPopup && (
-              <div className="popup">
-                <h2>Add New Customer</h2>
-                <label>
-                  Name:
-                  <input
-                    type="text"
-                    value={newCustomerName}
-                    onChange={(e) => setNewCustomerName(e.target.value)}
-                  />
-                </label>
-                <br />
-                <label>
-                  Phone:
-                  <input
-                    type="text"
-                    id="customerNumber"
-                    value={newCustomerPhone}
-                    onInput={(e) =>
-                      setNewCustomerPhone(e.target.value.replace(/\D/g, ""))
-                    }
-                    placeholder="Customer Number"
-                    required
-                    maxLength={10}
-                    pattern="\d{10}"
-                    inputMode="numeric"
-                  />
-                </label>
-                <br />
-                <button onClick={handleAddCustomer}>Add Customer</button>
-                <button onClick={() => setShowPopup(false)}>Cancel</button>
-              </div>
+            ) : (
+              <>
+                {" "}
+                {lloading && <div className="loader">Loading...</div>}
+                {showPopup && (
+                  <div className="popup">
+                    <h2>Add New Customer</h2>
+                    <label>
+                      Name:
+                      <input
+                        type="text"
+                        value={newCustomerName}
+                        onChange={(e) => setNewCustomerName(e.target.value)}
+                      />
+                    </label>
+                    <br />
+                    <label>
+                      Phone:
+                      <input
+                        type="text"
+                        id="customerNumber"
+                        value={newCustomerPhone}
+                        onInput={(e) =>
+                          setNewCustomerPhone(e.target.value.replace(/\D/g, ""))
+                        }
+                        placeholder="Customer Number"
+                        required
+                        maxLength={10}
+                        pattern="\d{10}"
+                        inputMode="numeric"
+                      />
+                    </label>
+                    <br />
+                    <button onClick={handleAddCustomer}>Add Customer</button>
+                    <button onClick={() => setShowPopup(false)}>Cancel</button>
+                  </div>
+                )}
+              </>
             )}
-          </>
+          </div>
+        </form>
+
+        {eventResponse?._id && (
+          <p
+            className="message"
+            style={{
+              color: messageColor,
+              textAlign: "center",
+              marginTop: "15px",
+            }}
+          >
+            Invite Link Admin :{" "}
+            <a
+              target="_blank"
+              href={`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}&frompanel=true`}
+            >{`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}&frompanel=true`}</a>
+          </p>
         )}
-        </div>
-      </form>
-
-      {eventResponse?._id && (
-        <p
-          className="message"
-          style={{
-            color: messageColor,
-            textAlign: "center",
-            marginTop: "15px",
-          }}
-        >
-          Invite Link Admin :{" "}
-          <a
-            target="_blank"
-            href={`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}&frompanel=true`}
-          >{`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}&frompanel=true`}</a>
-        </p>
-      )}
-      {eventResponse?._id && (
-        <p
-          className="message"
-          style={{
-            color: messageColor,
-            textAlign: "center",
-            marginTop: "15px",
-          }}
-        >
-          Invite Link To Share :{" "}
-          <a
-            target="_blank"
-            href={`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}`}
-          >{`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}`}</a>
-        </p>
-      )}
-    </div>
-      {product &&
+        {eventResponse?._id && (
+          <p
+            className="message"
+            style={{
+              color: messageColor,
+              textAlign: "center",
+              marginTop: "15px",
+            }}
+          >
+            Invite Link To Share :{" "}
+            <a
+              target="_blank"
+              href={`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}`}
+            >{`https://horaservices.com/wonderland/invite?eventid=${eventResponse?._id}`}</a>
+          </p>
+        )}
+      </div>
+      {product && (
         <div className="createDecor-container order-summary-container">
-
           <div className="summary-header">
             <h2 className="createOrder pageHeading">Order Summary</h2>
           </div>
 
           {/* Product */}
           <div className="summary-product">
-            Product URL: {" "}{`${product?.productUrl || ""}`}
-
+            Product URL: {`${product?.productUrl || ""}`}
             <div>
-              <div> Product Name: {" "}{product?.name || ""}</div>
-              <div> Product Price: {" "}₹{product?.price || 0}</div>
+              <div> Product Name: {product?.name || ""}</div>
+              <div> Product Price: ₹{product?.price || 0}</div>
             </div>
           </div>
 
@@ -1395,64 +1613,58 @@ const changeQuantity = (id, delta) => {
 
           {/* Customer Details */}
           <div className="summary-section">
-            <h4>Customer Details:{" "}</h4>
+            <h4>Customer Details: </h4>
 
             <div className="summary-row">
-              <span>Contact Number:{" "}</span>
+              <span>Contact Number: </span>
               <span>{customerNumber || "—"}</span>
             </div>
 
             <div className="summary-row">
-              <span>Order Taken By:{" "}</span>
+              <span>Order Taken By: </span>
               <span>{orderTakenBy || "—"}</span>
             </div>
           </div>
 
           {/* Event Details */}
           <div className="summary-section">
-            <h4>Event Details :{" "}</h4>
-
-
+            <h4>Event Details : </h4>
 
             <div className="summary-row">
-              <span>Event Name :{" "}</span>
+              <span>Event Name : </span>
               <span>{wonderlandevent || selectedEvent || "—"}</span>
             </div>
 
-
             <div className="summary-row">
-              <span>City :{" "}</span>
+              <span>City : </span>
               <span>{city || "—"}</span>
             </div>
 
-
             <div className="summary-row">
-              <span>Pincode :{" "}</span>
+              <span>Pincode : </span>
               <span>{pincode || "—"}</span>
             </div>
 
             <div className="summary-row">
-              <span>Date :{" "}</span>
+              <span>Date : </span>
               <span>{date || "—"}</span>
             </div>
 
             <div className="summary-row">
-              <span>Time Slot :{" "}</span>
+              <span>Time Slot : </span>
               <span>{timeSlot?.label || "—"}</span>
             </div>
 
             <div className="summary-row summary-column">
-              <span>Address :{" "}</span>
+              <span>Address : </span>
               <span>{address || "—"}</span>
             </div>
 
             <div className="summary-row summary-column">
-              <span>Google Location :{" "}</span>
+              <span>Google Location : </span>
               <span>{googleLocation || "—"}</span>
             </div>
           </div>
-
-          
 
           {/* Inclusions */}
           {product?.inclusion?.length > 0 && (
@@ -1480,11 +1692,9 @@ const changeQuantity = (id, delta) => {
 
               <ul className="summary-list">
                 {selectedAddOns.map((addOn, index) => {
-                  const quantity =
-                    selectedItems[addOn._id]?.quantity || 1;
+                  const quantity = selectedItems[addOn._id]?.quantity || 1;
 
-                  const totalPrice =
-                    Number(addOn.price || 0) * quantity;
+                  const totalPrice = Number(addOn.price || 0) * quantity;
 
                   return (
                     <li key={addOn._id} className="summary-row">
@@ -1492,9 +1702,7 @@ const changeQuantity = (id, delta) => {
                         {index + 1}. {addOn.title} × {quantity}
                       </span>
 
-                      <span>
-                        ₹{totalPrice}
-                      </span>
+                      <span>₹{totalPrice}</span>
                     </li>
                   );
                 })}
@@ -1509,10 +1717,7 @@ const changeQuantity = (id, delta) => {
 
               <ul className="summary-list">
                 {selectedTheme.map((theme, index) => (
-                  <li
-                    key={theme._id}
-                    className="summary-row"
-                  >
+                  <li key={theme._id} className="summary-row">
                     <span>
                       {index + 1}. {theme.title}
                     </span>
@@ -1542,28 +1747,21 @@ const changeQuantity = (id, delta) => {
 
           {/* Amount Summary */}
           <div className="summary-amount">
-
             <h4>Amount Details</h4>
 
             <div className="amount-summary-row">
               <span>Total Amount :</span>
-              <span>
-                ₹{totalamount || 0}
-              </span>
+              <span>₹{totalamount || 0}</span>
             </div>
 
             <div className="amount-summary-row">
               <span>Advance Amount :</span>
-              <span>
-                ₹{advanceamount || 0}
-              </span>
+              <span>₹{advanceamount || 0}</span>
             </div>
 
             <div className="amount-summary-row balance-row">
               <span>Balance Amount :</span>
-              <span>
-                ₹{balanceamount || 0}
-              </span>
+              <span>₹{balanceamount || 0}</span>
             </div>
 
             {message === "Customer exists." && (
@@ -1571,11 +1769,9 @@ const changeQuantity = (id, delta) => {
                 Copy Order Summary(For Customer)
               </button>
             )}
-
           </div>
-
         </div>
-      }
+      )}
     </div>
   );
 };

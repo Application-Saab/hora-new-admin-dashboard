@@ -30,6 +30,26 @@
   margin-bottom: 20px;
   font-size: 14px;
   color: #444;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.commonpopup-body::-webkit-scrollbar {
+  width: 5px;
+}
+
+.commonpopup-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 2px;
+}
+
+.commonpopup-body::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 2px;
+}
+
+.commonpopup-body::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 
 .commonpopup-footer {
