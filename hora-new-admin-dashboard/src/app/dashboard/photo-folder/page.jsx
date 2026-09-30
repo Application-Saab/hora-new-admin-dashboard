@@ -6,6 +6,7 @@ import CheckCustomer from "./CheckCustomer.jsx"; // Corrected import
 import ImageUpload from "./uploadInfolder/ImageUpload.jsx"; // Corrected import
 import "./photoFolder.css";
 import { BASE_URL, DRIVE_FOLDER_UPLOAD } from "@/utils/apiconstant.jsx";
+import VideoUploadSection from "./VideoUploadSection.jsx"
 
 const PhotoCreateProject = () => {
   const [folderTitle, setFolderTitle] = useState("");
@@ -125,7 +126,7 @@ const PhotoCreateProject = () => {
           Check Folder
         </button>
       </div> */}
-
+<div>
       {showForm && (
         <>
           <div className="createPhotoFolderContainer">
@@ -225,6 +226,11 @@ const PhotoCreateProject = () => {
           enteredNum={enteredNum}
         />
       )}
+      </div>
+<div>
+  <VideoUploadSection/>
+</div>
+
 
       {/* {activeTab === 'check' && (
         <div className="checkFolder">
