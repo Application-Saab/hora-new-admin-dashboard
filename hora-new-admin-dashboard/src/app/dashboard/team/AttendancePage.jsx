@@ -11,7 +11,7 @@ export default function AttendancePage() {
     const today = new Date();
     const [selectedMonth, setSelectedMonth] = useState(today.getMonth());
     const [selectedYear, setSelectedYear] = useState(today.getFullYear());
-
+const [selectedEmployee, setSelectedEmployee] = useState("");
     const [teamData, setTeamData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -430,27 +430,29 @@ export default function AttendancePage() {
                                 <div className="form-group">
                                     <label className="form-label">Select Employee</label>
 
-                                    <SearchWithDropDown
-                                        options={teamData.map(
-                                            (member) => `${member.name?.trim()} (${member.number})`
-                                        )}
-                                        selectedValue=""
-                                        onChange={(selectedEmployeeText) => {
-                                            const member = teamData.find(
-                                                (item) =>
-                                                    `${item.name?.trim()} (${item.number})` ===
-                                                    selectedEmployeeText
-                                            );
+<SearchWithDropDown
+    options={teamData.map(
+        (member) => `${member.name?.trim()} (${member.number})`
+    )}
+    selectedValue={selectedEmployee}
+    onChange={(selectedEmployeeText) => {
+        setSelectedEmployee(selectedEmployeeText);
 
-                                            if (member) {
-                                                setLeaveForm(prev => ({
-                                                    ...prev,
-                                                    memberId: member._id,
-                                                }));
-                                            }
-                                        }}
-                                        placeholder="Select Employee..."
-                                    />
+        const member = teamData.find(
+            (item) =>
+                `${item.name?.trim()} (${item.number})` ===
+                selectedEmployeeText
+        );
+
+        if (member) {
+            setLeaveForm(prev => ({
+                ...prev,
+                memberId: member._id,
+            }));
+        }
+    }}
+    placeholder="Select Employee..."
+/>
                                 </div>
 
                                 <div className="form-group">
