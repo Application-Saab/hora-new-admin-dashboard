@@ -678,9 +678,9 @@ const ActionPopup = ({
           if (product && product.tag?.length > 0) {
             const matchedTag = product.tag.find((tag) => categoryMap[tag]);
             if (matchedTag) {
-              const categoryName = categoryMap[matchedTag];
+              // const categoryName = categoryMap[matchedTag];
               const formattedName = dec.name.split(" ").join("-");
-              const finalUrl = `${BASE_URL}/balloon-decoration/${categoryName}/product/${formattedName}`;
+              const finalUrl = `${BASE_URL}/balloon-decoration/product/${formattedName}`;
               message += `*Product Page:* ${finalUrl}\n`;
             } else {
               console.warn("❌ No matching tag found for:", dec.name);
