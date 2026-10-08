@@ -472,3 +472,8 @@ button[disabled] {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+.amount-fields{
+min-width: 200px;
+max-width: 200px;
+}

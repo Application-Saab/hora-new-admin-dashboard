@@ -63,6 +63,8 @@ const CreateOrderForm = ({
   const [message, setMessage] = useState("");
   const [messageColor, setMessageColor] = useState("");
   const [customerId, setCustomerId] = useState(null);
+  const [errors, setErrors] = useState({});
+
   // const [showButton, setShowButton] = useState(false);
   // const [inclusion, setInclusion] = useState("");
   // const [totalDiscount, setTotalDiscount] = useState()
@@ -299,6 +301,49 @@ const CreateOrderForm = ({
 
   const handleSubmit = async (e, isEmergency = false) => {
     e.preventDefault();
+
+
+    const newErrors = {};
+
+    if (!customerNumber || customerNumber.length !== 10) {
+      newErrors.customerNumber = "Please enter 10 digit customer number";
+    }
+
+    if (!orderTakenBy) {
+      newErrors.orderTakenBy = "Please select order taken by";
+    }
+
+    if (!date) {
+      newErrors.date = "Please select date";
+    }
+
+    if (!timeSlot) {
+      newErrors.timeSlot = "Please select time slot";
+    }
+
+    if (!address.trim()) {
+      newErrors.address = "Please enter address";
+    }
+
+    if (!totalamount) {
+      newErrors.totalamount = "Please enter total amount";
+    }
+
+    if (!city) {
+      newErrors.city = "Please select city";
+    }
+
+    if (!pincode) {
+      newErrors.pincode = "Please enter pincode";
+    }
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      return;
+    }
+
+
     setlLoading(true);
     const formattedDate = date ? formatDate(date) : null;
 
@@ -545,15 +590,23 @@ const CreateOrderForm = ({
             type="text"
             id="customerNumber"
             value={customerNumber}
-            onInput={(e) =>
-              setCustomerNumber(e.target.value.replace(/\D/g, ""))
-            } // Remove non-digits as the user types
+            onInput={(e) => {
+              const value = e.target.value.replace(/\D/g, "");
+              setCustomerNumber(value);
+
+              if (value.length === 10) {
+                setErrors((prev) => ({ ...prev, customerNumber: "" }));
+              }
+            }}
             placeholder="Customer Number"
             required
             maxLength={10} // Limit to 10 digits
             pattern="\d{10}" // Enforce exactly 10 digits
             inputMode="numeric" // Optimize for numeric input on mobile devices
           />
+          {errors.customerNumber && (
+            <span style={{ color: "red", marginTop: "5px" }}>{errors.customerNumber}</span>
+          )}
           <button
             onClick={handleCheckCustomer}
             className="orderCheck-btn"
@@ -570,9 +623,17 @@ const CreateOrderForm = ({
               <SearchWithDropDown
                 options={teams?.map((team) => team.name) || []}
                 selectedValue={orderTakenBy}
-                onChange={(value) => setOrderTakenBy(value)}
+                onChange={(value) => {
+                  setOrderTakenBy(value);
+                  if (value) {
+                    setErrors((prev) => ({ ...prev, orderTakenBy: "" }));
+                  }
+                }}
                 placeholder="Search Team..."
               />
+              {errors.orderTakenBy && (
+                <span style={{ color: "red", marginTop: "5px" }}>{errors.orderTakenBy}</span>
+              )}
               <div
                 className="date-time-container"
                 style={style.dateTimeContainer}
@@ -585,10 +646,18 @@ const CreateOrderForm = ({
                     type="date"
                     id="date"
                     value={date}
-                    onChange={(e) => setDate(e.target.value)}
+                    onChange={(e) => {
+                      setDate(e.target.value);
+                      if (e.target.value) {
+                        setErrors((prev) => ({ ...prev, date: "" }));
+                      }
+                    }}
                     required
                     style={style.input}
                   />
+                  {errors.date && (
+                    <span style={{ color: "red", marginTop: "5px" }}>{errors.date}</span>
+                  )}
                 </div>
 
                 <div style={style.dateTimeField}>
@@ -598,11 +667,20 @@ const CreateOrderForm = ({
                   <Select
                     options={timeSlotOptions}
                     value={timeSlot}
-                    onChange={(selectedOption) => setTimeSlot(selectedOption)}
+                    onChange={(selectedOption) => {
+                      setTimeSlot(selectedOption);
+                      if (selectedOption) {
+                        setErrors((prev) => ({ ...prev, timeSlot: "" }));
+                      }
+                    }}
                     placeholder="Select Time Slot"
                     required
                   />
+                  {errors.timeSlot && (
+                    <span style={{ color: "red", marginTop: "5px" }}>{errors.timeSlot}</span>
+                  )}
                 </div>
+                
               </div>
               <label htmlFor="address" style={style.label}>
                 Address*
@@ -611,11 +689,20 @@ const CreateOrderForm = ({
                 type="text"
                 id="address"
                 value={address}
-                onChange={(e) => setAddress(e.target.value)}
+                onChange={(e) => {
+                  setAddress(e.target.value);
+
+                  if (e.target.value.trim()) {
+                    setErrors((prev) => ({ ...prev, address: "" }));
+                  }
+                }}
                 placeholder="Address"
                 style={style.textArea}
                 required
               />
+              {errors.address && (
+                <span style={{ color: "red", marginTop: "5px" }}>{errors.address}</span>
+              )}
 
               <label htmlFor="googleLocation" style={style.label}>
                 Google Location
@@ -636,11 +723,19 @@ const CreateOrderForm = ({
                 type="text"
                 id="totalamount"
                 value={totalamount}
-                onChange={(e) => setTotalAmount(e.target.value)}
+                onChange={(e) => {
+                  setTotalAmount(e.target.value);
+
+                  if (e.target.value) {
+                    setErrors((prev) => ({ ...prev, totalamount: "" }));
+                  }
+                }}
                 placeholder="Total Amount"
                 required
               />
-
+              {errors.totalamount && (
+                <div style={{ color: "red", marginTop: "5px" }}>{errors.totalamount}</div>
+              )}
               <label htmlFor="advanceamount" style={style.label}>
                 Advance Amount
               </label>
@@ -693,7 +788,13 @@ const CreateOrderForm = ({
                 <select
                   id="city"
                   value={city}
-                  onChange={(e) => setCity(e.target.value)}
+                  onChange={(e) => {
+                    setCity(e.target.value);
+
+                    if (e.target.value) {
+                      setErrors((prev) => ({ ...prev, city: "" }));
+                    }
+                  }}
                   required
                   style={style.citySelect}
                 >
@@ -705,6 +806,10 @@ const CreateOrderForm = ({
                   <option value="Mumbai">Mumbai</option>
                   <option value="Hyderabad">Hyderabad</option>
                 </select>
+
+                {errors.city && (
+                  <span style={{ color: "red", marginTop: "5px" }}>{errors.city}</span>
+                )}
               </div>
 
               <label htmlFor="pincode" style={style.label}>
@@ -714,8 +819,17 @@ const CreateOrderForm = ({
                 type="text"
                 id="pincode"
                 value={pincode}
-                onChange={(e) => setPincode(e.target.value)}
+                onChange={(e) => {
+                  setPincode(e.target.value);
+
+                  if (e.target.value) {
+                    setErrors((prev) => ({ ...prev, pincode: "" }));
+                  }
+                }}
               />
+              {errors.pincode && (
+                <span style={{ color: "red", marginTop: "5px" }}>{errors.pincode}</span>
+              )}
               <p
                 style={{ ...style.pincodeMessage, color: pincodeMessageColor }}
               >
