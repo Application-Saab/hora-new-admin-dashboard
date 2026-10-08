@@ -1,0 +1,186 @@
+/* =========================================
+   MAIN PAGE
+========================================= */
+
+.specialization-page {
+    width: 100%;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+.specialization-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.specialization-header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.add-btn {
+    border: none;
+    background: #97538c;
+    color: #fff;
+    padding: 7px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+
+/* =========================================
+   MAIN LIST ONLY
+========================================= */
+
+.specialization-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,
+            minmax(280px, 340px));
+    gap: 12px;
+    align-items: start;
+}
+
+.specialization-item {
+    width: 100%;
+    min-height: 76px;
+
+    padding: 10px 11px;
+    box-sizing: border-box;
+
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 9px;
+
+    display: flex;
+    align-items: center;
+}
+
+.specialization-image {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+
+    object-fit: contain;
+    border-radius: 8px;
+    background: #f8f8f8;
+}
+
+.specialization-info {
+    flex: 1;
+    min-width: 0;
+    margin-left: 11px;
+}
+
+.specialization-info p {
+    margin: 0;
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+}
+
+.specialization-actions {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: 8px;
+}
+
+.specialization-actions button {
+    border: 1px solid #dedede;
+    background: #fff;
+    padding: 5px 9px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 11px;
+}
+
+.specialization-actions .delete-action {
+    color: #e53935;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 900px) {
+    .specialization-list {
+        grid-template-columns: repeat(auto-fill,
+                minmax(260px, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .specialization-page {
+        padding: 12px;
+    }
+
+    .specialization-list {
+        grid-template-columns: 1fr;
+    }
+}
+.specialization-popup-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.specialization-popup-form .form-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.specialization-popup-form label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+.specialization-popup-form input[type="text"] {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    box-sizing: border-box;
+
+    border: 1px solid #d8d8d8;
+    border-radius: 6px;
+    outline: none;
+
+    font-size: 14px;
+}
+
+.specialization-popup-form input[type="text"]:focus {
+    border-color: #97538c;
+}
+
+.specialization-popup-form input[type="file"] {
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 13px;
+}
+
+.preview-wrapper {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    margin-top: -4px;
+}
+
+.image-preview {
+    width: 90px;
+    height: 90px;
+    object-fit: contain;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    background: #f7f7f7;
+    padding: 4px;
+    box-sizing: border-box;
+}

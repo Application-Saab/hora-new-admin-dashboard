@@ -160,6 +160,11 @@ const menuItems = [
         icon: <FaClipboardList />,
         url: "/dashboard/photography-theme"
       }, 
+      {
+        label: "Specializations list",
+        icon: <FaPlusCircle />,
+        url: "/dashboard/specalization-list",
+      },
     ],
   },
 
