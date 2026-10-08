@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./vendorRating.css";
 import { BASE_URL, ADMIN_USER_LIST, SUPPLIER_PERSONALDETAILS_UPDATE } from "../../../utils/apiconstant";
+import { useRouter } from "next/navigation";
+
 
 const VendorRating = () => {
   const [selectedCity, setSelectedCity] = useState("");
@@ -20,7 +22,7 @@ const VendorRating = () => {
     8: "Photography"
   };
 
-
+  const router = useRouter();
   // Fetch Vendors from API
   const fetchVendors = async () => {
     try {
@@ -168,6 +170,7 @@ const VendorRating = () => {
               <th>Phone Number</th>
               <th>Badge</th>
               <th>Order Limit (Of Given Day)</th>
+              <th>View Details</th>
             </tr>
           </thead>
           <tbody>
@@ -221,6 +224,19 @@ const VendorRating = () => {
                       Save
                     </button>
 
+                  </td>
+
+                  <td>
+                    <button
+                      className="edit-details-btn"
+                      onClick={() =>
+                        router.push(
+                          `/dashboard/vendor-details?id=${vendor._id}&phone=${encodeURIComponent(vendor.phone || "")}`
+                        )
+                      }
+                    >
+                      Edit Details
+                    </button>
                   </td>
 
                 </tr>
