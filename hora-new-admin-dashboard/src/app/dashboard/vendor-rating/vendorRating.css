@@ -177,3 +177,17 @@
   opacity:0.4;
   cursor:not-allowed;
 }
+.edit-details-btn {
+  background: #97538C;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.edit-details-btn:hover {
+  opacity: 0.9;
+}
