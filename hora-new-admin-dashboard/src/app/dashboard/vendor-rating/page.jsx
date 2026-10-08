@@ -227,16 +227,21 @@ const VendorRating = () => {
                   </td>
 
                   <td>
-                    <button
-                      className="edit-details-btn"
-                      onClick={() =>
-                        router.push(
-                          `/dashboard/vendor-details?id=${vendor._id}&phone=${encodeURIComponent(vendor.phone || "")}`
-                        )
-                      }
-                    >
-                      Edit Details
-                    </button>
+                    {vendor.job_profile === "Photography" &&
+                      String(vendor.order_type) === "8" && (
+                        <button
+                          className="edit-details-btn"
+                          onClick={() =>
+                            router.push(
+                              `/dashboard/vendor-details?id=${vendor._id}&phone=${encodeURIComponent(
+                                vendor.phone || ""
+                              )}`
+                            )
+                          }
+                        >
+                          Edit Details
+                        </button>
+                      )}
                   </td>
 
                 </tr>
