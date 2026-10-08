@@ -630,8 +630,12 @@ const EditVendorDetails = () => {
                     <button className="ed-btn-outline" onClick={() => setModal("details")}>Edit</button>
                 </div>
                 <div className="ed-profile">
-                    <div className="ed-avatar">
-                        {user?.avatar ? <img src={user.avatar} alt="avatar" /> : <span>{(user?.name || "?")[0]}</span>}
+                    <div className="avatar">
+                        {(user?.avatar && user.avatar !="attachment-1678985070996.jpg") ? (
+                            <img src={`${user.avatar}`} alt="avatar" />
+                        ) : (
+                            <span>{(user?.name || "?")[0].toUpperCase()}</span>
+                        )}
                     </div>
                     <div className="ed-info">
                         <div><b>Name:</b> {user?.name || "N/A"}</div>
