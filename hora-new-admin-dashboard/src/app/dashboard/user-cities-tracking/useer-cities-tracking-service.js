@@ -1,31 +1,26 @@
 import axios from "axios";
-import { BASE_URL, GET_CITY_TRACKING_LIST } from "@/utils/apiconstant";
+import { BASE_URL, GET_CITY_TRACKING_LIST, GET_CITY_TRACKING_STATS } from "@/utils/apiconstant";
 
-let latestRequestId = 0;
+let latestListRequestId = 0;
+let latestStatsRequestId = 0;
 
-export const fetchUserCitiesTracking = async ({
+export const fetchUserCitiesTrackingList = async ({
   setLoading,
   setData,
   setPagination,
-  setStats,
-
   page = 1,
   limit = 10,
-
   search = "",
-
   cityName = "",
   startDate = "",
   endDate = "",
-
   searchedUsers = false,
   eventDateUsers = false,
   whatsappUsers = false,
   loggedInUsers = false,
-
   signal,
 }) => {
-  const requestId = ++latestRequestId;
+  const requestId = ++latestListRequestId;
 
   try {
     setLoading(true);
@@ -34,45 +29,73 @@ export const fetchUserCitiesTracking = async ({
       params: {
         page,
         limit,
-
         search,
-
         cityName,
         startDate,
         endDate,
-
         searchedUsers,
         eventDateUsers,
         whatsappUsers,
         loggedInUsers,
       },
-
       signal,
     });
-    if (requestId !== latestRequestId) {
-      return;
-    }
+
+    if (requestId !== latestListRequestId) return;
 
     const responseData = res?.data?.data;
 
     setData(responseData?.cityList || []);
-
     setPagination(responseData?.pagination || {});
-
-    setStats(responseData?.stats || {});
   } catch (err) {
-    if (
-      axios.isCancel(err) ||
-      err?.name === "CanceledError" ||
-      signal?.aborted
-    ) {
+    if (axios.isCancel(err) || err?.name === "CanceledError" || signal?.aborted) {
       return;
     }
-
-    console.error("User Cities Tracking API Error:", err);
+    console.error("User Cities Tracking List API Error:", err);
   } finally {
-    if (requestId === latestRequestId && !signal?.aborted) {
+    if (requestId === latestListRequestId && !signal?.aborted) {
       setLoading(false);
     }
+  }
+};
+
+export const fetchUserCitiesTrackingStats = async ({
+  setStats,
+  search = "",
+  cityName = "",
+  startDate = "",
+  endDate = "",
+  searchedUsers = false,
+  eventDateUsers = false,
+  whatsappUsers = false,
+  loggedInUsers = false,
+  signal,
+}) => {
+  const requestId = ++latestStatsRequestId;
+
+  try {
+    const res = await axios.get(`${BASE_URL}${GET_CITY_TRACKING_STATS}`, {
+      params: {
+        search,
+        cityName,
+        startDate,
+        endDate,
+        searchedUsers,
+        eventDateUsers,
+        whatsappUsers,
+        loggedInUsers,
+      },
+      signal,
+    });
+
+    if (requestId !== latestStatsRequestId) return;
+
+    const responseData = res?.data?.data;
+    setStats(responseData?.stats || {});
+  } catch (err) {
+    if (axios.isCancel(err) || err?.name === "CanceledError" || signal?.aborted) {
+      return;
+    }
+    console.error("User Cities Tracking Stats API Error:", err);
   }
 };

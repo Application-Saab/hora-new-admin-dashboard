@@ -8,7 +8,7 @@ import {
   fetchDecorationMaterials,
   handleMaterialStatusToggle,
 } from "../../../services/decorationMaterialListServices";
-import { BASE_URL } from "@/utils/apiconstant";
+import { IMAGE_BASE_URL } from "@/utils/apiconstant";
 
 const DishTable = () => {
   const [dishes, setDishes] = useState([]);
@@ -25,13 +25,17 @@ const DishTable = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Filter states
   const [searchName, setSearchName] = useState("");
   const [materialCategory, setMaterialCategory] = useState("");
   const [materialStatus, setMaterialStatus] = useState("");
   const [showCreateMaterialPopup, setShowCreateMaterialPopup] = useState(false);
   const [showEditMaterialPopup, setShowEditMaterialPopup] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState(null);
+
+  // Image Preview Popup
+  const [previewImage, setPreviewImage] = useState(null);
+  const [copyStatus, setCopyStatus] = useState("");
+  const [isPreparing, setIsPreparing] = useState(false);
 
   const callMaterialAPi = () => {
     fetchDecorationMaterials(
@@ -57,27 +61,170 @@ const DishTable = () => {
     setShowEditMaterialPopup(true);
   };
 
-  // Handle search input change
   const handleSearchChange = (e) => {
     setSearchName(e.target.value);
-    setPage(1); // Reset to first page when searching
+    setPage(1);
   };
 
-  // Handle material category filter change
   const handleCategoryChange = (e) => {
     setMaterialCategory(e.target.value);
-    setPage(1); // Reset to first page when filtering
+    setPage(1);
   };
 
-  // Handle material status filter change
   const handleStatusChange = (e) => {
     setMaterialStatus(e.target.value);
-    setPage(1); // Reset to first page when filtering
+    setPage(1);
+  };
+
+  const openImagePreview = async (dish) => {
+    if (!dish?.images) return;
+
+    const url = `${IMAGE_BASE_URL}/${dish.images}`;
+
+    setPreviewImage({
+      url,
+      name: dish.materialName || "Material",
+      blob: null,
+    });
+    setCopyStatus("");
+    setIsPreparing(true);
+
+    try {
+      const response = await fetch(url, { mode: "cors" });
+
+      if (!response.ok) {
+        throw new Error(`Image fetch failed: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const clipboardBlob = await convertToPng(blob, 1920);
+
+      setPreviewImage((prev) => ({
+        ...prev,
+        blob: clipboardBlob,
+      }));
+    } catch (error) {
+      console.error("Failed to prepare image:", error);
+    } finally {
+      setIsPreparing(false);
+    }
+  };
+
+  const closeImagePreview = () => {
+    setPreviewImage(null);
+    setCopyStatus("");
+    setIsPreparing(false);
+  };
+
+  // Copy Image URL
+  const handleCopyUrl = async () => {
+    if (!previewImage?.url) return;
+
+    try {
+      await navigator.clipboard.writeText(previewImage.url);
+      setCopyStatus("url");
+      setTimeout(() => setCopyStatus(""), 2000);
+    } catch (err) {
+      console.error("Failed to copy URL:", err);
+      alert("Failed to copy URL");
+    }
+  };
+
+  // Copy Image (PNG only)
+  const handleCopyImage = async () => {
+    if (!previewImage?.blob) {
+      alert("Image is still preparing. Please wait a moment.");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          "image/png": previewImage.blob,
+        }),
+      ]);
+
+      setCopyStatus("image");
+      setTimeout(() => setCopyStatus(""), 2000);
+    } catch (err) {
+      console.error("Failed to copy image:", err);
+
+      if (err?.name === "NotAllowedError") {
+        alert("Browser blocked image clipboard access. Please try again.");
+      } else {
+        alert("Failed to copy image. You can still copy the URL.");
+      }
+    }
+  };
+
+  const convertToPng = (blob, maxSize = 1920) => {
+    return new Promise((resolve, reject) => {
+      const img = new window.Image();
+      const objectUrl = URL.createObjectURL(blob);
+
+      img.onload = () => {
+        try {
+          let { naturalWidth: width, naturalHeight: height } = img;
+
+          // Resize if too large (keeps aspect ratio)
+          if (width > maxSize || height > maxSize) {
+            if (width > height) {
+              height = Math.round((height * maxSize) / width);
+              width = maxSize;
+            } else {
+              width = Math.round((width * maxSize) / height);
+              height = maxSize;
+            }
+          }
+
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            URL.revokeObjectURL(objectUrl);
+            reject(new Error("Canvas context unavailable"));
+            return;
+          }
+
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, width, height);
+
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(
+            (pngBlob) => {
+              URL.revokeObjectURL(objectUrl);
+
+              if (pngBlob) {
+                resolve(pngBlob);
+              } else {
+                reject(new Error("PNG conversion failed"));
+              }
+            },
+            "image/png",
+            0.92,
+          );
+        } catch (err) {
+          URL.revokeObjectURL(objectUrl);
+          reject(err);
+        }
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error("Image load failed"));
+      };
+
+      img.src = objectUrl;
+    });
   };
 
   return (
     <div className="container">
       <h1 className="header-title">Decoration Material List</h1>
+
       <div className="add-package-btn-ctn">
         <button
           className="add-package-btn"
@@ -143,13 +290,19 @@ const DishTable = () => {
               dishes.map((dish) => (
                 <tr key={dish._id}>
                   <td className="dish-image">
-                    <Image
-                      src={`${BASE_URL}/api/uploads/${dish?.images}`}
-                      alt={dish.name}
-                      className="image"
-                      width={40}
-                      height={40}
-                    />
+                    <div
+                      className="image-clickable"
+                      onClick={() => openImagePreview(dish)}
+                      title="Click to preview"
+                    >
+                      <Image
+                        src={`${IMAGE_BASE_URL}/${dish?.images}`}
+                        alt={dish.materialName || "Material"}
+                        className="image"
+                        width={40}
+                        height={40}
+                      />
+                    </div>
                   </td>
                   <td>{dish.specs}</td>
                   <td>{dish.type}</td>
@@ -169,7 +322,9 @@ const DishTable = () => {
                           () => callMaterialAPi(),
                         )
                       }
-                      className={`status-button ${dish.materialStatus === 1 ? "active" : "inactive"}`}
+                      className={`status-button ${
+                        dish.materialStatus === 1 ? "active" : "inactive"
+                      }`}
                     >
                       {dish.materialStatus === 1 ? "Active" : "Inactive"}
                     </button>
@@ -186,13 +341,14 @@ const DishTable = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="13" className="no-data">
-                  No dishes found
+                <td colSpan="12" className="no-data">
+                  No materials found
                 </td>
               </tr>
             )}
           </tbody>
         </table>
+
         {showCreateMaterialPopup && (
           <CreateMaterialPopup
             isOpen={showCreateMaterialPopup}
@@ -200,6 +356,7 @@ const DishTable = () => {
             onSuccess={callMaterialAPi}
           />
         )}
+
         {showEditMaterialPopup && (
           <EditMaterialPopup
             isOpen={showEditMaterialPopup}
@@ -233,6 +390,50 @@ const DishTable = () => {
       )}
 
       {loading && <div className="loading-overlay">Loading...</div>}
+
+      {previewImage && (
+        <div className="image-preview-overlay" onClick={closeImagePreview}>
+          <div
+            className="image-preview-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button className="image-preview-close" onClick={closeImagePreview}>
+              ×
+            </button>
+
+            <div className="image-preview-title">{previewImage.name}</div>
+
+            <div className="image-preview-body">
+              <img
+                src={previewImage.url}
+                alt={previewImage.name}
+                className="image-preview-img"
+              />
+            </div>
+
+            <div className="image-preview-actions">
+              <button
+                className="preview-btn copy-image-btn"
+                onClick={handleCopyImage}
+                disabled={isPreparing || !previewImage?.blob}
+              >
+                {isPreparing
+                  ? "Preparing..."
+                  : copyStatus === "image"
+                    ? "✓ Copied!"
+                    : "Copy Image"}
+              </button>
+
+              <button
+                className="preview-btn copy-url-btn"
+                onClick={handleCopyUrl}
+              >
+                {copyStatus === "url" ? "✓ Copied!" : "Copy Image URL"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

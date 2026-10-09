@@ -220,3 +220,131 @@
     font-weight: 500;
     font-size: 0.9em;
 }
+
+
+/* Clickable image in table */
+.image-clickable {
+  cursor: pointer;
+  display: inline-block;
+  border-radius: 6px;
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.image-clickable:hover {
+  transform: scale(1.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Overlay */
+.image-preview-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+}
+
+/* Modal */
+.image-preview-modal {
+  background: #fff;
+  border-radius: 12px;
+  max-width: 420px;
+  width: 100%;
+  padding: 20px;
+  position: relative;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  animation: previewFadeIn 0.2s ease;
+}
+
+@keyframes previewFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.image-preview-close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  color: #666;
+}
+
+.image-preview-close:hover {
+  color: #000;
+}
+
+.image-preview-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  text-align: center;
+  padding-right: 24px;
+}
+
+.image-preview-body {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.image-preview-img {
+  max-width: 100%;
+  max-height: 280px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+/* Buttons */
+.image-preview-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.preview-btn {
+  flex: 1;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.copy-image-btn {
+  background: #2563eb;
+  color: white;
+}
+
+.copy-image-btn:hover {
+  background: #1d4ed8;
+}
+
+.copy-url-btn {
+  background: #059669;
+  color: white;
+}
+
+.copy-url-btn:hover {
+  background: #047857;
+}
+
+.preview-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

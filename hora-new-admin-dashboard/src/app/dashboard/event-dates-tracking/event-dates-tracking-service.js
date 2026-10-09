@@ -1,5 +1,6 @@
-import { BASE_URL, GET_EVENT_DATES_LISTING_DATA } from "@/utils/apiconstant";
 import axios from "axios";
+import { BASE_URL, GET_EVENT_DATES_LISTING_DATA } from "@/utils/apiconstant";
+let latestRequestId = 0;
 
 export const fetchEventDatesListingData = async ({
   setLoading,
@@ -10,7 +11,9 @@ export const fetchEventDatesListingData = async ({
   search = "",
   startDate = "",
   endDate = "",
+  signal,
 }) => {
+  const requestId = ++latestRequestId;
   try {
     setLoading(true);
 
@@ -22,17 +25,27 @@ export const fetchEventDatesListingData = async ({
         startDate,
         endDate,
       },
+      signal,
     });
-    setData(res.data.data.eventList);
-    setPagination(res.data.data.pagination);
+
+    if (requestId !== latestRequestId) return;
+
+    const responseData = res?.data?.data;
+    setData(responseData?.eventList || []);
+    setPagination(responseData?.pagination || {});
   } catch (err) {
-    // ignore cancelled requests
-    if (err.name === "CanceledError" || err.code === "ERR_CANCELED") {
+    if (
+      axios.isCancel(err) ||
+      err?.name === "CanceledError" ||
+      signal?.aborted
+    ) {
       return;
     }
 
-    console.error(err);
+    console.error("Event Dates Listing API Error:", err);
   } finally {
-    setLoading(false);
+    if (requestId === latestRequestId && !signal?.aborted) {
+      setLoading(false);
+    }
   }
 };

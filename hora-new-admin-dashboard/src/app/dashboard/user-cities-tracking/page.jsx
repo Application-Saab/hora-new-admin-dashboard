@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import "./user-cities-tracking.css";
-import { fetchUserCitiesTracking } from "./useer-cities-tracking-service";
+import { fetchUserCitiesTrackingList, fetchUserCitiesTrackingStats } from "./useer-cities-tracking-service";
 
 const CityNames = {
   delhi: "Delhi",
@@ -80,46 +80,53 @@ const UserCitiesTracking = () => {
     };
   }, [search]);
 
-  useEffect(() => {
-    const controller = new AbortController();
+useEffect(() => {
+  const controller = new AbortController();
 
-    fetchUserCitiesTracking({
-      setLoading,
-      setData,
-      setPagination,
-      setStats,
-
-      page,
-      search: debouncedSearch,
-
-      cityName: appliedFilters.cityName,
-      startDate: appliedFilters.startDate,
-      endDate: appliedFilters.endDate,
-
-      searchedUsers: appliedFilters.searchedUsers,
-      eventDateUsers: appliedFilters.eventDateUsers,
-      whatsappUsers: appliedFilters.whatsappUsers,
-      loggedInUsers: appliedFilters.loggedInUsers,
-
-      signal: controller.signal,
-    });
-
-    return () => {
-      controller.abort();
-    };
-  }, [
+  fetchUserCitiesTrackingList({
+    setLoading,
+    setData,
+    setPagination,
     page,
-    debouncedSearch,
+    search: debouncedSearch,
+    cityName: appliedFilters.cityName,
+    startDate: appliedFilters.startDate,
+    endDate: appliedFilters.endDate,
+    searchedUsers: appliedFilters.searchedUsers,
+    eventDateUsers: appliedFilters.eventDateUsers,
+    whatsappUsers: appliedFilters.whatsappUsers,
+    loggedInUsers: appliedFilters.loggedInUsers,
+    signal: controller.signal,
+  });
 
-    appliedFilters.cityName,
-    appliedFilters.startDate,
-    appliedFilters.endDate,
+  // Stats (parallel)
+  fetchUserCitiesTrackingStats({
+    setStats,
+    search: debouncedSearch,
+    cityName: appliedFilters.cityName,
+    startDate: appliedFilters.startDate,
+    endDate: appliedFilters.endDate,
+    searchedUsers: appliedFilters.searchedUsers,
+    eventDateUsers: appliedFilters.eventDateUsers,
+    whatsappUsers: appliedFilters.whatsappUsers,
+    loggedInUsers: appliedFilters.loggedInUsers,
+    signal: controller.signal,
+  });
 
-    appliedFilters.searchedUsers,
-    appliedFilters.eventDateUsers,
-    appliedFilters.whatsappUsers,
-    appliedFilters.loggedInUsers,
-  ]);
+  return () => {
+    controller.abort();
+  };
+}, [
+  page,
+  debouncedSearch,
+  appliedFilters.cityName,
+  appliedFilters.startDate,
+  appliedFilters.endDate,
+  appliedFilters.searchedUsers,
+  appliedFilters.eventDateUsers,
+  appliedFilters.whatsappUsers,
+  appliedFilters.loggedInUsers,
+]);
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
