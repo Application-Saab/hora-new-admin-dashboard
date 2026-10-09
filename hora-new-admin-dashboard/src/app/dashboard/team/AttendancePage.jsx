@@ -69,6 +69,14 @@ const [selectedEmployee, setSelectedEmployee] = useState("");
                 initialMap[member._id] = {};
             });
 
+            const joiningDateMap = {};
+            members.forEach(member => {
+                const joinSource = member.joiningDate || member.createdAt;
+                joiningDateMap[member._id] = joinSource
+                    ? normalizeDate(new Date(joinSource))
+                    : null;
+            });
+
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateObj = new Date(selectedYear, selectedMonth, day);
                 const dateObjNormalized = normalizeDate(dateObj);
@@ -88,7 +96,13 @@ const [selectedEmployee, setSelectedEmployee] = useState("");
                         weekday: 'long'
                     });
 
-                    if (isFuture) {
+                    const joiningDate = joiningDateMap[member._id];
+                    const isBeforeJoining = joiningDate && dateObjNormalized < joiningDate;
+
+                    if (isBeforeJoining) {
+                        defaultStatus = 'Not Joined';
+                        defaultReason = 'Member had not joined yet';
+                    } else if (isFuture) {
                         defaultStatus = '-';
                     } else if (
                         member.weekOff &&
@@ -114,14 +128,17 @@ const [selectedEmployee, setSelectedEmployee] = useState("");
                 const fetchedRecords = attendanceResult.data || [];
 
                 fetchedRecords.forEach(rec => {
-                    if (initialMap[rec.memberId] && initialMap[rec.memberId][rec.date]) {
-                        initialMap[rec.memberId][rec.date] = {
-                            status: rec.status,
-                            reason: rec.reason || '-',
-                            leaveType: rec.leaveType || '',
-                            halfDayType: rec.halfDayType || ''
-                        };
-                    }
+                    const cell = initialMap[rec.memberId]?.[rec.date];
+                    if (!cell) return;
+
+                    if (cell.status === 'Not Joined') return;
+
+                    initialMap[rec.memberId][rec.date] = {
+                        status: rec.status,
+                        reason: rec.reason || '-',
+                        leaveType: rec.leaveType || '',
+                        halfDayType: rec.halfDayType || ''
+                    };
                 });
             }
 
@@ -343,6 +360,10 @@ const [selectedEmployee, setSelectedEmployee] = useState("");
                                                     }
                                                     else if (record.status === 'Week Off') badgeClass = "badge badge-sunday";
                                                     else if (record.status === 'Holiday') badgeClass = "badge badge-holiday";
+                                                    else if (record.status === 'Not Joined') {
+                                                        badgeClass = "badge badge-future";
+                                                        displayStatus = '-';
+                                                    }
                                                     else if (record.status === '-') badgeClass = "badge badge-future";
 
                                                     const hasDetails = record.status === 'Leave' || record.status === 'Holiday' || record.status === 'Week Off';
