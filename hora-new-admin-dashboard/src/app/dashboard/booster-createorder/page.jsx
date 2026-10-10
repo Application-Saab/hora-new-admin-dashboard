@@ -11,7 +11,7 @@ import {
   CONFIRM_ORDER_ENDPOINT,
   SAVE_LOCATION_ENDPOINT,
   API_SUCCESS_CODE,
-  ADMIN_USER_LIST,
+  ADMIN_USER_LIST, 
   CREATE_WONDERLAND_EVENT,
 } from "../../../utils/apiconstant";
 import { pincodes } from "../../../utils/pincodes.js";
@@ -54,6 +54,8 @@ const AddDecOrder = () => {
   const [newCustomerName, setNewCustomerName] = useState("");
   const [newCustomerPhone, setNewCustomerPhone] = useState("");
   const [isOrderCreated, setIsOrderCreated] = useState(false);
+
+  const [errors, setErrors] = useState({});
 
   // Wonderland Event states
   const [wonderlandevent, setWonderlandEvent] = useState("");
@@ -159,6 +161,8 @@ const AddDecOrder = () => {
           } else {
             setShowProductDetails(false);
             setDishNameError("No product found");
+
+            setErrors((prev) => ({ ...prev, product: "" }));
           }
         } catch (error) {
           console.error("Error fetching product:", error.message);
@@ -278,6 +282,51 @@ const AddDecOrder = () => {
   const [lloading, setlLoading] = useState(false);
   const handleSubmit = async (e, isEmergency = false) => {
     e.preventDefault();
+
+    const newErrors = {};
+
+    if (!product || !product._id) {
+      newErrors.product = "Please select a product";
+    }
+
+    if (!customerNumber || customerNumber.length !== 10) {
+      newErrors.customerNumber = "Please enter 10 digit customer number";
+    }
+
+    if (!orderTakenBy) {
+      newErrors.orderTakenBy = "Please select order taken by";
+    }
+
+    if (!date) {
+      newErrors.date = "Please select date";
+    }
+
+    if (!timeSlot) {
+      newErrors.timeSlot = "Please select time slot";
+    }
+
+    if (!address.trim()) {
+      newErrors.address = "Please enter address";
+    }
+
+    if (!totalamount) {
+      newErrors.totalamount = "Please enter total amount";
+    }
+
+    if (!city) {
+      newErrors.city = "Please select city";
+    }
+
+    if (!pincode) {
+      newErrors.pincode = "Please enter pincode";
+    }
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      return;
+    }
+
     setlLoading(true);
 
     const formattedDate = date ? formatDate(date) : null;
@@ -415,6 +464,10 @@ Order Taken By: ${orderTakenBy}
           required
         />
 
+        {errors.product && (
+          <span style={{ color: "red", marginTop: "5px" }}>{errors.product}</span>
+        )}
+
         {!showProductDetails && (
           <button
             type="button"
@@ -463,15 +516,23 @@ Order Taken By: ${orderTakenBy}
               type="text"
               id="customerNumber"
               value={customerNumber}
-              onInput={(e) =>
-                setCustomerNumber(e.target.value.replace(/\D/g, ""))
-              }
+              onInput={(e) => {
+                const value = e.target.value.replace(/\D/g, "");
+                setCustomerNumber(value);
+
+                if (value.length === 10) {
+                  setErrors((prev) => ({ ...prev, customerNumber: "" }));
+                }
+              }}
               placeholder="Customer Number"
               required
               maxLength={10}
               pattern="\d{10}"
               inputMode="numeric"
             />
+            {errors.customerNumber && (
+              <span style={{ color: "red", marginTop: "5px" }}>{errors.customerNumber}</span>
+            )}
             <button
               className="orderCheck-btn"
               onClick={handleCheckCustomer}
@@ -500,9 +561,17 @@ Order Taken By: ${orderTakenBy}
                   <SearchWithDropDown
                     options={teams?.map((team) => team.name) || []}
                     selectedValue={orderTakenBy}
-                    onChange={(value) => setOrderTakenBy(value)}
+                  onChange={(value) => {
+                    setOrderTakenBy(value);
+                    if (value) {
+                      setErrors((prev) => ({ ...prev, orderTakenBy: "" }));
+                    }
+                  }}
                     placeholder="Search Team..."
                   />
+                {errors.orderTakenBy && (
+                  <span style={{ color: "red", marginTop: "5px" }}>{errors.orderTakenBy}</span>
+                )}
               </div>
 
               <div style={{ marginRight: "18px" }}>
@@ -511,9 +580,17 @@ Order Taken By: ${orderTakenBy}
                   type="date"
                   id="date"
                   value={date}
-                  onChange={(e) => setDate(e.target.value)}
+                  onChange={(e) => {
+                    setDate(e.target.value);
+                    if (e.target.value) {
+                      setErrors((prev) => ({ ...prev, date: "" }));
+                    }
+                  }}
                   required
                 />
+                {errors.date && (
+                  <span style={{ color: "red", marginTop: "5px" }}>{errors.date}</span>
+                )}
               </div>
 
               <div style={{ marginRight: "18px" }}>
@@ -529,10 +606,18 @@ Order Taken By: ${orderTakenBy}
                 <Select
                   options={timeSlotOptions}
                   value={timeSlot}
-                  onChange={(selectedOption) => setTimeSlot(selectedOption)}
+                  onChange={(selectedOption) => {
+                    setTimeSlot(selectedOption);
+                    if (selectedOption) {
+                      setErrors((prev) => ({ ...prev, timeSlot: "" }));
+                    }
+                  }}
                   placeholder="Select Time Slot"
                   required
                 />
+                {errors.timeSlot && (
+                  <span style={{ color: "red", marginTop: "5px" }}>{errors.timeSlot}</span>
+                )}
               </div>
             </div>
 
@@ -542,10 +627,19 @@ Order Taken By: ${orderTakenBy}
                 type="text"
                 id="address"
                 value={address}
-                onChange={(e) => setAddress(e.target.value)}
+                onChange={(e) => {
+                  setAddress(e.target.value);
+
+                  if (e.target.value.trim()) {
+                    setErrors((prev) => ({ ...prev, address: "" }));
+                  }
+                }}
                 placeholder="Address"
                 required
               />
+              {errors.address && (
+                <span style={{ color: "red", marginTop: "5px" }}>{errors.address}</span>
+              )}
             </div>
             <div className="googleLocation-box">
               <label htmlFor="googleLocation">Google Location</label>
@@ -558,16 +652,28 @@ Order Taken By: ${orderTakenBy}
               />
             </div>
             <div className="amount-box">
-              <label htmlFor="totalamount">Total Amount*</label>
+              <div>
+                <label htmlFor="totalamount">Total Amount*</label>
               <input
                 type="text"
                 id="totalamount"
                 value={totalamount}
-                onChange={(e) => setTotalAmount(e.target.value)}
+                  onChange={(e) => {
+                    setTotalAmount(e.target.value);
+
+                    if (e.target.value) {
+                      setErrors((prev) => ({ ...prev, totalamount: "" }));
+                    }
+                  }}
                 placeholder="Total Amount"
                 required
+                className="amount-fields"
               />
-
+              {errors.totalamount && (
+                <div style={{ color: "red", marginTop: "5px" }}>{errors.totalamount}</div>
+              )}
+              </div>
+              <div>
               <label htmlFor="advanceamount">Advance Amount</label>
               <input
                 type="text"
@@ -575,8 +681,10 @@ Order Taken By: ${orderTakenBy}
                 value={advanceamount}
                 onChange={(e) => setAdvanceAmount(e.target.value)}
                 placeholder="Advance Amount"
+                  className="amount-fields"
               />
-
+              </div>
+              <div>
               <label htmlFor="balanceamount">Balance Amount</label>
               <input
                 type="text"
@@ -584,7 +692,9 @@ Order Taken By: ${orderTakenBy}
                 value={balanceamount}
                 placeholder="Balance Amount"
                 disabled
+                  className="amount-fields"
               />
+              </div>
             </div>
 
             <div
@@ -613,7 +723,13 @@ Order Taken By: ${orderTakenBy}
                 <select
                   id="city"
                   value={city}
-                  onChange={(e) => setCity(e.target.value)}
+                  onChange={(e) => {
+                    setCity(e.target.value);
+
+                    if (e.target.value) {
+                      setErrors((prev) => ({ ...prev, city: "" }));
+                    }
+                  }}
                   required
                   style={{
                     width: "100%",
@@ -631,6 +747,10 @@ Order Taken By: ${orderTakenBy}
                   <option value="Mumbai">Mumbai</option>
                   <option value="Hyderabad">Hyderabad</option>
                 </select>
+
+                {errors.city && (
+                  <span style={{ color: "red", marginTop: "5px" }}>{errors.city}</span>
+                )}
               </div>
               <div className="pincode-box" style={{ flex: 1 }}>
                 <label htmlFor="pincode">Pincode *</label>
@@ -646,8 +766,17 @@ Order Taken By: ${orderTakenBy}
                     width: "100%",
                     boxSizing: "border-box",
                   }}
-                  onChange={(e) => setPincode(e.target.value)}
+                  onChange={(e) => {
+                    setPincode(e.target.value);
+
+                    if (e.target.value) {
+                      setErrors((prev) => ({ ...prev, pincode: "" }));
+                    }
+                  }}
                 />
+                {errors.pincode && (
+                  <span style={{ color: "red", marginTop: "5px" }}>{errors.pincode}</span>
+                )}
                 <p
                   style={{
                     fontWeight: "bold",
