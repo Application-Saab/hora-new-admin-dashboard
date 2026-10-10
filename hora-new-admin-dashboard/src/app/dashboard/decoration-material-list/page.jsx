@@ -8,7 +8,7 @@ import {
   fetchDecorationMaterials,
   handleMaterialStatusToggle,
 } from "../../../services/decorationMaterialListServices";
-import { IMAGE_BASE_URL } from "@/utils/apiconstant";
+import { IMAGE_BASE_URL } from '../../../utils/apiconstant';
 
 const DishTable = () => {
   const [dishes, setDishes] = useState([]);
