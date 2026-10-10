@@ -13,7 +13,7 @@ const Specialization = () => {
     const [preview, setPreview] = useState("");
 
     const [editingId, setEditingId] = useState(null);
-    const [oldImage, setOldImage] = useState("");
+    // const [oldImage, setOldImage] = useState("");
 
     // Add / Edit popup
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -62,7 +62,7 @@ const Specialization = () => {
         setName("");
         setImage(null);
         setPreview("");
-        setOldImage("");
+        // setOldImage("");
 
         setIsModalOpen(true);
     };
@@ -76,7 +76,7 @@ const Specialization = () => {
 
         setImage(null);
         setPreview(item.image);
-        setOldImage(item.image);
+        // setOldImage(item.image);
 
         setIsModalOpen(true);
     };
@@ -197,7 +197,7 @@ const Specialization = () => {
             setImage(null);
             setPreview("");
             setEditingId(null);
-            setOldImage("");
+            // setOldImage("");
 
             // ==========================================
             // 5. REFRESH LIST
