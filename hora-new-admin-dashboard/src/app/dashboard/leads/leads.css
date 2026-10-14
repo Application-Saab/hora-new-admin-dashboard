@@ -221,6 +221,16 @@
     border-radius: 8px;
 }
 
+.date-filter-all {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    padding: 15px;
+    background: #fff;
+    border-radius: 8px;
+    flex-wrap: wrap;
+}
+
 .date-field {
     display: flex;
     flex-direction: column;
@@ -286,4 +296,172 @@
     display: block;
     font-size: 20px;
     color: #111827;
+}
+.not-confirmed-pill {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    background: #fee2e2;
+    color: #dc2626;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.source-dropdown {
+    position: relative;
+    min-width: 200px;
+}
+
+.source-dropdown>label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.source-dropdown-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 14px;
+}
+
+.source-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    width: 260px;
+    max-height: 260px;
+    overflow-y: auto;
+    padding: 12px;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    z-index: 100;
+}
+
+.source-dropdown-menu .clear-btn {
+    margin-top: 10px;
+}
+
+
+
+.source-dropdown>label {
+    display: block;
+    margin-bottom: 6px;
+}
+
+.source-dropdown-btn {
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
+}
+
+.source-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 100%;
+    min-width: 220px;
+    max-height: 240px;
+    overflow-y: auto;
+    padding: 8px;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    z-index: 100;
+}
+
+.source-checkbox-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 4px;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+
+.source-checkbox-option input {
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.source-checkbox-option:hover {
+    background: #f6f6f6;
+}
+
+.source-dropdown-menu .clear-btn {
+    width: 100%;
+    margin-top: 6px;
+}
+
+.source-empty {
+    margin: 8px 4px;
+    color: #666;
+    font-size: 13px;
+}
+.leads-pagination-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    width: 100%;
+    margin-bottom: 16px;
+}
+
+.leads-pagination-row .analytics-summary {
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.leads-pagination {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    white-space: nowrap;
+}
+
+.leads-page-info {
+    font-size: 14px;
+    color: #333;
+}
+
+.leads-pagination button {
+    margin: 0;
+}
+
+@media (max-width: 600px) {
+    .leads-pagination-row {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .leads-pagination {
+        position: static;
+        transform: none;
+        width: 100%;
+        flex-wrap: wrap;
+    }
 }
