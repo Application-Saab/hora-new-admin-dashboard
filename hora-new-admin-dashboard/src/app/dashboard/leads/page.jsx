@@ -81,7 +81,7 @@ export default function LeadAnalytics() {
 
 
             const response = await fetch(
-                `${BASE_URL}/api/leads/leads?${params.toString()}`
+                `${BASE_URL}/api/leads/admin-leads?${params.toString()}`
             );
 
             const result = await response.json();
