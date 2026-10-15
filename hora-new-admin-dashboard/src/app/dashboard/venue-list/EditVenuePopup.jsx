@@ -634,6 +634,7 @@ const EditVenuePopup = ({ isOpen, onClose, venueData, onSuccess }) => {
           overflowY: "auto",
           flex: 1,
         }}
+        className="slim-scrollbar"
       >
         <form id="edit-venue-form" onSubmit={handleSubmit}>
           {message.text && (

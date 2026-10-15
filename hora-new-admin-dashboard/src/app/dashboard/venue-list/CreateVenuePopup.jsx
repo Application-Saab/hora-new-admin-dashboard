@@ -539,6 +539,7 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
   // Venue fields
   const [venueType, setVenueType] = useState([]);
   const [venueName, setVenueName] = useState("");
+  const [venueMaskName, setVenueMaskName] = useState("");
   const [location, setLocation] = useState("");
   const [locality, setLocality] = useState("");
   const [venueCity, setVenueCity] = useState("");
@@ -679,6 +680,7 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
         JSON.stringify(venueType.map((v) => v.value)),
       );
       formData.append("venueName", venueName);
+      formData.append("maskName", venueMaskName);
       formData.append("location", location);
       formData.append("locality", locality);
       formData.append("city", venueCity);
@@ -795,6 +797,7 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
             overflowY: "auto",
             flex: 1,
           }}
+          className="slim-scrollbar"
         >
           {/* Customer Section */}
           <Box mb={3}>
@@ -857,16 +860,21 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
 
               {/* Venue Type */}
               <Box mb={2.5}>
-                <Typography variant="body2" fontWeight={500} mb={0.8}>
-                  Venue Type *
-                </Typography>
-                <Select
-                  isMulti
-                  options={venueTypeOptions}
-                  value={venueType}
-                  onChange={setVenueType}
-                  placeholder="Select venue types..."
-                  styles={selectStyles}
+                <TextField
+                  label="Venue Name *"
+                  value={venueName}
+                  onChange={(e) => setVenueName(e.target.value)}
+                  size="small"
+                  required
+                  fullWidth
+                />
+
+                <TextField
+                  label="Venue Mask Name"
+                  value={venueMaskName}
+                  onChange={(e) => setVenueMaskName(e.target.value)}
+                  size="small"
+                  fullWidth
                 />
               </Box>
 
@@ -877,22 +885,32 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
                 gap={2}
                 mb={2.5}
               >
-                <TextField
-                  label="Venue Name *"
-                  value={venueName}
-                  onChange={(e) => setVenueName(e.target.value)}
-                  size="small"
-                  required
-                  fullWidth
-                />
-                <TextField
-                  label="City *"
-                  value={venueCity}
-                  onChange={(e) => setVenueCity(e.target.value)}
-                  size="small"
-                  required
-                  fullWidth
-                />
+                <Box>
+                  <Typography variant="body2" fontWeight={500} mb={0.8}>
+                    Venue Type *
+                  </Typography>
+                  <Select
+                    isMulti
+                    options={venueTypeOptions}
+                    value={venueType}
+                    onChange={setVenueType}
+                    placeholder="Select venue types..."
+                    styles={selectStyles}
+                  />
+                </Box>
+                <Box>
+                  <Typography variant="body2" fontWeight={500} mb={0.8}>
+                    Venue City
+                  </Typography>
+                  <TextField
+                    label="City *"
+                    value={venueCity}
+                    onChange={(e) => setVenueCity(e.target.value)}
+                    size="small"
+                    required
+                    fullWidth
+                  />
+                </Box>
               </Box>
 
               <Box

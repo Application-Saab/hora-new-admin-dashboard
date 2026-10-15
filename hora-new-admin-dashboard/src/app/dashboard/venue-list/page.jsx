@@ -289,15 +289,15 @@ import CreateVenuePopup from "./CreateVenuePopup";
 import EditVenuePopup from "./EditVenuePopup";
 import VenuePackagesPopup from "./VenuePackagesPopup";
 import EditTermsPopup from "./CreateTermsModal";
+import VenueFaqPopup from "./CreateVenueFAQ"
 import {
   fetchVenues,
   toggleVenueStatus,
 } from "../../../services/venueListServices";
 import { useRouter } from "next/navigation";
 import { venueTypes } from "@/constants/venueListConstants";
-import { BASE_URL } from "@/utils/apiconstant";
 import Image from "next/image";
-import './createVenue.css';
+import "./createVenue.css";
 const VenueList = () => {
   const router = useRouter();
   const [venues, setVenues] = useState([]);
@@ -311,6 +311,7 @@ const VenueList = () => {
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [selectedVenue, setSelectedVenue] = useState(null);
   const [showPackagesPopup, setShowPackagesPopup] = useState(false);
+  const [showFaqPopup, setShowFaqPopup] = useState(false);
   const [showCreateTermsPopup, setShowCreateTermsPopup] = useState(false);
 
   // Image Preview Popup
@@ -481,232 +482,250 @@ const VenueList = () => {
 
   return (
     <>
-    <div className="venue-page">
-      {/* Header */}
-      <div className="venue-header">
-        <div>
-          <h1 className="venue-title">Venue List</h1>
-          <p className="venue-subtitle">Manage all venues, packages & terms</p>
+      <div className="venue-page">
+        {/* Header */}
+        <div className="venue-header">
+          <div>
+            <h1 className="venue-title">Venue List</h1>
+            <p className="venue-subtitle">
+              Manage all venues, packages & terms
+            </p>
+          </div>
+          <button
+            className="btn-primary"
+            onClick={() => setShowCreatePopup(true)}
+          >
+            + Add Venue
+          </button>
         </div>
-        <button
-          className="btn-primary"
-          onClick={() => setShowCreatePopup(true)}
-        >
-          + Add Venue
-        </button>
-      </div>
 
-      {/* Filters */}
-      <div className="venue-filters">
-        <div className="search-wrapper">
-          <input
-            type="text"
-            className="filter-input"
-            placeholder="Search by venue name..."
-            value={search}
+        {/* Filters */}
+        <div className="venue-filters">
+          <div className="search-wrapper">
+            <input
+              type="text"
+              className="filter-input"
+              placeholder="Search by venue name..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+            />
+          </div>
+
+          <select
+            className="filter-select"
+            value={venueType}
             onChange={(e) => {
-              setSearch(e.target.value);
+              setVenueType(e.target.value);
               setPage(1);
             }}
-          />
+          >
+            <option value="">All Venue Types</option>
+            {venueTypes?.map((item, index) => (
+              <option key={index} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
         </div>
 
-        <select
-          className="filter-select"
-          value={venueType}
-          onChange={(e) => {
-            setVenueType(e.target.value);
-            setPage(1);
-          }}
-        >
-          <option value="">All Venue Types</option>
-          {venueTypes?.map((item, index) => (
-            <option key={index} value={item}>
-              {item}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Table */}
-      <div className="table-card">
-        <div className="table-scroll">
-          <table className="venue-table">
-            <thead>
-              <tr>
-                <th>Image</th>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Location</th>
-                <th>Map</th>
-                <th>Created</th>
-                <th>Gallery</th>
-                <th>Edit</th>
-                <th>Status</th>
-                <th>Terms</th>
-                <th>Venue Link</th>
-                <th>Packages</th>
-              </tr>
-            </thead>
-            <tbody>
-              {venues.length > 0 ? (
-                venues.map((venue) => (
-                  <tr key={venue._id}>
-                    <td>
-                      {venue.venueImageUrl ? (
-                        <>
-                          {/* <img
+        {/* Table */}
+        <div className="table-card">
+          <div className="table-scroll">
+            <table className="venue-table">
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Location</th>
+                  <th>Map</th>
+                  <th>Created</th>
+                  <th>Gallery</th>
+                  <th>Edit</th>
+                  <th>FAQs</th>
+                  <th>Status</th>
+                  <th>Terms</th>
+                  <th>Venue Link</th>
+                  <th>Packages</th>
+                </tr>
+              </thead>
+              <tbody>
+                {venues.length > 0 ? (
+                  venues.map((venue) => (
+                    <tr key={venue._id}>
+                      <td>
+                        {venue.venueImageUrl ? (
+                          <>
+                            {/* <img
                           src={venue.venueImageUrl}
                           alt={venue.venueName}
                           className="venue-thumb"
                         /> */}
-                          <div
-                            className="image-clickable"
-                            onClick={() => openImagePreview(venue)}
-                            title="Click to preview"
+                            <div
+                              className="image-clickable"
+                              onClick={() => openImagePreview(venue)}
+                              title="Click to preview"
+                            >
+                              <Image
+                                src={venue?.venueImageUrl}
+                                alt={venue.venueName || "Venue"}
+                                className="venue-thumb"
+                                width={40}
+                                height={40}
+                              />
+                            </div>
+                          </>
+                        ) : (
+                          <div className="no-img">—</div>
+                        )}
+                      </td>
+                      <td className="name-cell">{venue.venueName}</td>
+                      <td>
+                        {Array.isArray(venue.venueType)
+                          ? venue.venueType.join(", ")
+                          : venue.venueType || "—"}
+                      </td>
+                      <td>{venue.location || "—"}</td>
+                      <td>
+                        {venue.googleMapLink ? (
+                          <a
+                            href={venue.googleMapLink}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="link-btn"
                           >
-                            <Image
-                              src={venue?.venueImageUrl}
-                              alt={venue.venueName || "Venue"}
-                              className="venue-thumb"
-                              width={40}
-                              height={40}
-                            />
-                          </div>
-                        </>
-                      ) : (
-                        <div className="no-img">—</div>
-                      )}
-                    </td>
-                    <td className="name-cell">{venue.venueName}</td>
-                    <td>
-                      {Array.isArray(venue.venueType)
-                        ? venue.venueType.join(", ")
-                        : venue.venueType || "—"}
-                    </td>
-                    <td>{venue.location || "—"}</td>
-                    <td>
-                      {venue.googleMapLink ? (
+                            Open
+                          </a>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                      <td>{new Date(venue.createdAt).toLocaleDateString()}</td>
+                      <td>
+                        <button
+                          className="btn-sm btn-blue"
+                          onClick={() =>
+                            router.push(
+                              `/dashboard/venue-list/image-gallery?venueid=${venue._id}`,
+                            )
+                          }
+                        >
+                          Gallery
+                        </button>
+                      </td>
+                      <td>
+                        <button
+                          className="btn-sm btn-blue"
+                          onClick={() => {
+                            setSelectedVenue(venue);
+                            setShowEditPopup(true);
+                          }}
+                        >
+                          Edit
+                        </button>
+                      </td>
+                      <td>
+                        <button
+                          className="btn-sm btn-blue"
+                          onClick={() => {
+                            setSelectedVenue(venue);
+                            setShowFaqPopup(true);
+                          }}
+                        >
+                          FAQs
+                        </button>
+                      </td>
+                      <td>
+                        <button
+                          className={`status-btn ${
+                            venue.venueStatus === 1 ? "active" : "inactive"
+                          }`}
+                          onClick={() => {
+                            const newStatus = venue.venueStatus === 1 ? 2 : 1;
+                            toggleVenueStatus(
+                              venue._id,
+                              newStatus,
+                              callVenueApi,
+                            );
+                          }}
+                        >
+                          {venue.venueStatus === 1 ? "Active" : "Inactive"}
+                        </button>
+                      </td>
+                      <td>
+                        <button
+                          className="btn-sm btn-blue"
+                          onClick={() => {
+                            setSelectedVenue(venue);
+                            setShowCreateTermsPopup(true);
+                          }}
+                        >
+                          Terms
+                        </button>
+                      </td>
+                      <td>
                         <a
-                          href={venue.googleMapLink}
+                          href={`https://horaservices.com/venue-list/venue?venueid=${venue._id}`}
                           target="_blank"
                           rel="noreferrer"
                           className="link-btn"
                         >
-                          Open
+                          View
                         </a>
-                      ) : (
-                        "—"
-                      )}
-                    </td>
-                    <td>{new Date(venue.createdAt).toLocaleDateString()}</td>
-                    <td>
-                      <button
-                        className="btn-sm btn-blue"
-                        onClick={() =>
-                          router.push(
-                            `/dashboard/venue-list/image-gallery?venueid=${venue._id}`,
-                          )
-                        }
-                      >
-                        Gallery
-                      </button>
-                    </td>
-                    <td>
-                      <button
-                        className="btn-sm btn-blue"
-                        onClick={() => {
-                          setSelectedVenue(venue);
-                          setShowEditPopup(true);
-                        }}
-                      >
-                        Edit
-                      </button>
-                    </td>
-                    <td>
-                      <button
-                        className={`status-btn ${
-                          venue.venueStatus === 1 ? "active" : "inactive"
-                        }`}
-                        onClick={() => {
-                          const newStatus = venue.venueStatus === 1 ? 2 : 1;
-                          toggleVenueStatus(venue._id, newStatus, callVenueApi);
-                        }}
-                      >
-                        {venue.venueStatus === 1 ? "Active" : "Inactive"}
-                      </button>
-                    </td>
-                    <td>
-                      <button
-                        className="btn-sm btn-blue"
-                        onClick={() => {
-                          setSelectedVenue(venue);
-                          setShowCreateTermsPopup(true);
-                        }}
-                      >
-                        Terms
-                      </button>
-                    </td>
-                    <td>
-                      <a
-                        href={`${BASE_URL}/venue-list/venue?venueid=${venue._id}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="link-btn"
-                      >
-                        View
-                      </a>
-                    </td>
-                    <td>
-                      <button
-                        className="btn-sm btn-blue"
-                        onClick={() => {
-                          setSelectedVenue(venue);
-                          setShowPackagesPopup(true);
-                        }}
-                      >
-                        Packages
-                      </button>
+                      </td>
+                      <td>
+                        <button
+                          className="btn-sm btn-blue"
+                          onClick={() => {
+                            setSelectedVenue(venue);
+                            setShowPackagesPopup(true);
+                          }}
+                        >
+                          Packages
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={12} className="no-data">
+                      No Venue Found
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={12} className="no-data">
-                    No Venue Found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Pagination */}
+        <div className="pagination">
+          <button
+            className="page-btn"
+            disabled={!pagination.previous_page || page <= 1}
+            onClick={() => setPage(pagination.previous_page)}
+          >
+            Previous
+          </button>
+          <span className="page-info">
+            Page {pagination.current_page || page} of{" "}
+            {pagination.last_page || 1}
+          </span>
+          <button
+            className="page-btn"
+            disabled={
+              !pagination.next_page || page >= (pagination.last_page || 1)
+            }
+            onClick={() => setPage(pagination.next_page)}
+          >
+            Next
+          </button>
         </div>
       </div>
 
-      {/* Pagination */}
-      <div className="pagination">
-        <button
-          className="page-btn"
-          disabled={!pagination.previous_page || page <= 1}
-          onClick={() => setPage(pagination.previous_page)}
-        >
-          Previous
-        </button>
-        <span className="page-info">
-          Page {pagination.current_page || page} of {pagination.last_page || 1}
-        </span>
-        <button
-          className="page-btn"
-          disabled={
-            !pagination.next_page || page >= (pagination.last_page || 1)
-          }
-          onClick={() => setPage(pagination.next_page)}
-        >
-          Next
-        </button>
-      </div>
-
-    </div>
-    
       {/* Popups */}
       {showCreatePopup && (
         <CreateVenuePopup
@@ -735,6 +754,15 @@ const VenueList = () => {
           isOpen={showCreateTermsPopup}
           venue={selectedVenue}
           onClose={() => setShowCreateTermsPopup(false)}
+          onSuccess={callVenueApi}
+        />
+      )}
+
+      {showFaqPopup && (
+        <VenueFaqPopup
+          isOpen={showFaqPopup}
+          venue={selectedVenue}
+          onClose={() => setShowFaqPopup(false)}
           onSuccess={callVenueApi}
         />
       )}
