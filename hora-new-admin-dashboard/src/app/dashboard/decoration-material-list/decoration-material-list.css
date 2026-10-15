@@ -348,3 +348,15 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.dish-table th {
+  background: #f8f9fa;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  white-space: nowrap;
+}
+
+.column-filter-container {
+  vertical-align: middle;
+}
