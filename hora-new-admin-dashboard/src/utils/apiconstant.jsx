@@ -48,6 +48,7 @@ export const GET_CELEBRATION_BOOSTERS_BY_NAME = '/api/celebration-booster/getCel
 
 // Decoration Material List APIs
 export const GET_DECORATION_MATERIALS = '/api/material-list/admin_material_list';
+export const GET_MATERIAL_FILTER_OPTIONS = '/api/material-list/material_filter_options';
 export const CREATE_DECORATION_MATERIAL = '/api/material-list/createMaterial';
 export const UPDATE_DECORATION_MATERIAL = '/api/material-list/updateMaterial';
 export const GET_MATERIAL_FILTER_DATA = "/api/material-list/getMaterialFilterData";

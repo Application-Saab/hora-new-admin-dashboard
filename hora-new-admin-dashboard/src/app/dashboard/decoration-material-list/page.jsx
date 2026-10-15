@@ -7,8 +7,10 @@ import EditMaterialPopup from "./EditMaterialPopup";
 import {
   fetchDecorationMaterials,
   handleMaterialStatusToggle,
+  fetchMaterialFilterOptions,
 } from "../../../services/decorationMaterialListServices";
-import { IMAGE_BASE_URL } from '../../../utils/apiconstant';
+import { IMAGE_BASE_URL } from "../../../utils/apiconstant";
+import ColumnFilterPopover from "../../component/ColumnFilterPopover";
 
 const DishTable = () => {
   const [dishes, setDishes] = useState([]);
@@ -22,17 +24,35 @@ const DishTable = () => {
     next_page: 2,
     last_page: 1,
   });
+
+  const [filterOptions, setFilterOptions] = useState({
+    materialNames: [],
+    types: [],
+    specs: [],
+  });
+
+  const [selectedNames, setSelectedNames] = useState([]);
+  const [selectedTypes, setSelectedTypes] = useState([]);
+  const [selectedSpecs, setSelectedSpecs] = useState([]);
+
+  useEffect(() => {
+    const loadOptions = async () => {
+      const data = await fetchMaterialFilterOptions();
+      if (data) setFilterOptions(data);
+    };
+    loadOptions();
+  }, []);
+
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const [searchName, setSearchName] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [materialCategory, setMaterialCategory] = useState("");
   const [materialStatus, setMaterialStatus] = useState("");
   const [showCreateMaterialPopup, setShowCreateMaterialPopup] = useState(false);
   const [showEditMaterialPopup, setShowEditMaterialPopup] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState(null);
-
-  // Image Preview Popup
   const [previewImage, setPreviewImage] = useState(null);
   const [copyStatus, setCopyStatus] = useState("");
   const [isPreparing, setIsPreparing] = useState(false);
@@ -44,15 +64,27 @@ const DishTable = () => {
       setDishes,
       setPagination,
       page,
-      searchName,
+      debouncedSearch,
       materialCategory,
       materialStatus,
+      selectedNames,
+      selectedTypes,
+      selectedSpecs,
     );
   };
 
   useEffect(() => {
     callMaterialAPi();
-  }, [page, searchName, materialCategory, materialStatus]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    page,
+    debouncedSearch,
+    materialCategory,
+    materialStatus,
+    selectedNames,
+    selectedTypes,
+    selectedSpecs,
+  ]);
 
   const handlePageChange = (newPage) => setPage(newPage);
 
@@ -63,8 +95,16 @@ const DishTable = () => {
 
   const handleSearchChange = (e) => {
     setSearchName(e.target.value);
-    setPage(1);
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchName);
+      setPage(1);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchName]);
 
   const handleCategoryChange = (e) => {
     setMaterialCategory(e.target.value);
@@ -116,7 +156,6 @@ const DishTable = () => {
     setIsPreparing(false);
   };
 
-  // Copy Image URL
   const handleCopyUrl = async () => {
     if (!previewImage?.url) return;
 
@@ -130,7 +169,6 @@ const DishTable = () => {
     }
   };
 
-  // Copy Image (PNG only)
   const handleCopyImage = async () => {
     if (!previewImage?.blob) {
       alert("Image is still preparing. Please wait a moment.");
@@ -166,7 +204,6 @@ const DishTable = () => {
         try {
           let { naturalWidth: width, naturalHeight: height } = img;
 
-          // Resize if too large (keeps aspect ratio)
           if (width > maxSize || height > maxSize) {
             if (width > height) {
               height = Math.round((height * maxSize) / width);
@@ -238,7 +275,7 @@ const DishTable = () => {
       <div className="filters-container">
         <input
           type="text"
-          placeholder="Search By Name..."
+          placeholder="Search By Specs, Type & Material Name..."
           className="filter-input"
           value={searchName}
           onChange={handleSearchChange}
@@ -268,13 +305,62 @@ const DishTable = () => {
       {error && <div className="error-message">{error}</div>}
 
       <div className="table-container">
-        <table className="dish-table">
+        <table className="dish-table" style={{ minHeight: "400px" }}>
           <thead>
             <tr>
               <th>Material Image</th>
-              <th>Specs</th>
-              <th>Type</th>
-              <th>Material Name</th>
+
+              <th>
+                Specs
+                <ColumnFilterPopover
+                  title="Specs"
+                  options={filterOptions.specs}
+                  selectedValues={selectedSpecs}
+                  onApply={(vals) => {
+                    setSelectedSpecs(vals);
+                    setPage(1);
+                  }}
+                  onClear={() => {
+                    setSelectedSpecs([]);
+                    setPage(1);
+                  }}
+                />
+              </th>
+
+              <th>
+                Type
+                <ColumnFilterPopover
+                  title="Type"
+                  options={filterOptions.types}
+                  selectedValues={selectedTypes}
+                  onApply={(vals) => {
+                    setSelectedTypes(vals);
+                    setPage(1);
+                  }}
+                  onClear={() => {
+                    setSelectedTypes([]);
+                    setPage(1);
+                  }}
+                />
+              </th>
+
+              <th>
+                Material Name
+                <ColumnFilterPopover
+                  title="Material Name"
+                  options={filterOptions.materialNames}
+                  selectedValues={selectedNames}
+                  onApply={(vals) => {
+                    setSelectedNames(vals);
+                    setPage(1);
+                  }}
+                  onClear={() => {
+                    setSelectedNames([]);
+                    setPage(1);
+                  }}
+                />
+              </th>
+
               <th>MOQ</th>
               <th>Material Category</th>
               <th>Vendor Material Price</th>
