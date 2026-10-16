@@ -77,6 +77,12 @@ const menuItems = [
         icon: <BiErrorCircle />,
         url: "/dashboard/leads",
       },
+      {
+        label: "Leads Dashboard",
+        icon: <BiErrorCircle />,
+        url: "/dashboard/leads-dashboard",
+      },
+
     ],
   },
 
