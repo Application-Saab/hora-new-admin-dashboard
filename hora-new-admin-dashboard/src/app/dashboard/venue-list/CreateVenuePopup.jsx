@@ -545,6 +545,7 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
   const [venueCity, setVenueCity] = useState("");
   const [googleMapLink, setGoogleMapLink] = useState("");
   const [eventTypes, setEventTypes] = useState([]);
+  const [minGuestCapacity, setMinGuestCapacity] = useState("");
   const [guestCapacity, setGuestCapacity] = useState("");
   const [isParkingAvailable, setIsParkingAvailable] = useState(false);
   const [hallType, setHallType] = useState([]);
@@ -690,6 +691,7 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
         JSON.stringify(eventTypes.map((v) => v.value)),
       );
       formData.append("guestCapacity", guestCapacity);
+      formData.append("minGuestCapacity", minGuestCapacity);
       formData.append("isParkingAvailable", isParkingAvailable);
       formData.append("hallType", JSON.stringify(hallType.map((v) => v.value)));
       formData.append(
@@ -859,7 +861,7 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
               </Typography>
 
               {/* Venue Type */}
-              <Box mb={2.5}>
+              <Box mb={2.5} display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
                 <TextField
                   label="Venue Name *"
                   value={venueName}
@@ -1004,18 +1006,28 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
               {/* Numbers */}
               <Box
                 display="grid"
-                gridTemplateColumns="1fr 1fr 1fr"
+                gridTemplateColumns="1fr 1fr 1fr 1fr"
                 gap={2}
                 mb={2.5}
               >
                 <TextField
-                  label="Guest Capacity"
+                  label="Min guest capacity"
+                  type="number"
+                  value={minGuestCapacity}
+                  onChange={(e) => setMinGuestCapacity(e.target.value)}
+                  size="small"
+                  fullWidth
+                />
+
+                <TextField
+                  label="Max guest capacity"
                   type="number"
                   value={guestCapacity}
                   onChange={(e) => setGuestCapacity(e.target.value)}
                   size="small"
                   fullWidth
                 />
+
                 <TextField
                   label="Starting Price"
                   type="number"

@@ -404,6 +404,7 @@ import { venueEventTypes, venueTypes } from "@/constants/venueListConstants";
 const EditVenuePopup = ({ isOpen, onClose, venueData, onSuccess }) => {
   const [formData, setFormData] = useState({
     venueName: "",
+    maskName: "",
     location: "",
     locality: "",
     city: "",
@@ -414,6 +415,7 @@ const EditVenuePopup = ({ isOpen, onClose, venueData, onSuccess }) => {
   const [eventTypes, setEventTypes] = useState([]);
   const [hallType, setHallType] = useState([]);
   const [foodTypes, setFoodTypes] = useState([]);
+  const [minGuestCapacity, setMinGuestCapacity] = useState("");
   const [guestCapacity, setGuestCapacity] = useState("");
   const [startingPrice, setStartingPrice] = useState("");
   const [totalRoomsAvailable, setTotalRoomsAvailable] = useState("");
@@ -446,6 +448,7 @@ const EditVenuePopup = ({ isOpen, onClose, venueData, onSuccess }) => {
     if (venueData) {
       setFormData({
         venueName: venueData.venueName || "",
+        maskName: venueData.maskName || "",
         location: venueData.location || "",
         locality: venueData.locality || "",
         city: venueData.city || "",
@@ -479,6 +482,7 @@ const EditVenuePopup = ({ isOpen, onClose, venueData, onSuccess }) => {
       );
 
       setGuestCapacity(venueData.guestCapacity || "");
+      setMinGuestCapacity(venueData.minGuestCapacity || "");
       setStartingPrice(venueData.startingPrice || "");
       setTotalRoomsAvailable(venueData.totalRoomsAvailable || "");
       setIsParkingAvailable(venueData.isParkingAvailable || false);
@@ -519,6 +523,7 @@ const EditVenuePopup = ({ isOpen, onClose, venueData, onSuccess }) => {
 
       const payload = new FormData();
       payload.append("venueName", formData.venueName);
+      payload.append("maskName", formData.maskName);
       payload.append("location", formData.location);
       payload.append("locality", formData.locality);
       payload.append("city", formData.city);
@@ -537,6 +542,7 @@ const EditVenuePopup = ({ isOpen, onClose, venueData, onSuccess }) => {
         JSON.stringify(foodTypes.map((v) => v.value)),
       );
       payload.append("guestCapacity", guestCapacity);
+      payload.append("minGuestCapacity", minGuestCapacity);
       payload.append("startingPrice", startingPrice);
       payload.append("totalRoomsAvailable", totalRoomsAvailable);
       payload.append("isParkingAvailable", isParkingAvailable);
@@ -651,22 +657,7 @@ const EditVenuePopup = ({ isOpen, onClose, venueData, onSuccess }) => {
           </Typography>
 
           {/* Venue Type */}
-          <Box mb={2.5}>
-            <Typography variant="body2" fontWeight={500} mb={0.8}>
-              Venue Type *
-            </Typography>
-            <Select
-              isMulti
-              options={venueTypeOptions}
-              value={venueType}
-              onChange={setVenueType}
-              placeholder="Select venue types..."
-              styles={selectStyles}
-            />
-          </Box>
-
-          {/* Name + City */}
-          <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2} mb={2.5}>
+          <Box mb={2.5} display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
             <TextField
               name="venueName"
               label="Venue Name *"
@@ -677,14 +668,44 @@ const EditVenuePopup = ({ isOpen, onClose, venueData, onSuccess }) => {
               fullWidth
             />
             <TextField
-              name="city"
-              label="City *"
-              value={formData.city}
+              name="maskName"
+              label="Venue Mask Name"
+              value={formData.maskName}
               onChange={handleChange}
               size="small"
-              required
               fullWidth
             />
+          </Box>
+
+          {/* Name + City */}
+          <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2} mb={2.5}>
+            <Box mb={2.5}>
+              <Typography variant="body2" fontWeight={500} mb={0.8}>
+                Venue Type *
+              </Typography>
+              <Select
+                isMulti
+                options={venueTypeOptions}
+                value={venueType}
+                onChange={setVenueType}
+                placeholder="Select venue types..."
+                styles={selectStyles}
+              />
+            </Box>
+            <Box>
+              <Typography variant="body2" fontWeight={500} mb={0.8}>
+                Venue City
+              </Typography>
+              <TextField
+                name="city"
+                label="City *"
+                value={formData.city}
+                onChange={handleChange}
+                size="small"
+                required
+                fullWidth
+              />
+            </Box>
           </Box>
 
           {/* Location + Locality */}
@@ -772,23 +793,24 @@ const EditVenuePopup = ({ isOpen, onClose, venueData, onSuccess }) => {
           {/* Numbers */}
           <Box
             display="grid"
-            gridTemplateColumns="1fr 1fr 1fr"
+            gridTemplateColumns="1fr 1fr 1fr 1fr"
             gap={2}
             mb={2.5}
           >
             <TextField
-              label="Guest Capacity"
+              label="Min guest capacity"
               type="number"
-              value={guestCapacity}
-              onChange={(e) => setGuestCapacity(e.target.value)}
+              value={minGuestCapacity}
+              onChange={(e) => setMinGuestCapacity(e.target.value)}
               size="small"
               fullWidth
             />
+
             <TextField
-              label="Starting Price"
+              label="Max guest capacity"
               type="number"
-              value={startingPrice}
-              onChange={(e) => setStartingPrice(e.target.value)}
+              value={guestCapacity}
+              onChange={(e) => setGuestCapacity(e.target.value)}
               size="small"
               fullWidth
             />
