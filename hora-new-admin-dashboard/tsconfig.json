@@ -30,6 +30,6 @@
     "src/app/layout.tsx",
     "src/app/page.tsx",
     "src/app/page.jsx"
-  ],
+, "src/lib/server.js", "src/lib/metrics.js", "src/lib/format.js", "src/lib/demo-data.js"  ],
   "exclude": ["node_modules"]
 }
