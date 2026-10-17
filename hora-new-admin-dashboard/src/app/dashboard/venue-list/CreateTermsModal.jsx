@@ -6,7 +6,7 @@ import React, {
 } from "react";
 
 import dynamic from "next/dynamic";
-
+import './createVenue.css';
 import {
   updateVenueTerms,
 } from "@/services/venueListServices";
@@ -75,6 +75,11 @@ const EditTermsPopup = ({
           Edit Terms &
           Conditions
         </h2>
+        <span style={{
+          fontWeight : "bold",
+          marginTop: "0px",
+          marginBottom: "10px",
+        }}>Venue Name : </span> <span> {venue?.venueName}</span>
 
         <form
           onSubmit={
