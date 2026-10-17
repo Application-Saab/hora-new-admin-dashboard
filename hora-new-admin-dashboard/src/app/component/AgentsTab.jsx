@@ -13,8 +13,9 @@ import {
   wait,
 } from '../../lib/format';
 import { Card, HBars, Kpi, Spark, StatusChip } from './ui';
+import { LeadQueue } from './LeadsTab';
 
-export function AgentsTab({ dash, periodPhrase, onOpenAgent }) {
+export function AgentsTab({ dash, periodPhrase, onOpenAgent, onOpenLead }) {
   const v = dash.agentsView;
   const k = v.kpis;
   const lk = dash.leadsView.kpis;
@@ -61,6 +62,11 @@ export function AgentsTab({ dash, periodPhrase, onOpenAgent }) {
       </div>
 
       <Scorecard dash={dash} onOpen={onOpenAgent} />
+
+      <LeadQueue
+        rows={dash.leadsView.rows}
+        onOpen={onOpenLead}
+      />
 
       <div className="grid">
         <Card

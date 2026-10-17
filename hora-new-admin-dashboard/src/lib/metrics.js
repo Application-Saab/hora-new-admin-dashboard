@@ -161,6 +161,7 @@ function parseLead(j) {
         'createdAt',
       ])
     ),
+    leadDate: pick(j, ['lead_date']) || '',
     assignedAgentId:
       pick(j, ['assigned_agent_id']) ||
       (assigned && str(assigned.id)) ||

@@ -458,24 +458,11 @@ export function Dashboard({ demo, userName }) {
             </section>
           ) : tab === 'leads' ? (
             <section aria-label="Leads">
-              {/* <LeadsTab
-                dash={dash}
-                periodPhrase={periodPhrase}
-                onOpenLead={(id) =>
-                  setDrawer({ type: 'lead', id })
-                }
-                onPickSource={setSource}
-              /> */}
-
                 <LeadsTab
                   dash={dash}
                   periodPhrase={periodPhrase}
                   onOpenLead={(id) =>
                     setDrawer({ type: 'lead', id })
-                  }
-                  onPickSource={setSource}
-                  onOpenAgent={(id) =>
-                    setDrawer({ type: 'agent', id })
                   }
                 />
             </section>
@@ -486,6 +473,9 @@ export function Dashboard({ demo, userName }) {
                 periodPhrase={periodPhrase}
                 onOpenAgent={(id) =>
                   setDrawer({ type: 'agent', id })
+                }
+                onOpenLead={(id) =>
+                  setDrawer({ type: 'lead', id })
                 }
               />
             </section>

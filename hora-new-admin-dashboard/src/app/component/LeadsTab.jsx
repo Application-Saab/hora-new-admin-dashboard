@@ -1,7 +1,4 @@
 'use client';
-
-/** Leads tab: KPIs, funnel, best hour, speed to first call, sources, follow-up queue. */
-
 import { useMemo, useState } from 'react';
 import { hourLabel } from '@/lib/metrics';
 import {
@@ -14,14 +11,11 @@ import {
   RULES,
 } from '../../lib/format';
 import { Card, HBars, Kpi, StatusChip } from './ui';
-import { Scorecard } from './AgentsTab';
 
 export function LeadsTab({
   dash,
   periodPhrase,
   onOpenLead,
-  onPickSource,
-  onOpenAgent,
 }) {
   const v = dash.leadsView;
   const k = v.kpis;
@@ -120,7 +114,6 @@ export function LeadsTab({
         >
           <SourceTable
             rows={v.sources}
-            onPick={onPickSource}
           />
         </Card>
       </div>
@@ -128,11 +121,6 @@ export function LeadsTab({
       <LeadQueue
         rows={v.rows}
         onOpen={onOpenLead}
-      />
-
-      <Scorecard
-        dash={dash}
-        onOpenAgent={onOpenAgent}
       />
     </>
   );
@@ -432,7 +420,7 @@ function HourlyChart({ hourly, best }) {
   );
 }
 
-function SourceTable({ rows, onPick }) {
+function SourceTable({ rows }) {
   if (!rows.length) {
     return (
       <div className="empty">
@@ -459,8 +447,6 @@ function SourceTable({ rows, onPick }) {
           {rows.map((s) => (
             <tr
               key={s.source}
-              onClick={() => onPick(s.source)}
-              title={`Filter by ${ s.source } `}
             >
               <td className="cell-main">
                 {s.source}
@@ -550,8 +536,8 @@ export function LeadQueue({ rows, onOpen }) {
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState({
-    key: 'priority',
-    dir: 1,
+    key: 'created',
+    dir: -1,
   });
   const [limit, setLimit] = useState(50);
 
@@ -619,7 +605,7 @@ export function LeadQueue({ rows, onOpen }) {
           setSort(
             on
               ? { key: k, dir: -sort.dir }
-              : { key: k, dir: 1 }
+              : { key: k, dir: k === 'created' ? -1 : 1 }
           )
         }
       >
@@ -694,7 +680,7 @@ export function LeadQueue({ rows, onOpen }) {
                 <Th k="name" label="Lead" />
                 <Th k="source" label="Source" />
                 <Th k="agent" label="Agent" />
-                <Th k="created" label="Generated" />
+                  <Th k="created" label="Created at" />
 
                 <Th
                   k="first"
@@ -767,11 +753,11 @@ export function LeadQueue({ rows, onOpen }) {
                     </td>
 
                     <td>
-                      {date(l.createdAt)}
+                      {l.leadDate || '–'}
 
                       <div className="cell-sub">
                         {s.ageMs !== undefined
-                          ? `${ wait(s.ageMs) } ago`
+                          ? `${wait(s.ageMs)} ago`
                           : ''}
                       </div>
                     </td>
