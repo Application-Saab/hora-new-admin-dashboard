@@ -57,6 +57,8 @@ const ChefForPartyCreateOrderComponent = () => {
   const [advanceamount, setAdvanceAmount] = useState("");
   const [balanceamount1, setBalanceAmount1] = useState("");
 
+    const [errors, setErrors] = useState({});
+
   // Wonderland Event states
   const [wonderlandevent, setWonderlandEvent] = useState("");
   const [eventResponse, setEventResponse] = useState({});
@@ -203,11 +205,20 @@ const ChefForPartyCreateOrderComponent = () => {
   };
 
   const handleCheckboxChange = (itemId) => {
-    setSelectedItems((prevSelected) =>
-      prevSelected.includes(itemId)
+    setSelectedItems((prevSelected) => {
+      const updated = prevSelected.includes(itemId)
         ? prevSelected.filter((id) => id !== itemId)
-        : [...prevSelected, itemId],
-    );
+        : [...prevSelected, itemId];
+
+      if (updated.length > 0) {
+        setErrors((prev) => ({
+          ...prev,
+          dishes: "",
+        }));
+      }
+
+      return updated;
+    });
   };
 
   const handlePeopleChange = (e) => {
@@ -433,6 +444,52 @@ const ChefForPartyCreateOrderComponent = () => {
   const [lloading, setlLoading] = useState(false);
   const handleSubmit = async (e, isEmergency = false) => {
     e.preventDefault();
+
+
+    const newErrors = {};
+
+    if (!selectedItems.length) {
+      newErrors.dishes = "Please select a dish to continue.";
+    }
+
+    if (!customerNumber || customerNumber.length !== 10) {
+      newErrors.customerNumber = "Please enter 10 digit customer number";
+    }
+
+    if (!orderTakenBy) {
+      newErrors.orderTakenBy = "Please select order taken by";
+    }
+
+    if (!date) {
+      newErrors.date = "Please select date";
+    }
+
+    if (!timeSlot) {
+      newErrors.timeSlot = "Please select time slot";
+    }
+
+    if (!address.trim()) {
+      newErrors.address = "Please enter address";
+    }
+
+    if (!totalamount) {
+      newErrors.totalamount = "Please enter total amount";
+    }
+
+    if (!city) {
+      newErrors.city = "Please select city";
+    }
+
+    if (!pincode) {
+      newErrors.pincode = "Please enter pincode";
+    }
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      return;
+    }
+
     setlLoading(true);
     console.log("handlesubmit");
 
@@ -658,6 +715,17 @@ const ChefForPartyCreateOrderComponent = () => {
               className="search-input"
             />
           </div>
+          {errors.dishes && (
+            <span
+              style={{
+                color: "red",
+                marginTop: "5px",
+                display: "block",
+              }}
+            >
+              {errors.dishes}
+            </span>
+          )}
 
           {showDropdown && (
             <div className="dropdown" ref={dropdownRef}>
@@ -824,13 +892,25 @@ const ChefForPartyCreateOrderComponent = () => {
           type="text"
           id="customerNumber"
           value={customerNumber}
-          onInput={(e) => setCustomerNumber(e.target.value.replace(/\D/g, ""))} // Remove non-digits as the user types
+          onInput={(e) => {
+            const value = e.target.value.replace(/\D/g, "");
+            setCustomerNumber(value);
+
+            if (value.length === 10) {
+              setErrors((prev) => ({ ...prev, customerNumber: "" }));
+            }
+          }}
           placeholder="Customer Number"
           required
           maxLength={10} // Limit to 10 digits
           pattern="\d{10}" // Enforce exactly 10 digits
           inputMode="numeric" // Optimize for numeric input on mobile devices
         />
+        {errors.customerNumber && (
+          <span style={{ color: "red", marginTop: "5px" }}>
+            {errors.customerNumber}
+          </span>
+        )}
         <button
           className="orderCheck-btn"
           onClick={handleCheckCustomer}
@@ -852,9 +932,20 @@ const ChefForPartyCreateOrderComponent = () => {
                   <SearchWithDropDown
                     options={teams?.map((team) => team.name) || []}
                     selectedValue={orderTakenBy}
-                    onChange={(value) => setOrderTakenBy(value)}
+                    onChange={(value) => {
+                      setOrderTakenBy(value);
+
+                      if (value) {
+                        setErrors((prev) => ({ ...prev, orderTakenBy: "" }));
+                      }
+                    }}
                     placeholder="Search Team..."
                   />
+                  {errors.orderTakenBy && (
+                    <span style={{ color: "red", marginTop: "5px" }}>
+                      {errors.orderTakenBy}
+                    </span>
+                  )}
 
                   <div
                     className="date-time-container"
@@ -870,10 +961,21 @@ const ChefForPartyCreateOrderComponent = () => {
                         type="date"
                         id="date"
                         value={date}
-                        onChange={(e) => setDate(e.target.value)}
+                        onChange={(e) => {
+                          setDate(e.target.value);
+
+                          if (e.target.value) {
+                            setErrors((prev) => ({ ...prev, date: "" }));
+                          }
+                        }}
                         // min={new Date().toISOString().split("T")[0]} // Directly setting min date is this need?
                         required
                       />
+                      {errors.date && (
+                        <span style={{ color: "red", marginTop: "5px" }}>
+                          {errors.date}
+                        </span>
+                      )}
                     </div>
 
                     <div style={{ marginLeft: "10px" }}>
@@ -889,12 +991,21 @@ const ChefForPartyCreateOrderComponent = () => {
                       <Select
                         options={chefTimeSlots}
                         value={timeSlot}
-                        onChange={(selectedOption) =>
-                          setTimeSlot(selectedOption)
-                        }
+                        onChange={(selectedOption) => {
+                          setTimeSlot(selectedOption);
+
+                          if (selectedOption) {
+                            setErrors((prev) => ({ ...prev, timeSlot: "" }));
+                          }
+                        }}
                         placeholder="Select Time Slot"
                         required
                       />
+                      {errors.timeSlot && (
+                        <span style={{ color: "red", marginTop: "5px" }}>
+                          {errors.timeSlot}
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -904,10 +1015,21 @@ const ChefForPartyCreateOrderComponent = () => {
                       type="text"
                       id="address"
                       value={address}
-                      onChange={(e) => setAddress(e.target.value)}
+                      onChange={(e) => {
+                        setAddress(e.target.value);
+
+                        if (e.target.value.trim()) {
+                          setErrors((prev) => ({ ...prev, address: "" }));
+                        }
+                      }}
                       placeholder="Address"
                       required
                     />
+                    {errors.address && (
+                      <span style={{ color: "red", marginTop: "5px" }}>
+                        {errors.address}
+                      </span>
+                    )}
                   </div>
                   <div className="googleLocation-box">
                     <label htmlFor="googleLocation">Google Location</label>
@@ -924,10 +1046,21 @@ const ChefForPartyCreateOrderComponent = () => {
                     type="text"
                     id="totalamount"
                     value={totalamount}
-                    onChange={(e) => setTotalAmount(e.target.value)}
+                    onChange={(e) => {
+                      setTotalAmount(e.target.value);
+
+                      if (e.target.value) {
+                        setErrors((prev) => ({ ...prev, totalamount: "" }));
+                      }
+                    }}
                     placeholder="Total Amount"
                     required
                   />
+                  {errors.totalamount && (
+                    <span style={{ color: "red", marginTop: "5px" }}>
+                      {errors.totalamount}
+                    </span>
+                  )}
 
                   <label htmlFor="advanceamount">Advance Amount</label>
                   <input
@@ -964,7 +1097,13 @@ const ChefForPartyCreateOrderComponent = () => {
                       <select
                         id="city"
                         value={city}
-                        onChange={(e) => setCity(e.target.value)}
+                        onChange={(e) => {
+                          setCity(e.target.value);
+
+                          if (e.target.value) {
+                            setErrors((prev) => ({ ...prev, city: "" }));
+                          }
+                        }}
                         required
                         style={{
                           width: "100%",
@@ -982,6 +1121,11 @@ const ChefForPartyCreateOrderComponent = () => {
                         <option value="Mumbai">Mumbai</option>
                         <option value="Hyderabad">Hyderabad</option>
                       </select>
+                      {errors.city && (
+                        <span style={{ color: "red", marginTop: "5px" }}>
+                          {errors.city}
+                        </span>
+                      )}
                     </div>
                     <div className="pincode-box">
                       <label htmlFor="pincode">Pincode *</label>
@@ -989,8 +1133,20 @@ const ChefForPartyCreateOrderComponent = () => {
                         type="text"
                         id="pincode"
                         value={pincode}
-                        onChange={(e) => setPincode(e.target.value)}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setPincode(value);
+
+                          if (value) {
+                            setErrors((prev) => ({ ...prev, pincode: "" }));
+                          }
+                        }}
                       />
+                      {errors.pincode && (
+                        <span style={{ color: "red", marginTop: "5px" }}>
+                          {errors.pincode}
+                        </span>
+                      )}
                       <p
                         style={{
                           fontWeight: "bold",

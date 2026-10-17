@@ -1,4 +1,5 @@
-export const BASE_URL = 'http://localhost:5000';
+export const BASE_URL = 'https://horaservices.com';
+export const IMAGE_BASE_URL = "https://horaservices.com/api/uploads";
 export const MEDIA_PROCESSING_BASE_URL = 'https://horaservices.com/media-api';
 export const GET_DECORATION_BY_NAME = '/api/Decoration/searchByName/';
 export const CONFIRM_ORDER_ENDPOINT = "/api/order/add";
@@ -47,6 +48,7 @@ export const GET_CELEBRATION_BOOSTERS_BY_NAME = '/api/celebration-booster/getCel
 
 // Decoration Material List APIs
 export const GET_DECORATION_MATERIALS = '/api/material-list/admin_material_list';
+export const GET_MATERIAL_FILTER_OPTIONS = '/api/material-list/material_filter_options';
 export const CREATE_DECORATION_MATERIAL = '/api/material-list/createMaterial';
 export const UPDATE_DECORATION_MATERIAL = '/api/material-list/updateMaterial';
 export const GET_MATERIAL_FILTER_DATA = "/api/material-list/getMaterialFilterData";
@@ -68,6 +70,7 @@ export const GET_EVENT_DATES_LISTING_DATA = '/api/event-dates/list';
 export const GET_SEARCH_TRACKING_LIST = '/api/search-tracking/tracking-list';
 export const GET_SEARCH_TRACKING_STATS = '/api/search-tracking/stats'
 export const GET_CITY_TRACKING_LIST = "/api/event-dates/city-tracking-list";
+export const GET_CITY_TRACKING_STATS = "/api/event-dates/city-tracking-stats";
 export const GET_ERROR_LOGS_LIST = "/api/error-log/list";
 export const ADD_ADDON = "/api/addon/add";
 export const DELETE_ADDON = "/api/addon/delete";

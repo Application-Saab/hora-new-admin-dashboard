@@ -12,22 +12,11 @@ const EventDatesTracking = () => {
   const [pagination, setPagination] = useState({});
 
   const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState(search);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  useEffect(() => {
-    fetchEventDatesListingData({
-      setLoading,
-      setData,
-      setPagination,
-      page,
-      search: debouncedSearch,
-      startDate,
-      endDate,
-    });
-  }, [page, debouncedSearch, startDate, endDate]);
-
+  // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
@@ -36,11 +25,30 @@ const EventDatesTracking = () => {
     return () => clearTimeout(timer);
   }, [search]);
 
+  // Fetch with AbortController
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetchEventDatesListingData({
+      setLoading,
+      setData,
+      setPagination,
+      page,
+      search: debouncedSearch,
+      startDate,
+      endDate,
+      signal: controller.signal,
+    });
+
+    return () => {
+      controller.abort();
+    };
+  }, [page, debouncedSearch, startDate, endDate]);
+
   const formatDateDDMMYYYY = (dateInput) => {
     if (!dateInput) return "N/A";
 
     const d = new Date(dateInput);
-
     if (isNaN(d.getTime())) return "Invalid Date";
 
     const day = String(d.getDate()).padStart(2, "0");
@@ -94,13 +102,14 @@ const EventDatesTracking = () => {
 
         {(startDate || endDate) && (
           <button
-           style={{
-            backgroundColor : "blue",
-            color : "white",
-            border : 'none',
-            borderRadius : "10px",
-            cursor : "pointer"
-           }}
+            style={{
+              backgroundColor: "blue",
+              color: "white",
+              border: "none",
+              borderRadius: "10px",
+              cursor: "pointer",
+              padding: "8px 15px",
+            }}
             onClick={() => {
               setStartDate("");
               setEndDate("");
@@ -143,8 +152,8 @@ const EventDatesTracking = () => {
               ))
             ) : (
               <tr>
-                <td colSpan={7} className="no-data">
-                  No Data Found
+                <td colSpan={8} className="no-data" style={{ textAlign: "center" }}>
+                  <b>{loading ? "Loading..." : "No Data Found"}</b>
                 </td>
               </tr>
             )}
@@ -155,19 +164,19 @@ const EventDatesTracking = () => {
       {data.length > 0 && (
         <div className="pagination">
           <button
+            disabled={page === 1 || loading}
             onClick={() => setPage((prev) => prev - 1)}
-            disabled={page === 1}
           >
             Prev
           </button>
 
           <span>
-            Page {page} of {pagination.totalPages}
+            Page {page} of {pagination?.totalPages || 1}
           </span>
 
           <button
+            disabled={loading || page >= (pagination?.totalPages || 1)}
             onClick={() => setPage((prev) => prev + 1)}
-            disabled={page >= pagination.totalPages}
           >
             Next
           </button>
@@ -178,4 +187,5 @@ const EventDatesTracking = () => {
     </div>
   );
 };
+
 export default EventDatesTracking;
