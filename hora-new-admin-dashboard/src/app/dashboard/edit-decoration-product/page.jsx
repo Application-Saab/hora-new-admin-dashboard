@@ -66,6 +66,20 @@ const DecorationEditor = () => {
     "Flex",
     "Artificial Flower",
     "Real Flower",
+    "On Wall", 
+    "Personalized Flex On Wall", 
+    "On Ring",
+    "Ring + Personalised Flex", 
+    "Sequins Design",
+    "U Shape Stand",
+    "U stand + Personalized flex", 
+    "U Shape Wooden stand", 
+    "Canopy",
+    "Personalized Flex on Stand", 
+    "Multi - Panel Backdrop",
+    "On Square Stand",
+    "Car Decor",
+    "Entry Arch",    
   ];
 
   const getDefaultDesignType = (data = {}) => {
