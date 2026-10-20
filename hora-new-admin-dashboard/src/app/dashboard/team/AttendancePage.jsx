@@ -132,12 +132,17 @@ const [selectedEmployee, setSelectedEmployee] = useState("");
                     if (!cell) return;
 
                     if (cell.status === 'Not Joined') return;
+                    const halfDayMatch = (rec.reason || '').match(
+                        /Half Day \((First Half|Second Half)\)/i
+                    );
 
                     initialMap[rec.memberId][rec.date] = {
                         status: rec.status,
                         reason: rec.reason || '-',
                         leaveType: rec.leaveType || '',
-                        halfDayType: rec.halfDayType || ''
+                        halfDayType:
+                            rec.halfDayType ||
+                            (halfDayMatch ? halfDayMatch[1] : '')
                     };
                 });
             }
