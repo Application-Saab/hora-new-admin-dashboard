@@ -86,17 +86,66 @@ export const fetchPackageItems = async (
   }
 };
 
+// export const fetchPackageCategories = async (setPackageCategories) => {
+//   try {
+//     const res = await axios.get(
+//       `${BASE_URL}/api/party-venue/package-category/categories-list?limit=500`,
+//     );
+
+//     setPackageCategories(res.data.data || []);
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
+
 export const fetchPackageCategories = async (setPackageCategories) => {
   try {
     const res = await axios.get(
-      `${BASE_URL}/api/party-venue/package-category/categories-list?limit=500`,
+      `${BASE_URL}/api/party-venue/package-category/categories-list`,
+      {
+        params: {
+          limit: 500,
+          categoriesStatus: 1, // only active
+        },
+      }
     );
-
     setPackageCategories(res.data.data || []);
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 };
+
+// NEW: Fetch items by category (or search)
+export const fetchPackageItemsByCategory = async ({
+  categoryId = "",
+  search = "",
+  page = 1,
+  limit = 100,
+}) => {
+  try {
+    const res = await axios.get(
+      `${BASE_URL}/api/party-venue/package-item/items-list`,
+      {
+        params: {
+          categoryId: categoryId || undefined,
+          search: search || undefined,
+          itemsStatus: 1,
+          page,
+          limit,
+        },
+      }
+    );
+
+    return {
+      items: res.data.data || [],
+      pagination: res.data.pagination || {},
+    };
+  } catch (err) {
+    console.error(err);
+    return { items: [], pagination: {} };
+  }
+};
+
 
 export const createVenuePackage = async (
   payload,
@@ -252,5 +301,46 @@ export const deleteVenueMedia = async (imageId, setLoading, onSuccess) => {
     throw err;
   } finally {
     setLoading?.(false);
+  }
+};
+
+// fetch suggestions master list for faq
+export const fetchFaqSuggestions = async () => {
+  try {
+    const res = await axios.get(
+      `${BASE_URL}/api/venue-suggestion/suggestion-by-type/FAQ`
+    );
+    return res.data?.data || [];
+  } catch (err) {
+    console.error("Error fetching FAQ suggestions:", err);
+    return [];
+  }
+};
+
+// update venue faqs
+export const updateVenueFaqs = async (
+  venueId,
+  faqs,
+  onSuccess,
+  onClose,
+  setLoading
+) => {
+  try {
+    setLoading(true);
+    const res = await axios.put(
+      `${BASE_URL}/api/party-venue/update-faqs/${venueId}`,
+      { faqs }
+    );
+
+    if (!res.data.error) {
+      alert("FAQs updated successfully!");
+      onSuccess?.();
+      onClose?.();
+    }
+  } catch (err) {
+    console.error(err);
+    alert(err?.response?.data?.message || "Failed to update FAQs");
+  } finally {
+    setLoading(false);
   }
 };
