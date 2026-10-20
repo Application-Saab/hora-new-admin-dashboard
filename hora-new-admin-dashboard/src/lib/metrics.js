@@ -483,7 +483,11 @@ export function computeDashboard(data, opts = {}) {
   const bestHourAll = bestHourFromCalls(rangeCalls, rules);
 
   // Leads without a created date are kept: they can't be dated.
-  const periodLeads = scopeLeads;
+  const periodLeads = scopeLeads.filter(
+    (l) =>
+      l.createdAt === undefined ||
+      (l.createdAt >= from && l.createdAt <= to)
+  );
 
   const summaries = periodLeads
     .filter(l => !opts.agentKey || l.agentKey === opts.agentKey)
@@ -662,14 +666,15 @@ export function computeDashboard(data, opts = {}) {
       const appKnown = out.filter(c => c.placedFromApp !== undefined);
       const talk = sum(conn.map(c => c.duration));
       const converted = assigned.filter(s => s.converted).length;
+      const leadsCalled = new Set(out.map(c => c.leadId)).size;
 
       return {
         agent: a,
         assigned: assigned.length,
         assignedCalled: assignedCalled.length,
-        coverage: ratio(assignedCalled.length, assigned.length),
-        leadsCalled: new Set(out.map(c => c.leadId)).size,
-        calls: out.length,
+        coverage: ratio(leadsCalled, assigned.length),
+        leadsCalled: leadsCalled,
+        calls: mine.length,
         connected: outConn.length,
         connectRate: ratio(outConn.length, out.length),
         talkSeconds: talk,
@@ -783,7 +788,9 @@ export function computeDashboard(data, opts = {}) {
   const agentsView = {
     kpis: {
       activeAgents: agentRows.filter(r => r.calls > 0).length,
-      calls: tOut.length,
+      calls: rangeCalls.filter(
+        c => !opts.agentKey || c.agentKey === opts.agentKey
+      ).length,
       leadsCalled: new Set(tOut.map(c => c.leadId)).size,
       talkSeconds: sum(tConn.map(c => c.duration)),
       connectRate: ratio(tOut.filter(c => c.connected).length, tOut.length),

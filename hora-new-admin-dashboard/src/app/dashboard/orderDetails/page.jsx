@@ -31,6 +31,7 @@ const OrderList = () => {
   const [refetchData, setRefetchData] = useState(false);
   const [selectedPhoneNumber, setSelectedPhoneNumber] = useState("");
   const [selectedOrderType, setSelectedOrderType] = useState("");
+  const [selectedTakenBy, setSelectedTakenBy] = useState("");
   const [selectedActiveStatus, setSelectedActiveStatus] = useState("");
   const [selectedOrderStatus, setSelectedOrderStatus] = useState("");
   const [actionPopupOrderId, setActionPopupOrderId] = useState("");
@@ -65,6 +66,8 @@ const [order, setOrder] = useState(null);
   const [orderId1, setOrderId] = useState("");
 
   const [createdAtDate, setCreatedAtDate] = useState("");
+  const [startCreatedAt, setStartCreatedAt] = useState("");
+  const [endCreatedAt, setEndCreatedAt] = useState("");
 
   const [orderTypeShow, setOrderTypeShow] = useState(null);
   const [callChecklistData,setCallChecklistData ] = useState(null);
@@ -139,6 +142,9 @@ const [order, setOrder] = useState(null);
       phone_no: selectedOfflineNum || "",
       // online_phone_no :selectedOfflineNum || "",
       createdAt: createdAtDate || "",
+      start_createdAt: startCreatedAt || "",
+      end_createdAt: endCreatedAt || "",
+      order_taken_by: selectedTakenBy || "",
     };
 
     console.log(requestData);
@@ -189,7 +195,10 @@ const [order, setOrder] = useState(null);
       selectedCity,
       selectedDate,
       selectedPhoneNumber,
-      createdAtDate
+      createdAtDate,
+      selectedTakenBy,
+      startCreatedAt,
+      endCreatedAt,
     );
   }, [
     currentPage,
@@ -201,7 +210,10 @@ const [order, setOrder] = useState(null);
     selectedDate,
     selectedPhoneNumber,
     createdAtDate,
-    refetchData
+    refetchData,
+    selectedTakenBy,
+    startCreatedAt,
+    endCreatedAt,
   ]);
 
   const getOrderStatus = (orderStatusValue) => {
@@ -932,6 +944,36 @@ useEffect(() => {
               />
             </div>
 
+
+
+            <div className="filter-item_new">
+              <label htmlFor="startCreatedAt" className="label_new">
+                Created From
+              </label>
+              <input
+                id="startCreatedAt"
+                type="date"
+                className="input_new"
+                value={startCreatedAt}
+                onChange={(e) => setStartCreatedAt(e.target.value)}
+              />
+            </div>
+
+            <div className="filter-item_new">
+              <label htmlFor="endCreatedAt" className="label_new">
+                Created To
+              </label>
+              <input
+                id="endCreatedAt"
+                type="date"
+                className="input_new"
+                value={endCreatedAt}
+                min={startCreatedAt || undefined}
+                onChange={(e) => setEndCreatedAt(e.target.value)}
+              />
+            </div>
+
+
             <div className="filter-item_new">
               <label htmlFor="statusDropdown" className="label_new">
                 Status
@@ -1007,7 +1049,33 @@ useEffect(() => {
                 <th>Fulfillment Date</th>
                 <th>Fulfillment Time</th>
                 <th>Otp</th>
-                <th>Order Taken By</th>
+                <th className="order-type-header">
+                  <span>Order Taken By</span>
+                <span>
+                  <select
+                      value={selectedTakenBy}
+                    onChange={(e) => {
+                      const filterdStatus = e.target.value; // Get the updated value directly
+                      setSelectedTakenBy(filterdStatus); // Update state
+                      // FilterByStatus(newStatus);          // Pass the updated value immediately
+                    }}
+                    className="order-type-dropdown"
+                  >
+                    <option value="">All</option>
+                      <option value="Aarti Bhagat">Aarti Bhagat</option>
+                      <option value="Pooja Kewat">Pooja Kewat</option>
+                      <option value="Kajal Gupta">Kajal Gupta</option>
+                      <option value="Laxmi Kumari">Laxmi Kumari</option>
+                      <option value="Bharat Gyanchandani">Bharat Gyanchandani</option>
+                      <option value="Parveen Jahan">Parveen Jahan</option>
+                      <option value="Paavani Mangal">Paavani Mangal</option>
+                      <option value="Vaishnavi Hariyal">Vaishnavi Hariyal</option>
+                      <option value="Sanjay Prasad">Sanjay Prasad</option>
+                      <option value="Sachin Verma">Sachin Verma</option>
+                      <option value="Girija Devi">Girija Devi</option>
+                  </select>
+                </span>
+                </th>
                 <th>Customer No</th>
                 {/* <th>Online Customer No</th> */}
                 <th>Supplier</th>
