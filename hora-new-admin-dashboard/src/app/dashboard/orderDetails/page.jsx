@@ -932,7 +932,6 @@ useEffect(() => {
               />
             </div>
 
-
             <div className="filter-item_new">
               <label htmlFor="statusDropdown" className="label_new">
                 Status
