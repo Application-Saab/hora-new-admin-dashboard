@@ -171,6 +171,11 @@ const menuItems = [
         icon: <FaPlusCircle />,
         url: "/dashboard/specalization-list",
       },
+      {
+        label: "Category capsule",
+        icon: <FaPlusCircle />,
+        url: "/dashboard/category-capsule",
+      },
     ],
   },
 
