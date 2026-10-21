@@ -77,7 +77,7 @@
 
 .capsule-form-card input,
 .capsule-form-card textarea {
-    width: 100%;
+    /* width: 100%; */
     box-sizing: border-box;
     padding: 12px 14px;
     border: 1px solid #dfe2ea;
@@ -86,6 +86,7 @@
     color: #171923;
     font: inherit;
     outline: none;
+    min-width: 100px !important
 }
 
 .capsule-form-card input:focus,
@@ -387,4 +388,50 @@
     .capsule-orders-cell {
         min-width: 180px;
     }
+}
+.capsule-link {
+    color: #007bff;
+    text-decoration: underline;
+    display: inline-block;
+    max-width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+}
+.capsule-link-wrapper{
+    display: flex;
+}
+.capsule-copy-btn{
+    background-color: transparent;
+    border: none;
+}
+.capsule-order-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+.capsule-order-input-row .capsule-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+
+
+
+
+.capsule-order-input-row input {
+    width: 100px;
+    max-width: 100px;
+    flex: 0 0 100px;
+    min-width: 150px;
+}
+
+.capsule-order-input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
 }

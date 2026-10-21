@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
@@ -8,8 +7,20 @@ import { BASE_URL } from '../../../utils/apiconstant';
 export default function CapsulesPage() {
     const [capsules, setCapsules] = useState([]);
     const [name, setName] = useState('');
-    const [orderIds, setOrderIds] = useState('');
+
+    const [orderIds, setOrderIds] = useState(['']);
+    const addOrderIdInput = () => {
+        setOrderIds((prev) => [...prev, '']);
+    };
+
+    const handleOrderIdChange = (index, value) => {
+        setOrderIds((prev) =>
+            prev.map((id, i) => (i === index ? value : id))
+        );
+    };
     const [editingId, setEditingId] = useState(null);
+    const [sourceOrderId, setSourceOrderId] = useState('');
+
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState('');
@@ -53,7 +64,8 @@ export default function CapsulesPage() {
 
     const resetForm = () => {
         setName('');
-        setOrderIds('');
+        setOrderIds(['']);
+        setSourceOrderId('');
         setEditingId(null);
         setMessage('');
         setError('');
@@ -63,12 +75,15 @@ export default function CapsulesPage() {
         setEditingId(capsule._id);
         setName(capsule.folderName || '');
         setOrderIds(
-            (capsule.galleryFolders || [])
-                .map((gallery) => gallery.orderId)
-                .join('\n')
+            capsule.galleryFolders?.length
+                ? capsule.galleryFolders.map((gallery) => gallery.orderId || '')
+                : ['']
         );
+
+        setSourceOrderId('');
         setMessage('');
         setError('');
+
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -80,7 +95,6 @@ export default function CapsulesPage() {
         const ids = [
             ...new Set(
                 orderIds
-                    .split(/[\n,]+/)
                     .map((id) => id.trim())
                     .filter(Boolean)
             ),
@@ -96,6 +110,13 @@ export default function CapsulesPage() {
             return;
         }
 
+        if (editingId && sourceOrderId.trim()) {
+            if (!Number.isFinite(Number(sourceOrderId.trim()))) {
+                setError('Please enter a valid banner source Order ID.');
+                return;
+            }
+        }
+
         setSaving(true);
 
         try {
@@ -104,12 +125,27 @@ export default function CapsulesPage() {
                 : '/api/internal/create-capsule';
 
             const payload = editingId
-                ? { capsuleId: editingId, name: name.trim(), orderIds: ids }
-                : { name: name.trim(), orderIds: ids };
+                ? {
+                    capsuleId: editingId,
+                    name: name.trim(),
+                    orderIds: ids,
+                    ...(sourceOrderId.trim()
+                        ? {
+                            capsuleBannerSourceOrderId:
+                                sourceOrderId.trim(),
+                        }
+                        : {}),
+                }
+                : {
+                    name: name.trim(),
+                    orderIds: ids,
+                };
 
             const response = await fetch(api(endpoint), {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify(payload),
             });
 
@@ -142,16 +178,24 @@ export default function CapsulesPage() {
                 </div>
             </header>
 
-            {message && <div className="capsule-alert success">{message}</div>}
-            {error && <div className="capsule-alert error">{error}</div>}
+            {message && (
+                <div className="capsule-alert success">{message}</div>
+            )}
+
+            {error && (
+                <div className="capsule-alert error">{error}</div>
+            )}
 
             <section className="capsule-form-card">
                 <div className="capsule-section-heading">
                     <div>
-                        <h2>{editingId ? 'Edit Capsule' : 'Create New Capsule'}</h2>
+                        <h2>
+                            {editingId ? 'Edit Capsule' : 'Create New Capsule'}
+                        </h2>
+
                         <p>
                             {editingId
-                                ? 'Update the capsule name or selected order galleries.'
+                                ? 'Update the capsule name, order galleries, or banner source.'
                                 : 'Enter a capsule name and at least one Order ID with an existing gallery.'}
                         </p>
                     </div>
@@ -168,30 +212,48 @@ export default function CapsulesPage() {
                 </div>
 
                 <form onSubmit={submitCapsule}>
-                    <label htmlFor="capsule-name">Capsule Name</label>
+                    <label htmlFor="capsule-name">
+                        Capsule Name
+                    </label>
+
                     <input
                         id="capsule-name"
                         value={name}
                         onChange={(event) => setName(event.target.value)}
                         placeholder="e.g. Sharma Wedding"
                         required
+                        className='capsule-name'
                     />
 
-                    <label htmlFor="capsule-orders">
+
+                    <label>
                         Order IDs <span className="capsule-required">*</span>
                     </label>
 
-                    <textarea
-                        id="capsule-orders"
-                        value={orderIds}
-                        onChange={(event) => setOrderIds(event.target.value)}
-                        placeholder={'Enter one Order ID per line\nORDER_ID_1\nORDER_ID_2'}
-                        rows={4}
-                        required
-                    />
+                    <div className="capsule-order-inputs">
+                        {orderIds.map((orderId, index) => (
+                            <div className="capsule-order-input-row" key={index}>
+                                <input
+                                    type="text"
+                                    value={orderId}
+                                    onChange={(event) =>
+                                        handleOrderIdChange(index, event.target.value)
+                                    }
+                                    placeholder={`Enter Order ID ${index + 1}`}
+                                />
+
+                                <button
+                                    type="button"
+                                    className="capsule-btn capsule-btn-primary"
+                                    onClick={addOrderIdInput}
+                                >
+                                    + Add
+                                </button>
+                            </div>
+                        ))}
+                    </div>
 
                     <p className="capsule-help">
-                        Enter multiple IDs separated by commas or new lines.
                         Each Order ID must have an existing gallery.
                     </p>
 
@@ -213,12 +275,16 @@ export default function CapsulesPage() {
                 <div className="capsule-section-heading">
                     <div>
                         <h2>Existing Capsules</h2>
-                        <p>{capsules.length} capsule(s) with galleries</p>
+                        <p>
+                            {capsules.length} capsule(s) with galleries
+                        </p>
                     </div>
                 </div>
 
                 {loading && capsules.length === 0 ? (
-                    <div className="capsule-empty">Loading capsules...</div>
+                    <div className="capsule-empty">
+                        Loading capsules...
+                    </div>
                 ) : capsules.length === 0 ? (
                     <div className="capsule-empty">
                         No capsules with available galleries were found.
@@ -230,6 +296,7 @@ export default function CapsulesPage() {
                                 <tr>
                                     <th>Capsule Name</th>
                                     <th>Order IDs</th>
+                                    <th>Gallery Url</th>
                                     <th>Count</th>
                                     <th>Action</th>
                                 </tr>
@@ -240,6 +307,50 @@ export default function CapsulesPage() {
                                     <tr key={capsule._id}>
                                         <td className="capsule-name-cell">
                                             {capsule.folderName}
+                                        </td>
+
+                                        <td className="capsule-name-cell">
+                                            <div className="capsule-link-wrapper">
+                                                <a
+                                                    href={`https://horaservices.com/category-capsule?galleryId=${capsule._id}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="capsule-link"
+                                                >
+                                                    {`https://horaservices.com/category-capsule?galleryId=${capsule._id}`}
+                                                </a>
+
+                                                <button
+                                                    type="button"
+                                                    className="capsule-copy-btn"
+                                                    title="Copy link"
+                                                    onClick={async () => {
+                                                        try {
+                                                            await navigator.clipboard.writeText(
+                                                                `https://horaservices.com/category-capsule?galleryId=${capsule._id}`
+                                                            );
+                                                            alert("Link copied!");
+                                                        } catch (error) {
+                                                            console.error("Copy failed:", error);
+                                                        }
+                                                    }}
+                                                >
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        width="15"
+                                                        height="15"
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        strokeWidth="2"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                    >
+                                                        <rect x="8" y="8" width="13" height="13" rx="2" />
+                                                        <path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3" />
+                                                    </svg>
+                                                </button>
+                                            </div>
                                         </td>
 
                                         <td className="capsule-orders-cell">
