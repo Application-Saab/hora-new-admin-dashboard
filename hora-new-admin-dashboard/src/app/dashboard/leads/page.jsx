@@ -792,12 +792,18 @@ export default function LeadAnalytics() {
                                                     <td>
                                                         <span
                                                             className={
-                                                                lead.orderSummary === "Yes"
+                                                                lead.orderSummary &&
+                                                                    lead.orderSummary.trim() !== "" &&
+                                                                    lead.orderSummary !== "#N/A"
                                                                     ? "confirmed-pill"
                                                                     : "not-confirmed-pill"
                                                             }
                                                         >
-                                                            {lead.orderStatus || "No"}
+                                                            {lead.orderSummary &&
+                                                                lead.orderSummary.trim() !== "" &&
+                                                                lead.orderSummary !== "#N/A"
+                                                                ? "Yes"
+                                                                : "No"}
                                                         </span>
                                                     </td>
                                                     <td>
@@ -814,19 +820,25 @@ export default function LeadAnalytics() {
                                                     <td>
                                                         <span
                                                             className={
-                                                                lead.eventDetails === "Yes"
+                                                                lead.eventDetails &&
+                                                                    lead.eventDetails.trim() !== "" &&
+                                                                    lead.eventDetails.trim() !== "#N/A"
                                                                     ? "confirmed-pill"
                                                                     : "not-confirmed-pill"
                                                             }
                                                         >
-                                                            {lead.orderStatus || "No"}
+                                                            {lead.eventDetails &&
+                                                                lead.eventDetails.trim() !== "" &&
+                                                                lead.eventDetails.trim() !== "#N/A"
+                                                                ? "Yes"
+                                                                : "No"}
                                                         </span>
                                                     </td>
                                                 </tr>
                                             ))
                                         ) : (
                                             <tr>
-                                                <td colSpan="7" className="no-data">
+                                                <td colSpan="8" className="no-data">
                                                     No Leads Available
                                                 </td>
                                             </tr>
@@ -906,6 +918,10 @@ export default function LeadAnalytics() {
                                         Order Summary
                                     </th>
 
+                                    <th>
+                                        Event Date
+                                    </th>
+
 
                                     <th>
                                        Event Details
@@ -949,6 +965,14 @@ export default function LeadAnalytics() {
                                                         <span className="confirmed-pill">
                                                             {
                                                                 item.orderSummaryCount
+                                                            }
+                                                        </span>
+                                                    </td>
+
+                                                    <td>
+                                                        <span className="confirmed-pill">
+                                                            {
+                                                                item.eventDateCount
                                                             }
                                                         </span>
                                                     </td>
@@ -1037,6 +1061,20 @@ export default function LeadAnalytics() {
                                             Order Confirmed
                                         </th>
 
+
+                                    <th>
+                                        Order Summary
+                                    </th>
+
+                                    <th>
+                                        Event Date
+                                    </th>
+
+
+                                    <th>
+                                        Event Details
+                                    </th>
+
                                         <th>
                                             Conversion Ratio
                                         </th>
@@ -1063,6 +1101,27 @@ export default function LeadAnalytics() {
                                                         <span className="confirmed-pill">
                                                             {
                                                                 item.orderConfirmed
+                                                            }
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span className="confirmed-pill">
+                                                            {
+                                                                item.orderSummaryCount
+                                                            }
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span className="confirmed-pill">
+                                                            {
+                                                                item.eventDateCount
+                                                            }
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span className="confirmed-pill">
+                                                            {
+                                                                item.eventDetailsCount
                                                             }
                                                         </span>
                                                     </td>

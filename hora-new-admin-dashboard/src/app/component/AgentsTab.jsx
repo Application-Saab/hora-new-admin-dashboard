@@ -337,7 +337,7 @@ export function Scorecard({ dash, onOpen }) {
                   <td className="r num">
                     {pct(r.coverage)}
                     <div className="cell-sub">
-                      {int(r.assignedCalled)} of{' '}
+                      {int(r.leadsCalled)} of{' '}
                       {int(r.assigned)}
                     </div>
                   </td>

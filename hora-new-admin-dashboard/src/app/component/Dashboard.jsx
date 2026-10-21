@@ -19,6 +19,7 @@ import { AgentsTab } from './AgentsTab';
 import { AgentDrawer, LeadDrawer } from './Drawers';
 import { TooltipLayer } from './ui';
 import { BASE_URL } from '@/utils/apiconstant';
+import "../dashboard/leads-dashboard/leadsdashboard.css"
 
 function stored(key, allowed, dflt) {
   try {
@@ -41,6 +42,8 @@ function store(key, value) {
 export function Dashboard({ demo, userName }) {
   const [tab, setTab] = useState('leads');
   const [period, setPeriod] = useState('30d');
+  const [customFrom, setCustomFrom] = useState('');
+  const [customTo, setCustomTo] = useState('');
   const [agent, setAgent] = useState('');
   const [source, setSource] = useState('');
   const [raw, setRaw] = useState(null);
@@ -64,7 +67,13 @@ export function Dashboard({ demo, userName }) {
     const id = ++reqId.current;
     setLoading(true);
 
-    const range = periodRange(p, Date.now());
+    const range =
+      customFrom && customTo
+        ? {
+          from: new Date(`${customFrom}T00:00:00`).getTime(),
+          to: new Date(`${customTo}T00:00:00`).getTime(),
+        }
+        : periodRange(p, Date.now());
 
     const q = new URLSearchParams();
     if (range.from !== undefined) q.set('from', ymd(range.from));
@@ -140,7 +149,7 @@ export function Dashboard({ demo, userName }) {
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [period, load]);
+  }, [period, load,customFrom, customTo]);
 
   useEffect(() => {
     if (!REFRESH_MINUTES || origin !== 'live') {
@@ -166,7 +175,13 @@ export function Dashboard({ demo, userName }) {
       return null;
     }
 
-    const r = periodRange(period, now);
+    const r =
+      customFrom && customTo
+        ? {
+          from: new Date(`${customFrom}T00:00:00`).getTime(),
+          to: new Date(`${customTo}T23:59:59.999`).getTime(),
+        }
+        : periodRange(period, now);
 
     return computeDashboard(data, {
       ...RULES,
@@ -176,7 +191,7 @@ export function Dashboard({ demo, userName }) {
       agentKey: agent || undefined,
       source: source || undefined,
     });
-  }, [data, period, now, agent, source]);
+  }, [data, period, now, agent, source, customFrom, customTo]);
 
   const sources = useMemo(
     () =>
@@ -212,6 +227,8 @@ export function Dashboard({ demo, userName }) {
   };
 
   const choosePeriod = (p) => {
+    setCustomFrom('');
+    setCustomTo('');
     setPeriod(p);
     store('lcm-period', p);
 
@@ -352,6 +369,34 @@ export function Dashboard({ demo, userName }) {
                   </button>
                 ))}
               </div>
+            </div>
+
+            <div className="field">
+              <label htmlFor="custom-from">From date</label>
+              <input
+                id="custom-from"
+                type="date"
+                value={customFrom}
+                max={customTo || undefined}
+                onChange={(e) => {
+                  setCustomFrom(e.target.value);
+                  setPeriod('custom');
+                }}
+              />
+            </div>
+
+            <div className="field">
+              <label htmlFor="custom-to">To date</label>
+              <input
+                id="custom-to"
+                type="date"
+                value={customTo}
+                min={customFrom || undefined}
+                onChange={(e) => {
+                  setCustomTo(e.target.value);
+                  setPeriod('custom');
+                }}
+              />
             </div>
 
             <div className="field">
