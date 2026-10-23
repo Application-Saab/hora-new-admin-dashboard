@@ -26,6 +26,10 @@ const TeamPage = () => {
     const [deleteModal, setDeleteModal] = useState(false);
     const [deleteTeamId, setDeleteTeamId] = useState("");
     const [editModal, setEditModal] = useState(false);
+    const [statusForm, setStatusForm] = useState({ date: "", reason: "" });
+    const [statusModal, setStatusModal] = useState(false);
+    const [statusMember, setStatusMember] = useState(null);
+    const [statusLoading, setStatusLoading] = useState(false);
 
     const [editData, setEditData] = useState({
         _id: "",
@@ -48,6 +52,55 @@ const TeamPage = () => {
 
     const [viewModal, setViewModal] = useState(false);
     const [viewData, setViewData] = useState(null);
+
+
+    const getOpenInactivePeriod = (item) =>
+        (item?.inactivePeriods || []).find((p) => !p.to);
+
+    const handleStatusClick = (item) => {
+        setStatusMember(item);
+        const today = new Date().toISOString().split("T")[0];
+        setStatusForm({ date: today, reason: "" });
+        setStatusModal(true);
+    };
+
+    const handleStatusSubmit = async () => {
+        if (!statusMember) return;
+
+        if (!statusForm.date) {
+            alert("Please select date");
+            return;
+        }
+
+        try {
+            setStatusLoading(true);
+
+            const response = await fetch(
+                `${BASE_URL}/api/team/toggle-status/${statusMember._id}`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        date: statusForm.date,
+                        reason: statusForm.reason,
+                    }),
+                }
+            );
+
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message || "Failed");
+
+            alert(result.message);
+            setStatusModal(false);
+            setStatusMember(null);
+            getTeams(searchNumber);
+        } catch (error) {
+            console.error("Status update error:", error);
+            alert(error.message);
+        } finally {
+            setStatusLoading(false);
+        }
+    };
 
     const handleEditClick = (item) => {
         const data = {
@@ -580,6 +633,19 @@ return (
                                                         ? "Deleting..."
                                                         : "Delete"}
                                                 </button>
+
+                                                <button
+                                                    type="button"
+                                                    className="team-edit-btn"
+                                                    style={{
+                                                        backgroundColor: getOpenInactivePeriod(item) ? "#ef4444" : "#16a34a",
+                                                        color: "#fff",
+                                                        border: "none",
+                                                    }}
+                                                    onClick={() => handleStatusClick(item)}
+                                                >
+                                                    {getOpenInactivePeriod(item) ? "Inactive" : "Active"}
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -785,6 +851,53 @@ return (
                         Are you sure you want to delete this team member?
                     </p>
                 </div>
+            }
+        />
+
+        <CommonPopup
+            isOpen={statusModal}
+            onClose={() => { setStatusModal(false); setStatusMember(null); }}
+            heading={
+                statusMember && getOpenInactivePeriod(statusMember)
+                    ? "Activate Member"
+                    : "Make Member Inactive"
+            }
+            buttonText={statusLoading ? "Saving..." : "Save"}
+            disabled={statusLoading}
+            mainButtonAction={handleStatusSubmit}
+            popupBody={
+                statusMember && (
+                    <div className="team-edit-form">
+                        <div className="team-form-group">
+                            <label>
+                                {getOpenInactivePeriod(statusMember)
+                                    ? "Active Date (return date)"
+                                    : "Inactive Date"}
+                            </label>
+                            <input
+                                type="date"
+                                value={statusForm.date}
+                                onChange={(e) =>
+                                    setStatusForm({ ...statusForm, date: e.target.value })
+                                }
+                            />
+                        </div>
+
+                        {!getOpenInactivePeriod(statusMember) && (
+                            <div className="team-form-group">
+                                <label>Reason</label>
+                                <textarea
+                                    rows={3}
+                                    value={statusForm.reason}
+                                    onChange={(e) =>
+                                        setStatusForm({ ...statusForm, reason: e.target.value })
+                                    }
+                                    placeholder="e.g. Marriage leave"
+                                />
+                            </div>
+                        )}
+                    </div>
+                )
             }
         />
     </div>

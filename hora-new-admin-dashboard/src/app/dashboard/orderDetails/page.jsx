@@ -65,6 +65,7 @@ const [order, setOrder] = useState(null);
   const [orderId1, setOrderId] = useState("");
 
   const [createdAtDate, setCreatedAtDate] = useState("");
+  const [selectedDriveStatus, setSelectedDriveStatus] = useState("");
 
   const [orderTypeShow, setOrderTypeShow] = useState(null);
   const [callChecklistData,setCallChecklistData ] = useState(null);
@@ -88,7 +89,8 @@ const [order, setOrder] = useState(null);
     orderCity = "",
     selectedDate = "",
     selectedOfflineNum = "",
-    createdAtDate = ""
+    createdAtDate = "",
+    driveStatus = ""
   ) => {
     // Handle orderType mapping
     let typeId;
@@ -139,6 +141,7 @@ const [order, setOrder] = useState(null);
       phone_no: selectedOfflineNum || "",
       // online_phone_no :selectedOfflineNum || "",
       createdAt: createdAtDate || "",
+      driveLinkStatus: driveStatus || "",
     };
 
     console.log(requestData);
@@ -189,7 +192,8 @@ const [order, setOrder] = useState(null);
       selectedCity,
       selectedDate,
       selectedPhoneNumber,
-      createdAtDate
+      createdAtDate,
+      selectedDriveStatus,
     );
   }, [
     currentPage,
@@ -201,7 +205,8 @@ const [order, setOrder] = useState(null);
     selectedDate,
     selectedPhoneNumber,
     createdAtDate,
-    refetchData
+    refetchData,
+    selectedDriveStatus,
   ]);
 
   const getOrderStatus = (orderStatusValue) => {
@@ -1059,7 +1064,23 @@ useEffect(() => {
                 <th>Add EventName</th>
                 <th>Wonderland Event Name</th>
                 <th>Add Order Image</th>
-                <th>Add Multiple Drive links</th>
+                <th className="order-type-header">
+                  <span>Add Multiple Drive links</span>
+                  <span>
+                    <select
+                      value={selectedDriveStatus}
+                      onChange={(e) => {
+                        setSelectedDriveStatus(e.target.value);
+                        setCurrentPage(1);
+                      }}
+                      className="order-type-dropdown"
+                    >
+                      <option value="">All</option>
+                      <option value="pending">Pending</option>
+                      <option value="completed">Completed</option>
+                    </select>
+                  </span>
+                </th>
               </tr>
             </thead>
             <tbody>

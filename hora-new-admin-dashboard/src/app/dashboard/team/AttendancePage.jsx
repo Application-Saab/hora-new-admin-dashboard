@@ -41,6 +41,15 @@ const [selectedEmployee, setSelectedEmployee] = useState("");
     const normalizeDate = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
     const currentDateNormalized = normalizeDate(today);
 
+
+    const isDateInInactivePeriod = (member, dateString) => {
+        const periods = member.inactivePeriods || [];
+        return periods.some(p => {
+            if (!p.from) return false;
+            return dateString >= p.from && (!p.to || dateString <= p.to);
+        });
+    };
+
     const fetchData = useCallback(async () => {
         try {
             setIsLoading(true);
@@ -54,7 +63,41 @@ const [selectedEmployee, setSelectedEmployee] = useState("");
             if (!teamRes.ok) throw new Error(`Team Fetch Failed: ${teamRes.status}`);
 
             const teamResult = await teamRes.json();
-            const members = Array.isArray(teamResult) ? teamResult : (teamResult.data || []);
+            const allMembers = Array.isArray(teamResult) ? teamResult : (teamResult.data || []);
+
+            const monthEnd = new Date(selectedYear, selectedMonth + 1, 0);
+
+
+            const members = allMembers.filter(member => {
+                const joinSource = member.joiningDate || member.createdAt;
+
+                if (joinSource && normalizeDate(new Date(joinSource)) > monthEnd) {
+                    return false;
+                }
+
+                const monthStartString =
+                    `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-01`;
+
+                const monthEndString =
+                    `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-${String(
+                        new Date(selectedYear, selectedMonth + 1, 0).getDate()
+                    ).padStart(2, '0')}`;
+
+                const inactivePeriods = member.inactivePeriods || [];
+
+                const isInactiveForWholeMonth = inactivePeriods.some(p => {
+                    if (!p.from) return false;
+
+                    const from = p.from.slice(0, 10);
+                    const to = p.to ? p.to.slice(0, 10) : null;
+
+                    return from <= monthStartString && (!to || to >= monthEndString);
+                });
+
+                return !isInactiveForWholeMonth;
+            });
+
+
             setTeamData(members);
 
             if (members.length > 0 && !leaveForm.memberId) {
@@ -98,13 +141,20 @@ const [selectedEmployee, setSelectedEmployee] = useState("");
 
                     const joiningDate = joiningDateMap[member._id];
                     const isBeforeJoining = joiningDate && dateObjNormalized < joiningDate;
+                    const isInactiveDay = isDateInInactivePeriod(member, dateString);
+
 
                     if (isBeforeJoining) {
                         defaultStatus = 'Not Joined';
                         defaultReason = 'Member had not joined yet';
                     } else if (isFuture) {
                         defaultStatus = '-';
-                    } else if (
+                    } 
+                    else if (isInactiveDay) {
+                        defaultStatus = 'Inactive';
+                        defaultReason = 'Member was inactive / on pause';
+                    }
+                    else if (
                         member.weekOff &&
                         member.weekOff.toLowerCase() === dayNameFull.toLowerCase()
                     ) {
@@ -131,7 +181,7 @@ const [selectedEmployee, setSelectedEmployee] = useState("");
                     const cell = initialMap[rec.memberId]?.[rec.date];
                     if (!cell) return;
 
-                    if (cell.status === 'Not Joined') return;
+                    if (cell.status === 'Not Joined' || cell.status === 'Inactive') return;
                     const halfDayMatch = (rec.reason || '').match(
                         /Half Day \((First Half|Second Half)\)/i
                     );
@@ -368,6 +418,10 @@ const [selectedEmployee, setSelectedEmployee] = useState("");
                                                     else if (record.status === 'Not Joined') {
                                                         badgeClass = "badge badge-future";
                                                         displayStatus = '-';
+                                                    }
+                                                    else if (record.status === 'Inactive') {
+                                                        badgeClass = "badge badge-inactive";
+                                                        displayStatus = 'Inactive';
                                                     }
                                                     else if (record.status === '-') badgeClass = "badge badge-future";
 
