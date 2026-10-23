@@ -605,8 +605,13 @@ thead th.sticky-col {
 }
 
 .badge-leave {
-    background-color: #fef3c7;
+    background-color: #fee7c7;
     color: #b45309;
+}
+
+.badge-inactive{
+    background-color: #f78d8d;
+    color: #b61313;
 }
 
 .badge-sunday {
