@@ -1130,7 +1130,7 @@ useEffect(() => {
                           >
                             ✏️
                           </span>
-
+                            {order?.acceptedBy && 
                           <span
                             style={{
                               display: "inline-flex",
@@ -1154,12 +1154,13 @@ useEffect(() => {
                                 ? "A"
                                 : ""}
                           </span>
+}
                           </div>
                         </>
                       ) : (order.isEmergencyOrder === true && order.processedBy.length > 0)  ? (
                       <>
                           <button
-                            className={`assigningBtn ${order.processedBy?.some(
+                            className={`assigningBtn ${order?.processedBy?.some(
                               (supplier) => supplier.action === "yes"
                             )
                                 ? "pre-assigned"
@@ -1169,13 +1170,15 @@ useEffect(() => {
                           >
                             Pre Assigned
                           </button>
-                                                    <span
+                        {order?.order_status == 0 &&
+                          <span
                             style={{ cursor: "pointer", marginLeft: "8px" }}
                             onClick={() => openSupplierAssignPopup(order)}
                             title="Edit"
                           >
                             ✏️
                           </span>
+                        }    
                           </>
                           ) 
                           :
