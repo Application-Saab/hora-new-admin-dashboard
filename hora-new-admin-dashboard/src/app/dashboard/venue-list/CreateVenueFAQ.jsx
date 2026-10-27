@@ -24,7 +24,7 @@ import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import * as XLSX from "xlsx";
 import {
-  fetchFaqSuggestions,
+  fetchVenueSuggestion,
   updateVenueFaqs,
   fetchVenuePackages,
 } from "@/services/venueListServices";
@@ -60,7 +60,7 @@ const VenueFaqPopup = ({ isOpen, onClose, venue, onSuccess }) => {
       }
 
       setLoadingSuggestions(true);
-      fetchFaqSuggestions()
+      fetchVenueSuggestion("FAQ")
         .then((data) => setSuggestedFaqs(data || []))
         .finally(() => setLoadingSuggestions(false));
 

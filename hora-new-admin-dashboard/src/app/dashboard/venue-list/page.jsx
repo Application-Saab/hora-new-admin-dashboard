@@ -5,7 +5,7 @@ import CreateVenuePopup from "./CreateVenuePopup";
 import EditVenuePopup from "./EditVenuePopup";
 import VenuePackagesPopup from "./VenuePackagesPopup";
 import EditTermsPopup from "./CreateTermsModal";
-import VenueFaqPopup from "./CreateVenueFAQ"
+import VenueFaqPopup from "./CreateVenueFAQ";
 import {
   fetchVenues,
   toggleVenueStatus,
@@ -14,14 +14,40 @@ import { useRouter } from "next/navigation";
 import { venueTypes } from "@/constants/venueListConstants";
 import Image from "next/image";
 import "./createVenue.css";
+import {
+  Search,
+  X,
+  RotateCcw,
+  Building2,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
+
+const FOOD_TYPES = [
+  { label: "Veg", value: "veg" },
+  { label: "Non-Veg", value: "non-veg" },
+  { label: "Mixed", value: "mixed" },
+];
+
 const VenueList = () => {
   const router = useRouter();
   const [venues, setVenues] = useState([]);
-  const [, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [, setError] = useState("");
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [venueType, setVenueType] = useState("");
+  const [city, setCity] = useState("");
+  const [foodType, setFoodType] = useState("");
+  const [venueStatus, setVenueStatus] = useState("");
+
+  const [stats, setStats] = useState({
+    totalVenues: 0,
+    activeVenues: 0,
+    inactiveVenues: 0,
+    cities: [],
+  });
+
   const [pagination, setPagination] = useState({});
   const [showCreatePopup, setShowCreatePopup] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
@@ -36,20 +62,34 @@ const VenueList = () => {
   const [isPreparing, setIsPreparing] = useState(false);
 
   const callVenueApi = () => {
-    fetchVenues(
+    fetchVenues({
       setError,
       setLoading,
       setVenues,
       setPagination,
+      setStats,
       page,
+      limit: 10,
       search,
       venueType,
-    );
+      city,
+      foodType,
+      venueStatus,
+    });
   };
 
   useEffect(() => {
     callVenueApi();
-  }, [page, search, venueType]);
+  }, [page, search, venueType, city, foodType, venueStatus]);
+
+  const resetFilters = () => {
+    setSearch("");
+    setVenueType("");
+    setCity("");
+    setFoodType("");
+    setVenueStatus("");
+    setPage(1);
+  };
 
   const openImagePreview = async (dish) => {
     if (!dish?.venueImageUrl) return;
@@ -58,7 +98,7 @@ const VenueList = () => {
 
     setPreviewImage({
       url,
-      name: dish.venueName || "Material",
+      name: dish.venueName || "Venue Image",
       blob: null,
     });
     setCopyStatus("");
@@ -66,11 +106,9 @@ const VenueList = () => {
 
     try {
       const response = await fetch(url, { mode: "cors" });
-
       if (!response.ok) {
         throw new Error(`Image fetch failed: ${response.status}`);
       }
-
       const blob = await response.blob();
       const clipboardBlob = await convertToPng(blob, 1920);
 
@@ -78,8 +116,8 @@ const VenueList = () => {
         ...prev,
         blob: clipboardBlob,
       }));
-    } catch (error) {
-      console.error("Failed to prepare image:", error);
+    } catch (err) {
+      console.error("Failed to prepare image:", err);
     } finally {
       setIsPreparing(false);
     }
@@ -91,10 +129,8 @@ const VenueList = () => {
     setIsPreparing(false);
   };
 
-  // Copy Image URL
   const handleCopyUrl = async () => {
     if (!previewImage?.url) return;
-
     try {
       await navigator.clipboard.writeText(previewImage.url);
       setCopyStatus("url");
@@ -105,30 +141,22 @@ const VenueList = () => {
     }
   };
 
-  // Copy Image (PNG only)
   const handleCopyImage = async () => {
     if (!previewImage?.blob) {
       alert("Image is still preparing. Please wait a moment.");
       return;
     }
-
     try {
       await navigator.clipboard.write([
         new ClipboardItem({
           "image/png": previewImage.blob,
         }),
       ]);
-
       setCopyStatus("image");
       setTimeout(() => setCopyStatus(""), 2000);
     } catch (err) {
       console.error("Failed to copy image:", err);
-
-      if (err?.name === "NotAllowedError") {
-        alert("Browser blocked image clipboard access. Please try again.");
-      } else {
-        alert("Failed to copy image. You can still copy the URL.");
-      }
+      alert("Failed to copy image.");
     }
   };
 
@@ -140,8 +168,6 @@ const VenueList = () => {
       img.onload = () => {
         try {
           let { naturalWidth: width, naturalHeight: height } = img;
-
-          // Resize if too large (keeps aspect ratio)
           if (width > maxSize || height > maxSize) {
             if (width > height) {
               height = Math.round((height * maxSize) / width);
@@ -165,13 +191,11 @@ const VenueList = () => {
 
           ctx.fillStyle = "#ffffff";
           ctx.fillRect(0, 0, width, height);
-
           ctx.drawImage(img, 0, 0, width, height);
 
           canvas.toBlob(
             (pngBlob) => {
               URL.revokeObjectURL(objectUrl);
-
               if (pngBlob) {
                 resolve(pngBlob);
               } else {
@@ -199,52 +223,176 @@ const VenueList = () => {
   return (
     <>
       <div className="venue-page">
-        {/* Header */}
-        <div className="venue-header">
+        {/* ── Top Header with Compact Stats ── */}
+        {/* ── Top Header with Dynamic Stats ── */}
+        <div className="venue-header-compact">
           <div>
-            <h1 className="venue-title">Venue List</h1>
+            <div className="venue-title-row">
+              <h1 className="venue-title">Venue List</h1>
+              {/* City selected ho toh badge me City ka naam dikha do */}
+              <span className="venue-count-badge">
+                {city ? `${city}: ` : ""}
+                {stats.totalVenues || 0} Venues
+              </span>
+            </div>
             <p className="venue-subtitle">
               Manage all venues, packages & terms
             </p>
           </div>
-          <button
-            className="btn-primary"
-            onClick={() => setShowCreatePopup(true)}
-          >
-            + Add Venue
-          </button>
+
+          <div className="venue-header-right">
+            {/* Dynamic Status Chips */}
+            <div className="status-chips-group">
+              <button
+                type="button"
+                className={`status-chip ${venueStatus === "" ? "active-chip" : ""}`}
+                onClick={() => {
+                  setVenueStatus("");
+                  setPage(1);
+                }}
+              >
+                <Building2 size={14} />
+                <span>All</span>
+                <strong>{stats.totalVenues || 0}</strong>
+              </button>
+
+              <button
+                type="button"
+                className={`status-chip status-chip-green ${venueStatus === "1" ? "active-chip green" : ""}`}
+                onClick={() => {
+                  setVenueStatus(venueStatus === "1" ? "" : "1");
+                  setPage(1);
+                }}
+              >
+                <CheckCircle2 size={14} />
+                <span>Active</span>
+                <strong>{stats.activeVenues || 0}</strong>
+              </button>
+
+              <button
+                type="button"
+                className={`status-chip status-chip-red ${venueStatus === "2" ? "active-chip red" : ""}`}
+                onClick={() => {
+                  setVenueStatus(venueStatus === "2" ? "" : "2");
+                  setPage(1);
+                }}
+              >
+                <XCircle size={14} />
+                <span>Inactive</span>
+                <strong>{stats.inactiveVenues || 0}</strong>
+              </button>
+            </div>
+
+            <button
+              className="btn-primary-compact"
+              onClick={() => setShowCreatePopup(true)}
+            >
+              + Add Venue
+            </button>
+          </div>
         </div>
 
-        {/* Filters */}
-        <div className="venue-filters">
-          <div className="search-wrapper">
+        {/* ── Compact Filter Toolbar ── */}
+        {/* ── Compact & Balanced Filter Toolbar ── */}
+        <div className="venue-filter-toolbar">
+          {/* Left: Fixed Width Search Bar */}
+          <div className="modern-search-box">
+            <Search size={15} className="search-icon" />
             <input
               type="text"
-              className="filter-input"
-              placeholder="Search by venue name..."
+              placeholder="Search venue or location..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
                 setPage(1);
               }}
             />
+            {search && (
+              <button
+                type="button"
+                className="search-clear-btn"
+                onClick={() => {
+                  setSearch("");
+                  setPage(1);
+                }}
+              >
+                <X size={12} />
+              </button>
+            )}
           </div>
 
-          <select
-            className="filter-select"
-            value={venueType}
-            onChange={(e) => {
-              setVenueType(e.target.value);
-              setPage(1);
-            }}
-          >
-            <option value="">All Venue Types</option>
-            {venueTypes?.map((item, index) => (
-              <option key={index} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
+          {/* Right: Grouped Filters */}
+          <div className="filter-controls-group">
+            {/* City Dropdown */}
+            <div className="select-wrapper">
+              <select
+                className="modern-select"
+                value={city}
+                onChange={(e) => {
+                  setCity(e.target.value);
+                  setPage(1);
+                }}
+              >
+                <option value="">All Cities</option>
+                {stats.cities?.map((c, i) => (
+                  <option key={i} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Venue Type Dropdown */}
+            <div className="select-wrapper">
+              <select
+                className="modern-select"
+                value={venueType}
+                onChange={(e) => {
+                  setVenueType(e.target.value);
+                  setPage(1);
+                }}
+              >
+                <option value="">All Types</option>
+                {venueTypes?.map((t, i) => (
+                  <option key={i} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Food Type Dropdown */}
+            <div className="select-wrapper">
+              <select
+                className="modern-select"
+                value={foodType}
+                onChange={(e) => {
+                  setFoodType(e.target.value);
+                  setPage(1);
+                }}
+              >
+                <option value="">All Food Types</option>
+                {FOOD_TYPES.map((f) => (
+                  <option key={f.value} value={f.value}>
+                    {f.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Reset Button */}
+            {(search || venueType || city || foodType || venueStatus) && (
+              <button
+                type="button"
+                className="reset-filter-btn"
+                onClick={resetFilters}
+                title="Reset All Filters"
+              >
+                <RotateCcw size={13} />
+                <span>Reset</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Table */}
@@ -255,7 +403,9 @@ const VenueList = () => {
                 <tr>
                   <th>Image</th>
                   <th>Name</th>
+                  <th>City</th>
                   <th>Type</th>
+                  <th>Food</th>
                   <th>Location</th>
                   <th>Map</th>
                   <th>Created</th>
@@ -274,35 +424,35 @@ const VenueList = () => {
                     <tr key={venue._id}>
                       <td>
                         {venue.venueImageUrl ? (
-                          <>
-                            {/* <img
-                          src={venue.venueImageUrl}
-                          alt={venue.venueName}
-                          className="venue-thumb"
-                        /> */}
-                            <div
-                              className="image-clickable"
-                              onClick={() => openImagePreview(venue)}
-                              title="Click to preview"
-                            >
-                              <Image
-                                src={venue?.venueImageUrl}
-                                alt={venue.venueName || "Venue"}
-                                className="venue-thumb"
-                                width={40}
-                                height={40}
-                              />
-                            </div>
-                          </>
+                          <div
+                            className="image-clickable"
+                            onClick={() => openImagePreview(venue)}
+                            title="Click to preview"
+                          >
+                            <Image
+                              src={venue.venueImageUrl}
+                              alt={venue.venueName || "Venue"}
+                              className="venue-thumb"
+                              width={40}
+                              height={40}
+                            />
+                          </div>
                         ) : (
                           <div className="no-img">—</div>
                         )}
                       </td>
                       <td className="name-cell">{venue.venueName}</td>
+                      <td>{venue.city || "—"}</td>
                       <td>
                         {Array.isArray(venue.venueType)
                           ? venue.venueType.join(", ")
                           : venue.venueType || "—"}
+                      </td>
+                      <td>
+                        {Array.isArray(venue.foodTypes) &&
+                        venue.foodTypes.length > 0
+                          ? venue.foodTypes.join(", ")
+                          : "—"}
                       </td>
                       <td>{venue.location || "—"}</td>
                       <td>
@@ -407,8 +557,8 @@ const VenueList = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={12} className="no-data">
-                      No Venue Found
+                    <td colSpan={15} className="no-data">
+                      {loading ? "Loading Venues..." : "No Venue Found"}
                     </td>
                   </tr>
                 )}
@@ -473,7 +623,6 @@ const VenueList = () => {
           onSuccess={callVenueApi}
         />
       )}
-
       {showFaqPopup && (
         <VenueFaqPopup
           isOpen={showFaqPopup}
@@ -483,6 +632,7 @@ const VenueList = () => {
         />
       )}
 
+      {/* Image Preview Overlay */}
       {previewImage && (
         <div className="image-preview-overlay" onClick={closeImagePreview}>
           <div
@@ -492,9 +642,7 @@ const VenueList = () => {
             <button className="image-preview-close" onClick={closeImagePreview}>
               ×
             </button>
-
             <div className="image-preview-title">{previewImage.name}</div>
-
             <div className="image-preview-body">
               <img
                 src={previewImage.url}
@@ -502,7 +650,6 @@ const VenueList = () => {
                 className="image-preview-img"
               />
             </div>
-
             <div className="image-preview-actions">
               <button
                 className="preview-btn copy-image-btn"
@@ -515,7 +662,6 @@ const VenueList = () => {
                     ? "✓ Copied!"
                     : "Copy Image"}
               </button>
-
               <button
                 className="preview-btn copy-url-btn"
                 onClick={handleCopyUrl}

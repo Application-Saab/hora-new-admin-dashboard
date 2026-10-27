@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
   Dialog,
@@ -18,13 +18,20 @@ import {
   Alert,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import Select from "react-select";
+import CreatableSelect from "react-select/creatable"; // <-- Creatable select for custom features
 import {
   BASE_URL,
   ADMIN_USER_LIST,
   ADMIN_USER_SIGNUP,
 } from "../../../utils/apiconstant";
 import { venueEventTypes, venueTypes } from "@/constants/venueListConstants";
+import {
+  fetchVenueSuggestion,
+  createVenueSuggestion, // <-- service function
+} from "@/services/venueListServices";
+import VenueDescriptionPromptModal from "../../component/VenueDescriptionPromptModal";
 
 const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
   // Customer
@@ -39,12 +46,14 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
 
   // Venue fields
   const [venueType, setVenueType] = useState([]);
+  const [venueFeatures, setVenueFeatures] = useState([]);
   const [venueName, setVenueName] = useState("");
   const [venueMaskName, setVenueMaskName] = useState("");
   const [location, setLocation] = useState("");
   const [locality, setLocality] = useState("");
   const [venueCity, setVenueCity] = useState("");
   const [googleMapLink, setGoogleMapLink] = useState("");
+  const [description, setDescription] = useState("");
   const [eventTypes, setEventTypes] = useState([]);
   const [minGuestCapacity, setMinGuestCapacity] = useState("");
   const [guestCapacity, setGuestCapacity] = useState("");
@@ -55,6 +64,12 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
   const [totalRoomsAvailable, setTotalRoomsAvailable] = useState("");
   const [venueImage, setVenueImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
+  const [featuresSuggestion, setFeaturesSuggestion] = useState([]);
+  const [creatingFeature, setCreatingFeature] = useState(false);
+
+  // Packages (for prompt generation context)
+  const [venuePackages] = useState([]);
+  const [showPromptModal, setShowPromptModal] = useState(false);
 
   const [message, setMessage] = useState({ text: "", type: "" });
   const [createLoading, setCreateLoading] = useState(false);
@@ -81,6 +96,44 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
     { value: "veg", label: "Veg" },
     { value: "non-veg", label: "Non-Veg" },
   ];
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchVenueSuggestion("SPECIAL_FEATURES").then((data) =>
+        setFeaturesSuggestion(data || []),
+      );
+    }
+  }, [isOpen]);
+
+  // -------------------------------------------------
+  // Handle Custom Feature Creation
+  // -------------------------------------------------
+  const handleCreateFeature = async (inputValue) => {
+    if (!inputValue || !inputValue.trim()) return;
+
+    const trimmedValue = inputValue.trim();
+    const newOption = { value: trimmedValue, label: trimmedValue };
+
+    // Turant UI update
+    setVenueFeatures((prev) => [...prev, newOption]);
+    setCreatingFeature(true);
+
+    try {
+      const savedSuggestion = await createVenueSuggestion(
+        trimmedValue,
+        "SPECIAL_FEATURES",
+      );
+
+      // Suggestions list mein append karein taaki duplicate na bane
+      if (savedSuggestion) {
+        setFeaturesSuggestion((prev) => [...prev, savedSuggestion]);
+      }
+    } catch (err) {
+      console.error("Error creating suggestion:", err);
+    } finally {
+      setCreatingFeature(false);
+    }
+  };
 
   // -------------------------------------------------
   // Check Customer
@@ -181,12 +234,19 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
         "venueType",
         JSON.stringify(venueType.map((v) => v.value)),
       );
+      if (venueFeatures?.length > 0) {
+        formData.append(
+          "venueFeatures",
+          JSON.stringify(venueFeatures?.map((v) => v?.value)),
+        );
+      }
       formData.append("venueName", venueName);
       formData.append("maskName", venueMaskName);
       formData.append("location", location);
       formData.append("locality", locality);
       formData.append("city", venueCity);
       formData.append("googleMapLink", googleMapLink);
+      formData.append("description", description);
       formData.append(
         "eventTypes",
         JSON.stringify(eventTypes.map((v) => v.value)),
@@ -361,8 +421,13 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
                 Venue Details
               </Typography>
 
-              {/* Venue Type */}
-              <Box mb={2.5} display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+              {/* Venue Name + Mask Name */}
+              <Box
+                mb={2.5}
+                display="grid"
+                gridTemplateColumns="1fr 1fr"
+                gap={2}
+              >
                 <TextField
                   label="Venue Name *"
                   value={venueName}
@@ -381,7 +446,7 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
                 />
               </Box>
 
-              {/* Name + Location row */}
+              {/* Type + City row */}
               <Box
                 display="grid"
                 gridTemplateColumns="1fr 1fr"
@@ -416,6 +481,7 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
                 </Box>
               </Box>
 
+              {/* Location + Locality */}
               <Box
                 display="grid"
                 gridTemplateColumns="1fr 1fr"
@@ -439,14 +505,90 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
                 />
               </Box>
 
-              <TextField
-                label="Google Map Link"
-                value={googleMapLink}
-                onChange={(e) => setGoogleMapLink(e.target.value)}
-                size="small"
-                fullWidth
-                sx={{ mb: 3 }}
-              />
+              {/* Google Map + Special Features (Creatable) */}
+              <Box
+                display="grid"
+                gridTemplateColumns="1fr 1fr"
+                gap={2}
+                mb={2.5}
+              >
+                <Box>
+                  <Typography variant="body2" fontWeight={500} mb={0.8}>
+                    Google Map Link
+                  </Typography>
+                  <TextField
+                    label="Google Map Link"
+                    value={googleMapLink}
+                    onChange={(e) => setGoogleMapLink(e.target.value)}
+                    size="small"
+                    fullWidth
+                  />
+                </Box>
+                <Box>
+                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.8}>
+                    <Typography variant="body2" fontWeight={500}>
+                      Special Features
+                    </Typography>
+                    {creatingFeature && (
+                      <Typography variant="caption" color="text.secondary">
+                        Saving new feature...
+                      </Typography>
+                    )}
+                  </Box>
+                  <CreatableSelect
+                    isMulti
+                    options={featuresSuggestion?.map((item) => ({
+                      value: item?.title,
+                      label: item?.title,
+                    }))}
+                    value={venueFeatures}
+                    onChange={(selected) => setVenueFeatures(selected || [])}
+                    onCreateOption={handleCreateFeature}
+                    placeholder="Type or select features..."
+                    styles={selectStyles}
+                    formatCreateLabel={(inputValue) => `Add & Save "${inputValue}"`}
+                  />
+                </Box>
+              </Box>
+
+              {/* Description with AI Prompt Button */}
+              <Box mb={3}>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  mb={1}
+                >
+                  <Typography variant="body2" fontWeight={500}>
+                    Venue Description (4-5 lines recommended)
+                  </Typography>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    color="secondary"
+                    startIcon={<AutoAwesomeIcon sx={{ fontSize: "14px !important" }} />}
+                    onClick={() => setShowPromptModal(true)}
+                    sx={{
+                      textTransform: "none",
+                      borderRadius: 1.5,
+                      fontSize: 12,
+                      px: 1.5,
+                      py: 0.2,
+                    }}
+                  >
+                    Generate AI Prompt
+                  </Button>
+                </Box>
+                <TextField
+                  placeholder="Enter venue description here (or generate via AI prompt)..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  size="small"
+                  multiline
+                  rows={4}
+                  fullWidth
+                />
+              </Box>
 
               <Divider sx={{ mb: 3 }} />
 
@@ -701,6 +843,32 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* AI Venue Description Prompt Modal */}
+      {showPromptModal && (
+        <VenueDescriptionPromptModal
+          isOpen={showPromptModal}
+          onClose={() => setShowPromptModal(false)}
+          venueData={{
+            venueName,
+            venueMaskName,
+            venueTypes: venueType.map((v) => v.value),
+            venueFeatures: venueFeatures.map((v) => v.value),
+            location,
+            locality,
+            venueCity,
+            eventTypes: eventTypes.map((v) => v.value),
+            guestCapacity,
+            minGuestCapacity,
+            hallTypes: hallType.map((v) => v.value),
+            foodTypes: foodTypes.map((v) => v.value),
+            startingPrice,
+            totalRoomsAvailable,
+            isParkingAvailable,
+          }}
+          packages={venuePackages}
+        />
+      )}
     </>
   );
 };

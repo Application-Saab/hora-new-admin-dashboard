@@ -252,12 +252,12 @@
   flex-wrap: wrap;
 }
 
-.venue-title {
+/* .venue-title {
   font-size: 1.75rem;
   font-weight: 700;
   margin: 0 0 4px 0;
   color: #111827;
-}
+} */
 
 .venue-subtitle {
   margin: 0;
@@ -718,4 +718,349 @@
 /* The scrollbar track background */
 .slim-scrollbar::-webkit-scrollbar-track {
   background-color: transparent;
+}
+
+.venue-stats-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  flex: 1;
+  background: #ffffff;
+  padding: 16px 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #eef0f3;
+  transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.stat-active-card {
+  border-color: #97538c;
+  background: #fdf8fc;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.text-green {
+  color: #16a34a;
+}
+
+.text-red {
+  color: #dc2626;
+}
+
+.btn-secondary-venue {
+  padding: 8px 14px;
+  font-size: 13px;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.btn-secondary-venue:hover {
+  background: #e2e8f0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ── Top Header Compact Bar ── */
+.venue-header-compact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.venue-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.venue-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.venue-count-badge {
+  font-size: 11px;
+  font-weight: 600;
+  background: #f1f5f9;
+  color: #475569;
+  padding: 3px 8px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.venue-subtitle {
+  font-size: 12px;
+  color: #64748b;
+  margin: 2px 0 0 0;
+}
+
+.venue-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ── Inline Status Chips ── */
+.status-chips-group {
+  display: inline-flex;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.status-chip strong {
+  font-weight: 700;
+  color: #334155;
+  font-size: 11px;
+  padding: 1px 5px;
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.status-chip:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* Active Chip States */
+.status-chip.active-chip {
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.status-chip-green.active-chip {
+  color: #15803d;
+  background: #f0fdf4;
+}
+.status-chip-green.active-chip strong {
+  color: #16a34a;
+  background: #dcfce7;
+}
+
+.status-chip-red.active-chip {
+  color: #b91c1c;
+  background: #fef2f2;
+}
+.status-chip-red.active-chip strong {
+  color: #dc2626;
+  background: #fee2e2;
+}
+
+.btn-primary-compact {
+  background: #97538c;
+  color: #ffffff;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.15s;
+  box-shadow: 0 2px 4px rgba(151, 83, 140, 0.25);
+}
+
+.btn-primary-compact:hover {
+  background: #803f75;
+}
+
+/* ── Filter Toolbar Container ── */
+.venue-filter-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Search left me rahega, Dropdowns right me */
+  background: #ffffff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 14px;
+  gap: 16px;
+}
+
+/* ── Fixed Search Box (Ab bekaar me lamba nahi hoga) ── */
+.modern-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 270px; /* Perfect fixed width */
+  min-width: 240px;
+  flex-shrink: 0;
+}
+
+.modern-search-box .search-icon {
+  position: absolute;
+  left: 10px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.modern-search-box input {
+  width: 100%;
+  height: 34px;
+  padding: 0 28px 0 32px;
+  font-size: 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #f8fafc;
+  outline: none;
+  box-sizing: border-box;
+  transition: all 0.15s ease;
+}
+
+.modern-search-box input:focus {
+  border-color: #97538c;
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(151, 83, 140, 0.12);
+}
+
+.search-clear-btn {
+  position: absolute;
+  right: 8px;
+  background: #cbd5e1;
+  border: none;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #475569;
+  cursor: pointer;
+  padding: 0;
+}
+
+.search-clear-btn:hover {
+  background: #94a3b8;
+  color: #ffffff;
+}
+
+/* ── Right-Side Filter Controls Group ── */
+.filter-controls-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── Dropdowns Styling ── */
+.select-wrapper {
+  position: relative;
+  width: 145px; /* Clean uniform width sabhi dropdowns ke liye */
+}
+
+.modern-select {
+  width: 100%;
+  height: 34px;
+  padding: 0 28px 0 10px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #334155;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  outline: none;
+  cursor: pointer;
+  appearance: none; /* Default browser arrow replace karega */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  box-sizing: border-box;
+  transition: all 0.15s ease;
+}
+
+.modern-select:hover {
+  border-color: #94a3b8;
+}
+
+.modern-select:focus {
+  border-color: #97538c;
+  box-shadow: 0 0 0 2px rgba(151, 83, 140, 0.12);
+}
+
+/* ── Reset Button ── */
+.reset-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 34px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 0 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  box-sizing: border-box;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.reset-filter-btn:hover {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #fca5a5;
 }
