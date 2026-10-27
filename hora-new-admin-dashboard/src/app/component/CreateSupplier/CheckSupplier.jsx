@@ -44,6 +44,7 @@ const CheckSupplier = ({
           otp: SelectedOrder.otp,
           _id: SelectedOrder._id,
           userId: supplierData._id,
+          acceptedBy: "admin",
         }),
       });
 
