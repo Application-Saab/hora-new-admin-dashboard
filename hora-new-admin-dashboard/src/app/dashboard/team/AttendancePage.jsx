@@ -100,10 +100,6 @@ const [selectedEmployee, setSelectedEmployee] = useState("");
 
             setTeamData(members);
 
-            if (members.length > 0 && !leaveForm.memberId) {
-                setLeaveForm(prev => ({ ...prev, memberId: members[0]._id }));
-            }
-
             const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
             const days = [];
             const initialMap = {};
@@ -242,12 +238,25 @@ const [selectedEmployee, setSelectedEmployee] = useState("");
                     reason: `${leaveLabel}: ${leaveForm.reason || 'No detailed reason provided'}`
                 })
             });
+            const result = await res.json();
 
-            if (!res.ok) throw new Error('Failed to apply leave');
+            if (!res.ok) {
+                throw new Error(result.message || 'Failed to apply leave');
+            }
+
+            alert(result.message || "Leave applied successfully!");
 
             setIsLeaveModalOpen(false);
-            setLeaveForm(prev => ({ ...prev, date: '', reason: '', leaveType: 'Full Day' }));
-            fetchData();
+            setSelectedEmployee("");
+            setLeaveForm(prev => ({
+                ...prev,
+                date: '',
+                reason: '',
+                leaveType: 'Full Day',
+                halfDayType: 'First Half',
+            }));
+
+            await fetchData();
         } catch (err) {
             console.error("Apply Leave API Error:", err);
             alert("Failed to apply leave. Please try again.");
@@ -256,7 +265,10 @@ const [selectedEmployee, setSelectedEmployee] = useState("");
 
     // 4. Declare Holiday (All or Per Employee) via API
     const handleDeclareHoliday = async () => {
-        if (!holidayForm.date) return;
+        if (!holidayForm.date){
+            alert("Please select holiday date");
+            return;
+        } 
 
         try {
             const res = await fetch(`${BASE_URL_TEAM}/declare-holiday`, {
@@ -269,7 +281,11 @@ const [selectedEmployee, setSelectedEmployee] = useState("");
                 })
             });
 
+            const result = await res.json();
+
             if (!res.ok) throw new Error('Failed to declare holiday');
+
+            alert(result.message || "Holiday saved successfully!");
 
             setIsHolidayModalOpen(false);
             setHolidayForm({ memberId: 'all', date: '', title: '' });
@@ -517,20 +533,15 @@ const [selectedEmployee, setSelectedEmployee] = useState("");
     selectedValue={selectedEmployee}
     onChange={(selectedEmployeeText) => {
         setSelectedEmployee(selectedEmployeeText);
-
         const member = teamData.find(
-            (item) =>
-                `${item.name?.trim()} (${item.number})` ===
-                selectedEmployeeText
+        (item) =>
+        `${item.name?.trim()} (${item.number})` === selectedEmployeeText
         );
-
-        if (member) {
-            setLeaveForm(prev => ({
-                ...prev,
-                memberId: member._id,
-            }));
-        }
-    }}
+        setLeaveForm(prev => ({
+        ...prev,
+        memberId: member ? member._id : "",
+        }));
+        }}
     placeholder="Select Employee..."
 />
                                 </div>
@@ -619,24 +630,20 @@ const [selectedEmployee, setSelectedEmployee] = useState("");
                                                     : ALL_TEAM_LABEL
                                         }
                                         onChange={(selectedText) => {
-                                            if (selectedText === ALL_TEAM_LABEL) {
-                                                setHolidayForm(prev => ({
-                                                    ...prev,
-                                                    memberId: 'all'
-                                                }));
-                                            } else {
-                                                const member = teamData.find(
-                                                    (item) =>
-                                                        `${item.name?.trim()} (${item.number})` === selectedText
-                                                );
+                                            const member = teamData.find(
+                                                (item) =>
+                                                    `${item.name?.trim()} (${item.number})` === selectedText
+                                            );
 
-                                                if (member) {
-                                                    setHolidayForm(prev => ({
-                                                        ...prev,
-                                                        memberId: member._id
-                                                    }));
-                                                }
-                                            }
+                                            setHolidayForm(prev => ({
+                                                ...prev,
+                                                memberId:
+                                                    selectedText === ALL_TEAM_LABEL
+                                                        ? 'all'
+                                                        : member
+                                                            ? member._id
+                                                            : 'all',
+                                            }));
                                         }}
                                         placeholder="Search Employee or Select All..."
                                     />

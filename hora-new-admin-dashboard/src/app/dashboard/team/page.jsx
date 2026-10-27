@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { BASE_URL } from "../../../utils/apiconstant";
 import AttendancePage from "./AttendancePage"
+import HolidaysPage from "./Holidays";
 import "./team.css";
 import CommonPopup from "../../component/CommonPopup";
 
@@ -388,6 +389,10 @@ const handleAddClick = () => {
         setActiveTab("attendance");
     };
 
+    const handleHolidaysListClick = () => {
+        setActiveTab("holidaysList");
+    };
+
 return (
     <div className="team-page">
         <div className="team-header">
@@ -418,6 +423,14 @@ return (
                     className={`team-tab ${activeTab === "attendance" ? "team-tab-active" : ""}`}
                 >
                     Attendance Sheet
+                </button>
+
+                <button
+                    type="button"
+                    onClick={handleHolidaysListClick}
+                    className={`team-tab ${activeTab === "holidaysList" ? "team-tab-active" : ""}`}
+                >
+                    Holiday List
                 </button>
 
             </div>
@@ -659,6 +672,10 @@ return (
 
         {activeTab === "attendance" && (
             <AttendancePage />
+        )}
+
+        {activeTab === "holidaysList" && (
+            <HolidaysPage />
         )}
 
         <CommonPopup

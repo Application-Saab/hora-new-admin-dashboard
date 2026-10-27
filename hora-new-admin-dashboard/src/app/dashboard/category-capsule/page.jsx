@@ -242,13 +242,15 @@ export default function CapsulesPage() {
                                     placeholder={`Enter Order ID ${index + 1}`}
                                 />
 
-                                <button
-                                    type="button"
-                                    className="capsule-btn capsule-btn-primary"
-                                    onClick={addOrderIdInput}
-                                >
-                                    + Add
-                                </button>
+                                {index === orderIds.length - 1 && (
+                                    <button
+                                        type="button"
+                                        className="capsule-btn capsule-btn-primary"
+                                        onClick={addOrderIdInput}
+                                    >
+                                        + Add
+                                    </button>
+                                )}
                             </div>
                         ))}
                     </div>
