@@ -132,26 +132,29 @@ export default function HolidaysPage() {
         <div className="holidays-page">
             <div className="holidays-header">
                 <div>
-                    <h2>Holiday Management</h2>
-                    <p>Manage your company holidays and optional leaves.</p>
+                    <h2>Leaves Management</h2>
+                    <p>Manage optional leaves.</p>
                 </div>
 
                 <button className="holiday-add-btn" onClick={openAddModal}>
-                    + Add Holiday
+                    + Add Leaves
                 </button>
             </div>
 
             <div className="holidays-toolbar">
                 <label htmlFor="holiday-year">Year</label>
 
-                <input
+                <select
                     id="holiday-year"
-                    type="number"
-                    min="1900"
-                    max="9999"
                     value={year}
                     onChange={(e) => setYear(e.target.value)}
-                />
+                >
+                    {[2026, 2027, 2028, 2029, 2030].map((item) => (
+                        <option key={item} value={String(item)}>
+                            {item}
+                        </option>
+                    ))}
+                </select>
 
                 <span className="holiday-count">
                     Total Holidays: {holidays.length}

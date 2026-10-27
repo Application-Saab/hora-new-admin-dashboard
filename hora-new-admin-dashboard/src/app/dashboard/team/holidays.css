@@ -43,11 +43,6 @@
     color: white;
 }
 
-.holiday-add-btn:hover,
-.holiday-save-btn:hover {
-    background: #252568;
-}
-
 .holidays-toolbar {
     display: flex;
     align-items: center;
@@ -106,10 +101,6 @@
     color: #374151;
     font-weight: 700;
     white-space: nowrap;
-}
-
-.holidays-table tbody tr:hover {
-    background: #fafbff;
 }
 
 .holiday-name {
@@ -280,4 +271,24 @@
         padding: 8px;
         white-space: nowrap;
     }
+}
+
+#holiday-year {
+    width: 100px;
+    height: 30px;
+    padding: 0 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background-color: #fff;
+    color: #333;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#holiday-year:focus {
+    border-color: #97538c;
+    box-shadow: 0 0 0 3px rgba(253, 99, 31, 0.12);
 }

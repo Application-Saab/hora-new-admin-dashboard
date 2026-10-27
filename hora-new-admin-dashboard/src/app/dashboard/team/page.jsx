@@ -430,7 +430,7 @@ return (
                     onClick={handleHolidaysListClick}
                     className={`team-tab ${activeTab === "holidaysList" ? "team-tab-active" : ""}`}
                 >
-                    Holiday List
+                    Optional Leaves
                 </button>
 
             </div>
