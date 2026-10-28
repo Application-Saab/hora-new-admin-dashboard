@@ -51,7 +51,7 @@ const [order, setOrder] = useState(null);
   const [preAssignedSuppliers, setPreAssignedSuppliers] = useState([]);
   const [showPreAssginedPopup, setShowPreAssginedPopup] = useState(false);
   const [preAssignedLoading, setPreAssignedLoading] = useState(false);
-
+  const [isSupplierDetailsOpen, setIsSupplierDetailsOpen] = useState(false);
   // supplier
   const [isSupplierAssigned, setIsSupplierAssigned] = useState(false);
   const [selectedDate, setSelectedDate] = useState("");
@@ -311,17 +311,20 @@ const [order, setOrder] = useState(null);
     setOrder(order)
   };
 
-  const openSupplierDeatilsPopup = async (orderId) => {
+  const openSupplierDeatilsPopup = async (order) => {
+
+    setSelectedOrder(order);
+
     try {
       const response = await fetch(
-        `${BASE_URL}/api/admin/getUserDetails/${orderId}`
+        `${BASE_URL}/api/admin/getUserDetails/${order.toId}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch user details");
       }
       const data = await response.json();
       setSupplierDetails(data);
-      setIsPopupOpen(true);
+      setIsSupplierDetailsOpen(true);
     } catch (error) {
       console.error("Error fetching user details:", error);
     }
@@ -1113,12 +1116,13 @@ useEffect(() => {
                       {order.toId ? (
                         <>
                           <button
-                            onClick={() => openSupplierDeatilsPopup(order.toId)}
+                            onClick={() => openSupplierDeatilsPopup(order)}
                             className="assigningBtn assigned"
                           >
                             <FaEye />
                             <span>Assigned</span>
                           </button>
+                          <div style={{display:"flex", justifyContent:"space-between", marginTop:"5px"}}>
                           <span
                             style={{ cursor: "pointer", marginLeft: "8px" }}
                             onClick={() => openSupplierAssignPopup(order)}
@@ -1126,12 +1130,56 @@ useEffect(() => {
                           >
                             ✏️
                           </span>
+                            {order?.acceptedBy && 
+                          <span
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              width: "20px",
+                              height: "20px",
+                              borderRadius: "50%",
+                              backgroundColor: order.acceptedBy === "admin" ? "#E8F0FF" : "#E6F8EC",
+                              color: order.acceptedBy === "admin" ? "#2563EB" : "#16A34A",
+                              fontWeight: "700",
+                              fontSize: "10px",
+                              border: `1px solid ${order.acceptedBy === "admin" ? "#BFDBFE" : "#BBF7D0"
+                                }`,
+                              flexShrink: 0,
+                            }}
+                          >
+                            {order.acceptedBy === "admin"
+                              ? "M"
+                              : order.acceptedBy === "self"
+                                ? "A"
+                                : ""}
+                          </span>
+}
+                          </div>
                         </>
                       ) : (order.isEmergencyOrder === true && order.processedBy.length > 0)  ? (
-                      <button className="assigningBtn pre-assigned" 
-                      onClick={() => openPreAssignedPopup(order)} >
-                         Pre Assigned
+                      <>
+                          <button
+                            className={`assigningBtn ${order?.processedBy?.some(
+                              (supplier) => supplier.action === "yes"
+                            )
+                                ? "pre-assigned"
+                                : "not-assigned"
+                              }`}
+                            onClick={() => openPreAssignedPopup(order)}
+                          >
+                            Pre Assigned
                           </button>
+                        {order?.order_status == 0 &&
+                          <span
+                            style={{ cursor: "pointer", marginLeft: "8px" }}
+                            onClick={() => openSupplierAssignPopup(order)}
+                            title="Edit"
+                          >
+                            ✏️
+                          </span>
+                        }    
+                          </>
                           ) 
                           :
                           (
@@ -2143,7 +2191,7 @@ const filledCountForCounter = trueDynamicApiKeys.filter((linkType) => {
         </div>
       )}
       {/* supplier details popup */}
-      {isPopupOpen && supplierDetails && (
+      {isSupplierDetailsOpen && supplierDetails && (
         <div className="popup-overlay" onClick={closePopup}>
           <div className="popup" onClick={(e) => e.stopPropagation()}>
             <button className="close-button" onClick={closePopup}>
@@ -2152,6 +2200,19 @@ const filledCountForCounter = trueDynamicApiKeys.filter((linkType) => {
             <h3>Supplier Details</h3>
             <p>Name: {supplierDetails.data?.name || "NA"}</p>
             <p>Phone: {supplierDetails.data?.phone || "NA"}</p>
+            <p>
+              Accepted At:{" "}
+              {selectedOrder?.acceptedAt
+                ? new Date(selectedOrder.acceptedAt).toLocaleString("en-IN", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })
+                : "N/A"}
+            </p>
           </div>
         </div>
       )}

@@ -1022,3 +1022,13 @@ display: flex;
   cursor: not-allowed;
   opacity: 0.9;
 }
+
+.assigningBtn.not-assigned {
+  background-color: #dc2626;
+  color: white;
+}
+
+.assigningBtn.pre-assigned {
+  background-color: #f97316;
+  color: white;
+}
