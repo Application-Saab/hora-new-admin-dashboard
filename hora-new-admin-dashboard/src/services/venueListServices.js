@@ -1,54 +1,60 @@
 import axios from "axios";
 import { BASE_URL } from "@/utils/apiconstant";
 
-export const fetchVenues = async (
+export const fetchVenues = async ({
   setError,
   setLoading,
   setVenues,
   setPagination,
-  page,
-  search,
-  venueType,
-) => {
+  setStats,
+  page = 1,
+  limit = 10,
+  search = "",
+  venueType = "",
+  city = "",
+  foodType = "",
+  venueStatus = "",
+}) => {
   try {
     setLoading(true);
-    setError(null);
+    if (setError) setError(null);
 
     const response = await axios.get(
       `${BASE_URL}/api/party-venue/venues-list`,
       {
         params: {
           page,
-          limit: 10,
+          limit,
           search,
           venueType,
+          city,
+          foodType,
+          venueStatus,
         },
-      },
+      }
     );
 
-    setVenues(response.data.data);
+    const resData = response.data;
+    setVenues(resData.data || []);
 
-    setPagination({
-      total_item: response.data.pagination.total,
-      current_page: response.data.pagination.page,
-      last_page: response.data.pagination.totalPages,
-      next_page:
-        response.data.pagination.page < response.data.pagination.totalPages
-          ? response.data.pagination.page + 1
-          : response.data.pagination.totalPages,
-      previous_page:
-        response.data.pagination.page > 1
-          ? response.data.pagination.page - 1
-          : 1,
-      first_page: 1,
-    });
+    if (setStats && resData.stats) {
+      setStats(resData.stats);
+    }
+
+    if (setPagination && resData.pagination) {
+      const { total, page: curPage, totalPages } = resData.pagination;
+      setPagination({
+        total_item: total,
+        current_page: curPage,
+        last_page: totalPages,
+        next_page: curPage < totalPages ? curPage + 1 : totalPages,
+        previous_page: curPage > 1 ? curPage - 1 : 1,
+        first_page: 1,
+      });
+    }
   } catch (err) {
-    console.log(
-      "%c [ err ]",
-      "font-size:13px; background:pink; color:#bf2c9f;",
-      err,
-    );
-    setError("Error fetching venues");
+    console.error("Error fetching venues:", err);
+    if (setError) setError("Error fetching venues");
   } finally {
     setLoading(false);
   }
@@ -305,10 +311,10 @@ export const deleteVenueMedia = async (imageId, setLoading, onSuccess) => {
 };
 
 // fetch suggestions master list for faq
-export const fetchFaqSuggestions = async () => {
+export const fetchVenueSuggestion = async (type) => {
   try {
     const res = await axios.get(
-      `${BASE_URL}/api/venue-suggestion/suggestion-by-type/FAQ`
+      `${BASE_URL}/api/venue-suggestion/suggestion-by-type/${type}`
     );
     return res.data?.data || [];
   } catch (err) {
@@ -316,6 +322,22 @@ export const fetchFaqSuggestions = async () => {
     return [];
   }
 };
+
+// create venue suggestion
+export const createVenueSuggestion = async (title, dataType = "SPECIAL_FEATURES") => {
+  try {
+    const res = await axios.post(`${BASE_URL}/api/venue-suggestion`, {
+      title: title.trim(),
+    dataType,
+      status: 1,
+    });
+    return res.data?.data || null;
+  } catch (err) {
+    console.error("Error creating venue suggestion:", err);
+    return null;
+  }
+};
+
 
 // update venue faqs
 export const updateVenueFaqs = async (

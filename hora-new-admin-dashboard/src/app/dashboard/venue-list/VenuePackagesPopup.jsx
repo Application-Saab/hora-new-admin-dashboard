@@ -1,216 +1,3 @@
-// "use client";
-
-// import React, { useEffect, useState, useMemo } from "react";
-
-// import "./venue-packages-popup.css";
-
-// import CreatePackagePopup from "./CreatePackagePopup";
-// import EditPackagePopup from "./EditPackagePopup";
-// import { fetchVenuePackages, togglePackageStatus } from "@/services/venueListServices";
-
-// const VenuePackagesPopup = ({ isOpen, venue, onClose }) => {
-//   const [packages, setPackages] = useState([]);
-//   const [loading, setLoading] = useState(false);
-//   const [search, setSearch] = useState("");
-//   const [showCreatePackagePopup, setShowCreatePackagePopup] = useState(false);
-//   const [showEditPackagePopup, setShowEditPackagePopup] = useState(false);
-//   const [isCloningPackage, setIsCloningPackage] = useState(false);
-//   const [selectedPackage, setSelectedPackage] = useState(null);
-
-//   const callPackageApi = () => {
-//     if (!venue?._id) return;
-//     fetchVenuePackages(venue._id, setPackages, setLoading);
-//   };
-
-//   useEffect(() => {
-//     if (isOpen && venue?._id) {
-//       callPackageApi();
-//     }
-//   }, [isOpen, venue]);
-
-//   const filteredPackages = useMemo(() => {
-//     if (!search) return packages;
-
-//     return packages.filter(
-//       (pkg) =>
-//         pkg.title?.toLowerCase().includes(search.toLowerCase()) ||
-//         pkg.subTitle?.toLowerCase().includes(search.toLowerCase()),
-//     );
-//   }, [packages, search]);
-
-//   if (!isOpen) return null;
-
-//   return (
-//     <>
-//       <div className="popup-overlay">
-//         <div className="popup-content package-popup">
-//           <button className="close-btn" onClick={onClose}>
-//             X
-//           </button>
-
-//           <h2>Packages - {venue?.venueName}</h2>
-
-//           {/* HEADER */}
-//           <div className="package-header">
-//             <input
-//               type="text"
-//               placeholder="Search Package..."
-//               value={search}
-//               onChange={(e) => setSearch(e.target.value)}
-//             />
-
-//             <button
-//               className="add-package-btn"
-//               onClick={() => setShowCreatePackagePopup(true)}
-//             >
-//               Add Package
-//             </button>
-//           </div>
-
-//           {/* TABLE */}
-//           <div className="package-table-wrapper">
-//             <table className="dish-table">
-//               <thead>
-//                 <tr>
-//                   <th>Image</th>
-//                   <th>Title</th>
-//                   <th>Subtitle</th>
-//                   <th>Actual Price</th>
-//                   <th>Discounted</th>
-//                   <th>Max Guests</th>
-//                   <th>Package Items</th>
-//                   <th>Addons</th>
-//                   <th>Status</th>
-//                   <th>Edit</th>
-//                   <th>Clone</th>
-//                 </tr>
-//               </thead>
-
-//               <tbody>
-//                 {!loading && filteredPackages.length > 0 ? (
-//                   filteredPackages.map((pkg) => (
-//                     <tr key={pkg._id}>
-//                       <td>
-//                         {pkg.packageImageUrl ? (
-//                           <img
-//                             src={pkg.packageImageUrl}
-//                             alt={pkg.title}
-//                             style={{
-//                               width: "60px",
-//                               height: "40px",
-//                               objectFit: "cover",
-//                               borderRadius: "4px",
-//                             }}
-//                           />
-//                         ) : (
-//                           "-"
-//                         )}
-//                       </td>
-//                       <td>{pkg.title}</td>
-//                       <td>{pkg.subTitle}</td>
-//                       <td>₹{pkg.actualPrice}</td>
-//                       <td>₹{pkg.discountedPrice}</td>
-//                       <td>{pkg.maxGuests}</td>
-//                       <td>{pkg?.packageItems?.length || 0}</td>
-//                       <td>{pkg?.packageAddons?.length || 0}</td>
-
-//                       <td>
-//                         <button
-//                           onClick={() => {
-//                             const newStatus = pkg.packageStatus === 1 ? 2 : 1;
-
-//                             togglePackageStatus(
-//                               pkg._id,
-//                               newStatus,
-//                               callPackageApi,
-//                             );
-//                           }}
-//                           style={{
-//                             padding: "5px 10px",
-//                             borderRadius: "5px",
-//                             border: "none",
-//                             cursor: "pointer",
-//                             background:
-//                               pkg.packageStatus === 1 ? "green" : "red",
-//                             color: "#fff",
-//                           }}
-//                         >
-//                           {pkg.packageStatus === 1 ? "Active" : "Inactive"}
-//                         </button>
-//                       </td>
-
-//                       <td>
-//                         <button
-//                           className="edit-btn"
-//                           onClick={() => {
-//                             setSelectedPackage(pkg);
-//                             setShowEditPackagePopup(true);
-//                           }}
-//                         >
-//                           Edit
-//                         </button>
-//                       </td>
-//                       <td>
-//                         <button
-//                           className="edit-btn"
-//                           onClick={() => {
-//                             setIsCloningPackage(true)
-//                             setSelectedPackage(pkg);
-//                             setShowEditPackagePopup(true);
-//                           }}
-//                         >
-//                           Clone Package
-//                         </button>
-//                       </td>
-//                     </tr>
-//                   ))
-//                 ) : !loading ? (
-//                   <tr>
-//                     <td colSpan={9} className="no-data">
-//                       No Packages Found
-//                     </td>
-//                   </tr>
-//                 ) : (
-//                   <tr>
-//                     <td colSpan={9} className="no-data">
-//                       Loading...
-//                     </td>
-//                   </tr>
-//                 )}
-//               </tbody>
-//             </table>
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* CREATE */}
-
-//       {showCreatePackagePopup && (
-//         <CreatePackagePopup
-//           isOpen={showCreatePackagePopup}
-//           venueId={venue._id}
-//           onClose={() => setShowCreatePackagePopup(false)}
-//           onSuccess={callPackageApi}
-//         />
-//       )}
-
-//       {/* EDIT */}
-
-//       {showEditPackagePopup && (
-//         <EditPackagePopup
-//           isOpen={showEditPackagePopup}
-//           packageData={selectedPackage}
-//           onClose={() => setShowEditPackagePopup(false)}
-//           onSuccess={callPackageApi}
-//           isCloningPackage={isCloningPackage}
-//         />
-//       )}
-//     </>
-//   );
-// };
-
-// export default VenuePackagesPopup;
-
 "use client";
 import React, { useEffect, useState, useMemo } from "react";
 import {
@@ -236,12 +23,14 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import CreatePackagePopup from "./CreatePackagePopup";
 import EditPackagePopup from "./EditPackagePopup";
 import {
   fetchVenuePackages,
   togglePackageStatus,
 } from "@/services/venueListServices";
+import PackagePromptModal from '../../component/PackagePromptModal';
 
 const VenuePackagesPopup = ({ isOpen, venue, onClose }) => {
   const [packages, setPackages] = useState([]);
@@ -251,6 +40,10 @@ const VenuePackagesPopup = ({ isOpen, venue, onClose }) => {
   const [showEditPackagePopup, setShowEditPackagePopup] = useState(false);
   const [isCloningPackage, setIsCloningPackage] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
+
+  // AI Prompt popup state
+  const [showPromptModal, setShowPromptModal] = useState(false);
+  const [promptPackage, setPromptPackage] = useState(null);
 
   const callPackageApi = () => {
     if (!venue?._id) return;
@@ -306,7 +99,7 @@ const VenuePackagesPopup = ({ isOpen, venue, onClose }) => {
             <Typography variant="h6" fontWeight={700}>
               All Packages
             </Typography>
-            <Typography variant="body" color="text.primary">
+            <Typography variant="body2" color="text.primary">
               Venue Name : {venue?.venueName || "Venue"}
             </Typography>
           </Box>
@@ -373,61 +166,34 @@ const VenuePackagesPopup = ({ isOpen, venue, onClose }) => {
             <Table stickyHeader size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell
-                    sx={{ fontWeight: 700, bgcolor: "#f8fafc", width: 80 }}
-                  >
+                  <TableCell sx={{ fontWeight: 700, bgcolor: "#f8fafc", width: 80 }}>
                     Image
                   </TableCell>
-                  <TableCell
-                    sx={{ fontWeight: 700, bgcolor: "#f8fafc", minWidth: 140 }}
-                  >
+                  <TableCell sx={{ fontWeight: 700, bgcolor: "#f8fafc", minWidth: 140 }}>
                     Title
                   </TableCell>
-                  <TableCell
-                    sx={{ fontWeight: 700, bgcolor: "#f8fafc", minWidth: 220 }}
-                  >
+                  <TableCell sx={{ fontWeight: 700, bgcolor: "#f8fafc", minWidth: 220 }}>
                     Subtitle
                   </TableCell>
-                  <TableCell
-                    sx={{ fontWeight: 700, bgcolor: "#f8fafc" }}
-                    align="right"
-                  >
+                  <TableCell sx={{ fontWeight: 700, bgcolor: "#f8fafc" }} align="right">
                     Actual
                   </TableCell>
-                  <TableCell
-                    sx={{ fontWeight: 700, bgcolor: "#f8fafc" }}
-                    align="right"
-                  >
+                  <TableCell sx={{ fontWeight: 700, bgcolor: "#f8fafc" }} align="right">
                     Discounted
                   </TableCell>
-                  <TableCell
-                    sx={{ fontWeight: 700, bgcolor: "#f8fafc" }}
-                    align="center"
-                  >
+                  <TableCell sx={{ fontWeight: 700, bgcolor: "#f8fafc" }} align="center">
                     Max Guests
                   </TableCell>
-                  <TableCell
-                    sx={{ fontWeight: 700, bgcolor: "#f8fafc" }}
-                    align="center"
-                  >
+                  <TableCell sx={{ fontWeight: 700, bgcolor: "#f8fafc" }} align="center">
                     Items
                   </TableCell>
-                  <TableCell
-                    sx={{ fontWeight: 700, bgcolor: "#f8fafc" }}
-                    align="center"
-                  >
+                  <TableCell sx={{ fontWeight: 700, bgcolor: "#f8fafc" }} align="center">
                     Addons
                   </TableCell>
-                  <TableCell
-                    sx={{ fontWeight: 700, bgcolor: "#f8fafc" }}
-                    align="center"
-                  >
+                  <TableCell sx={{ fontWeight: 700, bgcolor: "#f8fafc" }} align="center">
                     Status
                   </TableCell>
-                  <TableCell
-                    sx={{ fontWeight: 700, bgcolor: "#f8fafc" }}
-                    align="center"
-                  >
+                  <TableCell sx={{ fontWeight: 700, bgcolor: "#f8fafc" }} align="center">
                     Actions
                   </TableCell>
                 </TableRow>
@@ -501,6 +267,7 @@ const VenuePackagesPopup = ({ isOpen, venue, onClose }) => {
                         </Typography>
                       </TableCell>
 
+                      {/* Subtitle */}
                       <TableCell>
                         <Tooltip
                           title={pkg.subTitle || ""}
@@ -508,23 +275,16 @@ const VenuePackagesPopup = ({ isOpen, venue, onClose }) => {
                           placement="top"
                           slotProps={{
                             tooltip: {
-                              sx: {
-                                backgroundColor: "black",
-                                color: "white",
-                              },
+                              sx: { backgroundColor: "black", color: "white" },
                             },
-                            arrow: {
-                              sx: {
-                                color: "black",
-                              },
-                            },
+                            arrow: { sx: { color: "black" } },
                           }}
                         >
                           <Typography
                             fontSize={13}
                             color="text.secondary"
                             sx={{
-                              maxWidth: 260,
+                              maxWidth: 240,
                               overflow: "hidden",
                               textOverflow: "ellipsis",
                               whiteSpace: "nowrap",
@@ -606,7 +366,7 @@ const VenuePackagesPopup = ({ isOpen, venue, onClose }) => {
                               textTransform: "none",
                               borderRadius: 1.5,
                               fontSize: 12,
-                              px: 1.5,
+                              px: 1.2,
                             }}
                           >
                             Edit
@@ -624,11 +384,38 @@ const VenuePackagesPopup = ({ isOpen, venue, onClose }) => {
                               textTransform: "none",
                               borderRadius: 1.5,
                               fontSize: 12,
-                              px: 1.5,
+                              px: 1.2,
                             }}
                           >
                             Clone
                           </Button>
+                          <Tooltip title="Generate & Copy AI Prompt">
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              color="info"
+                              startIcon={<AutoAwesomeIcon sx={{ fontSize: "14px !important" }} />}
+                              onClick={() => {
+                                setPromptPackage(pkg);
+                                setShowPromptModal(true);
+                              }}
+                              sx={{
+                                textTransform: "none",
+                                borderRadius: 1.5,
+                                fontSize: 12,
+                                px: 1.2,
+                                bgcolor: "#eff6ff",
+                                borderColor: "#bfdbfe",
+                                color: "#1d4ed8",
+                                "&:hover": {
+                                  bgcolor: "#dbeafe",
+                                  borderColor: "#93c5fd",
+                                },
+                              }}
+                            >
+                              Prompt
+                            </Button>
+                          </Tooltip>
                         </Box>
                       </TableCell>
                     </TableRow>
@@ -678,6 +465,19 @@ const VenuePackagesPopup = ({ isOpen, venue, onClose }) => {
           }}
           onSuccess={callPackageApi}
           isCloningPackage={isCloningPackage}
+        />
+      )}
+
+      {/* AI Prompt Generator Modal */}
+      {showPromptModal && (
+        <PackagePromptModal
+          isOpen={showPromptModal}
+          packageData={promptPackage}
+          venue={venue}
+          onClose={() => {
+            setShowPromptModal(false);
+            setPromptPackage(null);
+          }}
         />
       )}
     </>
