@@ -2213,6 +2213,7 @@ const filledCountForCounter = trueDynamicApiKeys.filter((linkType) => {
                 })
                 : "N/A"}
             </p>
+            <p>Performance Badge : {supplierDetails.data?.performanceBadge || "NA"}</p>
           </div>
         </div>
       )}
