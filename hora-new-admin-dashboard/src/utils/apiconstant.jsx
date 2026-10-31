@@ -2,6 +2,7 @@ export const BASE_URL = 'https://horaservices.com';
 export const IMAGE_BASE_URL = "https://horaservices.com/api/uploads";
 export const MEDIA_PROCESSING_BASE_URL = 'https://horaservices.com/media-api';
 export const GET_DECORATION_BY_NAME = '/api/Decoration/searchByName/';
+export const GET_DECORATION_BY_NAME_PANEL = '/api/Decoration/panel-searchByName/';
 export const CONFIRM_ORDER_ENDPOINT = "/api/order/add";
 export const SAVE_LOCATION_ENDPOINT='/api/admin/address/editByUserIDAdmin';
 export const ADMIN_USER_DETAILS="/api/admin/getUserDetails/";

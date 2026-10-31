@@ -7,7 +7,7 @@ import Image from "next/image";
 import axios from "axios";
 import {
   BASE_URL,
-  GET_DECORATION_BY_NAME,
+  GET_DECORATION_BY_NAME_PANEL,
   CONFIRM_ORDER_ENDPOINT,
   SAVE_LOCATION_ENDPOINT,
   API_SUCCESS_CODE,
@@ -18,6 +18,17 @@ import { pincodes } from "../../../utils/pincodes.js";
 import SearchWithDropDown from "../../component/SearchWithDropDown";
 import { eventList } from "../../../constants/eventList";
 import { formatDate } from "../../../utils/formateDate";
+
+
+const getProductImageUrl = (product) => {
+  const fileName = product?.featured_images?.[0]?.fileName;
+
+  if (!fileName) return "";
+
+  return `${BASE_URL}/api/uploads/compressed_webp/${fileName.split(".")[0]}.webp`;
+};
+
+
 
 const AddDecOrder = () => {
   const [dishName, setDishName] = useState("");
@@ -212,7 +223,7 @@ const AddDecOrder = () => {
       setLoading(true);
       setDishNameError("");
 
-      const url = `${BASE_URL}${GET_DECORATION_BY_NAME}${encodeURIComponent(
+      const url = `${BASE_URL}${GET_DECORATION_BY_NAME_PANEL}${encodeURIComponent(
         dishName.trim()
       )}`;
 
@@ -630,7 +641,7 @@ const AddDecOrder = () => {
   
   Product site Url :${product?.productUrl || "N/A"}
   *Product Name*: ${dishName}
-  Product Image URL: ${BASE_URL}/api/uploads/${product?.featured_images.length > 0 ? product?.featured_images[0]?.fileName : ""}
+  Product Image URL: ${encodeURI(getProductImageUrl(product))}
   
   *Add-On Items*:
   ${addons}
@@ -746,7 +757,7 @@ ${inclusionText}
                         {/* Product Image */}
                         <div className="product-suggestion-image-wrapper">
                           <img
-                            src={`${BASE_URL}/api/uploads/${product?.featured_images.length > 0 ? product?.featured_images[0]?.fileName : item.featured_image}`}
+                            src={getProductImageUrl(item)}
                             alt={item.name || "Product"}
                             className="product-suggestion-image"
                             onError={(e) => {
@@ -916,7 +927,7 @@ ${inclusionText}
               <div className="product-image">
                 <div>
                   <Image
-                    src={`${BASE_URL}/api/uploads/${product.featured_image}`}
+                    src={getProductImageUrl(product)}
                     alt="Product"
                     width={200}
                     height={200}
