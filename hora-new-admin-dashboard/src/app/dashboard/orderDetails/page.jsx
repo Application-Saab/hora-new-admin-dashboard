@@ -330,6 +330,38 @@ const [order, setOrder] = useState(null);
     }
   };
 
+
+  const handleVerifyAlbum = async (order) => {
+    try {
+      const response = await fetch(BASE_URL + "/api/order/edit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          _id: order._id,
+          isAlbumVerified: true,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.status === 200) {
+        alert("Album verified successfully!");
+
+        setSelectedOrder((prev) => ({
+          ...prev,
+          isAlbumVerified: true,
+        }));
+      } else {
+        alert("Failed to verify album");
+      }
+    } catch (error) {
+      console.error("Album verification error:", error);
+      alert("Something went wrong");
+    }
+  };
+
   const closePopup = () => {
     setPopupOpen(false);
     setIsPopupOpen(false);
@@ -431,7 +463,7 @@ useEffect(() => {
       );
 
       const rawPhotosLink =
-  backendApiKey === "rawPhotos"
+        backendApiKey === "colorCorrectedPhotos"
     ? selectedOrder?.orderDriveLink
     : "";
 
@@ -1622,28 +1654,34 @@ useEffect(() => {
 
     const savedLinks = order?.allDriveLinks || [];
 
-const filledCountForCounter = trueDynamicApiKeys.filter((linkType) => {
-  if (linkType === "rawPhotos") {
-    return (
-      savedLinks.some(
-        (item) =>
-          item.linkType === "rawPhotos" &&
-          item.link &&
-          item.link.trim() !== ""
-      ) ||
-      (order?.orderDriveLink &&
-        order.orderDriveLink.trim() !== "")
-    );
-  }
+                          const filledCountForCounter = trueDynamicApiKeys.filter((linkType) => {
+                            // Album verification
+                            if (linkType === "album") {
+                              return order?.isAlbumVerified === true;
+                            }
 
-  return savedLinks.some(
-    (item) =>
-      item.linkType === linkType &&
-      item.link &&
-      item.link.trim() !== ""
-  );
-}).length;
+                            // Raw Photos
+                            if (linkType === "colorCorrectedPhotos") {
+                              return (
+                                savedLinks.some(
+                                  (item) =>
+                                    item.linkType === "colorCorrectedPhotos" &&
+                                    item.link &&
+                                    item.link.trim() !== ""
+                                ) ||
+                                (order?.orderDriveLink &&
+                                  order.orderDriveLink.trim() !== "")
+                              );
+                            }
 
+                            // Other Drive Links
+                            return savedLinks.some(
+                              (item) =>
+                                item.linkType === linkType &&
+                                item.link &&
+                                item.link.trim() !== ""
+                            );
+                          }).length;
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: "8px", alignItems: "center" }}>
 
@@ -2317,7 +2355,10 @@ const filledCountForCounter = trueDynamicApiKeys.filter((linkType) => {
 
       <hr className="drive-modal-divider" />
 
-      {driveLinksInput.map((item, index) => (
+            {driveLinksInput.map((item, index) => {
+              if (item.linkType === "album") return null;
+
+              return (
         <div key={index} className="drive-link-group">
           <label className="drive-link-label">
             {apiKeyToInclusionMap[item.linkType] || item.linkType}
@@ -2336,7 +2377,46 @@ const filledCountForCounter = trueDynamicApiKeys.filter((linkType) => {
             className="drive-link-input"
           />
         </div>
-      ))}
+              );
+            })}
+
+            {selectedOrder?.call_checklist?.inclusions?.Album === true && (
+              <div className="album-verification-section">
+                <div className="album-verification-header">
+                  <h4>Album Verification</h4>
+
+                  <span className={selectedOrder?.isAlbumVerified ? "verified" : "pending"}>
+                    {selectedOrder?.isAlbumVerified ? "✓ Verified" : "Not Verified"}
+                  </span>
+                </div>
+
+                {selectedOrder?.albumImages?.length > 0 ? (
+                  <>
+                    <div className="album-images-preview">
+                      {selectedOrder.albumImages.map((image, index) => (
+                        <img
+                          key={index}
+                          src={typeof image === "string" ? image : image.url}
+                          alt={`Album ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+
+                    {!selectedOrder?.isAlbumVerified && (
+                      <button
+                        type="button"
+                        className="verify-album-btn"
+                        onClick={() => handleVerifyAlbum(selectedOrder)}
+                      >
+                        ✓ Verify Album
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <p className="no-album-images">No album images uploaded yet.</p>
+                )}
+              </div>
+            )}
 
       <div className="drive-modal-actions">
         <button
