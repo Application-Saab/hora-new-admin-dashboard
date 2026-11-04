@@ -1290,17 +1290,22 @@ const ActionPopup = ({
                                   <strong>Product Price:</strong> {dec.price}
                                 </p>
                                 <p>
-                                  <Image
-                                    src={`${BASE_URL}/api/uploads/compressed_webp/${
-                                      dec.featured_images?.length > 0 &&
-                                      dec.featured_images[0]?.fileName?.split(
-                                        ".",
-                                      )[0]
-                                    }.webp`}
-                                    width={200}
-                                    height={200}
-                                    alt={`${dec.featured_images[0]?.fileName?.split(".")[0]}-name`}
-                                  />
+                                  {order?.customProductImage ? (
+                                    <Image
+                                      src={`${BASE_URL}/api/uploads/compressed_webp/${order?.customProductImage}`}
+                                      width={200}
+                                      height={200}
+                                      alt="Custom Product"
+                                    />
+                                  ) : (
+                                    <Image
+                                      src={`${BASE_URL}/api/uploads/compressed_webp/${dec.featured_images?.[0]?.fileName?.split(".")[0]
+                                        }.webp`}
+                                      width={200}
+                                      height={200}
+                                      alt={`${dec.featured_images?.[0]?.fileName?.split(".")[0]}-name`}
+                                    />
+                                  )}
                                 </p>
                                 <div>{getItemInclusion(dec.inclusion)}</div>
 

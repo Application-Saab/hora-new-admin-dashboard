@@ -63,7 +63,7 @@ const [order, setOrder] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
   const [vendorAmount, setVendorAmountInput] = useState("");
   const [orderId1, setOrderId] = useState("");
-
+  const [emeregencyStatus, setEmeregencyStatus] = useState("");
   const [createdAtDate, setCreatedAtDate] = useState("");
   const [selectedDriveStatus, setSelectedDriveStatus] = useState("");
 
@@ -90,7 +90,8 @@ const [order, setOrder] = useState(null);
     selectedDate = "",
     selectedOfflineNum = "",
     createdAtDate = "",
-    driveStatus = ""
+    driveStatus = "",
+    emergencyOrderStatus = "",
   ) => {
     // Handle orderType mapping
     let typeId;
@@ -142,6 +143,7 @@ const [order, setOrder] = useState(null);
       // online_phone_no :selectedOfflineNum || "",
       createdAt: createdAtDate || "",
       driveLinkStatus: driveStatus || "",
+      emergencyOrderStatus: emeregencyStatus || "",
     };
 
     console.log(requestData);
@@ -194,6 +196,7 @@ const [order, setOrder] = useState(null);
       selectedPhoneNumber,
       createdAtDate,
       selectedDriveStatus,
+      emeregencyStatus,
     );
   }, [
     currentPage,
@@ -207,6 +210,7 @@ const [order, setOrder] = useState(null);
     createdAtDate,
     refetchData,
     selectedDriveStatus,
+    emeregencyStatus,
   ]);
 
   const getOrderStatus = (orderStatusValue) => {
@@ -1095,7 +1099,24 @@ useEffect(() => {
                 <th>Rating</th>
                 <th>Extra Pay</th>
                 <th>Edit Order</th>
-                <th>Payment Status</th>
+                <th className="order-type-header">
+                  <span>Payment Status</span>
+                  <span>
+                    <select
+                      value={emeregencyStatus}
+                      onChange={(e) => {
+                        setEmeregencyStatus(e.target.value);
+                        setCurrentPage(1);
+                      }}
+                      className="order-type-dropdown"
+                    >
+                      <option value="">All</option>
+                      <option value="notPaid">Pending</option>
+                      <option value="pending">Pending + Not Acc.</option>
+                      <option value="paid">Paid</option>
+                    </select>
+                  </span>
+                </th>
                 <th>Add EventName</th>
                 <th>Wonderland Event Name</th>
                 <th>Add Order Image</th>
