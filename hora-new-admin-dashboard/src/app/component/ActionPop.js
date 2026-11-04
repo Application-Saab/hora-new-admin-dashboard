@@ -1559,6 +1559,12 @@ const ActionPopup = ({
                           <strong>Order Time:</strong>{" "}
                           {orderDetails.order_time || "N/A"}
                         </p>
+
+                          <p>
+                            <strong>Order Images Uplaoded By App:</strong>{" "}
+                            {(orderDetails?.imageUploadByApp == true) ? "Yes" : "No"}
+                          </p>
+
                         <p>
                           <strong>Order Comments:</strong>{" "}
                           {orderDetails.decoration_comments ? (

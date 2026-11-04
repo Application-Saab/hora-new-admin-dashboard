@@ -241,7 +241,7 @@ const Capsuletracking = () => {
                         let driveUrl = "";
 
                         if (order?.allDriveLinks && order.allDriveLinks.length > 0) {
-                          const foundObj = order.allDriveLinks.find(d => d.linkType === "rawPhotos") || order.allDriveLinks[0];
+                          const foundObj = order.allDriveLinks.find(d => d.linkType === "colorCorrectedPhotos") || order.allDriveLinks[0];
                           driveUrl = foundObj?.link || order?.orderDriveLink || "";
                         } else {
                           driveUrl = order?.orderDriveLink || "";
