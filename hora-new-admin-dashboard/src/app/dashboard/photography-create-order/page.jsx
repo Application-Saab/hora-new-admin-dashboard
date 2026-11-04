@@ -664,38 +664,75 @@ const AddPhotoOrder = () => {
   }, [customerId, wonderlandevent, date, address, googleLocation]);
 
   const copyOrderSummary = () => {
+    // Selected Add-ons
+    const addons = selectedAddOns.length > 0
+      ? selectedAddOns.map((item, index) => {
+        const quantity = selectedItems[item._id]?.quantity || 1;
+        const price = Number(item.price) || 0;
+        const totalPrice = price * quantity;
+
+        return `${index + 1}. ${item.title}: ₹${price} × ${quantity} = ₹${totalPrice}`;
+      }).join("\n")
+      : "None";
+
+    // Selected Themes
+    const themes = selectedTheme.length > 0
+      ? selectedTheme.map((item, index) =>
+        `${index + 1}. ${item.title}`
+      ).join("\n")
+      : "None";
+
+    // Product Inclusions
+    const inclusions = inclusion.length > 0
+      ? inclusion.map((item, index) => `${index + 1}. ${item}`).join("\n")
+      : "None";
+
     const orderSummary = `
+*Photography Order Details*
 
-      Date: ${date}
-      Time Slot: ${timeSlot?.label || "N/A"}
+Date: ${date}
+Time Slot: ${timeSlot?.label || ""}
+Contact Number: ${customerNumber}
+Address: ${address}
+Google Map Location: ${googleLocation}
 
+Total Amount: ₹${totalamount || "N/A"}
+Advance Amount: ₹${advanceamount || "N/A"}
+Balance Amount: ₹${balanceamount || "N/A"}
 
-      Product Site Url: ${product?.productUrl || "N/A"}
-      *Product Name*: ${dishName}
-      Product Price: ${category || "N/A"}
-      Product Inclusions:
-       ${inclusion.length > 0 ? inclusion.join("\n -") : "None"}
-      
-      Contact number Number: ${customerNumber}
-      
-      Total Amount: ${totalamount}
-      Advance Amount: ${advanceamount || "N/A"}
-      Balance Amount: ${balanceamount || "N/A"}
+Product URL: ${product?.productUrl || "N/A"}
+Product Name: ${dishName}
+Product Price: ₹${product?.price || 0}
 
-      *Address*: ${address}
-      Google Location: ${googleLocation || "N/A"}
-      City: ${city}
-      Pincode: ${pincode}
-      Comments: ${comment || "None"}
-      Order Taken By: ${orderTakenBy}
-    `;
+*Add-On Items:*
+${addons}
 
-    navigator.clipboard.writeText(orderSummary.trim()).then(() => {
-      alert("Order Summary copied to clipboard!");
-    }).catch((err) => {
-      alert("Failed to copy: ", err);
-    });
-};
+*Selected Themes:*
+${themes}
+
+*Product Inclusions:*
+${inclusions}
+
+Event: ${wonderlandevent || selectedEvent || "N/A"}
+
+*Comments:*
+${
+      comment
+        ?.split("\n")
+        .filter((item) => item.trim())
+        .map((item, index) => `${index + 1}. ${item}`)
+        .join("\n") || "None"
+}
+Order Taken By: ${orderTakenBy}
+`;
+
+    navigator.clipboard.writeText(orderSummary.trim())
+      .then(() => alert("Order Summary copied to clipboard!"))
+      .catch((err) => {
+        console.error("Copy failed:", err);
+        alert("Failed to copy order summary");
+      });
+  };
 
 
 // Handle add-on selection
