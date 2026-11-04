@@ -702,7 +702,6 @@ Balance Amount: ₹${balanceamount || "N/A"}
 
 Product URL: ${product?.productUrl || "N/A"}
 Product Name: ${dishName}
-Product Price: ₹${product?.price || 0}
 
 *Add-On Items:*
 ${addons}
