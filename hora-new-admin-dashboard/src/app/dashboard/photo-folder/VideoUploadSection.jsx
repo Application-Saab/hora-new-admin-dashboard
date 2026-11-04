@@ -174,6 +174,7 @@ const initiateRes = await fetch(`${MEDIA_PROCESSING_BASE_URL}/initiate`, {
           uploadId,
           key,
           parts: completedParts,
+          fromPanel: true,
         }),
       });
 

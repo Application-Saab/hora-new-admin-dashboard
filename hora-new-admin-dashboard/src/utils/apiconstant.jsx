@@ -1,6 +1,6 @@
-export const BASE_URL = 'https://horaservices.com';
-export const IMAGE_BASE_URL = "https://horaservices.com/api/uploads";
-export const MEDIA_PROCESSING_BASE_URL = 'https://horaservices.com/media-api';
+export const BASE_URL = 'http://localhost:9000';
+export const IMAGE_BASE_URL = "http://localhost:4000";
+export const MEDIA_PROCESSING_BASE_URL = 'http://localhost:4000';
 export const GET_DECORATION_BY_NAME = '/api/Decoration/searchByName/';
 export const GET_DECORATION_BY_NAME_PANEL = '/api/Decoration/panel-searchByName/';
 export const CONFIRM_ORDER_ENDPOINT = "/api/order/add";
