@@ -471,7 +471,7 @@ const AddPhotoOrder = () => {
     try {
       const url = BASE_URL + SAVE_LOCATION_ENDPOINT;
 
-      const address2 = address + pincode;
+      const address2 = address;
       console.log(address2, "address2");
       const requestDataa = {
         address1: address2,
