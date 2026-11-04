@@ -74,7 +74,9 @@ const AddDecOrder = () => {
   const [showPopup, setShowPopup] = useState(false); // For toggling the popup
   const [newCustomerName, setNewCustomerName] = useState(""); // For name input
   const [newCustomerPhone, setNewCustomerPhone] = useState("");
-
+  const [customOrderImage, setCustomOrderImage] = useState(null);
+  const [customOrderImagePreview, setCustomOrderImagePreview] = useState("");
+  const [uploadedDesignName, setUploadedDesignName] = useState("");
   const [selectedItems, setSelectedItems] = useState({});
   const [teams, setTeams] = useState([]);
 
@@ -161,6 +163,37 @@ const AddDecOrder = () => {
       useEffect(() => {
           getTeams();
       }, []);
+  const uploadOrderDesign = async () => {
+    if (!customOrderImage) {
+      alert("Please select an image first");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const formData = new FormData();
+      formData.append("file", customOrderImage);
+
+      const response = await axios.post(
+        `${BASE_URL}/api/decoration_image_upload`,
+        formData
+      );
+
+      if (response.data.error) {
+        throw new Error(response.data.message);
+      }
+
+      setUploadedDesignName(response.data.data);
+
+      alert("Order design uploaded successfully!");
+    } catch (error) {
+      console.error("Image upload error:", error);
+      alert(error.message || "Image upload failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const toggleItem = (id) => {
     setSelectedItems((prev) => ({
@@ -494,6 +527,8 @@ const AddDecOrder = () => {
       isPaymentDone: !isEmergency,
       isEmergencyOrder: isEmergency,
       order_status: isEmergency ? 7 : 0,
+      customProductImage:
+        product?.name === "Custom Product" ? uploadedDesignName : "",
     };
 
     try {
@@ -743,6 +778,8 @@ ${inclusionText}
 
                           setDishName(item.name);
                           setProduct(item);
+                          setCustomOrderImage(null);
+                          setCustomOrderImagePreview("");
                           setAddonIds(item.addons || []);
                           setProductPrice(item.price);
                           setInclusion(item.inclusion || []);
@@ -978,6 +1015,66 @@ ${inclusionText}
               )}
             </div>
           )}
+
+          <div>
+            {product?.name === "Custom Product" && (
+              <div className="order-design-upload">
+                <label className="order-design-label">
+                  Upload Order Design <span>(Optional)</span>
+                </label>
+
+                <label className="order-design-dropzone">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+
+                      if (file) {
+                        setCustomOrderImage(file);
+                        setCustomOrderImagePreview(URL.createObjectURL(file));
+                      }
+                    }}
+                  />
+
+                  {customOrderImagePreview ? (
+                    <div className="selected-design">
+                      <img
+                        src={customOrderImagePreview}
+                        alt="Selected Design"
+                      />
+                      <div className="selected-design-info">
+                        <span className="selected-design-name">
+                          {customOrderImage?.name}
+                        </span>
+                        <span className="change-image-text">Click to change image</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="upload-icon">
+                        <i className="fa fa-cloud-upload" />
+                      </span>
+                      <span className="upload-text">Choose an image</span>
+                    </>
+                  )}
+
+                </label>
+                <div>
+                  {customOrderImage && (
+                    <button
+                      type="button"
+                      className="order-design-submit"
+                      onClick={uploadOrderDesign}
+                      disabled={loading}
+                    >
+                      {loading ? "Uploading..." : "Submit Design"}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
           {message === "Customer exists." && (
             <div className="amount-box">
               <div className="city-box" style={{ flex: 1 }}>
@@ -1365,9 +1462,9 @@ ${inclusionText}
                       className="createOrder-btn"
                       type="button"
                       onClick={handleSubmit}
-                      disabled={lloading}
+                      disabled={lloading || loading}
                     >
-                      {lloading ? "Creating Order..." : "Create Order"}
+                      {(lloading )? "Creating Order..." : "Create Order"}
                     </button>
                   )}
                 </div>
@@ -1379,9 +1476,9 @@ ${inclusionText}
                       onClick={(e) => {
                         handleSubmit(e, true);
                       }}
-                      disabled={lloading}
+                      disabled={lloading || loading}
                     >
-                      {lloading
+                      {(lloading)
                         ? "Creating Emergency Order..."
                         : "Create Emergency Order"}
                     </button>
