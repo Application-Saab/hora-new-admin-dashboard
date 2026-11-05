@@ -9,11 +9,36 @@ const CHUNK_SIZE = 25 * 1024 * 1024;
 const CONCURRENCY = 3; 
 const MAX_RETRIES = 3;
 
+// const putChunk = (url, blob, contentType, onProgress) =>
+//   new Promise((resolve, reject) => {
+//     const xhr = new XMLHttpRequest();
+//     xhr.open('PUT', url);
+//     xhr.setRequestHeader('Content-Type', contentType);
+//     xhr.upload.onprogress = (e) => {
+//       if (e.lengthComputable) onProgress(e.loaded);
+//     };
+//     xhr.onload = () => {
+//       if (xhr.status >= 200 && xhr.status < 300) {
+//         resolve(xhr.getResponseHeader('ETag'));
+//       } else {
+//         reject(new Error(`HTTP ${xhr.status}`));
+//       }
+//     };
+//     xhr.onerror = () => reject(new Error('Network error'));
+//     xhr.send(blob);
+//   });
+
+
 const putChunk = (url, blob, contentType, onProgress) =>
   new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('PUT', url);
-    xhr.setRequestHeader('Content-Type', contentType);
+
+    // ⚠️ YEHA SE Content-Type header hata dein, kyunki presigned URL 
+    // ke signed headers mein sirf 'host' included hai. 
+    // Content-Type lagane se S3 400 Bad Request de raha hai.
+    // xhr.setRequestHeader('Content-Type', contentType); 
+
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) onProgress(e.loaded);
     };
@@ -27,7 +52,7 @@ const putChunk = (url, blob, contentType, onProgress) =>
     xhr.onerror = () => reject(new Error('Network error'));
     xhr.send(blob);
   });
-
+  
 const putWithRetry = async (chunk, contentType, onProgress) => {
   for (let attempt = 0; ; attempt++) {
     try {
