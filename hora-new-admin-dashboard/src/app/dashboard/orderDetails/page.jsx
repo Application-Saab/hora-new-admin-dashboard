@@ -91,7 +91,7 @@ const [order, setOrder] = useState(null);
     selectedOfflineNum = "",
     createdAtDate = "",
     driveStatus = "",
-    emergencyOrderStatus = "",
+    // emergencyOrderStatus = "",
   ) => {
     // Handle orderType mapping
     let typeId;
