@@ -182,15 +182,21 @@ const initiateRes = await fetch(`${MEDIA_PROCESSING_BASE_URL}/initiate`, {
 
       const completeData = await completeRes.json();
 
-      const finalVideoUrl = completeData.location || completeData.videoUrl || completeData.url;
-
       setFileList((prev) =>
         prev.map((f) =>
           f.id === id
-            ? { ...f, progress: 100, status: 'completed', url: finalVideoUrl }
+            ? {
+              ...f,
+              progress: 100,
+              status: 'completed',
+              originalVideoUrl: completeData.originalVideoUrl,
+              compressedVideoUrl: completeData.compressedVideoUrl,
+            }
             : f
         )
       );
+
+      console.log("COMPLETE API RESPONSE:", completeData);
     } catch (error) {
       console.error(`Upload failed for ${file.name}:`, error);
       setFileList((prev) =>
@@ -279,67 +285,62 @@ const initiateRes = await fetch(`${MEDIA_PROCESSING_BASE_URL}/initiate`, {
                 </div>
               </div>
 
-              {item.status === 'completed' && item.url && (
-                <div
-                  className="url-box"
-                  style={{
-                    marginTop: '12px',
-                    padding: '10px',
-                    backgroundColor: '#f8f9fa',
-                    borderRadius: '6px',
-                    border: '1px solid #e2e8f0',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '6px'
-                  }}
-                >
-                  <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#16a34a' }}>
-                    Uploaded Video URL:
-                  </span>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <input
-                      type="text"
-                      readOnly
-                      value={item.url}
-                      style={{
-                        flex: 1,
-                        padding: '8px 10px',
-                        fontSize: '13px',
-                        border: '1px solid #cbd5e1',
-                        borderRadius: '4px',
-                        backgroundColor: '#ffffff',
-                        color: '#334155'
-                      }}
-                    />
-                    <button
-                      type="button"
-                      style={{
-                        padding: '8px 14px',
-                        fontSize: '13px',
-                        fontWeight: '500',
-                        cursor: 'pointer',
-                        backgroundColor: '#2563eb',
-                        color: '#ffffff',
-                        border: 'none',
-                        borderRadius: '4px',
-                        transition: 'background-color 0.2s'
-                      }}
-                      onClick={(e) => {
-                        navigator.clipboard.writeText(item.url);
-                        const btn = e.currentTarget;
-                        btn.innerText = 'Copied! ✅';
-                        btn.style.backgroundColor = '#9252aa';
-                        setTimeout(() => {
-                          btn.innerText = 'Copy';
-                          btn.style.backgroundColor = '#9252aa';
-                        }, 2000);
-                      }}
-                    >
-                      Copy
-                    </button>
-                  </div>
+
+              {item.status === 'completed' && (
+                <div className="url-box" style={{
+                  marginTop: '12px',
+                  padding: '10px',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '6px',
+                  border: '1px solid #e2e8f0',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px'
+                }}>
+                  {[
+                    { label: 'Original Video URL', url: item.originalVideoUrl },
+                    { label: 'Compressed Video URL', url: item.compressedVideoUrl }
+                  ].map((video, index) => (
+                    video.url && (
+                      <div key={index}>
+                        <span style={{
+                          fontSize: '12px',
+                          fontWeight: 'bold',
+                          color: '#16a34a'
+                        }}>
+                          {video.label}
+                        </span>
+
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+                          <input
+                            type="text"
+                            readOnly
+                            value={video.url}
+                            style={{
+                              flex: 1,
+                              minWidth: 0,
+                              padding: '8px 10px',
+                              fontSize: '13px',
+                              border: '1px solid #cbd5e1',
+                              borderRadius: '4px',
+                              backgroundColor: '#ffffff',
+                              color: '#334155'
+                            }}
+                          />
+
+                          <button
+                            type="button"
+                            onClick={() => navigator.clipboard.writeText(video.url)}
+                          >
+                            Copy
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  ))}
                 </div>
               )}
+
             </div>
           ))}
 
