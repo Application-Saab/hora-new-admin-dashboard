@@ -31,7 +31,7 @@ export const fetchVenues = async ({
           foodType,
           venueStatus,
         },
-      }
+      },
     );
 
     const resData = response.data;
@@ -113,7 +113,7 @@ export const fetchPackageCategories = async (setPackageCategories) => {
           limit: 500,
           categoriesStatus: 1, // only active
         },
-      }
+      },
     );
     setPackageCategories(res.data.data || []);
   } catch (err) {
@@ -139,7 +139,7 @@ export const fetchPackageItemsByCategory = async ({
           page,
           limit,
         },
-      }
+      },
     );
 
     return {
@@ -151,7 +151,6 @@ export const fetchPackageItemsByCategory = async ({
     return { items: [], pagination: {} };
   }
 };
-
 
 export const createVenuePackage = async (
   payload,
@@ -314,7 +313,7 @@ export const deleteVenueMedia = async (imageId, setLoading, onSuccess) => {
 export const fetchVenueSuggestion = async (type) => {
   try {
     const res = await axios.get(
-      `${BASE_URL}/api/venue-suggestion/suggestion-by-type/${type}`
+      `${BASE_URL}/api/venue-suggestion/suggestion-by-type/${type}`,
     );
     return res.data?.data || [];
   } catch (err) {
@@ -324,12 +323,17 @@ export const fetchVenueSuggestion = async (type) => {
 };
 
 // create venue suggestion
-export const createVenueSuggestion = async (title, dataType = "SPECIAL_FEATURES") => {
+export const createVenueSuggestion = async (
+  title,
+  dataType = "SPECIAL_FEATURES",
+  iconSvg = ""
+) => {
   try {
     const res = await axios.post(`${BASE_URL}/api/venue-suggestion`, {
       title: title.trim(),
-    dataType,
+      dataType,
       status: 1,
+      iconSvg
     });
     return res.data?.data || null;
   } catch (err) {
@@ -338,20 +342,19 @@ export const createVenueSuggestion = async (title, dataType = "SPECIAL_FEATURES"
   }
 };
 
-
 // update venue faqs
 export const updateVenueFaqs = async (
   venueId,
   faqs,
   onSuccess,
   onClose,
-  setLoading
+  setLoading,
 ) => {
   try {
     setLoading(true);
     const res = await axios.put(
       `${BASE_URL}/api/party-venue/update-faqs/${venueId}`,
-      { faqs }
+      { faqs },
     );
 
     if (!res.data.error) {
