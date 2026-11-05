@@ -240,7 +240,7 @@ const CreateOrderForm = ({
     try {
       const url = BASE_URL + SAVE_LOCATION_ENDPOINT;
 
-      const address2 = address + pincode;
+      const address2 = address;
       const requestDataa = {
         address1: address2,
         address2: googleLocation,

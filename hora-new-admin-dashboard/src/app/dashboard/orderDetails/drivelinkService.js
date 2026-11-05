@@ -10,7 +10,7 @@ export const saveOrderDriveLinks = async (currentOrder, driveLinksInput) => {
     throw new Error("Please provide at least one valid Google Drive link.");
   }
 
-  const rawPhotosRow = linksToSend.find((item) => item.linkType === "rawPhotos");
+  const rawPhotosRow = linksToSend.find((item) => item.linkType === "colorCorrectedPhotos");
   const rawFolderUrl = rawPhotosRow ? rawPhotosRow.link : "";
 
   const response = await axios.post(`${BASE_URL}/api/photo/drive/add-order-drive-link`, {
@@ -23,21 +23,23 @@ export const saveOrderDriveLinks = async (currentOrder, driveLinksInput) => {
 };
 
 export const inclusionToApiKeyMap = {
-  "Raw Photos": "rawPhotos",
+  "Color Corrected Photos": "colorCorrectedPhotos",
   "Edited Photos": "editedPhotos",
   "Teaser": "teaser", 
-  "Edited Video": "editedVideos",
-  "Raw Video": "rawVideos",
+  "Edited Video": "editedVideo",
   "Drone Shoot": "droneShoot",
-  "Edited Reel": "editedReel"
+  "Edited Reel": "editedReel",
+  "Album": "album",
+  "Raw Video Clips": "rawVideoClips",
 };
 
 export const apiKeyToInclusionMap = {
-  rawPhotos: "Raw Photos",
+  colorCorrectedPhotos: "Color Corrected Photos",
   editedPhotos: "Edited Photos",
   teaser: "Teaser",
-  editedVideos: "Edited Video",
-  rawVideos: "Raw Video",
+  editedVideo: "Edited Video",
   droneShoot: "Drone Shoot",
-  editedReel: "Edited Reel"
+  editedReel: "Edited Reel",
+  album: "Album",
+  rawVideoClips: "Raw Video Clips",
 };

@@ -19,13 +19,14 @@ export const DEFAULT_CHECKLIST = {
     otherLocationComment: "",
 
     inclusions: {
-        "Raw Photos": false,
+        "Color Corrected Photos": false,
         "Edited Photos": false,
         Teaser: false,
         "Edited Video": false,
-        "Raw Video": false,
         "Drone Shoot": false,
         "Edited Reel": false,
+        "Album": false,
+        "Raw Video Clips": false,
     },
 
     verificationChecklist: {
@@ -223,13 +224,14 @@ const PhotographyCallChecklistContent = ({
                 <CheckboxGroup
                     title="Check the inclusions"
                     items={[
-                        "Raw Photos",
+                        "Color Corrected Photos",
                         "Edited Photos",
                         "Teaser",
                         "Edited Video",
-                        "Raw Video",
                         "Drone Shoot",
                         "Edited Reel",
+                        "Album",
+                        "Raw Video Clips",
                     ]}
                     section="inclusions"
                     checklist={callChecklist}
