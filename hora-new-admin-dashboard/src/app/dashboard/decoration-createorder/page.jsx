@@ -676,7 +676,7 @@ const AddDecOrder = () => {
   
   Product site Url :${product?.productUrl || "N/A"}
   *Product Name*: ${dishName}
-  Product Image URL: ${encodeURI(getProductImageUrl(product))}
+  Product Image URL: ${ product?.name === "Custom Product" ? encodeURI(`${BASE_URL}/api/uploads/compressed_webp/${uploadedDesignName}`) : encodeURI(getProductImageUrl(product)) || "N/A" }
   
   *Add-On Items*:
   ${addons}
