@@ -70,6 +70,8 @@ const [order, setOrder] = useState(null);
   const [orderTypeShow, setOrderTypeShow] = useState(null);
   const [callChecklistData,setCallChecklistData ] = useState(null);
 
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+
   console.log(isSupplierAssigned);
 
    const [showChecklist, setShowChecklist] = useState(false);
@@ -1682,16 +1684,16 @@ useEffect(() => {
                             }
 
                             // Raw Photos
+                            // Raw Photos / Color Corrected Photos
                             if (linkType === "colorCorrectedPhotos") {
                               return (
                                 savedLinks.some(
                                   (item) =>
                                     item.linkType === "colorCorrectedPhotos" &&
-                                    item.link &&
-                                    item.link.trim() !== ""
+                                    item.link?.trim() !== ""
                                 ) ||
-                                (order?.orderDriveLink &&
-                                  order.orderDriveLink.trim() !== "")
+                                !!order?.orderDriveLink?.trim() ||
+                                order?.imageUploadByApp === true
                               );
                             }
 
@@ -2427,7 +2429,7 @@ useEffect(() => {
                       <button
                         type="button"
                         className="verify-album-btn"
-                        onClick={() => handleVerifyAlbum(selectedOrder)}
+                        onClick={() => setShowVerifyModal(true)}
                       >
                         ✓ Verify Album
                       </button>
@@ -2612,6 +2614,18 @@ useEffect(() => {
             )}
           </div>
         }
+      />
+
+      <CommonPopup
+        isOpen={showVerifyModal}
+        onClose={() => setShowVerifyModal(false)}
+        heading="Verify Album"
+        popupBody="Are you sure you want to verify this album?"
+        buttonText="Verify Album"
+        mainButtonAction={() => {
+          handleVerifyAlbum(selectedOrder);
+          setShowVerifyModal(false);
+        }}
       />
 
     </div>

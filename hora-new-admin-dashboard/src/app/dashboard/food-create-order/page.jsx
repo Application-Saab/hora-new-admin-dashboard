@@ -163,6 +163,7 @@ function AddFoodOrder() {
     ? Object.values(selectedDishes).map((dish) => {
         return {
           name: dish.name,
+          description: dish.description || "",
           image: dish.image,
           price: Number(dish.cuisineArray[0]),
           id: dish._id,

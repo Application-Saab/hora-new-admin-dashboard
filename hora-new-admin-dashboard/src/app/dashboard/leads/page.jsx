@@ -75,7 +75,7 @@ export default function LeadAnalytics() {
                     params.append(key, value.trim());
                 }
                 if (sources.length > 0) {
-                    params.set("sources", sources.join(","));
+                    params.set("sources", sources.join("|"));
                 }
             });
 
@@ -146,7 +146,7 @@ export default function LeadAnalytics() {
         }
 
         if (activeTab === "source" && selectedSources.length > 0) {
-            params.set("sources", selectedSources.join(","));
+            params.set("sources", selectedSources.join("|"));
         }
 
         console.log("Selected sources:", selectedSources);

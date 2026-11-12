@@ -415,32 +415,38 @@ const AddDecOrder = () => {
     }));
   }, [customerId, wonderlandevent, date, address, googleLocation]);
 
+
   const copyOrderSummary = () => {
+    const inclusionText = product?.inclusionText?.trim() || "N/A";
+
     const orderSummary = `
-*Celebration Booster Order*
+*Celebration Booster Order Details*
 
 Date: ${date}
 Time Slot: ${timeSlot?.label || ""}
 Contact Number: ${customerNumber}
 Address: ${address}
+Google Map Location: ${googleLocation || "N/A"}
 
 Total Amount: ₹${totalamount || "N/A"}
 Advance Amount: ₹${advanceamount || "N/A"}
 Balance Amount: ₹${balanceamount || "N/A"}
 
+Product site Url :${product?.productUrl || "N/A"}
 *Booster Name*: ${dishName}
-Image: ${BASE_URL}/api/uploads/${product.featured_image}
+Product Image URL: ${BASE_URL}/api/uploads/${product?.featured_image}
 
-Comment: ${comment}
+*Inclusions:*
+${inclusionText}
+
+Comment: ${comment || "N/A"}
 Order Taken By: ${orderTakenBy}
 `;
 
-    // Copy the order summary to clipboard
     navigator.clipboard.writeText(orderSummary.trim());
-
-    // Alert the user
     alert("Order summary copied!");
   };
+
 
   return (
     <div className="container">
