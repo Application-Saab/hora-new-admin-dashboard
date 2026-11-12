@@ -482,12 +482,17 @@ const CreateOrderForm = ({
     } Order Summary:*\n\n`;
     orderData += `*City:* ${city}\n`;
     orderData += `*Date:* ${formattedDate}\n`;
-    orderData += `*Guest Count:* ${peopleCount}\n`;
-    orderData += `*Time of Delivery:* ${
-      timeSlot ? timeSlot.value : "To be shared by customer"
-    }\n`;
+    orderData += `*Time of Delivery:* ${timeSlot ? timeSlot.value : "To be shared by customer"
+      }\n`;
+    orderData += `*Customer Number:* ${customerNumber}\n`;
     orderData += `*Address:* ${address}\n`;
-    orderData += `*Google Map Location:* ${googleLocation}\n\n`;
+    orderData += `*Google Map Location:* ${googleLocation}\n`;
+    orderData += `*Guest Count:* ${peopleCount}\n\n`;
+
+    // Financial information
+    orderData += `*Total amount:* ₹${totalamount}\n`;
+    orderData += `*Advance Amount:* ₹${advanceamount}\n`;
+    orderData += `*Balance Amount:* ₹${balanceamount}\n\n`;
 
     if (selectedOption === "live-catering") {
       orderData += `*Dishes:*\n`;
@@ -549,16 +554,17 @@ const CreateOrderForm = ({
       });
     }
 
-    // Financial information
-    orderData += `\n*Total amount:* ₹${totalamount}\n`;
-    orderData += `*Advance Amount:* ₹${advanceamount}\n`;
-    orderData += `*Balance Amount:* ₹${balanceamount}\n\n`;
+
 
     // Inclusions section
-    orderData += `*Inclusions:*\n`;
+    orderData += `\n*Inclusions:*\n`;
     inclusions.forEach((item) => {
       orderData += `• ${item}\n`;
     });
+
+
+    orderData += `\n*Comments:* ${comment || "No comments"}\n`;
+    orderData += `*Order Taken By:* ${orderTakenBy}\n`;
 
     // Copy to clipboard
     navigator.clipboard

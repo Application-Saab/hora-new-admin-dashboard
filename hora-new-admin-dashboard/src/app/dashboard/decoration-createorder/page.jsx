@@ -64,6 +64,7 @@ const AddDecOrder = () => {
   const [inclusionFields, setInclusionFields] = useState([0]);
   const [customInclusion, setCustomInclusion] = useState([""]);
     const [discountAmount, setDiscountAmount] = useState("");
+  const [isDesignUploaded, setIsDesignUploaded] = useState(false);
   // const [error, setError] = useState(null);
 
   const [loading, setLoading] = useState(false);
@@ -185,6 +186,7 @@ const AddDecOrder = () => {
       }
 
       setUploadedDesignName(response.data.data);
+      setIsDesignUploaded(true);
 
       alert("Order design uploaded successfully!");
     } catch (error) {
@@ -676,7 +678,7 @@ const AddDecOrder = () => {
   
   Product site Url :${product?.productUrl || "N/A"}
   *Product Name*: ${dishName}
-  Product Image URL: ${ product?.name === "Custom Product" ? encodeURI(`${BASE_URL}/api/uploads/compressed_webp/${uploadedDesignName}`) : encodeURI(getProductImageUrl(product)) || "N/A" }
+  Product Image URL: ${ (product?.name === "Custom Product" && uploadedDesignName) ? encodeURI(`${BASE_URL}/api/uploads/compressed_webp/${uploadedDesignName}`) : encodeURI(getProductImageUrl(product)) || "N/A" }
   
   *Add-On Items*:
   ${addons}
@@ -1032,6 +1034,7 @@ ${inclusionText}
 
                       if (file) {
                         setCustomOrderImage(file);
+                        setIsDesignUploaded(false);
                         setCustomOrderImagePreview(URL.createObjectURL(file));
                       }
                     }}
@@ -1043,11 +1046,31 @@ ${inclusionText}
                         src={customOrderImagePreview}
                         alt="Selected Design"
                       />
+
+                      <button
+                        type="button"
+                        className="remove-design-btn"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+
+                          setCustomOrderImage(null);
+                          setCustomOrderImagePreview("");
+                          setUploadedDesignName("");
+                          setIsDesignUploaded(false);
+                        }}
+                        title="Remove image"
+                      >
+                        ×
+                      </button>
+
                       <div className="selected-design-info">
                         <span className="selected-design-name">
                           {customOrderImage?.name}
                         </span>
-                        <span className="change-image-text">Click to change image</span>
+                        <span className="change-image-text">
+                          Click to change image
+                        </span>
                       </div>
                     </div>
                   ) : (
@@ -1071,6 +1094,13 @@ ${inclusionText}
                       {loading ? "Uploading..." : "Submit Design"}
                     </button>
                   )}
+                  {product?.name === "Custom Product" &&
+                    customOrderImagePreview &&
+                    !isDesignUploaded && !loading && (
+                      <p style={{ color: "red", marginTop: "5px", fontSize: "13px" }}>
+                        Please submit the design image before creating the order.
+                      </p>
+                    )}
                 </div>
               </div>
             )}
@@ -1462,7 +1492,9 @@ ${inclusionText}
                       className="createOrder-btn"
                       type="button"
                       onClick={handleSubmit}
-                      disabled={lloading || loading}
+                      disabled={lloading || loading || (product?.name === "Custom Product" &&
+                        customOrderImagePreview &&
+                        !isDesignUploaded)}
                     >
                       {(lloading )? "Creating Order..." : "Create Order"}
                     </button>
@@ -1476,7 +1508,9 @@ ${inclusionText}
                       onClick={(e) => {
                         handleSubmit(e, true);
                       }}
-                      disabled={lloading || loading}
+                      disabled={lloading || loading || (product?.name === "Custom Product" &&
+                        customOrderImagePreview &&
+                        !isDesignUploaded)}
                     >
                       {(lloading)
                         ? "Creating Emergency Order..."
