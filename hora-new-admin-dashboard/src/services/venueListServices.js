@@ -92,18 +92,6 @@ export const fetchPackageItems = async (
   }
 };
 
-// export const fetchPackageCategories = async (setPackageCategories) => {
-//   try {
-//     const res = await axios.get(
-//       `${BASE_URL}/api/party-venue/package-category/categories-list?limit=500`,
-//     );
-
-//     setPackageCategories(res.data.data || []);
-//   } catch (err) {
-//     console.log(err);
-//   }
-// };
-
 export const fetchPackageCategories = async (setPackageCategories) => {
   try {
     const res = await axios.get(

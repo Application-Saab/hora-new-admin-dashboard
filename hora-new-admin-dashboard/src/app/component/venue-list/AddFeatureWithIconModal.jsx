@@ -24,16 +24,27 @@ const AddFeatureWithIconModal = ({
 }) => {
   const [svgCode, setSvgCode] = useState("");
   const [copied, setCopied] = useState(false);
+  
+const promptText = `Generate a high-quality, modern hospitality amenity SVG icon for the feature: "${featureName}".
 
-  const promptText = `Create a clean, minimal, single-color SVG icon for the feature: "${featureName}".
+CRITICAL OUTPUT FORMAT INSTRUCTION:
+- DO NOT render the SVG preview or graphic.
+- You MUST provide ONLY the raw SVG code wrapped inside a markdown code block (\`\`\`xml ... \`\`\`) with NO explanation or conversational text before/after it.
+- Single click copy hona chahiye.
 
-Requirements:
-- Output ONLY valid SVG code (no markdown, no explanation)
-- viewBox="0 0 24 24"
-- stroke-based or simple fill, prefer currentColor
-- Simple, professional, line-style icon suitable for UI (like material icons)
-- No text inside the SVG
-- Keep it small and readable at 18-20px size`;
+🎨 DESIGN & STYLE REQUIREMENTS (Must strictly match existing UI theme):
+1. Style: Modern filled/solid silhouette or bold dual-tone icon with smooth rounded corners (matching hotel amenity badges like Airbnb/Booking.com). DO NOT make thin wireframe or skinny 1px outline icons.
+2. Contextual Color (Use inline hex fill):
+   - Water / Pool / Spa: Aqua / Sky Blue (#0288D1, #00ACC1)
+   - Rooms / AC / Stay: Rich Royal Blue (#1976D2, #1E88E5)
+   - Food / Drinks / Dining / Bar / Dance Bar: Warm Amber, Sunset Orange, or Wine Pink (#E65100, #F57C00, #C2185B)
+   - Gym / Fitness / Sports: Energetic Red or Coral (#E53935, #D32F2F)
+   - Guests / Party / People / Music: Elegant Purple or Violet (#7B1FA2, #8E24AA)
+   - Parking / Lawn / Outdoor / Nature: Fresh Green (#2E7D32, #43A047)
+   - Halls / Buildings / Architecture: Warm Amber / Terracotta (#FB8C00, #E65100)
+3. Technical SVG Specs:
+   - Must start with <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" viewBox="0 0 24 24"> and end with </svg>.
+   - Use <path fill="#HEX" ... /> elements with solid shapes.`;
 
   const handleCopyPrompt = async () => {
     try {
@@ -175,7 +186,11 @@ Requirements:
       </DialogContent>
 
       <DialogActions sx={{ p: 2, gap: 1 }}>
-        <Button onClick={onClose} variant="outlined" sx={{ textTransform: "none" }}>
+        <Button
+          onClick={onClose}
+          variant="outlined"
+          sx={{ textTransform: "none" }}
+        >
           Cancel
         </Button>
         <Button
@@ -184,7 +199,11 @@ Requirements:
           disabled={!svgCode.trim() || saving}
           sx={{ textTransform: "none", minWidth: 120 }}
         >
-          {saving ? <CircularProgress size={20} color="inherit" /> : "Save Feature"}
+          {saving ? (
+            <CircularProgress size={20} color="inherit" />
+          ) : (
+            "Save Feature"
+          )}
         </Button>
       </DialogActions>
     </Dialog>
