@@ -6,19 +6,19 @@ import * as XLSX from "xlsx";
 import CallChecklistContent from "./CallChecklistContent";
 import { BASE_URL, CREATE_WONDERLAND_EVENT } from "@/utils/apiconstant";
 
-const categoryMap = {
-  "65a92271ae1586258ccd0628": "anniversary-decoration",
-  "65a95dcb6995e7401e78c2ea": "baby-shower-decoration",
-  "65aeaf3747d5cb78ba19d4b6": "balloon-bouquets-decoration",
-  "65a91598ae1586258cccffd4": "birthday-decoration",
-  "65a92085ae1586258ccd04ff": "first-night-decoration",
-  "66ad224731c3672040d8d32a": "haldi-mehendi-decoration",
-  "65aeaf5147d5cb78ba19d4d3": "kids-birthday-decoration",
-  "65a92efbae1586258ccd0c6e": "premium-decoration",
-  "66c9df0922ed47b721180334": "Proposal-Decorations",
-  "65a2d129513d9389d34e31d4": "welcome-baby-decoration",
-  "66c44baf8bd9c45aaa2c42b5": "bachelorette-decoration",
-};
+// const categoryMap = {
+//   "65a92271ae1586258ccd0628": "anniversary-decoration",
+//   "65a95dcb6995e7401e78c2ea": "baby-shower-decoration",
+//   "65aeaf3747d5cb78ba19d4b6": "balloon-bouquets-decoration",
+//   "65a91598ae1586258cccffd4": "birthday-decoration",
+//   "65a92085ae1586258ccd04ff": "first-night-decoration",
+//   "66ad224731c3672040d8d32a": "haldi-mehendi-decoration",
+//   "65aeaf5147d5cb78ba19d4d3": "kids-birthday-decoration",
+//   "65a92efbae1586258ccd0c6e": "premium-decoration",
+//   "66c9df0922ed47b721180334": "Proposal-Decorations",
+//   "65a2d129513d9389d34e31d4": "welcome-baby-decoration",
+//   "66c44baf8bd9c45aaa2c42b5": "bachelorette-decoration",
+// };
 
 const ActionPopup = ({
   isOpen,
@@ -594,6 +594,7 @@ const ActionPopup = ({
       // Normal address
       return "";
     } catch (error) {
+      console.log('%c [ error ]', 'font-size:13px; background:pink; color:#bf2c9f;', error)
       return "";
     }
   };
