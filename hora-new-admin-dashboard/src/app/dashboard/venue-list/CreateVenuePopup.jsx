@@ -32,6 +32,7 @@ import {
   createVenueSuggestion, // <-- service function
 } from "@/services/venueListServices";
 import VenueDescriptionPromptModal from "../../component/VenueDescriptionPromptModal";
+import AddFeatureWithIconModal from '../../component/venue-list/AddFeatureWithIconModal'
 
 const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
   // Customer
@@ -65,7 +66,7 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
   const [venueImage, setVenueImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
   const [featuresSuggestion, setFeaturesSuggestion] = useState([]);
-  const [creatingFeature, setCreatingFeature] = useState(false);
+  const [creatingFeature] = useState(false);
 
   // Packages (for prompt generation context)
   const [venuePackages] = useState([]);
@@ -73,6 +74,10 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
 
   const [message, setMessage] = useState({ text: "", type: "" });
   const [createLoading, setCreateLoading] = useState(false);
+
+  const [showFeatureIconModal, setShowFeatureIconModal] = useState(false);
+  const [pendingFeatureName, setPendingFeatureName] = useState("");
+  const [savingFeature, setSavingFeature] = useState(false);
 
   // Options for react-select
   const venueTypeOptions =
@@ -108,30 +113,38 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
   // -------------------------------------------------
   // Handle Custom Feature Creation
   // -------------------------------------------------
-  const handleCreateFeature = async (inputValue) => {
+  const handleCreateFeature = (inputValue) => {
     if (!inputValue || !inputValue.trim()) return;
+    setPendingFeatureName(inputValue.trim());
+    setShowFeatureIconModal(true);
+  };
 
-    const trimmedValue = inputValue.trim();
-    const newOption = { value: trimmedValue, label: trimmedValue };
+  const handleSaveFeatureWithIcon = async ({ title, iconSvg }) => {
+    if (!title) return;
 
-    // Turant UI update
-    setVenueFeatures((prev) => [...prev, newOption]);
-    setCreatingFeature(true);
-
+    setSavingFeature(true);
     try {
       const savedSuggestion = await createVenueSuggestion(
-        trimmedValue,
+        title,
         "SPECIAL_FEATURES",
+        iconSvg,
       );
 
-      // Suggestions list mein append karein taaki duplicate na bane
       if (savedSuggestion) {
+        // Suggestions list update
         setFeaturesSuggestion((prev) => [...prev, savedSuggestion]);
+
+        // Venue features me add (sirf name)
+        const newOption = { value: title, label: title };
+        setVenueFeatures((prev) => [...prev, newOption]);
       }
+
+      setShowFeatureIconModal(false);
+      setPendingFeatureName("");
     } catch (err) {
       console.error("Error creating suggestion:", err);
     } finally {
-      setCreatingFeature(false);
+      setSavingFeature(false);
     }
   };
 
@@ -313,6 +326,43 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
       ...provided,
       zIndex: 100000,
     }),
+  };
+
+  const formatFeatureOptionLabel = (option) => {
+    // Suggestions se matching icon dhoondo
+    const matched = featuresSuggestion?.find(
+      (s) => s?.title?.toLowerCase() === option?.value?.toLowerCase(),
+    );
+
+    return (
+      <Box display="flex" alignItems="center" gap={1}>
+        {matched?.iconSvg ? (
+          <Box
+            sx={{
+              width: 18,
+              height: 18,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+              "& svg": { width: 16, height: 16 },
+            }}
+            dangerouslySetInnerHTML={{ __html: matched.iconSvg }}
+          />
+        ) : (
+          <Box
+            sx={{
+              width: 18,
+              height: 18,
+              borderRadius: "4px",
+              bgcolor: "#e2e8f0",
+              flexShrink: 0,
+            }}
+          />
+        )}
+        <span>{option.label}</span>
+      </Box>
+    );
   };
 
   return (
@@ -525,7 +575,12 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
                   />
                 </Box>
                 <Box>
-                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.8}>
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    mb={0.8}
+                  >
                     <Typography variant="body2" fontWeight={500}>
                       Special Features
                     </Typography>
@@ -543,10 +598,17 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
                     }))}
                     value={venueFeatures}
                     onChange={(selected) => setVenueFeatures(selected || [])}
-                    onCreateOption={handleCreateFeature}
+                    onCreateOption={handleCreateFeature} // ab modal kholega
                     placeholder="Type or select features..."
                     styles={selectStyles}
-                    formatCreateLabel={(inputValue) => `Add & Save "${inputValue}"`}
+                    formatCreateLabel={(inputValue) =>
+                      `Add & Save "${inputValue}"`
+                    }
+                    formatOptionLabel={formatFeatureOptionLabel} // icon + name
+                    // Input me icon mat dikhao
+                    components={{
+                      MultiValueLabel: ({ data }) => <span>{data.label}</span>,
+                    }}
                   />
                 </Box>
               </Box>
@@ -566,7 +628,9 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
                     size="small"
                     variant="outlined"
                     color="secondary"
-                    startIcon={<AutoAwesomeIcon sx={{ fontSize: "14px !important" }} />}
+                    startIcon={
+                      <AutoAwesomeIcon sx={{ fontSize: "14px !important" }} />
+                    }
                     onClick={() => setShowPromptModal(true)}
                     sx={{
                       textTransform: "none",
@@ -869,6 +933,17 @@ const CreateVenuePopup = ({ isOpen, onClose, onSuccess }) => {
           packages={venuePackages}
         />
       )}
+      {/* Feature Icon Modal */}
+      <AddFeatureWithIconModal
+        open={showFeatureIconModal}
+        featureName={pendingFeatureName}
+        onClose={() => {
+          setShowFeatureIconModal(false);
+          setPendingFeatureName("");
+        }}
+        onSave={handleSaveFeatureWithIcon}
+        saving={savingFeature}
+      />
     </>
   );
 };
