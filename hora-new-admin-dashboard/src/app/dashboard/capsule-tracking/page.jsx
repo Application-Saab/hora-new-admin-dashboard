@@ -255,7 +255,10 @@ const Capsuletracking = () => {
                             <td>
                               {order?.imageUploadCounts?.driveProvidedAt
                                 ? new Date(order.imageUploadCounts.driveProvidedAt).toLocaleString("en-IN")
-                                : "-"}
+                                : order?.imageUploadTracking?.startedAt
+                                  ? new Date(order.imageUploadTracking.startedAt).toLocaleString("en-IN")
+                                  : "-"
+                              }
                             </td>
                             <td>
                               <a
