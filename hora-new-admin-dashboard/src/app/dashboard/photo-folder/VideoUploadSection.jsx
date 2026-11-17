@@ -112,6 +112,7 @@ const initiateRes = await fetch(`${MEDIA_PROCESSING_BASE_URL}/initiate`, {
     fileType: contentType,
     totalChunks: totalChunks,
     folderName: 'video_uploads',
+    inclusionType:"video_uploads",
   }),
 });
 

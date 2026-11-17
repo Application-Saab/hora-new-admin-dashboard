@@ -454,7 +454,7 @@ const EditVendorDetails = () => {
 
         const { data } = await axios.post(
             `${MEDIA_PROCESSING_BASE_URL}/get-event-capsule-presigned-url`,
-            { fileName, fileType: file.type, folderName },
+            { fileName, fileType: file.type, folderName, inclusionType: "videoUplaods" },
             { headers: { Authorization: `${token}` } }
         );
         if (!data.uploadURL || !data.key) throw new Error("Presigned URL not received");
@@ -478,6 +478,7 @@ const EditVendorDetails = () => {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ fileName, fileType: contentType, totalChunks, folderName }),
+            inclusionType:"supplierUploads",
         });
         if (!initRes.ok) throw new Error("Failed to initiate upload");
         const { uploadId, key, presignedUrls } = await initRes.json();

@@ -205,7 +205,7 @@ const Capsuletracking = () => {
                   <th>Times link opened</th>
                   <th>First Device Type</th>
                   <th>Second Device Type</th>
-                  
+                  <th>Uploaded By app</th>
                 </tr>
               ) : (
                 // User Table Headers
@@ -255,7 +255,10 @@ const Capsuletracking = () => {
                             <td>
                               {order?.imageUploadCounts?.driveProvidedAt
                                 ? new Date(order.imageUploadCounts.driveProvidedAt).toLocaleString("en-IN")
-                                : "-"}
+                                : order?.imageUploadTracking?.startedAt
+                                  ? new Date(order.imageUploadTracking.startedAt).toLocaleString("en-IN")
+                                  : "-"
+                              }
                             </td>
                             <td>
                               <a
@@ -284,6 +287,12 @@ const Capsuletracking = () => {
                                   <span>{order?.imageUploadCounts?.totalFromDrive || 0}</span>
                                 )}
 
+                                {order?.allDriveLinks?.some(
+                                  (item) =>
+                                    (item.linkType === "rawPhotos" ||
+                                      item.linkType === "colorCorrectedPhotos") &&
+                                    item.link
+                                ) && (
                                 <button
                                   onClick={() =>
                                     handleRetryDriveUpload(
@@ -312,6 +321,7 @@ const Capsuletracking = () => {
                                     ? "Retring..."
                                     : "Retry"}
                                 </button>
+                                )}
                               </div>
                             </td>
                             <td>
@@ -351,7 +361,27 @@ const Capsuletracking = () => {
                             <td>{order?.counts?.totalClicks || 0}</td>
                             <td>{order?.counts?.firstDeviceType || "-"}</td>
                             <td>{order?.counts?.secondDeviceType || "-"}</td>
-                            
+                            <td>
+                              <span
+                                style={{
+                                  padding: "4px 8px",
+                                  borderRadius: "4px",
+                                  fontSize: "12px",
+                                  fontWeight: "500",
+                                  textTransform: "capitalize",
+                                  backgroundColor:
+                                    order?.imageUploadByApp === true
+                                      ? "#d4edda"
+                                        : "#f8d7da",
+                                  color:
+                                    order?.imageUploadByApp === true
+                                      ? "#155724"
+                                        : "#721c24",
+                                }}
+                              >
+                                {order?.imageUploadByApp === true ? "yes" : "no" || "-"}
+                              </span>
+                              </td>
                           </>
                         );
                       })()

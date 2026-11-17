@@ -7,6 +7,7 @@ import {
   BASE_URL,
   ADMIN_ORDER_LIST,
   ORDER_EDIT,
+  MEDIA_PROCESSING_BASE_URL,
 } from "../../../utils/apiconstant";
 // import * as XLSX from "xlsx";
 import CheckSupplier from "../../component/createsupplier/CheckSupplier";
@@ -71,6 +72,7 @@ const [order, setOrder] = useState(null);
   const [callChecklistData,setCallChecklistData ] = useState(null);
 
   const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [showRawVideoClips, setShowRawVideoClips] = useState(false);
 
   console.log(isSupplierAssigned);
 
@@ -378,6 +380,25 @@ const [order, setOrder] = useState(null);
     console.log(order, "orderrr");
     setSelectedSupplierOrder(order);
     setIsModalOpen(true);
+  };
+
+
+  const downloadFile = async (clip) => {
+    try {
+      const response = await axios.get(
+        `${MEDIA_PROCESSING_BASE_URL}/download-raw-video-clip`,
+        {
+          params: { key: clip.s3Key },
+        }
+      );
+
+      const link = document.createElement("a");
+      link.href = response.data.downloadUrl;
+      link.click();
+
+    } catch (error) {
+      console.error("Download Error:", error);
+    }
   };
 
   const openPreAssignedPopup = async (order) => {
@@ -1601,7 +1622,7 @@ useEffect(() => {
                             </button>
                           )
                         ) : order.type === 8 ? (
-                          !order.orderDriveLink ? (
+                            (!order.orderDriveLink && !order.orderWebLink) ? (
                             <div>
                               -
                             </div>
@@ -1620,6 +1641,7 @@ useEffect(() => {
                               <div className="order-links">
 
                                 {/* Drive Link */}
+                                    {order?.orderDriveLink &&
                                 <div
                                   className="link-item"
                                   onClick={() => window.open(order.orderDriveLink, "_blank")}
@@ -1628,6 +1650,7 @@ useEffect(() => {
                                   <span>drivelink</span>
                                   {order?.imageUploadCounts?.totalFromDrive}
                                 </div>
+}
 
                                 {/* Web Link */}
                                 {order?.orderWebLink ? (
@@ -1640,7 +1663,7 @@ useEffect(() => {
                                   >
                                     <IoMdOpen size={30} />
                                     <span>weblink</span>
-                                    {order?.imageUploadCounts?.totalWeblink}
+                                        {order?.orderDriveLink ? order?.imageUploadCounts?.totalWeblink :""}
                                   </div>
                                   
                                 ) : null} 
@@ -2441,6 +2464,25 @@ useEffect(() => {
               </div>
             )}
 
+
+            {selectedOrder?.folderData?.some(
+              (folder) => folder.rawVideoClips?.length > 0
+            ) && (
+                <div className="album-verification-section">
+                  <div className="album-verification-header">
+                    <h4>Raw Video Clips</h4>
+
+                    <button
+                      type="button"
+                      className="verify-album-btn"
+                      onClick={() => setShowRawVideoClips(true)}
+                    >
+                      View Clips
+                    </button>
+                  </div>
+                </div>
+              )}
+
       <div className="drive-modal-actions">
         <button
           onClick={() => setShowDriveLinkModal(false)}
@@ -2626,6 +2668,54 @@ useEffect(() => {
           handleVerifyAlbum(selectedOrder);
           setShowVerifyModal(false);
         }}
+      />
+
+      <CommonPopup
+        isOpen={showRawVideoClips}
+        onClose={() => setShowRawVideoClips(false)}
+        heading="Raw Video Clips"
+        mainBtnVisible={false}
+        popupBody={
+          <div className="raw-video-clips-popup">
+
+            {selectedOrder?.folderData?.flatMap(
+              (folder) => folder.rawVideoClips || []
+            ).map((clip) => {
+
+              const isVideo = clip.fileType?.startsWith("video/");
+
+              return (
+                <div key={clip._id} className="raw-video-clip-item">
+
+                  {isVideo ? (
+                    <video
+                      src={clip.fileUrl}
+                      controls
+                      preload="metadata"
+                      className="raw-video-preview"
+                    />
+                  ) : (
+                    <img
+                      src={clip.fileUrl}
+                      alt={clip.fileName}
+                      className="raw-video-preview"
+                    />
+                  )}
+
+                  <button
+                    type="button"
+                    className="raw-video-download-btn"
+                    onClick={() => downloadFile(clip)}
+                  >
+                    ↓ Download
+                  </button>
+
+                </div>
+              );
+            })}
+
+          </div>
+        }
       />
 
     </div>

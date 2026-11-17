@@ -1638,7 +1638,14 @@ const changeQuantity = (id, delta) => {
 
           {/* Product */}
           <div className="summary-product">
-            Product URL: {`${product?.productUrl || ""}`}
+            Product URL:{" "}
+            <a
+              href={product?.productUrl || "#"}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {product?.productUrl || "N/A"}
+            </a>
             <div>
               <div> Product Name: {product?.name || ""}</div>
               <div> Product Price: ₹{product?.price || 0}</div>

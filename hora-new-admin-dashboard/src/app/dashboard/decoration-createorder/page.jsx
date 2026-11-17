@@ -1602,7 +1602,33 @@ ${inclusionText}
 
           {/* Product */}
           <div className="summary-product">
-            Product URL: {`${product?.productUrl || ""}`}
+            <div style={{ marginBottom: "8px" }}>
+              Product URL:{" "}
+              <a
+                href={product?.productUrl || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {product?.productUrl || "N/A"}
+              </a>
+            </div>
+
+            <div style={{ marginBottom: "8px" }}>
+              Product Image Url:{" "}
+              <a
+                href={
+                  (product?.name === "Custom Product" && uploadedDesignName)
+                    ? encodeURI(`${BASE_URL}/api/uploads/compressed_webp/${uploadedDesignName}`)
+                    : encodeURI(getProductImageUrl(product) || "")
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {(product?.name === "Custom Product" && uploadedDesignName)
+                  ? encodeURI(`${BASE_URL}/api/uploads/compressed_webp/${uploadedDesignName}`)
+                  : encodeURI(getProductImageUrl(product) || "N/A")}
+              </a>
+            </div>
             <div>
               <div> Product Name: {product?.name || ""}</div>
               <div> Product Price: ₹{product?.price || 0}</div>
