@@ -478,6 +478,7 @@ const EditVendorDetails = () => {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ fileName, fileType: contentType, totalChunks, folderName }),
+            inclusionType:"supplierUploads",
         });
         if (!initRes.ok) throw new Error("Failed to initiate upload");
         const { uploadId, key, presignedUrls } = await initRes.json();
