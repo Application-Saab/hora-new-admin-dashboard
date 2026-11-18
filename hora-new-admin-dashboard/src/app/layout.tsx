@@ -36,14 +36,17 @@ const menuItems = [
 
   { label: "Analysis", icon: <FaClipboardList />, url: "/dashboard/analysis" },
 
-  
-  { label: "User Analysis", icon: <FaClipboardList />, url: "/dashboard/user-analysis" },
+  {
+    label: "User Analysis",
+    icon: <FaClipboardList />,
+    url: "/dashboard/user-analysis",
+  },
 
   { label: "Pincodes ", icon: <FaMapMarkerAlt />, url: "/dashboard/pincodes" },
 
   // { label: "Wonderland Tracking", icon: <FaClipboardList />, url: "/dashboard/wonderland-tracking" },
 
-    {
+  {
     label: "Trackings",
     icon: <GrAnalytics />,
     children: [
@@ -82,7 +85,6 @@ const menuItems = [
         icon: <BiErrorCircle />,
         url: "/dashboard/leads-dashboard",
       },
-
     ],
   },
 
@@ -119,12 +121,12 @@ const menuItems = [
       {
         label: "Decoration-Order-Report",
         icon: <FaCamera />,
-        url: "/dashboard/Decoration-Order-Report"
+        url: "/dashboard/Decoration-Order-Report",
       },
       {
         label: "Material List",
-        icon: <FaListUl  />,
-        url: "/dashboard/decoration-material-list"
+        icon: <FaListUl />,
+        url: "/dashboard/decoration-material-list",
       },
     ],
   },
@@ -138,12 +140,12 @@ const menuItems = [
         icon: <FaCamera />,
         url: "/dashboard/photography-create-order",
       },
-        {
+      {
         label: "Add Product",
         icon: <FaCartPlus />,
         url: "/dashboard/add-photography-product",
       },
-          {
+      {
         label: "Edit Product",
         icon: <FaPen />,
         url: "/dashboard/edit-photography-product",
@@ -158,14 +160,16 @@ const menuItems = [
         icon: <FaPlusCircle />,
         url: "/dashboard/add-more-images",
       },
-      { label: "Capsule Tracking",
-         icon: <FaClipboardList />,
-          url: "/dashboard/capsule-tracking" },
+      {
+        label: "Capsule Tracking",
+        icon: <FaClipboardList />,
+        url: "/dashboard/capsule-tracking",
+      },
       {
         label: "Theme",
         icon: <FaClipboardList />,
-        url: "/dashboard/photography-theme"
-      }, 
+        url: "/dashboard/photography-theme",
+      },
       {
         label: "Specializations list",
         icon: <FaPlusCircle />,
@@ -255,17 +259,16 @@ const menuItems = [
         url: "/dashboard/chef-for-party-food-create",
       },
       {
-        label : "Create Food Package",
-        icon : <FaPlusCircle />,
-        url : "/dashboard/create-food-package"
-      }
+        label: "Create Food Package",
+        icon: <FaPlusCircle />,
+        url: "/dashboard/create-food-package",
+      },
     ],
   },
 
   { label: "Addons", icon: <FaPlus />, url: "/dashboard/addons" },
   { label: "Dish List", icon: <FaUtensils />, url: "/dashboard/dish-list" },
-   { label: "Venue List", icon: <FaUtensils />, url: "/dashboard/venue-list" },
-
+  { label: "Venue List", icon: <FaUtensils />, url: "/dashboard/venue-list" },
 
   {
     label: "Create Dish",
@@ -278,7 +281,6 @@ const menuItems = [
     icon: <FaPlusCircle />,
     url: "/dashboard/team",
   },
-
 ];
 
 // SIDEBAR COMPONENT WITH RIGHT-SIDE TOGGLE ICON
@@ -362,6 +364,50 @@ export default function RootLayout({
   const pathname = usePathname();
 
   useEffect(() => {
+    const checkHash = async () => {
+      const token = localStorage.getItem("authToken");
+      const email = localStorage.getItem("adminEmail");
+      const hashedPassword = localStorage.getItem("adminHashPassword");
+
+      const logoutUser = () => {
+        localStorage.clear();
+        setIsLoggedIn(false);
+        if (pathname !== "/dashboard-login") {
+          router.replace("/dashboard-login");
+        }
+      };
+
+      if (!token || !email || !hashedPassword) {
+        logoutUser();
+        return;
+      }
+
+      try {
+        const response = await axios.post(
+          `${BASE_URL}/api/admin/check-admin-password`,
+          {
+            email: email,
+            hashcode: hashedPassword,
+          },
+        );
+
+        const data = response?.data;
+
+        if (data?.status === true || data?.status === "true") {
+          setIsLoggedIn(true);
+        } else {
+          logoutUser();
+        }
+      } catch (err) {
+        console.error("Error verifying password hash:", err);
+        logoutUser();
+      }
+    };
+
+    checkHash();
+  }, [pathname]);
+
+  useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (token) {
       setIsLoggedIn(true);
@@ -393,7 +439,7 @@ export default function RootLayout({
           {
             email: adminEmail,
             role: "admin",
-          }
+          },
         );
 
         const users = response?.data?.data?.users;
