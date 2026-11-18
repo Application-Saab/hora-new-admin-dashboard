@@ -1181,7 +1181,7 @@ const EditPackagePopup = ({
   // Package Features states
   const [packageFeatures, setPackageFeatures] = useState([]);
   const [featuresSuggestion, setFeaturesSuggestion] = useState([]);
-  const [creatingFeature, setCreatingFeature] = useState(false);
+  // const [creatingFeature, setCreatingFeature] = useState(false);
 
   const [packageImage, setPackageImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
