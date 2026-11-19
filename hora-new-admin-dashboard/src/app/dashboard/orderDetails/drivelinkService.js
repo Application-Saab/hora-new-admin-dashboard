@@ -31,6 +31,7 @@ export const inclusionToApiKeyMap = {
   "Edited Reel": "editedReel",
   "Album": "album",
   "Raw Video Clips": "rawVideoClips",
+  "Cinematic Video": "cinematicVideo",
 };
 
 export const apiKeyToInclusionMap = {
@@ -42,4 +43,5 @@ export const apiKeyToInclusionMap = {
   editedReel: "Edited Reel",
   album: "Album",
   rawVideoClips: "Raw Video Clips",
+  cinematicVideo: "Cinematic Video",
 };

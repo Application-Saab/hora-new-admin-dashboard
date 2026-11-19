@@ -1700,6 +1700,10 @@ useEffect(() => {
 
     const savedLinks = order?.allDriveLinks || [];
 
+
+                          const appInclusions =
+                            order?.folderData?.[0]?.appUploadInclusions || [];
+
                           const filledCountForCounter = trueDynamicApiKeys.filter((linkType) => {
                             // Album verification
                             if (linkType === "album") {
@@ -1721,11 +1725,17 @@ useEffect(() => {
                             }
 
                             // Other Drive Links
-                            return savedLinks.some(
-                              (item) =>
-                                item.linkType === linkType &&
-                                item.link &&
-                                item.link.trim() !== ""
+                            return (
+                              savedLinks.some(
+                                (item) =>
+                                  item.linkType === linkType &&
+                                  item.link?.trim() !== ""
+                              ) ||
+                              appInclusions.some(
+                                (item) =>
+                                  item.inclusionType === linkType &&
+                                  item.value === true
+                              )
                             );
                           }).length;
     return (
@@ -2404,11 +2414,30 @@ useEffect(() => {
             {driveLinksInput.map((item, index) => {
               if (item.linkType === "album") return null;
 
+              const isUploadedByApp = selectedOrder?.folderData?.some((folder) =>
+                folder?.appUploadInclusions?.some(
+                  (appItem) =>
+                    appItem.inclusionType === item.linkType &&
+                    appItem.value === true
+                )
+              );
+
               return (
         <div key={index} className="drive-link-group">
           <label className="drive-link-label">
             {apiKeyToInclusionMap[item.linkType] || item.linkType}
           </label>
+
+                  {isUploadedByApp && (
+                    <p style={{
+                      color: "#03BC44",
+                      fontSize: "13px",
+                      fontWeight: "600",
+                      margin: "4px 0 8px"
+                    }}>
+                      ✓ This image / video uploaded by app
+                    </p>
+                  )}
 
           <input
             type="text"
