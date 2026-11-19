@@ -140,7 +140,8 @@ const [order, setOrder] = useState(null);
         Number(activeStatus) === 0 || Number(activeStatus) === 1
           ? Number(activeStatus)
           : "",
-      type: typeId || "", // match order type
+        type: orderType === "Custom Product" ? "" : typeId || "",
+        customProduct: orderType === "Custom Product",
       order_locality: orderCity || "",
       order_date: selectedDate || "",
       phone_no: selectedOfflineNum || "",
@@ -1047,6 +1048,7 @@ useEffect(() => {
                       <option value="Live Catering">Live Catering</option>
                       <option value="Photography">Photography</option>
                       <option value="Boosters">Boosters</option>
+                      <option value="Custom Product">Custom Product</option>
                     </select>
                   </span>
                 </th>
