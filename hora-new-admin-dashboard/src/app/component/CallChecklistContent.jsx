@@ -6,6 +6,7 @@ import Image from "next/image";
 import CheckboxGroup from "./CheckboxGroup";
 import { CHECKBOX_GROUP_CONFIG, keyMap, DEFAULT_CHECKLIST} from '@/utils/callChecklist';
 import { deleteChecklistImageApi, uploadChecklistImagesApi, updateCallChecklistApi, saveCallChecklistApi} from "@/services/callChecklist";
+import { IMAGE_BASE_URL } from "@/utils/apiconstant";
 
 const CallChecklistContent = ({ open, onClose, data = null, cancleBtnColor="#000" }) => {
   const isEditMode = data?.call_checklist_exists === true;
@@ -302,7 +303,7 @@ const CallChecklistContent = ({ open, onClose, data = null, cancleBtnColor="#000
                         let imageSrc = "";
 
                         if (typeof file === "string") {
-                          imageSrc = `https://horaservices.com/api/uploads/${file}`;
+                          imageSrc = `${IMAGE_BASE_URL}/${file}`;
                         } else if (file instanceof File || file instanceof Blob) {
                           imageSrc = URL.createObjectURL(file);
                         } else {

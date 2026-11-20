@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import * as XLSX from "xlsx";
 import CallChecklistContent from "./CallChecklistContent";
-import { BASE_URL, CREATE_WONDERLAND_EVENT } from "@/utils/apiconstant";
+import { BASE_URL, CREATE_WONDERLAND_EVENT, IMAGE_BASE_URL } from "@/utils/apiconstant";
 
 // const categoryMap = {
 //   "65a92271ae1586258ccd0628": "anniversary-decoration",
@@ -2027,7 +2027,7 @@ Order Taken By: ${orderTakenBy}`;
                                         <Image
                                           src={
                                             item?.image
-                                              ? `https://horaservices.com/api/uploads/compressed_webp/${item.image}`
+                                              ? `${IMAGE_BASE_URL}/compressed_webp/${item.image}`
                                               : "/placeholder.png"
                                           }
                                           alt={item?.title}
@@ -2177,7 +2177,7 @@ Order Taken By: ${orderTakenBy}`;
                                         <Image
                                           src={
                                             item?.image
-                                              ? `https://horaservices.com/api/uploads/compressed_webp/${item.image}`
+                                              ? `${IMAGE_BASE_URL}/compressed_webp/${item.image}`
                                               : "/placeholder.png"
                                           }
                                           alt={item?.title}
