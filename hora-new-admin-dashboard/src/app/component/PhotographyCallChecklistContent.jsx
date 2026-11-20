@@ -27,6 +27,7 @@ export const DEFAULT_CHECKLIST = {
         "Edited Reel": false,
         "Album": false,
         "Raw Video Clips": false,
+        "Cinematic Video":false,
     },
 
     verificationChecklist: {
@@ -232,6 +233,7 @@ const PhotographyCallChecklistContent = ({
                         "Edited Reel",
                         "Album",
                         "Raw Video Clips",
+                        "Cinematic Video",
                     ]}
                     section="inclusions"
                     checklist={callChecklist}

@@ -523,6 +523,7 @@ const EditVendorDetails = () => {
 
         setUploading(true);
         setUploadInfo({ total: files.length, completed: 0, failed: 0 });
+        let failedCount = 0;
 
         for (const file of files) {
             const previewUrl = URL.createObjectURL(file);
@@ -543,6 +544,7 @@ const EditVendorDetails = () => {
                 setUploadInfo((p) => ({ ...p, completed: p.completed + 1 }));
             } catch (err) {
                 console.error("Upload failed:", file.name, err);
+                failedCount++;
                 updatePending(itemKey, "failed");
                 setUploadInfo((p) => ({ ...p, completed: p.completed + 1, failed: p.failed + 1 }));
             }
@@ -551,6 +553,12 @@ const EditVendorDetails = () => {
         setVideoPercent(0);
         setCurrentFile(null);
         setUploading(false);
+        await handleUploadDone();
+        if (failedCount !== 0) {
+            alert(
+                `${files.length - failedCount} files uploaded successfully, ${failedCount} failed. Please retry failed files.`
+            );
+        }
         setTimeout(() => setUploadInfo({ total: 0, completed: 0, failed: 0 }), 3000);
     };
 
@@ -724,13 +732,6 @@ const EditVendorDetails = () => {
 
                         {activeFolder && (
                             <div className="ed-done-wrap">
-                                <button
-                                    className="ed-btn"
-                                    onClick={handleUploadDone}
-                                    disabled={saving || uploading}
-                                >
-                                    {saving ? "Processing..." : "Done"}
-                                </button>
 
                                 <button
                                     className="ed-btn-outline"
