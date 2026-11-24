@@ -1,0 +1,29 @@
+.snap-tracking-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+  padding: 0 20px;
+}
+
+.snap-tracking-card {
+  width: 100%;
+  max-width: 1400px;
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.snap-tracking-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #333;
+}
+
+.snap-tracking-empty {
+  text-align: center;
+  color: #777;
+  padding: 40px 0;
+}

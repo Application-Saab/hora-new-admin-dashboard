@@ -166,6 +166,11 @@ const menuItems = [
         url: "/dashboard/capsule-tracking",
       },
       {
+        label: "SnapCapsule Tracking",
+        icon: <FaClipboardList />,
+        url: "/dashboard/snap-capsule-tracking",
+      },
+      {
         label: "Theme",
         icon: <FaClipboardList />,
         url: "/dashboard/photography-theme",
