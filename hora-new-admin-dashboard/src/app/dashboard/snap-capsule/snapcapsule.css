@@ -21,6 +21,10 @@
   color: #6b6b6b;
 }
 
+.sc-small {
+  font-size: 12px;
+}
+
 .sc-card {
   background: #fff;
   border: 1px solid #e3e3e3;
@@ -49,9 +53,74 @@
   color: #6b2f63;
 }
 
+.sc-button-green {
+  background: #4caf50;
+}
+
+.sc-link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #97538c;
+  cursor: pointer;
+  text-decoration: underline;
+  font: inherit;
+  align-self: flex-start;
+}
+
 .sc-error {
   color: #c62828;
   margin: 10px 0 0;
+}
+
+.sc-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.sc-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sc-stat strong {
+  font-size: 28px;
+  color: #6b2f63;
+}
+
+.sc-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.sc-input {
+  padding: 9px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  min-width: 240px;
+}
+
+.sc-date {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #555;
+}
+
+.sc-date input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.sc-toolbar .sc-button-green {
+  margin-left: auto;
 }
 
 .sc-table-wrap {
@@ -107,6 +176,25 @@
   padding: 2px 6px;
   cursor: pointer;
   color: #555;
+}
+
+.sc-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: #eee;
+  text-transform: capitalize;
+}
+
+.sc-badge-processing {
+  background: #fff4e0;
+  color: #a35f00;
+}
+
+.sc-badge-completed {
+  background: #e6f4ea;
+  color: #2e7d32;
 }
 
 .sc-empty {
