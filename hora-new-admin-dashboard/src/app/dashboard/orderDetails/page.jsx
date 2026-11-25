@@ -1139,6 +1139,7 @@ useEffect(() => {
                       <option value="notPaid">Pending</option>
                       <option value="pending">Pending + Not Acc.</option>
                       <option value="paid">Paid</option>
+                      <option value="lostOrders">Lost Orders</option>
                     </select>
                   </span>
                 </th>
