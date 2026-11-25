@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
-import { BASE_URL, DELETE_THEME, EDIT_THEME, IMAGE_UPLOAD, PRODUCT_MEAL_TYPE } from "../../../utils/apiconstant";
+import { BASE_URL, DELETE_THEME, EDIT_THEME, IMAGE_BASE_URL, IMAGE_UPLOAD, PRODUCT_MEAL_TYPE } from "../../../utils/apiconstant";
 import { FaPen, FaTrash } from "react-icons/fa";
 import "./theme.css";
 import CommonPopup from '../../component/CommonPopup'
@@ -565,7 +565,7 @@ const ThemeList = () => {
             <div key={addon._id} className="addon-item">
               <div className="image-wrapper">
                 <img
-                  src={`https://horaservices.com/api/uploads/compressed_webp/${addon.image}`}
+                  src={`${IMAGE_BASE_URL}/compressed_webp/${addon.image}`}
                   alt={addon.title}
                   className="addon-image"
                 />
