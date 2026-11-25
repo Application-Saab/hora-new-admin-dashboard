@@ -26,7 +26,13 @@ async function call(path) {
   try {
     res = await fetch(`${SNAP_CAPSULE_API_URL}${path}`, { headers: { Authorization: token } });
   } catch {
-    throw new ApiError("Can't reach the Snap Capsule server. Check your internet connection.", 0);
+    // The browser got no answer: the server is down or unreachable, or it
+    // doesn't allow this admin panel's address (backend ADMIN_ORIGINS).
+    throw new ApiError(
+      `Can't reach the Snap Capsule server at ${SNAP_CAPSULE_API_URL}. If your internet works, check that the server is running ` +
+        `and that its ADMIN_ORIGINS setting includes ${window.location.origin}.`,
+      0
+    );
   }
   const json = await res.json().catch(() => ({}));
   if (!res.ok || json.error === true) {
