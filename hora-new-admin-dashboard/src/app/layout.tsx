@@ -33,6 +33,8 @@ const menuItems = [
 
   { label: "Wonderland Tracking", icon: <FaClipboardList />, url: "/dashboard/wonderland-tracking" },
 
+  { label: "Snap Capsule", icon: <FaCamera />, url: "/dashboard/snap-capsule" },
+
   {
     label: "Order Details",
     icon: <FaClipboardList />,

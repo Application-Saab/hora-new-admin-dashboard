@@ -52,3 +52,8 @@ export const GET_MATERIAL_FILTER_DATA = "/api/material-list/getMaterialFilterDat
 // Wonderland tracking routes
 export const GET_WONDERLAND_GLOBAL_STATS = '/api/customer/event/all-tracking';
 export const GET_WONDERLAND_LISTING_DATA = '/api/customer/event/admin_all_details';
+
+// Snap Capsule backend (visitor tracking + Event Capsules), used by the
+// Snap Capsule page. Override with NEXT_PUBLIC_SNAP_CAPSULE_API_URL when
+// building, e.g. http://localhost:5000 for local testing.
+export const SNAP_CAPSULE_API_URL = (process.env.NEXT_PUBLIC_SNAP_CAPSULE_API_URL || "https://thesnapcapsule.com").replace(/\/+$/, "");
