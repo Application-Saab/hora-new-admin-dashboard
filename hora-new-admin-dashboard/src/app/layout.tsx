@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import "./globals.css";
-import { FaTachometerAlt, FaPlusCircle } from "react-icons/fa";
+import { FaTachometerAlt, FaPlusCircle, FaCamera } from "react-icons/fa";
 
 const Sidebar = () => {
   return (
@@ -33,6 +33,11 @@ const Sidebar = () => {
           >
             <FaPlusCircle style={{ marginRight: "8px" }} /> Food Create
             Order
+          </Link>
+        </li>
+        <li>
+          <Link href="/dashboard/snap-capsule" className="link-button">
+            <FaCamera style={{ marginRight: "8px" }} /> Snap Capsule
           </Link>
         </li>
       </ul>

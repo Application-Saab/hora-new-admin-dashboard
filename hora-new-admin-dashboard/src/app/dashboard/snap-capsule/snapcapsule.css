@@ -1,0 +1,286 @@
+/* Snap Capsule page. Classes start with sc- so they don't affect other pages. */
+.sc-page {
+  max-width: 1400px;
+  font-family: Arial, sans-serif;
+  color: #2b2b2b;
+}
+
+.sc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.sc-header h2 {
+  margin: 0 0 4px;
+}
+
+.sc-account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sc-muted {
+  color: #6b6b6b;
+}
+
+.sc-small {
+  font-size: 12px;
+}
+
+.sc-card {
+  background: #fff;
+  border: 1px solid #e3e3e3;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.sc-signin {
+  max-width: 380px;
+}
+
+.sc-signin h3 {
+  margin: 0 0 6px;
+}
+
+.sc-signin form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.sc-signin label {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.sc-signin input {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+.sc-button {
+  padding: 9px 16px;
+  border: none;
+  border-radius: 6px;
+  background: linear-gradient(90deg, rgba(221, 94, 137, 0.9), #97538c);
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.sc-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.sc-button-light {
+  background: #f3eef5;
+  color: #6b2f63;
+}
+
+.sc-button-green {
+  background: #4caf50;
+}
+
+.sc-link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #97538c;
+  cursor: pointer;
+  text-decoration: underline;
+  font: inherit;
+  align-self: flex-start;
+}
+
+.sc-error {
+  color: #c62828;
+  margin: 10px 0 0;
+}
+
+.sc-success {
+  color: #2e7d32;
+  margin: 10px 0 0;
+}
+
+.sc-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.sc-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sc-stat strong {
+  font-size: 28px;
+  color: #6b2f63;
+}
+
+.sc-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: -1px;
+}
+
+.sc-tabs button {
+  padding: 10px 18px;
+  border: 1px solid #e3e3e3;
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+  background: #f7f7f7;
+  cursor: pointer;
+  font-weight: bold;
+  color: #555;
+}
+
+.sc-tabs button.active {
+  background: #fff;
+  color: #97538c;
+}
+
+.sc-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.sc-input {
+  padding: 9px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  min-width: 240px;
+}
+
+.sc-select {
+  min-width: 150px;
+}
+
+.sc-date {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #555;
+}
+
+.sc-date input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.sc-toolbar .sc-button-green {
+  margin-left: auto;
+}
+
+.sc-table-wrap {
+  overflow-x: auto;
+  margin-top: 10px;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+}
+
+.sc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.sc-table th,
+.sc-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+  vertical-align: top;
+}
+
+.sc-table th {
+  background: #faf6fb;
+  color: #6b2f63;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+}
+
+.sc-table tbody tr:hover {
+  background: #fcf9fd;
+}
+
+.sc-table a {
+  color: #97538c;
+}
+
+.sc-strong {
+  font-weight: bold;
+}
+
+.sc-nowrap {
+  white-space: nowrap;
+}
+
+.sc-copy {
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 4px;
+  font-size: 11px;
+  padding: 2px 6px;
+  cursor: pointer;
+  color: #555;
+}
+
+.sc-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: #eee;
+  text-transform: capitalize;
+}
+
+.sc-badge-processing {
+  background: #fff4e0;
+  color: #a35f00;
+}
+
+.sc-badge-completed {
+  background: #e6f4ea;
+  color: #2e7d32;
+}
+
+.sc-capsule-list {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.sc-empty {
+  text-align: center;
+  padding: 24px;
+  color: #777;
+  margin: 0;
+}
+
+.sc-pager {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.sc-pager .sc-muted {
+  margin-right: auto;
+}
