@@ -44,6 +44,5 @@ const query = (params) => {
   return text ? `?${text}` : "";
 };
 
-export const getStats = () => call("/api/admin/stats");
-export const getCapsules = (params) => call(`/api/admin/capsules${query(params)}`);
-export const getVisitors = (params) => call(`/api/admin/visitors${query(params)}`);
+// GET /api/admin/users?page=&limit= → { items: [{ visitorId, email, capsules }], total, page, limit }
+export const getUsers = (params) => call(`/api/admin/users${query(params)}`);
