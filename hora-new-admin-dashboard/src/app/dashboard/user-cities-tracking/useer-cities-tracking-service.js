@@ -1,5 +1,9 @@
 import axios from "axios";
-import { BASE_URL, GET_CITY_TRACKING_LIST, GET_CITY_TRACKING_STATS } from "@/utils/apiconstant";
+import {
+  BASE_URL,
+  GET_CITY_TRACKING_LIST,
+  GET_CITY_TRACKING_STATS,
+} from "@/utils/apiconstant";
 
 let latestListRequestId = 0;
 let latestStatsRequestId = 0;
@@ -18,6 +22,7 @@ export const fetchUserCitiesTrackingList = async ({
   eventDateUsers = false,
   whatsappUsers = false,
   loggedInUsers = false,
+  userSource = "",
   signal,
 }) => {
   const requestId = ++latestListRequestId;
@@ -37,6 +42,7 @@ export const fetchUserCitiesTrackingList = async ({
         eventDateUsers,
         whatsappUsers,
         loggedInUsers,
+        userSource,
       },
       signal,
     });
@@ -69,6 +75,7 @@ export const fetchUserCitiesTrackingStats = async ({
   eventDateUsers = false,
   whatsappUsers = false,
   loggedInUsers = false,
+  userSource = "",
   signal,
 }) => {
   const requestId = ++latestStatsRequestId;
@@ -84,6 +91,7 @@ export const fetchUserCitiesTrackingStats = async ({
         eventDateUsers,
         whatsappUsers,
         loggedInUsers,
+        userSource,
       },
       signal,
     });
