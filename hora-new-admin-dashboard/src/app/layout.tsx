@@ -368,7 +368,7 @@ export default function RootLayout({
   const router = useRouter();
   const pathname = usePathname();
 
-  useEffect(() => {
+useEffect(() => {
     const checkHash = async () => {
       const token = localStorage.getItem("authToken");
       const email = localStorage.getItem("adminEmail");
@@ -394,7 +394,17 @@ export default function RootLayout({
             email: email,
             hashcode: hashedPassword,
           },
+          {
+            validateStatus: (status) => status < 500,
+          },
         );
+
+        if (response.status >= 500) {
+          console.warn(
+            `Password check skipped due to server status: ${response.status}`,
+          );
+          return;
+        }
 
         const data = response?.data;
 
@@ -405,7 +415,6 @@ export default function RootLayout({
         }
       } catch (err) {
         console.error("Error verifying password hash:", err);
-        logoutUser();
       }
     };
 
