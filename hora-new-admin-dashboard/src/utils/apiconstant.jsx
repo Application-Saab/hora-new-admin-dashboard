@@ -79,3 +79,7 @@ export const EDIT_ADDON = "/api/addon/edit";
 export const ADD_THEME = "/api/photography-theme/add";
 export const DELETE_THEME = "/api/photography-theme/delete";
 export const EDIT_THEME = "/api/photography-theme/edit"
+// Snap Capsule backend (visitor tracking + Event Capsules), used by the
+// SnapCapsule Tracking page. Override with NEXT_PUBLIC_SNAP_CAPSULE_API_URL
+// when building, e.g. http://localhost:5000 for local testing.
+export const SNAP_CAPSULE_API_URL = (process.env.NEXT_PUBLIC_SNAP_CAPSULE_API_URL || "https://thesnapcapsule.com").replace(/\/+$/, "");

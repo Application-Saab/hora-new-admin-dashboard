@@ -1,0 +1,54 @@
+import { SNAP_CAPSULE_API_URL } from "./apiconstant";
+
+// Calls the Snap Capsule backend's dashboard API (/api/admin/*) with the
+// admin panel's own login token (localStorage "authToken", saved by
+// /dashboard-login). No separate sign-in.
+
+export class ApiError extends Error {
+  constructor(message, status) {
+    super(message);
+    this.status = status;
+  }
+}
+
+const authToken = () => {
+  try {
+    return localStorage.getItem("authToken") || "";
+  } catch {
+    return "";
+  }
+};
+
+async function call(path) {
+  const token = authToken();
+  if (!token) throw new ApiError("Please log in to the admin panel.", 401);
+  let res;
+  try {
+    res = await fetch(`${SNAP_CAPSULE_API_URL}${path}`, { headers: { Authorization: token } });
+  } catch {
+    // The browser got no answer: the server is down or unreachable, or it
+    // doesn't allow this admin panel's address (backend ADMIN_ORIGINS).
+    throw new ApiError(
+      `Can't reach the Snap Capsule server at ${SNAP_CAPSULE_API_URL}. If your internet works, check that the server is running ` +
+        `and that its ADMIN_ORIGINS setting includes ${window.location.origin}.`,
+      0
+    );
+  }
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok || json.error === true) {
+    throw new ApiError(json.message || `Request failed (${res.status}).`, res.status);
+  }
+  return json.data;
+}
+
+const query = (params) => {
+  const q = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") q.set(key, String(value));
+  });
+  const text = q.toString();
+  return text ? `?${text}` : "";
+};
+
+// GET /api/admin/users?page=&limit= → { items: [{ visitorId, email, capsules }], total, page, limit }
+export const getUsers = (params) => call(`/api/admin/users${query(params)}`);
