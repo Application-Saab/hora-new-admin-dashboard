@@ -1,0 +1,85 @@
+.hinv {
+  /* colours */
+  --p: #6a35c2;
+  --p-dark: #5b2fb0;
+  --p-light: #7a3fd6;
+  --soft: #efeaf9;
+  --ink: #222;
+  --mute: #666;
+  --line: #e4e0ee;
+
+  --fs-xs: clamp(0.6875rem, 0.66rem + 0.12vw, 0.75rem);   
+  --fs-s:  clamp(0.75rem,   0.72rem + 0.15vw, 0.8125rem); 
+  --fs-m:  clamp(0.8125rem, 0.78rem + 0.18vw, 0.875rem);  
+  --fs-l:  clamp(0.9375rem, 0.88rem + 0.3vw,  1.125rem);  
+  --fs-xl: clamp(1.25rem,   1.05rem + 1vw,    1.625rem);  
+
+  --gap:      clamp(0.5rem, 0.4rem + 0.5vw, 0.875rem);
+  --pad-page: clamp(0.5rem, 0.3rem + 1.5vw, 1rem);
+  --pad-bar:  clamp(0.625rem, 0.5rem + 0.6vw, 0.875rem);
+  --radius:   clamp(0.375rem, 0.3rem + 0.3vw, 0.5rem);
+  --page-max: 51.25rem; 
+
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: var(--pad-page);
+  background: #f4f2f8;
+  color: var(--ink);
+  font-size: var(--fs-m);
+}
+.hinv *,
+.hinv *::before,
+.hinv *::after { box-sizing: border-box; }
+
+.hinv .bar {
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto var(--gap);
+  padding: var(--pad-bar);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap);
+}
+.hinv .bar h2 { margin: 0 var(--gap) 0 0; font-size: var(--fs-l); }
+
+.hinv .bar input {
+  flex: 1 1 min(100%, 11rem);
+  min-width: 0;
+  padding: 0.6em 0.75em;
+  font: inherit;
+  border: 1px solid #d6d0e6;
+  border-radius: var(--radius);
+}
+.hinv .bar input:focus,
+.hinv .btn:focus-visible { outline: 2px solid var(--p); outline-offset: 1px; }
+
+.hinv .btn {
+  padding: 0.6em clamp(0.75rem, 0.5rem + 1vw, 1.25rem);
+  font: inherit;
+  font-weight: 600;
+  color: #fff;
+  background: var(--p);
+  border: 1px solid var(--p);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.hinv .btn.ghost { background: #fff; color: var(--p); }
+.hinv .btn:disabled { opacity: .6; cursor: not-allowed; }
+
+.hinv .err,
+.hinv .note {
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto var(--gap);
+}
+.hinv .err { color: #b3261e; }
+.hinv .note { color: var(--mute); }
+
+@media print {
+  .hinv { min-height: 0; padding: 0; background: #fff; }
+  .hinv .noprint { display: none !important; }
+}

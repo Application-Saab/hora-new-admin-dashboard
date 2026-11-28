@@ -1,0 +1,33 @@
+.hinv .bar .spacer { flex: 1 1 0; }
+.hinv .bar .back { color: var(--p); text-decoration: none; font-weight: 500; }
+
+/* Saved invoice image */
+.hinv .himg {
+  display: block;
+  width: 100%;
+  max-width: var(--page-max);
+  height: auto;
+  margin: 0 auto;
+  background: #fff;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, .08);
+}
+.back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem;           
+  border-radius: 50%;
+  text-decoration: none;
+  transition: background .15s;
+  background-color: gray;
+}
+
+.back-img {
+  display: block;
+  width: 1.5rem;              
+  height: 1.5rem;
+  object-fit: contain;
+}
+@media print {
+  .hinv .himg { max-width: 100%; box-shadow: none; }
+}

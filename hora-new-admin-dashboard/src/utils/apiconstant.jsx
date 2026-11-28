@@ -1,4 +1,4 @@
-export const BASE_URL = 'https://horaservices.com';
+export const BASE_URL = 'http://localhost:5000';
 export const IMAGE_BASE_URL = "https://horaservices.com/api/uploads";
 export const MEDIA_PROCESSING_BASE_URL = 'https://horaservices.com/media-api';
 export const GET_DECORATION_BY_NAME = '/api/Decoration/searchByName/';
@@ -83,3 +83,5 @@ export const EDIT_THEME = "/api/photography-theme/edit"
 // SnapCapsule Tracking page. Override with NEXT_PUBLIC_SNAP_CAPSULE_API_URL
 // when building, e.g. http://localhost:5000 for local testing.
 export const SNAP_CAPSULE_API_URL = (process.env.NEXT_PUBLIC_SNAP_CAPSULE_API_URL || "https://thesnapcapsule.com").replace(/\/+$/, "");
+export const GET_INVOICE_LIST = '/api/invoices';
+export const GET_INVOICE_BY_ORDER = '/api/invoices/order';
