@@ -2,7 +2,7 @@
   --pad-sheet: clamp(1rem, 0.5rem + 2.5vw, 2.125rem);
   --pad-box:   clamp(0.625rem, 0.5rem + 0.5vw, 0.875rem);
   --pad-cell:  clamp(0.375rem, 0.3rem + 0.4vw, 0.625rem);
-  --logo:       clamp(5rem, 3.5rem + 5vw, 7.5rem); 
+  --logo:      clamp(5rem, 3.5rem + 5vw, 7.5rem);
 
   width: 100%;
   max-width: var(--page-max);
@@ -12,6 +12,7 @@
   box-shadow: 0 1px 6px rgba(0, 0, 0, .08);
 }
 
+/* ---------- Header ---------- */
 .hhead {
   display: flex;
   justify-content: space-between;
@@ -41,6 +42,7 @@
   object-fit: contain;
 }
 
+/* ---------- Billed By / Billed To ---------- */
 .hparties {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
@@ -63,6 +65,7 @@
   color: var(--p-dark);
 }
 
+/* ---------- Items table ---------- */
 .hitems {
   width: 100%;
   border-collapse: collapse;
@@ -75,11 +78,11 @@
   text-align: left;
   font-size: var(--fs-xs);
   font-weight: 600;
-  overflow-wrap: anywhere; 
+  overflow-wrap: anywhere;
 }
 .hitems td { padding: var(--pad-cell); vertical-align: top; }
 .hitems .r { text-align: right; }
-.hitems td.r { white-space: nowrap; } 
+.hitems td.r { white-space: nowrap; }
 
 .hitems tr.main td {
   background: var(--soft);
@@ -92,11 +95,13 @@
   line-height: 1.7;
   overflow-wrap: anywhere;
 }
-.prow { white-space: pre-line; } 
+.prow { white-space: pre-line; }
 .prow b { color: #111; }
 .pinc { margin-top: 0.6em; }
-.pinc ul { margin: 0.3em 0 0; padding-left: 1.25rem; }
+.pinc ul,
+.pinc ol { margin: 0.3em 0 0; padding-left: 1.25rem; }
 
+/* ---------- Total, signature, terms ---------- */
 .hfoot { margin-top: calc(var(--gap) * 1.5); }
 .htotal {
   display: flex;
@@ -110,12 +115,20 @@
 }
 
 .hsign {
-  width: clamp(8rem, 5rem + 16vw, 12.5rem);
+  width: clamp(8rem, 5rem + 16vw, 13.75rem);
   margin: clamp(1rem, 0.6rem + 1.5vw, 1.625rem) 0 0 auto;
   text-align: center;
 }
-.hsign img { max-width: 100%; max-height: 4.375rem; }
-.hsign div { margin-top: 0.4em; font-size: var(--fs-xs); color: var(--mute); }
+.hsign-img {
+  display: block;
+  width: 160px;
+  max-width: 100%;
+  height: auto;
+  max-height: 80px;
+  object-fit: contain;
+  margin: 0 auto 6px;
+}
+.hsign-label { font-size: var(--fs-xs); color: var(--mute); }
 
 .hterms {
   margin-top: clamp(1.25rem, 0.8rem + 2vw, 1.875rem);
@@ -152,7 +165,7 @@
   .hsheet {
     --pad-cell: 10px;
     --pad-box: 14px;
-    --logo: 72px;
+    --logo: 110px;
     max-width: none;
     padding: 0;
     box-shadow: none;

@@ -11,16 +11,18 @@ import {
 } from './exportInvoice';
 import InvoiceSheet from './InvoiceSheet';
 import { BASE } from './utils';
+import ArrowIcon from '@/assets/arrow.svg';
 import './invoice-common.css';
 import './invoice-detail.css';
-import ArrowIcon from '@/assets/arrow.svg';
+
 const arrowSrc = ArrowIcon?.src ?? ArrowIcon;
+const isAbort = e => e?.name === 'AbortError';
 
 export default function InvoiceDetail({ orderId }) {
   const sheetRef = useRef(null);
   const autoSaved = useRef(false);
-  const [data, setData] = useState(null);
-  const [regenerate, setRegenerate] = useState(false);
+  const [data, setData] = useState(null);              // { invoice, image }
+  const [regenerate, setRegenerate] = useState(false); // true = show live sheet instead of saved image
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(true);
@@ -99,7 +101,7 @@ export default function InvoiceDetail({ orderId }) {
       saveImage();
     }, 400);
     return () => clearTimeout(t);
-  }, [data]);
+  }, [data]); 
 
   return (
     <div className="hinv">
@@ -155,8 +157,10 @@ export default function InvoiceDetail({ orderId }) {
       )}
 
       {showSheet && (
-        <div ref={sheetRef}>
-          <InvoiceSheet inv={data.invoice} />
+        <div className="hscroll">
+          <div ref={sheetRef} className="hcapture">
+            <InvoiceSheet inv={data.invoice} />
+          </div>
         </div>
       )}
     </div>

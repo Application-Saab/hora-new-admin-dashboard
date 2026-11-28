@@ -1,12 +1,10 @@
 'use client';
-import { useState } from 'react';
 import LogoImage from '@/assets/logo.svg';
+import SignatureImage from '@/assets/SimranSignature.png';
 import { money, dLong, dShort } from './utils';
 import './invoice-sheet.css';
-import Signature from "@/assets/SimranSignature.png"
-
 const logoSrc = LogoImage?.src ?? LogoImage;
-const signatureSrc = Signature?.src ?? Signature;
+const signatureSrc = SignatureImage?.src ?? SignatureImage;
 function Party({ title, p = {} }) {
   return (
     <div className="hbox">
@@ -21,29 +19,30 @@ function Party({ title, p = {} }) {
 
 const Row = ({ k, v }) => (v ? <div className="prow"><b>{k}:</b> {v}</div> : null);
 
+// HTML string / array / objects ({name}, {title}) -> clean list of plain-text lines
 const htmlToList = (v) => {
   const arr = Array.isArray(v) ? v : v ? [v] : [];
   return arr
     .map((s) => (s && typeof s === 'object' ? s.name ?? s.title ?? '' : s))
     .flatMap((s) =>
       String(s)
-        .replace(/<\/(div|p|li)>/gi, '\n') 
+        .replace(/<\/(div|p|li)>/gi, '\n')
         .replace(/<br\s*\/?>/gi, '\n')
-        .replace(/<[^>]+>/g, '')         
+        .replace(/<[^>]+>/g, '')
         .replace(/&nbsp;/g, ' ')
         .replace(/&amp;/g, '&')
         .split('\n')
     )
-    .map((s) => s.replace(/^\s*[-•*]\s*/, '').trim()) 
+    .map((s) => s.replace(/^\s*[-•*]\s*/, '').trim())
     .filter(Boolean);
 };
 
 export default function InvoiceSheet({ inv }) {
-  const [noSign, setNoSign] = useState(false);
   const p = inv.product || {};
 
   const included = htmlToList(p.inclusion ?? p.inclusions ?? p.included ?? inv.inclusion);
   const addOns = htmlToList(p.addOns ?? inv.addOns);
+  // comments: array of lines (new server) or a single string (old data)
   const comments = Array.isArray(p.comments) ? p.comments : p.comments ? [p.comments] : [];
   const terms = inv.terms || [];
 
@@ -126,8 +125,8 @@ export default function InvoiceSheet({ inv }) {
         <div className="htotal"><span>Total (INR)</span><b>{money(inv.total)}</b></div>
 
         <div className="hsign">
-           <img src={signatureSrc} alt="Signature" />
-          <div>Authorised Signatory</div>
+          <img className="hsign-img" src={signatureSrc} alt="Signature" />
+          <div className="hsign-label">Authorised Signatory</div>
         </div>
 
         {terms.length > 0 && (
