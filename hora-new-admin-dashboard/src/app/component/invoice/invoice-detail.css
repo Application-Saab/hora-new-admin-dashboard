@@ -1,0 +1,23 @@
+/* =========================================================
+   invoice-detail.css  –  only the single-invoice page
+   (top action bar extras + the saved invoice image)
+   The paper itself is in invoice-sheet.css
+   ========================================================= */
+
+.hinv .bar .spacer { flex: 1 1 0; }
+.hinv .bar .back { color: var(--p); text-decoration: none; font-weight: 500; }
+
+/* Saved invoice image */
+.hinv .himg {
+  display: block;
+  width: 100%;
+  max-width: var(--page-max);
+  height: auto;
+  margin: 0 auto;
+  background: #fff;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, .08);
+}
+
+@media print {
+  .hinv .himg { max-width: 100%; box-shadow: none; }
+}

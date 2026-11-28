@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { api } from './invoiceService';
 import { BASE, money, fdate, words } from './utils';
-import './InvoiceForm.css';
 
 function Box({ h, p = {} }) {
   return (
